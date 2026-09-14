@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Narrative Visual Editor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
+
+    /* Sidebar Palette */
+    #sidebar { width: 220px; background: #1e293b; border-right: 1px solid #334155; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; z-index: 5; }
+    #sidebar h2 { font-size: 0.85rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; }
+    .palette-item { padding: 0.6rem 0.8rem; border-radius: 6px; cursor: grab; font-weight: 600; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    .palette-item:hover { filter: brightness(1.1); }
+    .palette-item span { font-size: 0.65rem; background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; text-transform: uppercase; }
+
+    /* Main Canvas Area */
+    #main { flex: 1; display: flex; flex-direction: column; position: relative; }
+    #toolbar { height: 50px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; z-index: 5; gap: 0.75rem; }
+    #toolbar h1 { font-size: 1rem; color: #38bdf8; }
+    .status-text { font-size: 0.85rem; color: #f59e0b; font-weight: bold; flex: 1; text-align: center; }
+    .toolbar-actions { display: flex; gap: 0.5rem; }
+
+    .btn { background: #38bdf8; color: #0f172a; font-weight: bold; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+    .btn:hover { filter: brightness(1.1); }
+    .btn-danger { background: #f43f5e; color: white; }
+    .btn-danger:hover { background: #fb7185; }
+    .btn-purple { background: #a855f7; color: white; }
+
+    #viewport { flex: 1; position: relative; background-color: #0f172a; background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px; overflow: hidden; }
+    #svg-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+    /* Wire Styling */
+    path.edge { stroke: #38bdf8; stroke-width: 3; fill: none; pointer-events: stroke; cursor: pointer; }
+    path.edge:hover { stroke: #f43f5e; stroke-width: 6; }
+    path.temp-wire { stroke: #f59e0b; stroke-width: 3; stroke-dasharray: 6; fill: none; pointer-events: none; }
+
+    /* Node Container */
+    .node-wrapper { position: absolute; z-index: 2; width: 110px; height: 100px; }
+    .node { width: 100%; height: 100%; cursor: move; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.75rem; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); padding: 5px; }
+    .node-wrapper.selected .node { outline: 3px solid #f59e0b !important; }
+
+    /* Visual Node Connectors (Ports) - colour-coded so input vs output is obvious at a glance */
+    .port { position: absolute; width: 18px; height: 18px; border: 3px solid #0f172a; border-radius: 50%; cursor: crosshair; z-index: 10; transition: transform 0.15s, background 0.15s, box-shadow 0.15s; }
+    .port:hover { transform: scale(1.4); }
+    .port-in { left: -9px; top: calc(50% - 9px); background: #22c55e; }
+    .port-out { right: -9px; top: calc(50% - 9px); background: #f59e0b; }
+    .port.connected { box-shadow: 0 0 0 3px rgba(255,255,255,0.6); }
+    .port.hidden { display: none; }
+
+    /* Shapes */
+    .shape-standard { background: #3b82f6; border-radius: 8px; }
+    .shape-event { background: #10b981; border-radius: 50%; }
+    .shape-npc { background: #a855f7; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+    .shape-terminal { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); justify-content: flex-end; padding-bottom: 12px; }
+    .shape-terminal.role-start { background: #22c55e; }
+    .shape-terminal.role-end { background: #f43f5e; }
+
+    /* Properties Inspector Panel */
+    #properties-panel { width: 320px; background: #1e293b; border-left: 1px solid #334155; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; z-index: 5; overflow-y: auto; }
+    #properties-panel h2 { font-size: 0.85rem; text-transform: uppercase; color: #94a3b8; }
+    .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .form-group label { font-size: 0.75rem; color: #cbd5e1; font-weight: bold; }
+    .form-group input, .form-group textarea, .form-group select { background: #0f172a; color: #38bdf8; border: 1px solid #334155; border-radius: 4px; padding: 0.5rem; font-size: 0.85rem; font-family: inherit; }
+    .form-group textarea { resize: vertical; height: 80px; user-select: text; }
+
+    /* Outgoing Connection Cards */
+    .out-card { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.4rem; }
+    .out-card-title { font-size: 0.75rem; color: #f59e0b; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .out-card-delete { color: #f43f5e; cursor: pointer; font-size: 0.75rem; }
+
+    /* Modals */
+    #modal, #var-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 20; align-items: center; justify-content: center; }
+    #modal-content { background: #1e293b; width: 600px; max-width: 90%; border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid #334155; }
+    #twee-output { width: 100%; height: 260px; background: #0f172a; color: #38bdf8; border: 1px solid #334155; border-radius: 4px; padding: 0.75rem; font-family: monospace; font-size: 0.85rem; resize: none; user-select: text; }
+    #var-modal-content { background: #1e293b; width: 480px; max-width: 90%; border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid #334155; }
+    .var-row { display: flex; gap: 6px; align-items: center; }
+    .var-row input { flex: 1; background: #0f172a; color: #38bdf8; border: 1px solid #334155; border-radius: 4px; padding: 0.4rem; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Palette -->
+  <aside id="sidebar">
+    <h2>Add Story Nodes</h2>
+    <div class="palette-item" style="background: #3b82f6" draggable="true" data-type="standard">Standard <span>Square</span></div>
+    <div class="palette-item" style="background: #10b981" draggable="true" data-type="event">Event <span>Circle</span></div>
+    <div class="palette-item" style="background: #a855f7" draggable="true" data-type="npc">NPC <span>Pentagon</span></div>
+    <div class="palette-item" style="background: linear-gradient(90deg, #22c55e 50%, #f43f5e 50%)" draggable="true" data-type="terminal">Start / End <span>Triangle</span></div>
+  </aside>
+
+  <!-- Canvas Workspace -->
+  <main id="main">
+    <header id="toolbar">
+      <h1>Narrative Visual Editor</h1>
+      <span id="status" class="status-text"></span>
+      <span id="start-status" style="font-size:0.8rem; color:#f59e0b; font-weight:bold;"></span>
+      <div class="toolbar-actions">
+        <button class="btn" id="play-btn" style="background:#22c55e; color:#0f172a;">▶ Play</button>
+        <button class="btn btn-purple" id="variables-btn">Variables</button>
+        <button class="btn" id="export-btn">Export</button>
+      </div>
+    </header>
+    <div id="viewport">
+      <svg id="svg-layer">
+        <path id="temp-wire" class="temp-wire" d="" />
+      </svg>
+    </div>
+  </main>
+
+  <!-- Properties Inspector Panel -->
+  <aside id="properties-panel">
+    <h2>Node Properties</h2>
+    <div id="no-selection" style="color: #64748b; font-size: 0.85rem;">Click any node on the canvas to inspect & edit its story properties.</div>
+    <div id="editor-form" style="display: none;" class="form-group">
+      <div class="form-group">
+        <label>Passage Title</label>
+        <input type="text" id="prop-title" />
+      </div>
+      <div class="form-group" id="role-group" style="display:none;">
+        <label>Node Role</label>
+        <select id="prop-role">
+          <option value="start">Start (story begins here)</option>
+          <option value="end">End (story concludes here)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Story / Passage Text</label>
+        <textarea id="prop-text"></textarea>
+      </div>
+      <div class="form-group">
+        <label>SugarCube Entry Logic (e.g. &lt;&lt;set $reputation to 5&gt;&gt;)</label>
+        <div style="display:flex; gap:4px;">
+          <input type="text" id="prop-code" placeholder="<<set $key to true>>" style="flex:1;" />
+          <select id="insert-var-select" style="width:100px;">
+            <option value="">+ Insert</option>
+          </select>
+        </div>
+      </div>
+
+      <hr style="border-color: #334155; margin: 0.5rem 0;" />
+
+      <h2>Outgoing Connections & Conditions</h2>
+      <div id="outgoing-list"></div>
+
+      <button class="btn btn-danger" id="delete-node-btn" style="margin-top: 1rem;">Delete Node</button>
+    </div>
+  </aside>
+
+  <datalist id="variables-datalist"></datalist>
+
+  <!-- Variables Manager Modal -->
+  <div id="var-modal">
+    <div id="var-modal-content">
+      <h2 style="font-size:0.85rem; text-transform:uppercase; color:#94a3b8;">Story Variables</h2>
+      <div id="var-list" style="display:flex; flex-direction:column; gap:0.5rem; max-height:320px; overflow-y:auto;"></div>
+      <button class="btn" id="add-var-btn">+ Add Variable</button>
+      <div style="display:flex; justify-content: flex-end;">
+        <button class="btn" style="background:#64748b; color:white;" id="close-var-modal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Play / Preview Modal -->
+  <div id="preview-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:25; align-items:center; justify-content:center;">
+    <div id="preview-modal-content" style="background:#1e293b; width:520px; max-width:92%; max-height:85vh; border-radius:8px; padding:1.5rem; display:flex; flex-direction:column; gap:1rem; border:1px solid #334155; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="preview-passage-title" style="font-weight:bold; color:#38bdf8; font-size:0.9rem;"></span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn" id="preview-restart-btn" style="background:#64748b; color:white; padding:0.3rem 0.6rem;">Restart</button>
+          <button class="btn" id="preview-close-btn" style="background:#64748b; color:white; padding:0.3rem 0.6rem;">Close</button>
+        </div>
+      </div>
+      <div id="preview-text" style="white-space:pre-wrap; line-height:1.5; font-size:0.9rem;"></div>
+      <div id="preview-choices"></div>
+      <details style="margin-top:0.5rem;">
+        <summary style="cursor:pointer; font-size:0.75rem; color:#64748b;">Variables</summary>
+        <pre id="preview-vars" style="font-size:0.75rem; color:#94a3b8; margin-top:0.4rem; white-space:pre-wrap;"></pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="modal">
+    <div id="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Export Story</h2>
+        <div style="display:flex; gap:4px;">
+          <button class="btn" id="tab-twee" style="padding:0.3rem 0.6rem; background:#38bdf8;">Twee</button>
+          <button class="btn" id="tab-play" style="padding:0.3rem 0.6rem; background:#64748b;">Playable HTML</button>
+          <button class="btn" id="tab-html" style="padding:0.3rem 0.6rem; background:#64748b;">Twine Archive (.html)</button>
+        </div>
+      </div>
+      <div id="export-note" style="color:#94a3b8; font-size:0.75rem;"></div>
+      <div id="export-warning" style="display:none; color:#f59e0b; font-size:0.8rem;"></div>
+      <textarea id="twee-output" readonly></textarea>
+      <div style="display:flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn" id="download-btn">Download File</button>
+        <button class="btn" style="background:#64748b; color:white;" id="close-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let nodes = [];
+    let connections = [];
+    let variables = [];
+    let nodeCount = 0;
+    let varCount = 0;
+    let selectedNodeId = null;
+    let draggedNode = null;
+    let dragOffset = { x: 0, y: 0 };
+    let exportMode = 'twee';
+
+    // Wire Creation State
+    let wireSourceNodeId = null;
+    let tempWireActive = false;
+
+    // Play/Preview State
+    let previewVars = {};
+    let currentPreviewNodeId = null;
+    let previewHistory = [];
+
+    const storyIfid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID().toUpperCase() : 'A1234567-B890-C123-D456-E7890ABCDEF1';
+
+    const viewport = document.getElementById('viewport');
+    const svgLayer = document.getElementById('svg-layer');
+    const tempWire = document.getElementById('temp-wire');
+    const statusText = document.getElementById('status');
+    const startStatusEl = document.getElementById('start-status');
+
+    // Keeps a persistent, hard-to-miss toolbar warning whenever no node is
+    // currently marked as the story's Start — this is what causes Tweego/Twine
+    // to reject the export with "no starting point set".
+    function updateStartStatus() {
+      const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+      startStatusEl.textContent = hasStart ? '' : '⚠ No Start node — add a Start/End triangle';
+    }
+
+    // Drag-and-Drop Spawning
+    document.querySelectorAll('.palette-item').forEach(item => {
+      item.addEventListener('dragstart', (e) => e.dataTransfer.setData('nodeType', item.dataset.type));
+    });
+
+    viewport.addEventListener('dragover', (e) => e.preventDefault());
+    viewport.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const type = e.dataTransfer.getData('nodeType');
+      if (!type) return;
+
+      const rect = viewport.getBoundingClientRect();
+      const x = Math.max(10, Math.min(rect.width - 120, e.clientX - rect.left - 55));
+      const y = Math.max(10, Math.min(rect.height - 120, e.clientY - rect.top - 50));
+
+      createNode(type, x, y);
+    });
+
+    // Which ports a node should show. Start nodes only lead out (nothing should
+    // link into the beginning); End nodes only receive (nothing leads on from one).
+    function portVisibility(node) {
+      if (node.type === 'terminal') {
+        if (node.role === 'start') return { showIn: false, showOut: true };
+        if (node.role === 'end') return { showIn: true, showOut: false };
+      }
+      return { showIn: true, showOut: true };
+    }
+
+    function createNode(type, x, y) {
+      nodeCount++;
+      const id = `Node_${nodeCount}`;
+      let role = null;
+      let title;
+
+      if (type === 'terminal') {
+        // First Start/End triangle placed automatically becomes the Start node.
+        const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+        role = hasStart ? 'end' : 'start';
+        title = role === 'start' ? `Start_${nodeCount}` : `Ending_${nodeCount}`;
+      } else {
+        const titles = { standard: 'Passage', event: 'Event', npc: 'NPC' };
+        title = `${titles[type] || 'Node'}_${nodeCount}`;
+      }
+
+      const nodeData = {
+        id, type, role, title, x, y,
+        text: `Write narrative text for ${title} here...`,
+        code: ''
+      };
+
+      nodes.push(nodeData);
+      renderNodeDOM(nodeData);
+      selectNode(nodeData.id);
+      renderConnections();
+      updateStartStatus();
+    }
+
+    function renderNodeDOM(node) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'node-wrapper';
+      wrapper.id = node.id;
+      wrapper.style.left = `${node.x}px`;
+      wrapper.style.top = `${node.y}px`;
+
+      const el = document.createElement('div');
+      el.className = `node shape-${node.type}`;
+      if (node.type === 'terminal') el.classList.add(`role-${node.role}`);
+
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'node-title-label';
+      titleSpan.innerText = node.title;
+      el.appendChild(titleSpan);
+      wrapper.appendChild(el);
+
+      const vis = portVisibility(node);
+
+      // Input Port (Left Handle)
+      const inPort = document.createElement('div');
+      inPort.className = 'port port-in' + (vis.showIn ? '' : ' hidden');
+      inPort.title = 'Input Port (Drop incoming wire here)';
+      inPort.addEventListener('mousedown', (e) => {
+        // Stop this from bubbling to the wrapper's mousedown handler, which
+        // would otherwise start dragging the node just because the click
+        // landed on its input port (the output port already does this).
+        e.stopPropagation();
+      });
+      inPort.addEventListener('mouseup', (e) => {
+        e.stopPropagation();
+        if (tempWireActive && wireSourceNodeId && wireSourceNodeId !== node.id) {
+          completeWireConnection(wireSourceNodeId, node.id);
+        }
+      });
+      wrapper.appendChild(inPort);
+
+      // Output Port (Right Handle)
+      const outPort = document.createElement('div');
+      outPort.className = 'port port-out' + (vis.showOut ? '' : ' hidden');
+      outPort.title = 'Output Port (Drag wire to another node)';
+      outPort.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        startWireConnection(node.id);
+      });
+      wrapper.appendChild(outPort);
+
+      // Node Dragging & Selection
+      wrapper.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        selectNode(node.id);
+
+        draggedNode = node;
+        dragOffset.x = e.clientX - node.x;
+        dragOffset.y = e.clientY - node.y;
+      });
+
+      viewport.appendChild(wrapper);
+    }
+
+    // Enforce a single Start node, and drop any connections that are no
+    // longer valid once a node's role (and therefore its available ports) changes.
+    function setNodeRole(node, role) {
+      if (role === 'start') {
+        nodes.forEach(n => {
+          if (n.type === 'terminal' && n.id !== node.id && n.role === 'start') {
+            n.role = 'end';
+            cleanupInvalidConnections(n);
+            syncNodeVisual(n);
+          }
+        });
+      }
+      node.role = role;
+      cleanupInvalidConnections(node);
+      syncNodeVisual(node);
+      renderConnections();
+      updateStartStatus();
+    }
+
+    function cleanupInvalidConnections(node) {
+      const vis = portVisibility(node);
+      if (!vis.showIn) connections = connections.filter(c => c.to !== node.id);
+      if (!vis.showOut) connections = connections.filter(c => c.from !== node.id);
+    }
+
+    function syncNodeVisual(node) {
+      const wrapper = document.getElementById(node.id);
+      if (!wrapper) return;
+      const el = wrapper.querySelector('.node');
+      el.classList.remove('role-start', 'role-end');
+      if (node.type === 'terminal') el.classList.add(`role-${node.role}`);
+      const vis = portVisibility(node);
+      wrapper.querySelector('.port-in').classList.toggle('hidden', !vis.showIn);
+      wrapper.querySelector('.port-out').classList.toggle('hidden', !vis.showOut);
+    }
+
+    // Wiring Handlers
+    function startWireConnection(sourceId) {
+      wireSourceNodeId = sourceId;
+      tempWireActive = true;
+      statusText.innerText = 'Drag wire to an Input Port...';
+    }
+
+    function completeWireConnection(sourceId, targetId) {
+      // Allows multiple connections between the same or different nodes
+      connections.push({
+        id: `Conn_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        from: sourceId,
+        to: targetId,
+        label: 'Proceed',
+        conditionVar: '',
+        conditionOp: '==',
+        conditionVal: ''
+      });
+      renderConnections();
+      renderPropertiesPanel();
+      cancelWireConnection();
+    }
+
+    function cancelWireConnection() {
+      wireSourceNodeId = null;
+      tempWireActive = false;
+      tempWire.setAttribute('d', '');
+      statusText.innerText = '';
+    }
+
+    // Global Mouse Movement for Wire Dragging & Node Repositioning
+    window.addEventListener('mousemove', (e) => {
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (tempWireActive && wireSourceNodeId) {
+        const sourceNode = nodes.find(n => n.id === wireSourceNodeId);
+        if (sourceNode) {
+          const x1 = sourceNode.x + 110;
+          const y1 = sourceNode.y + 50;
+          const dx = Math.abs(mouseX - x1) / 2;
+          tempWire.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${mouseX - dx} ${mouseY}, ${mouseX} ${mouseY}`);
+        }
+      }
+
+      if (draggedNode) {
+        draggedNode.x = Math.max(10, Math.min(rect.width - 120, e.clientX - dragOffset.x));
+        draggedNode.y = Math.max(10, Math.min(rect.height - 120, e.clientY - dragOffset.y));
+
+        const wrapper = document.getElementById(draggedNode.id);
+        wrapper.style.left = `${draggedNode.x}px`;
+        wrapper.style.top = `${draggedNode.y}px`;
+
+        renderConnections();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (tempWireActive) cancelWireConnection();
+      draggedNode = null;
+    });
+
+    // SVG Wire Drawing
+    function renderConnections() {
+      // Only remove the previously-drawn edge paths, and leave the temp-wire
+      // node untouched so the live `tempWire` reference stays attached to the DOM.
+      svgLayer.querySelectorAll('path.edge').forEach(p => p.remove());
+
+      connections.forEach((conn, index) => {
+        const fromNode = nodes.find(n => n.id === conn.from);
+        const toNode = nodes.find(n => n.id === conn.to);
+        if (!fromNode || !toNode) return;
+
+        const x1 = fromNode.x + 110;
+        const y1 = fromNode.y + 50;
+        const x2 = toNode.x;
+        const y2 = toNode.y + 50;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const dx = Math.max(30, Math.abs(x2 - x1) / 2);
+        path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`);
+        path.setAttribute('class', 'edge');
+        path.title = 'Click wire to delete connection';
+
+        path.addEventListener('click', (e) => {
+          e.stopPropagation();
+          connections.splice(index, 1);
+          renderConnections();
+          renderPropertiesPanel();
+        });
+
+        svgLayer.appendChild(path);
+      });
+
+      updatePortStates();
+    }
+
+    // Colour ports green/amber for input/output, and ring any that are actually wired.
+    function updatePortStates() {
+      nodes.forEach(node => {
+        const wrapper = document.getElementById(node.id);
+        if (!wrapper) return;
+        const hasIn = connections.some(c => c.to === node.id);
+        const hasOut = connections.some(c => c.from === node.id);
+        wrapper.querySelector('.port-in').classList.toggle('connected', hasIn);
+        wrapper.querySelector('.port-out').classList.toggle('connected', hasOut);
+      });
+    }
+
+    // Properties Inspector
+    const noSel = document.getElementById('no-selection');
+    const editorForm = document.getElementById('editor-form');
+    const propTitle = document.getElementById('prop-title');
+    const propText = document.getElementById('prop-text');
+    const propCode = document.getElementById('prop-code');
+    const roleGroup = document.getElementById('role-group');
+    const propRole = document.getElementById('prop-role');
+    const outgoingList = document.getElementById('outgoing-list');
+    const insertVarSelect = document.getElementById('insert-var-select');
+    const variablesDatalist = document.getElementById('variables-datalist');
+
+    function selectNode(id) {
+      selectedNodeId = id;
+      document.querySelectorAll('.node-wrapper').forEach(n => n.classList.remove('selected'));
+      const wrapper = document.getElementById(id);
+      if (wrapper) wrapper.classList.add('selected');
+
+      renderPropertiesPanel();
+    }
+
+    function renderPropertiesPanel() {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (!node) {
+        noSel.style.display = 'block';
+        editorForm.style.display = 'none';
+        return;
+      }
+
+      noSel.style.display = 'none';
+      editorForm.style.display = 'flex';
+      propTitle.value = node.title;
+      propText.value = node.text;
+      propCode.value = node.code || '';
+
+      if (node.type === 'terminal') {
+        roleGroup.style.display = 'flex';
+        propRole.value = node.role;
+      } else {
+        roleGroup.style.display = 'none';
+      }
+
+      outgoingList.innerHTML = '';
+      const outConns = connections.filter(c => c.from === node.id);
+
+      if (outConns.length === 0) {
+        const msg = node.type === 'terminal' && node.role === 'end'
+          ? 'End nodes have no outgoing wires — this is where the story concludes.'
+          : 'No outgoing wires attached. Drag a wire from this node\'s right port to another node.';
+        outgoingList.innerHTML = `<span style="color:#64748b; font-size:0.75rem;">${msg}</span>`;
+      } else {
+        outConns.forEach((conn) => {
+          const targetNode = nodes.find(n => n.id === conn.to);
+          const card = document.createElement('div');
+          card.className = 'out-card';
+
+          card.innerHTML = `
+            <div class="out-card-title">
+              <span>To: ${targetNode ? targetNode.title : 'Unknown'}</span>
+              <span class="out-card-delete" id="del-conn-${conn.id}">Delete Wire</span>
+            </div>
+            <div class="form-group">
+              <label>Choice Button Label</label>
+              <input type="text" value="${conn.label}" id="lbl-${conn.id}" />
+            </div>
+            <div class="form-group">
+              <label>Condition Builder (Optional)</label>
+              <div style="display:flex; gap: 4px;">
+                <input type="text" placeholder="$variable" value="${conn.conditionVar}" id="var-${conn.id}" list="variables-datalist" style="flex:1;" />
+                <select id="op-${conn.id}" style="width:55px;">
+                  <option value="==" ${conn.conditionOp === '==' ? 'selected' : ''}>==</option>
+                  <option value=">=" ${conn.conditionOp === '>=' ? 'selected' : ''}>&gt;=</option>
+                  <option value="<=" ${conn.conditionOp === '<=' ? 'selected' : ''}>&lt;=</option>
+                  <option value=">" ${conn.conditionOp === '>' ? 'selected' : ''}>&gt;</option>
+                  <option value="<" ${conn.conditionOp === '<' ? 'selected' : ''}>&lt;</option>
+                  <option value="!=" ${conn.conditionOp === '!=' ? 'selected' : ''}>!=</option>
+                </select>
+                <input type="text" placeholder="value" value="${conn.conditionVal}" id="val-${conn.id}" style="flex:1;" />
+              </div>
+            </div>
+          `;
+
+          outgoingList.appendChild(card);
+
+          document.getElementById(`del-conn-${conn.id}`).addEventListener('click', () => {
+            connections = connections.filter(c => c.id !== conn.id);
+            renderConnections();
+            renderPropertiesPanel();
+          });
+
+          document.getElementById(`lbl-${conn.id}`).addEventListener('input', (e) => conn.label = e.target.value);
+          document.getElementById(`var-${conn.id}`).addEventListener('input', (e) => conn.conditionVar = e.target.value);
+          document.getElementById(`op-${conn.id}`).addEventListener('change', (e) => conn.conditionOp = e.target.value);
+          document.getElementById(`val-${conn.id}`).addEventListener('input', (e) => conn.conditionVal = e.target.value);
+        });
+      }
+    }
+
+    propTitle.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) {
+        node.title = e.target.value;
+        const label = document.querySelector(`#${node.id} .node-title-label`);
+        if (label) label.innerText = node.title;
+        renderConnections();
+      }
+    });
+
+    propRole.addEventListener('change', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) {
+        setNodeRole(node, e.target.value);
+        renderPropertiesPanel();
+      }
+    });
+
+    propText.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) node.text = e.target.value;
+    });
+
+    propCode.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) node.code = e.target.value;
+    });
+
+    insertVarSelect.addEventListener('change', (e) => {
+      const varName = e.target.value;
+      if (!varName) return;
+      const v = variables.find(x => x.name === varName);
+      const snippet = `<<set ${varName} to ${v && v.value ? v.value : '0'}>>`;
+      propCode.value = propCode.value ? `${propCode.value}\n${snippet}` : snippet;
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) node.code = propCode.value;
+      e.target.value = '';
+    });
+
+    document.getElementById('delete-node-btn').addEventListener('click', () => {
+      if (!selectedNodeId) return;
+      nodes = nodes.filter(n => n.id !== selectedNodeId);
+      connections = connections.filter(c => c.from !== selectedNodeId && c.to !== selectedNodeId);
+
+      const wrapper = document.getElementById(selectedNodeId);
+      if (wrapper) wrapper.remove();
+
+      selectedNodeId = null;
+      renderPropertiesPanel();
+      renderConnections();
+      updateStartStatus();
+    });
+
+    // ---------------- Story Variables ----------------
+    const varModal = document.getElementById('var-modal');
+    const varList = document.getElementById('var-list');
+
+    document.getElementById('variables-btn').addEventListener('click', () => {
+      renderVariablesModal();
+      varModal.style.display = 'flex';
+    });
+    document.getElementById('close-var-modal').addEventListener('click', () => {
+      varModal.style.display = 'none';
+    });
+    document.getElementById('add-var-btn').addEventListener('click', () => {
+      varCount++;
+      variables.push({ id: `Var_${varCount}`, name: `$variable${varCount}`, value: '' });
+      renderVariablesModal();
+      refreshVariableUI();
+    });
+
+    function renderVariablesModal() {
+      varList.innerHTML = '';
+      if (variables.length === 0) {
+        varList.innerHTML = '<span style="color:#64748b; font-size:0.8rem;">No variables yet. Add one below, then pick it straight from any condition field.</span>';
+        return;
+      }
+      variables.forEach(v => {
+        const row = document.createElement('div');
+        row.className = 'var-row';
+        row.innerHTML = `
+          <input type="text" value="${v.name}" placeholder="$variableName" />
+          <input type="text" value="${v.value}" placeholder="default value" />
+          <span class="out-card-delete" style="cursor:pointer; padding:0 4px;">✕</span>
+        `;
+        const [nameInput, valueInput] = row.querySelectorAll('input');
+
+        nameInput.addEventListener('input', (e) => {
+          v.name = e.target.value.trim();
+          refreshVariableUI();
+        });
+        nameInput.addEventListener('blur', (e) => {
+          if (v.name && !v.name.startsWith('$')) {
+            v.name = '$' + v.name;
+            e.target.value = v.name;
+            refreshVariableUI();
+          }
+        });
+        valueInput.addEventListener('input', (e) => { v.value = e.target.value; });
+
+        row.querySelector('.out-card-delete').addEventListener('click', () => {
+          variables = variables.filter(x => x.id !== v.id);
+          renderVariablesModal();
+          refreshVariableUI();
+        });
+
+        varList.appendChild(row);
+      });
+    }
+
+    // Keeps the condition-field autocomplete list and the "+ Insert" snippet
+    // dropdown in sync with whatever variables currently exist.
+    function refreshVariableUI() {
+      variablesDatalist.innerHTML = variables.map(v => `<option value="${v.name}"></option>`).join('');
+      insertVarSelect.innerHTML = '<option value="">+ Insert</option>' +
+        variables.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+    }
+
+    // ---------------- Play / Preview ----------------
+    const previewModal = document.getElementById('preview-modal');
+    const previewTextEl = document.getElementById('preview-text');
+    const previewChoicesEl = document.getElementById('preview-choices');
+    const previewPassageTitle = document.getElementById('preview-passage-title');
+    const previewVarsEl = document.getElementById('preview-vars');
+
+    // Evaluates a small expression (a condition, or the right-hand side of a
+    // <<set>>) against the current preview variables. $name tokens are mapped
+    // onto previewVars so authors can write ordinary SugarCube-style syntax.
+    function evalExpr(expr) {
+      const transformed = expr.trim().replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, (m, n) => `previewVars["$${n}"]`);
+      return Function('previewVars', `"use strict"; return (${transformed});`)(previewVars);
+    }
+
+    function initPreviewVars() {
+      previewVars = {};
+      variables.forEach(v => {
+        const raw = v.value;
+        previewVars[v.name] = (raw !== '' && !isNaN(raw)) ? Number(raw) : raw;
+      });
+    }
+
+    function renderPreviewNode(node) {
+      currentPreviewNodeId = node.id;
+
+      // Run this passage's entry logic (<<set $var to expr>> lines) first.
+      if (node.code) {
+        const setRe = /<<set\s+\$([a-zA-Z_][a-zA-Z0-9_]*)\s+to\s+(.+?)>>/g;
+        let m;
+        while ((m = setRe.exec(node.code))) {
+          try { previewVars['$' + m[1]] = evalExpr(m[2]); } catch (e) { /* skip invalid expression */ }
+        }
+      }
+
+      previewPassageTitle.innerText = node.title;
+      previewTextEl.innerText = node.text;
+
+      const outConns = connections.filter(c => c.from === node.id).filter(c => {
+        if (!c.conditionVar || c.conditionVal === '') return true;
+        try {
+          const left = evalExpr(c.conditionVar);
+          const rightRaw = c.conditionVal;
+          const right = isNaN(rightRaw) ? rightRaw : Number(rightRaw);
+          switch (c.conditionOp) {
+            case '==': return left == right;
+            case '!=': return left != right;
+            case '>=': return left >= right;
+            case '<=': return left <= right;
+            case '>': return left > right;
+            case '<': return left < right;
+            default: return true;
+          }
+        } catch (e) { return true; }
+      });
+
+      previewChoicesEl.innerHTML = '';
+      if (outConns.length === 0) {
+        const endMsg = document.createElement('div');
+        endMsg.style.cssText = 'color:#64748b; font-style:italic; margin-top:0.5rem;';
+        endMsg.innerText = (node.type === 'terminal' && node.role === 'end') ? '— The End —' : '(No available choices from here)';
+        previewChoicesEl.appendChild(endMsg);
+      } else {
+        outConns.forEach(c => {
+          const targetNode = nodes.find(n => n.id === c.to);
+          if (!targetNode) return;
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.cssText = 'display:block; width:100%; text-align:left; margin-top:0.5rem; background:#334155; color:#f8fafc;';
+          btn.innerText = c.label || 'Continue';
+          btn.addEventListener('click', () => {
+            previewHistory.push(node.id);
+            renderPreviewNode(targetNode);
+          });
+          previewChoicesEl.appendChild(btn);
+        });
+      }
+
+      previewVarsEl.textContent = Object.keys(previewVars).length ? JSON.stringify(previewVars, null, 2) : '(none)';
+    }
+
+    function startPreview() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+      if (!startNode) {
+        alert('Add a Start/End triangle to the canvas and make sure its role is set to Start before playing.');
+        return;
+      }
+      initPreviewVars();
+      previewHistory = [];
+      previewModal.style.display = 'flex';
+      renderPreviewNode(startNode);
+    }
+
+    document.getElementById('play-btn').addEventListener('click', startPreview);
+    document.getElementById('preview-restart-btn').addEventListener('click', startPreview);
+    document.getElementById('preview-close-btn').addEventListener('click', () => {
+      previewModal.style.display = 'none';
+    });
+
+    // ---------------- Export ----------------
+    function passageTags(node) {
+      if (node.type === 'terminal') return node.role === 'end' ? ['end'] : ['start'];
+      if (node.type === 'event') return ['event'];
+      if (node.type === 'npc') return ['npc'];
+      return [];
+    }
+
+    function buildPassageBody(node) {
+      let body = '';
+      if (node.code) body += `${node.code}\n`;
+      body += `${node.text}`;
+
+      const outConnections = connections.filter(c => c.from === node.id);
+      outConnections.forEach(c => {
+        const targetNode = nodes.find(n => n.id === c.to);
+        if (!targetNode) return;
+        // Plain [[Choice Text]] shorthand when the label already matches the
+        // destination passage's title (or there's no custom label at all);
+        // otherwise fall back to the [[Choice Text->Target]] arrow form so a
+        // choice can still read differently from the passage it leads to.
+        const label = (c.label || '').trim();
+        const link = (!label || label === targetNode.title) ? targetNode.title : `${label}->${targetNode.title}`;
+        if (c.conditionVar && c.conditionVal) {
+          body += `\n<<if ${c.conditionVar} ${c.conditionOp} ${c.conditionVal}>>\n  [[${link}]]\n<</if>>`;
+        } else {
+          body += `\n[[${link}]]`;
+        }
+      });
+      return body;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function generateTweeCode() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+
+      let code = `:: StoryTitle\nNarrative Visual Editor Project\n\n:: StoryData\n{\n  "ifid": "${storyIfid}",\n  "format": "SugarCube",\n  "format-version": "2.36.1"${startNode ? `,\n  "start": "${startNode.title}"` : ''}\n}\n\n`;
+
+      if (variables.length) {
+        code += `:: StoryInit\n`;
+        code += variables.map(v => `<<set ${v.name} to ${v.value || 0}>>`).join('\n');
+        code += `\n\n`;
+      }
+
+      nodes.forEach(node => {
+        const tags = passageTags(node);
+        code += `:: ${node.title}${tags.length ? ' [' + tags.join(' ') + ']' : ''}\n`;
+        code += buildPassageBody(node);
+        code += `\n\n`;
+      });
+
+      return code;
+    }
+
+    function generateTwineArchiveHTML() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+      const startPid = startNode ? (nodes.indexOf(startNode) + 1) : 1;
+
+      let passagesHtml = '';
+      nodes.forEach((node, i) => {
+        const pid = i + 1;
+        const tags = passageTags(node).join(' ');
+        const body = buildPassageBody(node);
+        passagesHtml += `  <tw-passagedata pid="${pid}" name="${escapeHtml(node.title)}" tags="${escapeHtml(tags)}" position="${Math.round(node.x)},${Math.round(node.y)}" size="100,100">${escapeHtml(body)}</tw-passagedata>\n`;
+      });
+
+      if (variables.length) {
+        const initBody = variables.map(v => `<<set ${v.name} to ${v.value || 0}>>`).join('\n');
+        passagesHtml += `  <tw-passagedata pid="${nodes.length + 1}" name="StoryInit" tags="" position="0,0" size="100,100">${escapeHtml(initBody)}</tw-passagedata>\n`;
+      }
+
+      return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Narrative Visual Editor Project</title></head>
+<body>
+<!-- Twine 2 story archive. In Twine: Library -> Import From File -> select this .html to load the story. -->
+<tw-storydata name="Narrative Visual Editor Project" startnode="${startPid}" creator="Narrative Visual Editor" creator-version="1.0" ifid="${storyIfid}" format="SugarCube" format-version="2.36.1" options="" tags="" zoom="1">
+${passagesHtml}</tw-storydata>
+</body>
+</html>`;
+    }
+
+    // A fully self-contained, standalone playable HTML file. It bundles the
+    // story data plus a small purpose-built player engine (no Twine, no
+    // external files, no internet needed) so double-clicking it just works.
+    function generatePlayableHTML() {
+      const storyTitle = 'Narrative Visual Editor Project';
+      const storyData = {
+        nodes: nodes.map(n => ({ id: n.id, type: n.type, role: n.role, title: n.title, text: n.text, code: n.code })),
+        connections: connections.map(c => ({ from: c.from, to: c.to, label: c.label, conditionVar: c.conditionVar, conditionOp: c.conditionOp, conditionVal: c.conditionVal })),
+        variables: variables.map(v => ({ name: v.name, value: v.value }))
+      };
+      // Guard against authored text containing a script-closing tag, which
+      // would otherwise break out of the embedded tag when parsed as HTML.
+      const json = JSON.stringify(storyData).replace(/</g, '\\u003c');
+
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(storyTitle)}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #1a1a2e; color: #eaeaea; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  #game { max-width: 640px; width: 100%; background: #16213e; border-radius: 10px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  #passage-title { font-size: 1rem; color: #7aa2f7; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; font-family: 'Segoe UI', sans-serif; }
+  #passage-text { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; margin-bottom: 2rem; }
+  .choice-btn { display: block; width: 100%; text-align: left; background: #0f3460; color: #eaeaea; border: 1px solid #2a4a7a; border-radius: 6px; padding: 0.9rem 1.2rem; margin-bottom: 0.7rem; font-size: 1rem; cursor: pointer; font-family: 'Segoe UI', sans-serif; transition: 0.15s; }
+  .choice-btn:hover { background: #1a4a7a; }
+  #end-msg { font-style: italic; color: #99a; margin-top: 1rem; font-family: 'Segoe UI', sans-serif; }
+  #restart-btn { margin-top: 1.5rem; background: none; border: 1px solid #555; color: #aaa; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Segoe UI', sans-serif; }
+  #restart-btn:hover { color: #eaeaea; border-color: #888; }
+</style>
+</head>
+<body>
+  <div id="game">
+    <div id="passage-title"></div>
+    <div id="passage-text"></div>
+    <div id="choices"></div>
+    <button id="restart-btn">Restart</button>
+  </div>
+
+  <script>
+    var STORY = ${json};
+    var vars = {};
+
+    function evalExpr(expr) {
+      var t = expr.trim().replace(/\\$([a-zA-Z_][a-zA-Z0-9_]*)/g, function (m, n) { return 'vars["$' + n + '"]'; });
+      return Function('vars', '"use strict"; return (' + t + ');')(vars);
+    }
+
+    function initVars() {
+      vars = {};
+      STORY.variables.forEach(function (v) {
+        var raw = v.value;
+        vars[v.name] = (raw !== '' && !isNaN(raw)) ? Number(raw) : raw;
+      });
+    }
+
+    function findNode(id) {
+      for (var i = 0; i < STORY.nodes.length; i++) if (STORY.nodes[i].id === id) return STORY.nodes[i];
+      return null;
+    }
+
+    function renderNode(node) {
+      if (node.code) {
+        var setRe = /<<set\\s+\\$([a-zA-Z_][a-zA-Z0-9_]*)\\s+to\\s+(.+?)>>/g;
+        var m;
+        while ((m = setRe.exec(node.code))) {
+          try { vars['$' + m[1]] = evalExpr(m[2]); } catch (e) { /* skip invalid expression */ }
+        }
+      }
+
+      document.getElementById('passage-title').textContent = node.title;
+      document.getElementById('passage-text').textContent = node.text;
+
+      var outConns = STORY.connections.filter(function (c) { return c.from === node.id; }).filter(function (c) {
+        if (!c.conditionVar || c.conditionVal === '') return true;
+        try {
+          var left = evalExpr(c.conditionVar);
+          var right = isNaN(c.conditionVal) ? c.conditionVal : Number(c.conditionVal);
+          switch (c.conditionOp) {
+            case '==': return left == right;
+            case '!=': return left != right;
+            case '>=': return left >= right;
+            case '<=': return left <= right;
+            case '>': return left > right;
+            case '<': return left < right;
+            default: return true;
+          }
+        } catch (e) { return true; }
+      });
+
+      var choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+      if (outConns.length === 0) {
+        var msg = document.createElement('div');
+        msg.id = 'end-msg';
+        msg.textContent = (node.type === 'terminal' && node.role === 'end') ? '\\u2014 The End \\u2014' : '(No further choices)';
+        choicesEl.appendChild(msg);
+      } else {
+        outConns.forEach(function (c) {
+          var target = findNode(c.to);
+          if (!target) return;
+          var btn = document.createElement('button');
+          btn.className = 'choice-btn';
+          btn.textContent = c.label || 'Continue';
+          btn.addEventListener('click', function () { renderNode(target); });
+          choicesEl.appendChild(btn);
+        });
+      }
+    }
+
+    function start() {
+      var startNode = null;
+      for (var i = 0; i < STORY.nodes.length; i++) {
+        if (STORY.nodes[i].type === 'terminal' && STORY.nodes[i].role === 'start') { startNode = STORY.nodes[i]; break; }
+      }
+      if (!startNode) {
+        document.getElementById('passage-text').textContent = 'This story has no Start passage set.';
+        return;
+      }
+      initVars();
+      renderNode(startNode);
+    }
+
+    document.getElementById('restart-btn').addEventListener('click', start);
+    start();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    const modal = document.getElementById('modal');
+    const tweeOutput = document.getElementById('twee-output');
+    const exportNote = document.getElementById('export-note');
+    const exportWarning = document.getElementById('export-warning');
+    const tabTwee = document.getElementById('tab-twee');
+    const tabPlay = document.getElementById('tab-play');
+    const tabHtml = document.getElementById('tab-html');
+    const downloadBtn = document.getElementById('download-btn');
+
+    const EXPORT_TABS = { twee: tabTwee, play: tabPlay, html: tabHtml };
+
+    function setActiveExportTab(mode) {
+      exportMode = mode;
+      Object.keys(EXPORT_TABS).forEach(key => {
+        EXPORT_TABS[key].style.background = key === mode ? '#38bdf8' : '#64748b';
+      });
+      refreshExportOutput();
+    }
+
+    function refreshExportOutput() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+      if (!startNode) {
+        exportWarning.style.display = 'block';
+        exportWarning.textContent = '⚠ No Start node set — this story can\'t be exported or played yet. Add a Start/End triangle to the canvas (the first one placed becomes Start automatically), or set an existing triangle\'s role to Start in its Properties panel.';
+        downloadBtn.disabled = true;
+        downloadBtn.style.opacity = '0.5';
+        downloadBtn.style.cursor = 'not-allowed';
+      } else {
+        exportWarning.style.display = 'none';
+        downloadBtn.disabled = false;
+        downloadBtn.style.opacity = '1';
+        downloadBtn.style.cursor = 'pointer';
+      }
+
+      const startSuffix = startNode ? ` Starting passage: "${startNode.title}".` : '';
+      if (exportMode === 'twee') {
+        exportNote.textContent = `Plain-text Twee 3 source. Compile it with Tweego, or paste it into a new Twine story via Import From File, to get a playable game.${startSuffix}`;
+        tweeOutput.value = generateTweeCode();
+      } else if (exportMode === 'play') {
+        exportNote.textContent = `A standalone playable HTML file — just open it in any browser, no Twine or internet needed.${startSuffix}`;
+        tweeOutput.value = generatePlayableHTML();
+      } else {
+        exportNote.textContent = `A Twine 2 story archive (not a playable game on its own). In Twine: Library → Import From File. Use ▶ Play above, or the Playable HTML tab, to test the story without Twine.${startSuffix}`;
+        tweeOutput.value = generateTwineArchiveHTML();
+      }
+    }
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+      refreshExportOutput();
+      modal.style.display = 'flex';
+    });
+
+    tabTwee.addEventListener('click', () => setActiveExportTab('twee'));
+    tabPlay.addEventListener('click', () => setActiveExportTab('play'));
+    tabHtml.addEventListener('click', () => setActiveExportTab('html'));
+
+    document.getElementById('close-modal').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+      const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+      if (!hasStart) return;
+      const mimeType = exportMode === 'twee' ? 'text/plain' : 'text/html';
+      const filenames = {
+        twee: 'Narrative_Visual_Editor_Story.twee',
+        play: 'Narrative_Visual_Editor_Story_Playable.html',
+        html: 'Narrative_Visual_Editor_Story_Archive.html'
+      };
+      const blob = new Blob([tweeOutput.value], { type: mimeType });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filenames[exportMode];
+      a.click();
+    });
+
+    refreshVariableUI();
+    updateStartStatus();
+  </script>
+</body>
+</html>
