@@ -1,3 +1,3 @@
 # Game Resources
 
-[narrative-visual-editor](narrative-visual-editor.html)
+[narrative-visual-editor](https://purna.github.io/GamesDesign/narrative-visual-editor.html)
