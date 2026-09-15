@@ -139,7 +139,7 @@
       justify-content: space-between;
       padding: 0 1.25rem;
       z-index: 5;
-      gap: 0.75rem;
+      gap: 1rem;
     }
     
     .logo-container {
@@ -148,41 +148,60 @@
       gap: 0.6rem;
     }
     .logo-icon {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       fill: var(--primary);
     }
     #toolbar h1 {
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.01em;
+      white-space: nowrap;
     }
     
     .status-text {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--accent-warning);
       font-weight: 500;
       flex: 1;
       text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    
     .toolbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+    
+    .btn-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background-color: var(--border-color);
+      margin: 0 0.25rem;
+    }
 
     /* Base Buttons */
     .btn {
       background: var(--bg-surface-elevated);
       color: var(--text-main);
-      font-weight: 600;
+      font-weight: 500;
       border: 1px solid var(--border-color);
-      padding: 0.45rem 0.85rem;
+      padding: 0.4rem 0.75rem;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.15s ease;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.4rem;
+      white-space: nowrap;
     }
     .btn:hover {
       background: var(--border-color);
@@ -192,6 +211,7 @@
       background: var(--primary);
       color: var(--text-inverse);
       border: none;
+      font-weight: 600;
     }
     .btn-primary:hover {
       filter: brightness(1.1);
@@ -205,11 +225,6 @@
     .btn-danger:hover {
       background: #f43f5e;
       color: white;
-    }
-    .btn-icon {
-      padding: 0.45rem;
-      aspect-ratio: 1;
-      border-radius: 6px;
     }
 
     #viewport {
@@ -369,7 +384,7 @@
     .out-card-delete:hover { background: rgba(244, 63, 94, 0.15); }
 
     /* Modals */
-    #modal, #var-modal {
+    #modal, #var-modal, #gh-modal {
       display: none;
       position: fixed;
       inset: 0;
@@ -379,7 +394,7 @@
       align-items: center;
       justify-content: center;
     }
-    #modal-content, #var-modal-content {
+    #modal-content, #var-modal-content, #gh-modal-content {
       background: var(--bg-surface);
       width: 580px;
       max-width: 90%;
@@ -429,10 +444,8 @@
       justify-content: center;
       transition: background 0.15s;
     }
-    .theme-toggle-btn:hover {
-      background: var(--bg-surface-elevated);
-    }
-    .theme-toggle-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .theme-toggle-btn:hover { background: var(--bg-surface-elevated); }
+    .theme-toggle-btn svg { width: 16px; height: 16px; fill: currentColor; }
   </style>
 </head>
 <body>
@@ -444,6 +457,8 @@
     <div class="palette-item" style="background: var(--accent-event)" draggable="true" data-type="event">Event <span>Circle</span></div>
     <div class="palette-item" style="background: var(--accent-npc)" draggable="true" data-type="npc">NPC <span>Pentagon</span></div>
     <div class="palette-item" style="background: linear-gradient(135deg, var(--accent-terminal-start) 50%, var(--accent-terminal-end) 50%)" draggable="true" data-type="terminal">Start / End <span>Triangle</span></div>
+    
+    <div id="start-status" style="font-size: 0.8rem; color: var(--accent-warning); font-weight: 500; margin-top: auto; line-height: 1.4;"></div>
   </aside>
 
   <!-- Canvas Workspace -->
@@ -451,18 +466,37 @@
     <header id="toolbar">
       <div class="logo-container">
         <svg class="logo-icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        <h1>Narrative Visual Editor</h1>
+        <h1>Narrative Editor</h1>
       </div>
+
       <span id="status" class="status-text"></span>
-      <span id="start-status" style="font-size:0.8rem; color:var(--accent-warning); font-weight:600;"></span>
+
       <div class="toolbar-actions">
+        <!-- Project Storage Actions -->
+        <div class="btn-group">
+          <button class="btn" id="save-local-btn" title="Save to Local Storage">Save</button>
+          <button class="btn" id="load-local-btn" title="Load from Local Storage">Load</button>
+          <button class="btn" id="import-btn" title="Import Twine Archive or Twee File">Import</button>
+          <input type="file" id="import-file-input" accept=".html,.twee,.txt" style="display:none;" />
+          <button class="btn" id="github-btn" title="Save or Load GitHub Gist">GitHub</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Story Execution & Tools -->
+        <div class="btn-group">
+          <button class="btn" id="variables-btn">Variables</button>
+          <button class="btn btn-primary" id="play-btn">Play</button>
+          <button class="btn" id="export-btn">Export</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- View Controls -->
         <button class="theme-toggle-btn" id="theme-btn" title="Toggle Theme">
           <svg id="theme-icon-sun" style="display:none;" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
           <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
         </button>
-        <button class="btn btn-primary" id="play-btn">▶ Play</button>
-        <button class="btn" id="variables-btn">Variables</button>
-        <button class="btn" id="export-btn">Export</button>
       </div>
     </header>
     <div id="viewport">
@@ -475,7 +509,7 @@
   <!-- Properties Inspector Panel -->
   <aside id="properties-panel">
     <h2>Node Properties</h2>
-    <div id="no-selection" style="color: var(--text-muted); font-size: 0.85rem;">Click any node on the canvas to inspect & edit its story properties.</div>
+    <div id="no-selection" style="color: var(--text-muted); font-size: 0.85rem;">Select any node on the canvas to inspect and edit properties.</div>
     <div id="editor-form" style="display: none;" class="form-group">
       <div class="form-group">
         <label>Passage Title</label>
@@ -521,6 +555,27 @@
       <button class="btn" id="add-var-btn">+ Add Variable</button>
       <div style="display:flex; justify-content: flex-end;">
         <button class="btn btn-primary" id="close-var-modal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GitHub Gist Storage Modal -->
+  <div id="gh-modal">
+    <div id="gh-modal-content">
+      <h2 style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">GitHub Gist Sync</h2>
+      <div class="form-group">
+        <label>GitHub Personal Access Token (PAT with 'gist' scope)</label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" />
+      </div>
+      <div class="form-group">
+        <label>Gist ID (Leave empty to create a new Gist)</label>
+        <input type="text" id="gh-gist-id" placeholder="e.g. a1b2c3d4e5f6..." />
+      </div>
+      <div id="gh-status" style="font-size:0.8rem; color:var(--accent-warning);"></div>
+      <div style="display:flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn" id="gh-load-btn">Load Gist</button>
+        <button class="btn btn-primary" id="gh-save-btn">Save to Gist</button>
+        <button class="btn" id="gh-close-btn">Close</button>
       </div>
     </div>
   </div>
@@ -598,7 +653,6 @@
       setTheme(currentTheme === 'light' ? 'dark' : 'light');
     });
 
-    // Initialize saved theme or preferred scheme
     const savedTheme = localStorage.getItem('editor-theme') || 
       (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
     setTheme(savedTheme);
@@ -622,7 +676,7 @@
 
     function updateStartStatus() {
       const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
-      startStatusEl.textContent = hasStart ? '' : '⚠ No Start node — add a Start/End triangle';
+      startStatusEl.textContent = hasStart ? '' : 'Notice: No Start node set. Add a Start/End triangle.';
     }
 
     // Drag-and-Drop Spawning
@@ -651,25 +705,27 @@
       return { showIn: true, showOut: true };
     }
 
-    function createNode(type, x, y) {
+    function createNode(type, x, y, options = {}) {
       nodeCount++;
-      const id = `Node_${nodeCount}`;
-      let role = null;
+      const id = options.id || `Node_${nodeCount}`;
+      let role = options.role || null;
       let title;
 
       if (type === 'terminal') {
-        const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
-        role = hasStart ? 'end' : 'start';
-        title = role === 'start' ? `Start_${nodeCount}` : `Ending_${nodeCount}`;
+        if (!role) {
+          const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+          role = hasStart ? 'end' : 'start';
+        }
+        title = options.title || (role === 'start' ? `Start_${nodeCount}` : `Ending_${nodeCount}`);
       } else {
         const titles = { standard: 'Passage', event: 'Event', npc: 'NPC' };
-        title = `${titles[type] || 'Node'}_${nodeCount}`;
+        title = options.title || `${titles[type] || 'Node'}_${nodeCount}`;
       }
 
       const nodeData = {
         id, type, role, title, x, y,
-        text: `Write narrative text for ${title} here...`,
-        code: ''
+        text: options.text || `Write narrative text for ${title} here...`,
+        code: options.code || ''
       };
 
       nodes.push(nodeData);
@@ -677,6 +733,8 @@
       selectNode(nodeData.id);
       renderConnections();
       updateStartStatus();
+      autoSaveLocal();
+      return nodeData;
     }
 
     function renderNodeDOM(node) {
@@ -698,7 +756,6 @@
 
       const vis = portVisibility(node);
 
-      // Input Port
       const inPort = document.createElement('div');
       inPort.className = 'port port-in' + (vis.showIn ? '' : ' hidden');
       inPort.title = 'Input Port';
@@ -711,7 +768,6 @@
       });
       wrapper.appendChild(inPort);
 
-      // Output Port
       const outPort = document.createElement('div');
       outPort.className = 'port port-out' + (vis.showOut ? '' : ' hidden');
       outPort.title = 'Output Port';
@@ -733,6 +789,20 @@
       viewport.appendChild(wrapper);
     }
 
+    function clearCanvas() {
+      document.querySelectorAll('.node-wrapper').forEach(el => el.remove());
+      nodes = [];
+      connections = [];
+      variables = [];
+      nodeCount = 0;
+      varCount = 0;
+      selectedNodeId = null;
+      renderConnections();
+      renderPropertiesPanel();
+      refreshVariableUI();
+      updateStartStatus();
+    }
+
     function setNodeRole(node, role) {
       if (role === 'start') {
         nodes.forEach(n => {
@@ -748,6 +818,7 @@
       syncNodeVisual(node);
       renderConnections();
       updateStartStatus();
+      autoSaveLocal();
     }
 
     function cleanupInvalidConnections(node) {
@@ -770,22 +841,23 @@
     function startWireConnection(sourceId) {
       wireSourceNodeId = sourceId;
       tempWireActive = true;
-      statusText.innerText = 'Drag wire to an Input Port...';
+      statusText.innerText = 'Drag connection wire to target Input Port...';
     }
 
-    function completeWireConnection(sourceId, targetId) {
+    function completeWireConnection(sourceId, targetId, options = {}) {
       connections.push({
-        id: `Conn_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        id: options.id || `Conn_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
         from: sourceId,
         to: targetId,
-        label: 'Proceed',
-        conditionVar: '',
-        conditionOp: '==',
-        conditionVal: ''
+        label: options.label || 'Proceed',
+        conditionVar: options.conditionVar || '',
+        conditionOp: options.conditionOp || '==',
+        conditionVal: options.conditionVal || ''
       });
       renderConnections();
       renderPropertiesPanel();
       cancelWireConnection();
+      autoSaveLocal();
     }
 
     function cancelWireConnection() {
@@ -824,6 +896,7 @@
 
     window.addEventListener('mouseup', () => {
       if (tempWireActive) cancelWireConnection();
+      if (draggedNode) autoSaveLocal();
       draggedNode = null;
     });
 
@@ -844,13 +917,14 @@
         const dx = Math.max(30, Math.abs(x2 - x1) / 2);
         path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`);
         path.setAttribute('class', 'edge');
-        path.title = 'Click wire to delete connection';
+        path.title = 'Click connection wire to remove';
 
         path.addEventListener('click', (e) => {
           e.stopPropagation();
           connections.splice(index, 1);
           renderConnections();
           renderPropertiesPanel();
+          autoSaveLocal();
         });
 
         svgLayer.appendChild(path);
@@ -917,8 +991,8 @@
 
       if (outConns.length === 0) {
         const msg = node.type === 'terminal' && node.role === 'end'
-          ? 'End nodes have no outgoing wires — this is where the story concludes.'
-          : 'No outgoing wires attached. Drag a wire from this node\'s right port to another node.';
+          ? 'End nodes have no outgoing wires — the story terminates here.'
+          : 'No outgoing connections. Drag from the right port of this node to establish a link.';
         outgoingList.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">${msg}</span>`;
       } else {
         outConns.forEach((conn) => {
@@ -929,7 +1003,7 @@
           card.innerHTML = `
             <div class="out-card-title">
               <span>To: ${targetNode ? targetNode.title : 'Unknown'}</span>
-              <span class="out-card-delete" id="del-conn-${conn.id}">Delete Wire</span>
+              <span class="out-card-delete" id="del-conn-${conn.id}">Remove</span>
             </div>
             <div class="form-group">
               <label>Choice Button Label</label>
@@ -958,12 +1032,13 @@
             connections = connections.filter(c => c.id !== conn.id);
             renderConnections();
             renderPropertiesPanel();
+            autoSaveLocal();
           });
 
-          document.getElementById(`lbl-${conn.id}`).addEventListener('input', (e) => conn.label = e.target.value);
-          document.getElementById(`var-${conn.id}`).addEventListener('input', (e) => conn.conditionVar = e.target.value);
-          document.getElementById(`op-${conn.id}`).addEventListener('change', (e) => conn.conditionOp = e.target.value);
-          document.getElementById(`val-${conn.id}`).addEventListener('input', (e) => conn.conditionVal = e.target.value);
+          document.getElementById(`lbl-${conn.id}`).addEventListener('input', (e) => { conn.label = e.target.value; autoSaveLocal(); });
+          document.getElementById(`var-${conn.id}`).addEventListener('input', (e) => { conn.conditionVar = e.target.value; autoSaveLocal(); });
+          document.getElementById(`op-${conn.id}`).addEventListener('change', (e) => { conn.conditionOp = e.target.value; autoSaveLocal(); });
+          document.getElementById(`val-${conn.id}`).addEventListener('input', (e) => { conn.conditionVal = e.target.value; autoSaveLocal(); });
         });
       }
     }
@@ -975,6 +1050,7 @@
         const label = document.querySelector(`#${node.id} .node-title-label`);
         if (label) label.innerText = node.title;
         renderConnections();
+        autoSaveLocal();
       }
     });
 
@@ -988,12 +1064,12 @@
 
     propText.addEventListener('input', (e) => {
       const node = nodes.find(n => n.id === selectedNodeId);
-      if (node) node.text = e.target.value;
+      if (node) { node.text = e.target.value; autoSaveLocal(); }
     });
 
     propCode.addEventListener('input', (e) => {
       const node = nodes.find(n => n.id === selectedNodeId);
-      if (node) node.code = e.target.value;
+      if (node) { node.code = e.target.value; autoSaveLocal(); }
     });
 
     insertVarSelect.addEventListener('change', (e) => {
@@ -1005,6 +1081,7 @@
       const node = nodes.find(n => n.id === selectedNodeId);
       if (node) node.code = propCode.value;
       e.target.value = '';
+      autoSaveLocal();
     });
 
     document.getElementById('delete-node-btn').addEventListener('click', () => {
@@ -1019,6 +1096,7 @@
       renderPropertiesPanel();
       renderConnections();
       updateStartStatus();
+      autoSaveLocal();
     });
 
     // Story Variables
@@ -1037,12 +1115,13 @@
       variables.push({ id: `Var_${varCount}`, name: `$variable${varCount}`, value: '' });
       renderVariablesModal();
       refreshVariableUI();
+      autoSaveLocal();
     });
 
     function renderVariablesModal() {
       varList.innerHTML = '';
       if (variables.length === 0) {
-        varList.innerHTML = '<span style="color:var(--text-muted); font-size:0.8rem;">No variables yet. Add one below, then pick it straight from any condition field.</span>';
+        varList.innerHTML = '<span style="color:var(--text-muted); font-size:0.8rem;">No variables defined. Add a variable to track state across passages.</span>';
         return;
       }
       variables.forEach(v => {
@@ -1051,27 +1130,30 @@
         row.innerHTML = `
           <input type="text" value="${v.name}" placeholder="$variableName" />
           <input type="text" value="${v.value}" placeholder="default value" />
-          <span class="out-card-delete" style="cursor:pointer; padding:0 4px;">✕</span>
+          <span class="out-card-delete" style="cursor:pointer; padding:0 6px;">Delete</span>
         `;
         const [nameInput, valueInput] = row.querySelectorAll('input');
 
         nameInput.addEventListener('input', (e) => {
           v.name = e.target.value.trim();
           refreshVariableUI();
+          autoSaveLocal();
         });
         nameInput.addEventListener('blur', (e) => {
           if (v.name && !v.name.startsWith('$')) {
             v.name = '$' + v.name;
             e.target.value = v.name;
             refreshVariableUI();
+            autoSaveLocal();
           }
         });
-        valueInput.addEventListener('input', (e) => { v.value = e.target.value; });
+        valueInput.addEventListener('input', (e) => { v.value = e.target.value; autoSaveLocal(); });
 
         row.querySelector('.out-card-delete').addEventListener('click', () => {
           variables = variables.filter(x => x.id !== v.id);
           renderVariablesModal();
           refreshVariableUI();
+          autoSaveLocal();
         });
 
         varList.appendChild(row);
@@ -1084,7 +1166,369 @@
         variables.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
     }
 
-    // Play / Preview
+    // Local Storage Operations
+    const LOCAL_STORAGE_KEY = 'nve_story_data';
+
+    function getStoryPayload() {
+      return JSON.stringify({
+        nodes,
+        connections,
+        variables,
+        nodeCount,
+        varCount
+      });
+    }
+
+    function loadStoryPayload(jsonString) {
+      try {
+        const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+        clearCanvas();
+
+        if (data.nodeCount) nodeCount = data.nodeCount;
+        if (data.varCount) varCount = data.varCount;
+        if (Array.isArray(data.variables)) variables = data.variables;
+
+        if (Array.isArray(data.nodes)) {
+          data.nodes.forEach(n => {
+            nodes.push(n);
+            renderNodeDOM(n);
+          });
+        }
+
+        if (Array.isArray(data.connections)) {
+          connections = data.connections;
+        }
+
+        renderConnections();
+        refreshVariableUI();
+        updateStartStatus();
+        return true;
+      } catch (err) {
+        console.error('Failed to load story data:', err);
+        return false;
+      }
+    }
+
+    function autoSaveLocal() {
+      localStorage.setItem(LOCAL_STORAGE_KEY, getStoryPayload());
+    }
+
+    document.getElementById('save-local-btn').addEventListener('click', () => {
+      autoSaveLocal();
+      alert('Project saved successfully to local storage.');
+    });
+
+    document.getElementById('load-local-btn').addEventListener('click', () => {
+      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!savedData) {
+        alert('No saved project found in local storage.');
+        return;
+      }
+      if (confirm('Loading will overwrite your current workspace. Proceed?')) {
+        loadStoryPayload(savedData);
+      }
+    });
+
+    const initialSavedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (initialSavedData) {
+      loadStoryPayload(initialSavedData);
+    }
+
+    // GitHub Gist Sync
+    const ghModal = document.getElementById('gh-modal');
+    const ghTokenInput = document.getElementById('gh-token');
+    const ghGistIdInput = document.getElementById('gh-gist-id');
+    const ghStatus = document.getElementById('gh-status');
+
+    ghTokenInput.value = localStorage.getItem('nve_gh_token') || '';
+    ghGistIdInput.value = localStorage.getItem('nve_gh_gist_id') || '';
+
+    document.getElementById('github-btn').addEventListener('click', () => {
+      ghStatus.textContent = '';
+      ghModal.style.display = 'flex';
+    });
+    document.getElementById('gh-close-btn').addEventListener('click', () => {
+      ghModal.style.display = 'none';
+    });
+
+    document.getElementById('gh-save-btn').addEventListener('click', async () => {
+      const token = ghTokenInput.value.trim();
+      let gistId = ghGistIdInput.value.trim();
+
+      if (!token) {
+        ghStatus.textContent = 'Personal Access Token required.';
+        return;
+      }
+
+      localStorage.setItem('nve_gh_token', token);
+      ghStatus.textContent = 'Saving to GitHub Gist...';
+
+      const payload = {
+        description: 'Narrative Editor Save Data',
+        public: false,
+        files: {
+          'narrative_story.json': {
+            content: getStoryPayload()
+          }
+        }
+      };
+
+      try {
+        const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+        const method = gistId ? 'PATCH' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(`GitHub API error: ${res.statusText}`);
+
+        const result = await res.json();
+        gistId = result.id;
+        ghGistIdInput.value = gistId;
+        localStorage.setItem('nve_gh_gist_id', gistId);
+        ghStatus.textContent = 'Successfully saved to Gist.';
+      } catch (err) {
+        ghStatus.textContent = `Error saving: ${err.message}`;
+      }
+    });
+
+    document.getElementById('gh-load-btn').addEventListener('click', async () => {
+      const token = ghTokenInput.value.trim();
+      const gistId = ghGistIdInput.value.trim();
+
+      if (!gistId) {
+        ghStatus.textContent = 'Gist ID required to load.';
+        return;
+      }
+
+      ghStatus.textContent = 'Fetching from GitHub...';
+      const headers = { 'Accept': 'application/vnd.github+json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        localStorage.setItem('nve_gh_token', token);
+      }
+
+      try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers });
+        if (!res.ok) throw new Error(`GitHub API error: ${res.statusText}`);
+
+        const result = await res.json();
+        const file = result.files['narrative_story.json'];
+        if (!file || !file.content) throw new Error('narrative_story.json not found in target Gist.');
+
+        if (confirm('Loading Gist will replace your current workspace. Proceed?')) {
+          loadStoryPayload(file.content);
+          localStorage.setItem('nve_gh_gist_id', gistId);
+          ghStatus.textContent = 'Successfully loaded Gist.';
+        }
+      } catch (err) {
+        ghStatus.textContent = `Error loading: ${err.message}`;
+      }
+    });
+
+    // Twine & Twee Importer
+    const importBtn = document.getElementById('import-btn');
+    const importFileInput = document.getElementById('import-file-input');
+
+    importBtn.addEventListener('click', () => importFileInput.click());
+
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const content = evt.target.result;
+        if (file.name.endsWith('.html') || content.includes('<tw-storydata')) {
+          parseTwineArchiveHTML(content);
+        } else {
+          parseTweeCode(content);
+        }
+        importFileInput.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    function parseTwineArchiveHTML(htmlText) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+      const storyData = doc.querySelector('tw-storydata');
+
+      if (!storyData) {
+        alert('Could not locate valid Twine 2 story data in HTML file.');
+        return;
+      }
+
+      const startPid = storyData.getAttribute('startnode');
+      const passageNodes = doc.querySelectorAll('tw-passagedata');
+
+      if (!confirm(`Import ${passageNodes.length} passages into workspace? Current workspace will be cleared.`)) return;
+
+      clearCanvas();
+
+      const pidToNodeIdMap = {};
+      const passageLinks = [];
+
+      passageNodes.forEach((el, index) => {
+        const pid = el.getAttribute('pid');
+        const title = el.getAttribute('name') || `Passage_${index + 1}`;
+        const tags = (el.getAttribute('tags') || '').split(' ');
+        const posAttr = el.getAttribute('position');
+        
+        let x = 100 + (index % 5) * 180;
+        let y = 100 + Math.floor(index / 5) * 140;
+        if (posAttr) {
+          const coords = posAttr.split(',').map(Number);
+          if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            x = Math.max(20, coords[0]);
+            y = Math.max(20, coords[1]);
+          }
+        }
+
+        let type = 'standard';
+        let role = null;
+
+        if (pid === startPid || tags.includes('start')) {
+          type = 'terminal';
+          role = 'start';
+        } else if (tags.includes('end')) {
+          type = 'terminal';
+          role = 'end';
+        } else if (tags.includes('event')) {
+          type = 'event';
+        } else if (tags.includes('npc')) {
+          type = 'npc';
+        }
+
+        const rawContent = el.textContent || '';
+        const parsed = extractLinksAndCode(rawContent);
+
+        const createdNode = createNode(type, x, y, {
+          title,
+          text: parsed.text,
+          code: parsed.code,
+          role
+        });
+
+        pidToNodeIdMap[title] = createdNode.id;
+        passageLinks.push({ sourceId: createdNode.id, links: parsed.links });
+      });
+
+      passageLinks.forEach(item => {
+        item.links.forEach(link => {
+          const targetNodeId = pidToNodeIdMap[link.targetTitle];
+          if (targetNodeId) {
+            completeWireConnection(item.sourceId, targetNodeId, { label: link.label });
+          }
+        });
+      });
+
+      autoSaveLocal();
+    }
+
+    function parseTweeCode(tweeText) {
+      const passageBlocks = tweeText.split(/^::\s+/m).filter(b => b.trim().length > 0);
+      if (passageBlocks.length === 0) {
+        alert('No Twee passages found in file.');
+        return;
+      }
+
+      if (!confirm(`Import ${passageBlocks.length} Twee passages? Current workspace will be replaced.`)) return;
+
+      clearCanvas();
+
+      const titleToNodeIdMap = {};
+      const passageLinks = [];
+
+      passageBlocks.forEach((block, index) => {
+        const lines = block.split('\n');
+        const header = lines.shift() || '';
+        const body = lines.join('\n');
+
+        const headerMatch = header.match(/^([^\[\{]+)(?:\[(.*?)\])?/);
+        if (!headerMatch) return;
+
+        const title = headerMatch[1].trim();
+        if (title === 'StoryTitle' || title === 'StoryData' || title === 'StoryInit') return;
+
+        const tags = (headerMatch[2] || '').split(/\s+/);
+        
+        let type = 'standard';
+        let role = null;
+
+        if (tags.includes('start')) {
+          type = 'terminal';
+          role = 'start';
+        } else if (tags.includes('end')) {
+          type = 'terminal';
+          role = 'end';
+        } else if (tags.includes('event')) {
+          type = 'event';
+        } else if (tags.includes('npc')) {
+          type = 'npc';
+        }
+
+        const x = 100 + (index % 5) * 180;
+        const y = 100 + Math.floor(index / 5) * 140;
+
+        const parsed = extractLinksAndCode(body);
+
+        const createdNode = createNode(type, x, y, {
+          title,
+          text: parsed.text,
+          code: parsed.code,
+          role
+        });
+
+        titleToNodeIdMap[title] = createdNode.id;
+        passageLinks.push({ sourceId: createdNode.id, links: parsed.links });
+      });
+
+      passageLinks.forEach(item => {
+        item.links.forEach(link => {
+          const targetNodeId = titleToNodeIdMap[link.targetTitle];
+          if (targetNodeId) {
+            completeWireConnection(item.sourceId, targetNodeId, { label: link.label });
+          }
+        });
+      });
+
+      autoSaveLocal();
+    }
+
+    function extractLinksAndCode(content) {
+      let text = content;
+      let code = '';
+      const links = [];
+
+      const setMatches = text.match(/<<set\s+.*?>>/g);
+      if (setMatches) {
+        code = setMatches.join('\n');
+        text = text.replace(/<<set\s+.*?>>/g, '');
+      }
+
+      const linkRegex = /\[\[(?:([^\]\|]+)->|([^\]\|]+)\|)?([^\]]+)\]\]/g;
+      let match;
+      while ((match = linkRegex.exec(text)) !== null) {
+        const rawLabel = match[1] || match[2] || '';
+        const targetTitle = match[3].trim();
+        const label = rawLabel.trim() || targetTitle;
+        links.push({ label, targetTitle });
+      }
+
+      text = text.replace(linkRegex, '').trim();
+
+      return { text, code, links };
+    }
+
+    // Interactive Preview Engine
     const previewModal = document.getElementById('preview-modal');
     const previewTextEl = document.getElementById('preview-text');
     const previewChoicesEl = document.getElementById('preview-choices');
@@ -1140,7 +1584,7 @@
       if (outConns.length === 0) {
         const endMsg = document.createElement('div');
         endMsg.style.cssText = 'color:var(--text-muted); font-style:italic; margin-top:0.5rem;';
-        endMsg.innerText = (node.type === 'terminal' && node.role === 'end') ? '— The End —' : '(No available choices from here)';
+        endMsg.innerText = (node.type === 'terminal' && node.role === 'end') ? 'Story Concluded' : '(No available choices from here)';
         previewChoicesEl.appendChild(endMsg);
       } else {
         outConns.forEach(c => {
@@ -1164,7 +1608,7 @@
     function startPreview() {
       const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
       if (!startNode) {
-        alert('Add a Start/End triangle to the canvas and make sure its role is set to Start before playing.');
+        alert('Add a Start/End triangle node to the canvas and set its role to Start before playing.');
         return;
       }
       initPreviewVars();
@@ -1179,7 +1623,7 @@
       previewModal.style.display = 'none';
     });
 
-    // Export Logic
+    // Story Export Generation
     function passageTags(node) {
       if (node.type === 'terminal') return node.role === 'end' ? ['end'] : ['start'];
       if (node.type === 'event') return ['event'];
@@ -1218,7 +1662,7 @@
     function generateTweeCode() {
       const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
 
-      let code = `:: StoryTitle\nNarrative Visual Editor Project\n\n:: StoryData\n{\n  "ifid": "${storyIfid}",\n  "format": "SugarCube",\n  "format-version": "2.36.1"${startNode ? `,\n  "start": "${startNode.title}"` : ''}\n}\n\n`;
+      let code = `:: StoryTitle\nNarrative Editor Project\n\n:: StoryData\n{\n  "ifid": "${storyIfid}",\n  "format": "SugarCube",\n  "format-version": "2.36.1"${startNode ? `,\n  "start": "${startNode.title}"` : ''}\n}\n\n`;
 
       if (variables.length) {
         code += `:: StoryInit\n`;
@@ -1255,16 +1699,16 @@
 
       return `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Narrative Visual Editor Project</title></head>
+<head><meta charset="utf-8"><title>Narrative Editor Project</title></head>
 <body>
-<tw-storydata name="Narrative Visual Editor Project" startnode="${startPid}" creator="Narrative Visual Editor" creator-version="1.0" ifid="${storyIfid}" format="SugarCube" format-version="2.36.1" options="" tags="" zoom="1">
+<tw-storydata name="Narrative Editor Project" startnode="${startPid}" creator="Narrative Editor" creator-version="1.0" ifid="${storyIfid}" format="SugarCube" format-version="2.36.1" options="" tags="" zoom="1">
 ${passagesHtml}</tw-storydata>
 </body>
 </html>`;
     }
 
     function generatePlayableHTML() {
-      const storyTitle = 'Narrative Visual Editor Project';
+      const storyTitle = 'Narrative Editor Project';
       const storyData = {
         nodes: nodes.map(n => ({ id: n.id, type: n.type, role: n.role, title: n.title, text: n.text, code: n.code })),
         connections: connections.map(c => ({ from: c.from, to: c.to, label: c.label, conditionVar: c.conditionVar, conditionOp: c.conditionOp, conditionVal: c.conditionVal })),
@@ -1354,7 +1798,7 @@ ${passagesHtml}</tw-storydata>
       if (outConns.length === 0) {
         var msg = document.createElement('div');
         msg.id = 'end-msg';
-        msg.textContent = (node.type === 'terminal' && node.role === 'end') ? '\\u2014 The End \\u2014' : '(No further choices)';
+        msg.textContent = (node.type === 'terminal' && node.role === 'start') ? 'Story Concluded' : '(No further choices)';
         choicesEl.appendChild(msg);
       } else {
         outConns.forEach(function (c) {
@@ -1416,7 +1860,7 @@ ${passagesHtml}</tw-storydata>
       const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
       if (!startNode) {
         exportWarning.style.display = 'block';
-        exportWarning.textContent = '⚠ No Start node set — this story can\'t be exported or played yet. Add a Start/End triangle to the canvas, or set an existing triangle\'s role to Start.';
+        exportWarning.textContent = 'Notice: No Start node set. Add a Start/End node to the canvas before exporting or testing.';
         downloadBtn.disabled = true;
         downloadBtn.style.opacity = '0.5';
         downloadBtn.style.cursor = 'not-allowed';
@@ -1429,13 +1873,13 @@ ${passagesHtml}</tw-storydata>
 
       const startSuffix = startNode ? ` Starting passage: "${startNode.title}".` : '';
       if (exportMode === 'twee') {
-        exportNote.textContent = `Plain-text Twee 3 source. Compile with Tweego or import into Twine.${startSuffix}`;
+        exportNote.textContent = `Plain-text Twee 3 source code. Compile with Tweego or import into Twine.${startSuffix}`;
         tweeOutput.value = generateTweeCode();
       } else if (exportMode === 'play') {
-        exportNote.textContent = `Standalone playable HTML file — ready to play directly in browser.${startSuffix}`;
+        exportNote.textContent = `Standalone playable HTML file. Ready for direct browser testing.${startSuffix}`;
         tweeOutput.value = generatePlayableHTML();
       } else {
-        exportNote.textContent = `Twine 2 story archive for importing via Twine Library → Import From File.${startSuffix}`;
+        exportNote.textContent = `Twine 2 story archive HTML format for importing into Twine.${startSuffix}`;
         tweeOutput.value = generateTwineArchiveHTML();
       }
     }
@@ -1458,9 +1902,9 @@ ${passagesHtml}</tw-storydata>
       if (!hasStart) return;
       const mimeType = exportMode === 'twee' ? 'text/plain' : 'text/html';
       const filenames = {
-        twee: 'Narrative_Visual_Editor_Story.twee',
-        play: 'Narrative_Visual_Editor_Story_Playable.html',
-        html: 'Narrative_Visual_Editor_Story_Archive.html'
+        twee: 'Narrative_Story.twee',
+        play: 'Narrative_Story_Playable.html',
+        html: 'Narrative_Story_Archive.html'
       };
       const blob = new Blob([tweeOutput.value], { type: mimeType });
       const a = document.createElement('a');
