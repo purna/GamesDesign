@@ -21,15 +21,51 @@
     .badge-ready { background: #DEF7EC; color: #03543F; }
     .badge-host { background: #E0E7FF; color: #3730A3; }
     .info-text { text-align: center; font-size: 14px; color: #666; }
-    .totp-box { background: #EEF2FF; border: 2px dashed #6366F1; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 12px; }
-    .totp-code { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #4F46E5; }
-    .totp-timer { font-size: 12px; color: #6366F1; font-weight: bold; }
+
+    /* TOTP Container & Radial Timer Styles */
+    .totp-box { background: #EEF2FF; border: 2px dashed #6366F1; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; }
+    .totp-code { font-size: 26px; font-weight: bold; letter-spacing: 4px; color: #4F46E5; margin-top: 4px; }
+    
+    .base-timer { position: relative; width: 100px; height: 100px; margin-top: 10px; }
+    .base-timer__svg { transform: scaleX(-1); }
+    .base-timer__circle { fill: none; stroke: none; }
+    .base-timer__path-elapsed { stroke-width: 7px; stroke: #C7D2FE; }
+    .base-timer__path-remaining {
+      stroke-width: 7px;
+      stroke-linecap: round;
+      transform: rotate(90deg);
+      transform-origin: center;
+      transition: 1s linear all;
+      fill-rule: nonzero;
+      stroke: currentColor;
+    }
+    .base-timer__path-remaining.green { color: rgb(65, 184, 131); }
+    .base-timer__path-remaining.orange { color: orange; }
+    .base-timer__path-remaining.red { color: red; }
+    .base-timer__label {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #3730A3;
+    }
   </style>
 
   <script type="module">
     import { joinRoom } from 'https://esm.sh/trystero@0.22.0/nostr';
 
+    const MIN_PLAYERS = 2;
     const MAX_PLAYERS = 10;
+    const TIME_LIMIT = 60;
+    const FULL_DASH_ARRAY = 283;
+    const WARNING_THRESHOLD = 15;
+    const ALERT_THRESHOLD = 5;
+
     const QUESTIONS = [
       { q: "1. Preferred Study Environment?", opts: ["Quiet Library", "Bustling Cafe", "Bed with Music", "Outdoors"] },
       { q: "2. Ultimate Snack?", opts: ["Salty / Chips", "Sweet / Candy", "Fruit / Healthy", "Pastries"] },
@@ -47,29 +83,42 @@
     let myName = "", myAnswers = [], peerData = {}, peersGuesses = {};
     let isHost = false, hasJoined = false, joinedRoomCode = "";
 
-    const screenJoin = document.getElementById('screen-join');
-    const screenLobby = document.getElementById('screen-lobby');
-    const screenSetup = document.getElementById('screen-setup');
-    const screenGuess = document.getElementById('screen-guess');
-    const screenResults = document.getElementById('screen-results');
-    const btnStart = document.getElementById('btn-start-setup');
-    const playerStatusText = document.getElementById('player-status-text');
-
-    // Deterministic 6-character room code that updates every 60s
     function generateDynamicCode() {
       const epochMinute = Math.floor(Date.now() / 60000);
       const hash = Math.sin(epochMinute) * 1000000;
       return Math.abs(Math.floor(hash)).toString(36).substring(0, 6).toUpperCase().padStart(6, 'X');
     }
 
-    // Dynamic timer updater for join screen
     function updateTotpUI() {
       if (hasJoined) return;
       const currentCode = generateDynamicCode();
-      const secondsLeft = 60 - (Math.floor(Date.now() / 1000) % 60);
+      const secondsLeft = TIME_LIMIT - (Math.floor(Date.now() / 1000) % TIME_LIMIT);
+      
       document.getElementById('roomcode').value = currentCode;
       document.getElementById('totp-display').innerText = currentCode;
-      document.getElementById('totp-timer').innerText = `Refreshes in ${secondsLeft}s`;
+      document.getElementById('base-timer-label').innerText = `${secondsLeft}s`;
+
+      setCircleDasharray(secondsLeft);
+      setRemainingPathColor(secondsLeft);
+    }
+
+    function setRemainingPathColor(timeLeft) {
+      const path = document.getElementById("base-timer-path-remaining");
+      path.classList.remove("green", "orange", "red");
+      if (timeLeft <= ALERT_THRESHOLD) {
+        path.classList.add("red");
+      } else if (timeLeft <= WARNING_THRESHOLD) {
+        path.classList.add("orange");
+      } else {
+        path.classList.add("green");
+      }
+    }
+
+    function setCircleDasharray(timeLeft) {
+      const rawTimeFraction = timeLeft / TIME_LIMIT;
+      const timeFraction = rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+      const circleDasharray = `${(timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
+      document.getElementById("base-timer-path-remaining").setAttribute("stroke-dasharray", circleDasharray);
     }
 
     setInterval(updateTotpUI, 1000);
@@ -102,13 +151,11 @@
 
       hasJoined = true;
 
-      // Handle dropouts / leaves
       room.onPeerLeave(peerId => {
         delete peerData[peerId];
         delete peersGuesses[peerId];
         updateLobby();
 
-        // Check host migration if host disconnected
         const activePeers = Object.keys(peerData);
         const hostExists = activePeers.some(id => peerData[id].isHost);
         if (!hostExists && activePeers.length > 0) {
@@ -119,16 +166,14 @@
           }
         }
 
-        // Evaluate phase progress upon dropouts
         if (!screenSetup.classList.contains('hidden')) checkAllAnswersIn();
         if (!screenGuess.classList.contains('hidden')) checkAllGuessesIn();
       });
 
       room.onPeerJoin(peerId => {
-        // Enforce 10 player capacity rule
         const currentCount = Object.keys(peerData).length + 1;
         if (isHost && currentCount > MAX_PLAYERS) {
-          sendReject({ reason: "Room is full (Max 10 players)." });
+          sendReject({ reason: `Room is full! Maximum limit is ${MAX_PLAYERS} players.` });
           return;
         }
         sendAnnounce({ name: myName, isHost });
@@ -171,7 +216,6 @@
         renderLeaderboardUI(officialScores);
       });
 
-      // Host election timeout
       setTimeout(() => {
         const activePeers = Object.keys(peerData);
         if (activePeers.length === 0) {
@@ -200,9 +244,10 @@
       });
 
       const totalPlayers = activePeers.length + 1;
-      if (totalPlayers < 2) {
+      
+      if (totalPlayers < MIN_PLAYERS) {
         btnStart.disabled = true;
-        playerStatusText.innerText = `Waiting for players... (${totalPlayers}/${MAX_PLAYERS})`;
+        playerStatusText.innerText = `Waiting for players... Need at least ${MIN_PLAYERS} to start (${totalPlayers}/${MAX_PLAYERS})`;
       } else {
         btnStart.disabled = !isHost;
         playerStatusText.innerText = isHost 
@@ -275,7 +320,6 @@
     }
 
     function renderGuessQuestion(peerIndex, targetId, targetName, qIdx) {
-      // Skip guessing for disconnected players
       if (!peerData[targetId]) {
         runGuessingForPlayer(peerIndex + 1);
         return;
@@ -317,7 +361,7 @@
       const scores = {};
       
       Object.keys(peersGuesses).forEach(guesserId => {
-        if (guesserId !== 'me' && !peerData[guesserId]) return; // Skip dropped guessers
+        if (guesserId !== 'me' && !peerData[guesserId]) return;
         
         const guesserName = guesserId === 'me' ? myName : peerData[guesserId].name;
         scores[guesserName] = 0;
@@ -361,8 +405,29 @@
       <div class="totp-box">
         <div style="font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: bold;">Current Room Passcode</div>
         <div class="totp-code" id="totp-display">------</div>
-        <div class="totp-timer" id="totp-timer">Refreshes in 60s</div>
+        
+        <!-- Scaled SVG Base Timer -->
+        <div class="base-timer">
+          <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="base-timer__circle">
+              <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+              <path
+                id="base-timer-path-remaining"
+                stroke-dasharray="283"
+                class="base-timer__path-remaining green"
+                d="
+                  M 50, 50
+                  m -45, 0
+                  a 45,45 0 1,0 90,0
+                  a 45,45 0 1,0 -90,0
+                "
+              ></path>
+            </g>
+          </svg>
+          <span id="base-timer-label" class="base-timer__label">60s</span>
+        </div>
       </div>
+
       <input type="text" id="username" placeholder="Enter Your Name" maxlength="15">
       <input type="text" id="roomcode" placeholder="Room Code">
       <button id="btn-join">Join Room</button>
