@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Who Said What? - Class Icebreaker</title>
+  <!-- Party.js Library for Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/party-js@latest/bundle/party.min.js"></script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
     .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
@@ -91,6 +93,7 @@
     let myName = "", myAnswers = [], peerData = {}, myGuesses = {};
     let isHost = false, hasJoined = false, joinedRoomCode = "";
     let finalScores = {};
+    let confettiTriggered = false;
 
     function generateDynamicCode() {
       const epochMinute = Math.floor(Date.now() / 60000);
@@ -392,7 +395,6 @@
       screenBreakdown.classList.remove('hidden');
       screenBreakdown.innerHTML = reviewHtml;
 
-      // Broadcast client score
       finalScores[myName] = myTotalScore;
       sendMyScore({ name: myName, score: myTotalScore });
 
@@ -425,7 +427,7 @@
             <span class="podium-score">${second[1]}</span>
             <span class="podium-rank">2</span>
           </div>
-          <div class="podium-step podium-1">
+          <div class="podium-step podium-1" id="winner-podium">
             <span class="podium-name">${first[0]}</span>
             <span class="podium-score">${first[1]}</span>
             <span class="podium-rank">1</span>
@@ -444,6 +446,20 @@
 
       html += `</ul><button onclick="location.reload()">Play Again</button>`;
       screenResults.innerHTML = html;
+
+      // Trigger Party.js Confetti Explosion for 1st Place
+      if (!confettiTriggered && window.party) {
+        confettiTriggered = true;
+        setTimeout(() => {
+          const winnerElem = document.getElementById('winner-podium');
+          if (winnerElem) {
+            party.confetti(winnerElem, {
+              count: party.variation.range(40, 60),
+              spread: party.variation.range(40, 80)
+            });
+          }
+        }, 100);
+      }
     }
   </script>
 </head>
