@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who Said What? - Class Icebreaker</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+    h1, h2 { text-align: center; color: #333; margin-top: 0; }
+    .hidden { display: none; }
+    input, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; }
+    button { background: #4F46E5; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #4338CA; }
+    .option-btn { background: #E0E7FF; color: #3730A3; border: 2px solid #C7D2FE; margin: 6px 0; }
+    .option-btn:hover { background: #C7D2FE; }
+    .option-btn.selected { background: #4F46E5; color: white; border-color: #4F46E5; }
+    .player-list { list-style: none; padding: 0; }
+    .player-list li { background: #F3F4F6; padding: 10px; margin: 4px 0; border-radius: 4px; display: flex; justify-content: space-between; }
+  </style>
+  <!-- Load Trystero WebRTC via Torrent Trackers -->
+  <script type="module">
+    import { joinRoom } from 'https://cdn.skypack.dev/trystero/torrent';
+
+    const QUESTIONS = [
+      { q: "1. Preferred Study Environment?", opts: ["Quiet Library", "Bustling Cafe", "Bed with Music", "Outdoors"] },
+      { q: "2. Ultimate Snack?", opts: ["Salty / Chips", "Sweet / Candy", "Fruit / Healthy", "Pastries"] },
+      { q: "3. Ideal Superpower?", opts: ["Invisibility", "Flight", "Teleportation", "Mind Reading"] },
+      { q: "4. Morning or Night?", opts: ["Early Bird", "Night Owl", "Permanently Tired"] },
+      { q: "5. Favorite Pet?", opts: ["Dogs", "Cats", "Reptiles/Fish", "No Pets"] },
+      { q: "6. Dream Vacation?", opts: ["Tropical Beach", "Historic City", "Mountain Camping", "Amusement Park"] },
+      { q: "7. Media Choice?", opts: ["Video Games", "Movies / Shows", "Books / Audiobooks", "Social Media"] },
+      { q: "8. Productivity Style?", opts: ["Plan Weeks Ahead", "Burst at Deadline", "Steady Daily Progress"] },
+      { q: "9. Go-to Drink?", opts: ["Coffee", "Tea", "Boba / Smoothies", "Water"] },
+      { q: "10. In a Group Project, you are the:", opts: ["Leader", "Researcher", "Presenter", "Designer"] }
+    ];
+
+    let room, sendAnswers, sendProgress, sendGuesses;
+    let myName = "", myAnswers = [], peerData = {}, currentGuessTargetIndex = 0;
+    let peersGuesses = {}; // { peerId: { targetPeerId: [guesses] } }
+
+    // DOM Elements
+    const screenJoin = document.getElementById('screen-join');
+    const screenLobby = document.getElementById('screen-lobby');
+    const screenSetup = document.getElementById('screen-setup');
+    const screenGuess = document.getElementById('screen-guess');
+    const screenResults = document.getElementById('screen-results');
+
+    document.getElementById('btn-join').onclick = () => {
+      myName = document.getElementById('username').value.trim();
+      const roomCode = document.getElementById('roomcode').value.trim().toLowerCase();
+      if (!myName || !roomCode) return alert("Please enter both a name and room code!");
+
+      // Initialize WebRTC Room
+      room = joinRoom({ appId: 'classroom-icebreaker-2026', password: roomCode }, roomCode);
+      
+      const [makeSendAnswers, getAnswers] = room.makeAction('answers');
+      const [makeSendGuesses, getGuesses] = room.makeAction('guesses');
+      sendAnswers = makeSendAnswers;
+      sendGuesses = makeSendGuesses;
+
+      // Handle incoming player data
+      room.onPeerJoin(id => updateLobby());
+      room.onPeerLeave(id => { delete peerData[id]; updateLobby(); });
+
+      getAnswers((data, peerId) => {
+        peerData[peerId] = data;
+        updateLobby();
+        checkAllAnswersIn();
+      });
+
+      getGuesses((data, peerId) => {
+        peersGuesses[peerId] = data;
+        checkAllGuessesIn();
+      });
+
+      // Local player data initialization
+      peerData[room.getPeers().self || 'me'] = { name: myName, answers: null };
+
+      screenJoin.classList.add('hidden');
+      screenLobby.classList.remove('hidden');
+      updateLobby();
+    };
+
+    function updateLobby() {
+      const list = document.getElementById('player-list');
+      list.innerHTML = `<li><strong>${myName} (You)</strong></li>`;
+      
+      Object.keys(peerData).forEach(id => {
+        if (id !== 'me' && peerData[id].name !== myName) {
+          const status = peerData[id].answers ? " Ready" : " Waiting...";
+          list.innerHTML += `<li><span>${peerData[id].name}</span> <span>${status}</span></li>`;
+        }
+      });
+    }
+
+    document.getElementById('btn-start-setup').onclick = () => {
+      screenLobby.classList.add('hidden');
+      screenSetup.classList.remove('hidden');
+      renderSetupQuestion(0);
+    };
+
+    // --- SETUP PHASE (Answering 10 Questions) ---
+    function renderSetupQuestion(idx) {
+      if (idx >= QUESTIONS.length) {
+        // Complete answering
+        peerData['me'] = { name: myName, answers: myAnswers };
+        sendAnswers({ name: myName, answers: myAnswers });
+        screenSetup.innerHTML = `<h2>Answers Submitted!</h2><p>Waiting for other students to finish...</p>`;
+        checkAllAnswersIn();
+        return;
+      }
+
+      const q = QUESTIONS[idx];
+      let html = `<h2>Question ${idx + 1}/10</h2><p><strong>${q.q}</strong></p>`;
+      q.opts.forEach((opt, i) => {
+        html += `<button class="option-btn" onclick="selectAnswer(${idx}, ${i})">${opt}</button>`;
+      });
+      screenSetup.innerHTML = html;
+    }
+
+    window.selectAnswer = (qIdx, optIdx) => {
+      myAnswers[qIdx] = optIdx;
+      renderSetupQuestion(qIdx + 1);
+    };
+
+    function checkAllAnswersIn() {
+      const allPeers = Object.keys(peerData);
+      const allReady = allPeers.length > 0 && allPeers.every(id => peerData[id].answers !== null);
+      if (allReady && myAnswers.length === 10) {
+        startGuessingPhase();
+      }
+    }
+
+    // --- GUESSING PHASE ---
+    let myGuesses = {}; // { targetPeerId: [10 guesses] }
+
+    function startGuessingPhase() {
+      screenSetup.classList.add('hidden');
+      screenGuess.classList.remove('hidden');
+      
+      const otherPeerIds = Object.keys(peerData).filter(id => peerData[id].name !== myName);
+      if (otherPeerIds.length === 0) {
+        alert("You need at least 2 players to play!");
+        return;
+      }
+
+      runGuessingForPlayer(0);
+    }
+
+    function runGuessingForPlayer(peerIndex) {
+      const otherPeerIds = Object.keys(peerData).filter(id => peerData[id].name !== myName);
+      if (peerIndex >= otherPeerIds.length) {
+        // Finished guessing for everyone
+        screenGuess.innerHTML = `<h2>All Guesses Submitted!</h2><p>Waiting for remaining players...</p>`;
+        sendGuesses(myGuesses);
+        checkAllGuessesIn();
+        return;
+      }
+
+      const targetId = otherPeerIds[peerIndex];
+      const targetName = peerData[targetId].name;
+      myGuesses[targetId] = myGuesses[targetId] || [];
+
+      renderGuessQuestion(peerIndex, targetId, targetName, 0);
+    }
+
+    function renderGuessQuestion(peerIndex, targetId, targetName, qIdx) {
+      if (qIdx >= QUESTIONS.length) {
+        runGuessingForPlayer(peerIndex + 1);
+        return;
+      }
+
+      const q = QUESTIONS[qIdx];
+      let html = `<h2>Guessing for: <span style="color:#4F46E5">${targetName}</span></h2>
+                  <p><strong>${q.q}</strong></p>
+                  <p><small>Question ${qIdx + 1} of 10</small></p>`;
+      
+      q.opts.forEach((opt, i) => {
+        html += `<button class="option-btn" onclick="makeGuess('${targetId}', ${peerIndex}, ${qIdx}, ${i})">${opt}</button>`;
+      });
+      screenGuess.innerHTML = html;
+    }
+
+    window.makeGuess = (targetId, peerIndex, qIdx, optIdx) => {
+      myGuesses[targetId][qIdx] = optIdx;
+      const targetName = peerData[targetId].name;
+      renderGuessQuestion(peerIndex, targetId, targetName, qIdx + 1);
+    };
+
+    function checkAllGuessesIn() {
+      const otherPeersCount = Object.keys(peerData).length - 1;
+      const totalGuessesReceived = Object.keys(peersGuesses).length;
+
+      // Show leaderboard once everyone submits guesses
+      if (totalGuessesReceived >= otherPeersCount && Object.keys(myGuesses).length === otherPeersCount) {
+        peersGuesses['me'] = myGuesses;
+        showLeaderboard();
+      }
+    }
+
+    // --- LEADERBOARD PHASE ---
+    function showLeaderboard() {
+      screenGuess.classList.add('hidden');
+      screenResults.classList.remove('hidden');
+
+      const scores = {}; // { name: score }
+
+      // Calculate score for each guesser
+      Object.keys(peersGuesses).forEach(guesserId => {
+        const guesserName = guesserId === 'me' ? myName : peerData[guesserId].name;
+        scores[guesserName] = 0;
+
+        const guessMap = peersGuesses[guesserId]; // { targetId: [guesses] }
+        
+        Object.keys(guessMap).forEach(targetId => {
+          const actualAnswers = peerData[targetId] ? peerData[targetId].answers : null;
+          if (actualAnswers) {
+            guessMap[targetId].forEach((guess, qIdx) => {
+              if (guess === actualAnswers[qIdx]) {
+                scores[guesserName] += 1; // 1 point per correct guess
+              }
+            });
+          }
+        });
+      });
+
+      // Sort scores high to low
+      const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+      let html = `<h2>Final Leaderboard</h2><ul class="player-list">`;
+      sorted.forEach(([name, score], rank) => {
+        html += `<li><span><strong>#${rank + 1} ${name}</strong></span> <span>${score} pts</span></li>`;
+      });
+      html += `</ul><button onclick="location.reload()">Play Again</button>`;
+
+      screenResults.innerHTML = html;
+    }
+  </script>
+</head>
+<body>
+  <div class="card">
+    <!-- Screen 1: Join -->
+    <div id="screen-join">
+      <h1>Who Said What?</h1>
+      <input type="text" id="username" placeholder="Enter Your Name" maxlength="15">
+      <input type="text" id="roomcode" placeholder="Enter Class Room Code (e.g., Room101)">
+      <button id="btn-join">Join Room</button>
+    </div>
+
+    <!-- Screen 2: Lobby -->
+    <div id="screen-lobby" class="hidden">
+      <h2>Class Lobby</h2>
+      <p><small>Wait for all students to join, then click Start!</small></p>
+      <ul id="player-list" class="player-list"></ul>
+      <button id="btn-start-setup">Start Game</button>
+    </div>
+
+    <!-- Screen 3: Answer Setup -->
+    <div id="screen-setup" class="hidden"></div>
+
+    <!-- Screen 4: Guessing Phase -->
+    <div id="screen-guess" class="hidden"></div>
+
+    <!-- Screen 5: Results -->
+    <div id="screen-results" class="hidden"></div>
+  </div>
+</body>
+</html>
