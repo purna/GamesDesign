@@ -1,122 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Who Said What? - Class Icebreaker</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 500px;
-    }
-
-    h1,
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-top: 0;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    input,
-    button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      background: #4F46E5;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #4338CA;
-    }
-
-    button:disabled {
-      background: #A5B4FC;
-      cursor: not-allowed;
-    }
-
-    .option-btn {
-      background: #E0E7FF;
-      color: #3730A3;
-      border: 2px solid #C7D2FE;
-      margin: 6px 0;
-    }
-
-    .option-btn:hover {
-      background: #C7D2FE;
-    }
-
-    .player-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .player-list li {
-      background: #F3F4F6;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .badge {
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-weight: bold;
-    }
-
-    .badge-ready {
-      background: #DEF7EC;
-      color: #03543F;
-    }
-
-    .badge-waiting {
-      background: #FEECDC;
-      color: #9B1C1C;
-    }
-
-    .info-text {
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+    h1, h2 { text-align: center; color: #333; margin-top: 0; }
+    .hidden { display: none; }
+    input, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; }
+    button { background: #4F46E5; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #4338CA; }
+    button:disabled { background: #A5B4FC; cursor: not-allowed; }
+    .option-btn { background: #E0E7FF; color: #3730A3; border: 2px solid #C7D2FE; margin: 6px 0; }
+    .option-btn:hover { background: #C7D2FE; }
+    .player-list { list-style: none; padding: 0; }
+    .player-list li { background: #F3F4F6; padding: 10px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; font-weight: bold; }
+    .badge-ready { background: #DEF7EC; color: #03543F; }
+    .badge-host { background: #E0E7FF; color: #3730A3; }
+    .info-text { text-align: center; font-size: 14px; color: #666; }
+    .totp-box { background: #EEF2FF; border: 2px dashed #6366F1; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 12px; }
+    .totp-code { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #4F46E5; }
+    .totp-timer { font-size: 12px; color: #6366F1; font-weight: bold; }
   </style>
 
   <script type="module">
     import { joinRoom } from 'https://esm.sh/trystero@0.22.0/nostr';
 
+    const MAX_PLAYERS = 10;
     const QUESTIONS = [
       { q: "1. Preferred Study Environment?", opts: ["Quiet Library", "Bustling Cafe", "Bed with Music", "Outdoors"] },
       { q: "2. Ultimate Snack?", opts: ["Salty / Chips", "Sweet / Candy", "Fruit / Healthy", "Pastries"] },
@@ -130,8 +43,9 @@
       { q: "10. In a Group Project, you are the:", opts: ["Leader", "Researcher", "Presenter", "Designer"] }
     ];
 
-    let room, sendAnswers, sendGuesses, sendAnnounce;
+    let room, sendAnswers, sendGuesses, sendAnnounce, sendFinalScores, sendStartGame, sendReject;
     let myName = "", myAnswers = [], peerData = {}, peersGuesses = {};
+    let isHost = false, hasJoined = false, joinedRoomCode = "";
 
     const screenJoin = document.getElementById('screen-join');
     const screenLobby = document.getElementById('screen-lobby');
@@ -141,51 +55,131 @@
     const btnStart = document.getElementById('btn-start-setup');
     const playerStatusText = document.getElementById('player-status-text');
 
+    // Deterministic 6-character room code that updates every 60s
+    function generateDynamicCode() {
+      const epochMinute = Math.floor(Date.now() / 60000);
+      const hash = Math.sin(epochMinute) * 1000000;
+      return Math.abs(Math.floor(hash)).toString(36).substring(0, 6).toUpperCase().padStart(6, 'X');
+    }
+
+    // Dynamic timer updater for join screen
+    function updateTotpUI() {
+      if (hasJoined) return;
+      const currentCode = generateDynamicCode();
+      const secondsLeft = 60 - (Math.floor(Date.now() / 1000) % 60);
+      document.getElementById('roomcode').value = currentCode;
+      document.getElementById('totp-display').innerText = currentCode;
+      document.getElementById('totp-timer').innerText = `Refreshes in ${secondsLeft}s`;
+    }
+
+    setInterval(updateTotpUI, 1000);
+    updateTotpUI();
+
     document.getElementById('btn-join').onclick = () => {
       myName = document.getElementById('username').value.trim();
-      const roomCode = document.getElementById('roomcode').value.trim().toLowerCase();
-      if (!myName || !roomCode) return alert("Please enter both a name and room code!");
+      joinedRoomCode = document.getElementById('roomcode').value.trim().toLowerCase();
+      
+      if (!myName || !joinedRoomCode) return alert("Please enter both a name and room code!");
 
-      room = joinRoom({ appId: 'classroom-icebreaker-2026', password: roomCode }, roomCode);
-
+      room = joinRoom(
+        { appId: 'classroom-icebreaker-2026', password: joinedRoomCode, relayUrls: ['wss://relay.damus.io', 'wss://nos.lol'] }, 
+        joinedRoomCode
+      );
+      
       const [makeSendAnswers, getAnswers] = room.makeAction('answers');
       const [makeSendGuesses, getGuesses] = room.makeAction('guesses');
       const [makeSendAnnounce, getAnnounce] = room.makeAction('announce');
+      const [makeSendScores, getScores] = room.makeAction('scores');
+      const [makeSendStart, getStart] = room.makeAction('start');
+      const [makeSendReject, getReject] = room.makeAction('reject');
 
       sendAnswers = makeSendAnswers;
       sendGuesses = makeSendGuesses;
       sendAnnounce = makeSendAnnounce;
+      sendFinalScores = makeSendScores;
+      sendStartGame = makeSendStart;
+      sendReject = makeSendReject;
 
-      // Handle connection events
-      room.onPeerJoin(id => {
-        sendAnnounce({ name: myName });
+      hasJoined = true;
+
+      // Handle dropouts / leaves
+      room.onPeerLeave(peerId => {
+        delete peerData[peerId];
+        delete peersGuesses[peerId];
+        updateLobby();
+
+        // Check host migration if host disconnected
+        const activePeers = Object.keys(peerData);
+        const hostExists = activePeers.some(id => peerData[id].isHost);
+        if (!hostExists && activePeers.length > 0) {
+          activePeers.sort();
+          if (activePeers[0] === 'me') {
+            isHost = true;
+            sendAnnounce({ name: myName, isHost: true });
+          }
+        }
+
+        // Evaluate phase progress upon dropouts
+        if (!screenSetup.classList.contains('hidden')) checkAllAnswersIn();
+        if (!screenGuess.classList.contains('hidden')) checkAllGuessesIn();
+      });
+
+      room.onPeerJoin(peerId => {
+        // Enforce 10 player capacity rule
+        const currentCount = Object.keys(peerData).length + 1;
+        if (isHost && currentCount > MAX_PLAYERS) {
+          sendReject({ reason: "Room is full (Max 10 players)." });
+          return;
+        }
+        sendAnnounce({ name: myName, isHost });
         updateLobby();
       });
 
-      room.onPeerLeave(id => {
-        delete peerData[id];
-        updateLobby();
+      getReject((data) => {
+        alert(data.reason);
+        location.reload();
       });
 
       getAnnounce((data, peerId) => {
         peerData[peerId] = peerData[peerId] || {};
         peerData[peerId].name = data.name;
+        peerData[peerId].isHost = data.isHost;
         updateLobby();
+      });
+
+      getStart(() => {
+        screenLobby.classList.add('hidden');
+        screenSetup.classList.remove('hidden');
+        renderSetupQuestion(0);
       });
 
       getAnswers((data, peerId) => {
-        peerData[peerId] = data;
-        updateLobby();
-        checkAllAnswersIn();
+        if (peerData[peerId]) {
+          peerData[peerId].answers = data.answers;
+          checkAllAnswersIn();
+        }
       });
 
       getGuesses((data, peerId) => {
-        peersGuesses[peerId] = data;
-        checkAllGuessesIn();
+        if (peerData[peerId]) {
+          peersGuesses[peerId] = data;
+          checkAllGuessesIn();
+        }
       });
 
-      // Announce self upon joining
-      sendAnnounce({ name: myName });
+      getScores(officialScores => {
+        renderLeaderboardUI(officialScores);
+      });
+
+      // Host election timeout
+      setTimeout(() => {
+        const activePeers = Object.keys(peerData);
+        if (activePeers.length === 0) {
+          isHost = true;
+        }
+        sendAnnounce({ name: myName, isHost });
+        updateLobby();
+      }, 1000);
 
       screenJoin.classList.add('hidden');
       screenLobby.classList.remove('hidden');
@@ -194,38 +188,41 @@
 
     function updateLobby() {
       const list = document.getElementById('player-list');
-      list.innerHTML = `<li><span><strong>${myName} (You)</strong></span> <span class="badge badge-ready">Connected</span></li>`;
-
+      const hostTag = isHost ? '<span class="badge badge-host">HOST</span>' : '';
+      list.innerHTML = `<li><span><strong>${myName} (You)</strong></span> ${hostTag}</li>`;
+      
       const activePeers = Object.keys(peerData);
       activePeers.forEach(id => {
         if (peerData[id] && peerData[id].name) {
-          list.innerHTML += `<li><span>${peerData[id].name}</span> <span class="badge badge-ready">Connected</span></li>`;
+          const peerHostTag = peerData[id].isHost ? '<span class="badge badge-host">HOST</span>' : '';
+          list.innerHTML += `<li><span>${peerData[id].name}</span> ${peerHostTag}</li>`;
         }
       });
 
-      const totalPlayers = activePeers.length + 1; // Peers + Self
-
+      const totalPlayers = activePeers.length + 1;
       if (totalPlayers < 2) {
         btnStart.disabled = true;
-        playerStatusText.innerText = "Waiting for at least 1 more player to join...";
+        playerStatusText.innerText = `Waiting for players... (${totalPlayers}/${MAX_PLAYERS})`;
       } else {
-        btnStart.disabled = false;
-        playerStatusText.innerText = `${totalPlayers} players in lobby. Ready to start!`;
+        btnStart.disabled = !isHost;
+        playerStatusText.innerText = isHost 
+          ? `${totalPlayers}/${MAX_PLAYERS} players connected. Click Start Game!` 
+          : `${totalPlayers}/${MAX_PLAYERS} players connected. Waiting for Host to start...`;
       }
     }
 
     btnStart.onclick = () => {
+      sendStartGame({});
       screenLobby.classList.add('hidden');
       screenSetup.classList.remove('hidden');
       renderSetupQuestion(0);
     };
 
-    // --- SETUP PHASE ---
     function renderSetupQuestion(idx) {
       if (idx >= QUESTIONS.length) {
-        peerData['me'] = { name: myName, answers: myAnswers };
-        sendAnswers({ name: myName, answers: myAnswers });
-        screenSetup.innerHTML = `<h2>Answers Submitted!</h2><p class="info-text">Waiting for everyone else to finish answering...</p>`;
+        peerData['me'] = { name: myName, answers: myAnswers, isHost };
+        sendAnswers({ answers: myAnswers });
+        screenSetup.innerHTML = `<h2>Answers Submitted!</h2><p class="info-text">Waiting for remaining active players...</p>`;
         checkAllAnswersIn();
         return;
       }
@@ -244,16 +241,18 @@
     };
 
     function checkAllAnswersIn() {
-      const allPeers = Object.keys(peerData);
-      const allReady = allPeers.length > 0 && allPeers.every(id => peerData[id].answers !== undefined);
-      if (allReady && myAnswers.length === 10) {
+      const activePeers = Object.keys(peerData).filter(id => id !== 'me');
+      if (activePeers.length === 0 && myAnswers.length === 10) {
+        startGuessingPhase();
+        return;
+      }
+      const allPeersAnswered = activePeers.every(id => peerData[id] && peerData[id].answers);
+      if (allPeersAnswered && myAnswers.length === 10) {
         startGuessingPhase();
       }
     }
 
-    // --- GUESSING PHASE ---
     let myGuesses = {};
-
     function startGuessingPhase() {
       screenSetup.classList.add('hidden');
       screenGuess.classList.remove('hidden');
@@ -263,7 +262,7 @@
     function runGuessingForPlayer(peerIndex) {
       const otherPeerIds = Object.keys(peerData).filter(id => id !== 'me');
       if (peerIndex >= otherPeerIds.length) {
-        screenGuess.innerHTML = `<h2>Guesses Submitted!</h2><p class="info-text">Waiting for remaining players to complete their guesses...</p>`;
+        screenGuess.innerHTML = `<h2>Guesses Submitted!</h2><p class="info-text">Waiting for remaining players...</p>`;
         sendGuesses(myGuesses);
         checkAllGuessesIn();
         return;
@@ -272,11 +271,16 @@
       const targetId = otherPeerIds[peerIndex];
       const targetName = peerData[targetId].name;
       myGuesses[targetId] = myGuesses[targetId] || [];
-
       renderGuessQuestion(peerIndex, targetId, targetName, 0);
     }
 
     function renderGuessQuestion(peerIndex, targetId, targetName, qIdx) {
+      // Skip guessing for disconnected players
+      if (!peerData[targetId]) {
+        runGuessingForPlayer(peerIndex + 1);
+        return;
+      }
+
       if (qIdx >= QUESTIONS.length) {
         runGuessingForPlayer(peerIndex + 1);
         return;
@@ -284,9 +288,8 @@
 
       const q = QUESTIONS[qIdx];
       let html = `<h2>Guessing for: <span style="color:#4F46E5">${targetName}</span></h2>
-                  <p><strong>${q.q}</strong></p>
-                  <p class="info-text">Question ${qIdx + 1} of 10</p>`;
-
+                  <p><strong>${q.q}</strong></p>`;
+      
       q.opts.forEach((opt, i) => {
         html += `<button class="option-btn" onclick="makeGuess('${targetId}', ${peerIndex}, ${qIdx}, ${i})">${opt}</button>`;
       });
@@ -295,35 +298,33 @@
 
     window.makeGuess = (targetId, peerIndex, qIdx, optIdx) => {
       myGuesses[targetId][qIdx] = optIdx;
-      const targetName = peerData[targetId].name;
+      const targetName = peerData[targetId] ? peerData[targetId].name : "Player";
       renderGuessQuestion(peerIndex, targetId, targetName, qIdx + 1);
     };
 
     function checkAllGuessesIn() {
-      const otherPeersCount = Object.keys(peerData).length - 1;
-      const totalGuessesReceived = Object.keys(peersGuesses).length;
+      const activePeers = Object.keys(peerData).filter(id => id !== 'me');
+      peersGuesses['me'] = myGuesses;
 
-      if (totalGuessesReceived >= otherPeersCount && Object.keys(myGuesses).length === otherPeersCount) {
-        peersGuesses['me'] = myGuesses;
-        showLeaderboard();
+      const allGuessesReceived = activePeers.every(id => peersGuesses[id]);
+
+      if (isHost && (allGuessesReceived || activePeers.length === 0)) {
+        calculateAndBroadcastScores();
       }
     }
 
-    // --- LEADERBOARD PHASE ---
-    function showLeaderboard() {
-      screenGuess.classList.add('hidden');
-      screenResults.classList.remove('hidden');
-
+    function calculateAndBroadcastScores() {
       const scores = {};
-
+      
       Object.keys(peersGuesses).forEach(guesserId => {
+        if (guesserId !== 'me' && !peerData[guesserId]) return; // Skip dropped guessers
+        
         const guesserName = guesserId === 'me' ? myName : peerData[guesserId].name;
         scores[guesserName] = 0;
 
         const guessMap = peersGuesses[guesserId];
-
         Object.keys(guessMap).forEach(targetId => {
-          const actualAnswers = peerData[targetId] ? peerData[targetId].answers : null;
+          const actualAnswers = targetId === 'me' ? myAnswers : (peerData[targetId] ? peerData[targetId].answers : null);
           if (actualAnswers) {
             guessMap[targetId].forEach((guess, qIdx) => {
               if (guess === actualAnswers[qIdx]) {
@@ -334,10 +335,17 @@
         });
       });
 
-      const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      sendFinalScores(sortedScores);
+      renderLeaderboardUI(sortedScores);
+    }
+
+    function renderLeaderboardUI(scoresArray) {
+      screenGuess.classList.add('hidden');
+      screenResults.classList.remove('hidden');
 
       let html = `<h2>Final Leaderboard</h2><ul class="player-list">`;
-      sorted.forEach(([name, score], rank) => {
+      scoresArray.forEach(([name, score], rank) => {
         html += `<li><span><strong>#${rank + 1} ${name}</strong></span> <span>${score} pts</span></li>`;
       });
       html += `</ul><button onclick="location.reload()">Play Again</button>`;
@@ -346,18 +354,20 @@
     }
   </script>
 </head>
-
 <body>
   <div class="card">
-    <!-- Screen 1: Join -->
     <div id="screen-join">
       <h1>Who Said What?</h1>
+      <div class="totp-box">
+        <div style="font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: bold;">Current Room Passcode</div>
+        <div class="totp-code" id="totp-display">------</div>
+        <div class="totp-timer" id="totp-timer">Refreshes in 60s</div>
+      </div>
       <input type="text" id="username" placeholder="Enter Your Name" maxlength="15">
-      <input type="text" id="roomcode" placeholder="Enter Room Code (e.g. Room101)">
+      <input type="text" id="roomcode" placeholder="Room Code">
       <button id="btn-join">Join Room</button>
     </div>
 
-    <!-- Screen 2: Lobby -->
     <div id="screen-lobby" class="hidden">
       <h2>Classroom Lobby</h2>
       <p id="player-status-text" class="info-text">Waiting for players...</p>
@@ -365,15 +375,9 @@
       <button id="btn-start-setup" disabled>Start Game</button>
     </div>
 
-    <!-- Screen 3: Answer Setup -->
     <div id="screen-setup" class="hidden"></div>
-
-    <!-- Screen 4: Guessing Phase -->
     <div id="screen-guess" class="hidden"></div>
-
-    <!-- Screen 5: Results -->
     <div id="screen-results" class="hidden"></div>
   </div>
 </body>
-
 </html>
