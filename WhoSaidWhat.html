@@ -1,26 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Who Said What? - Class Icebreaker</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-    h1, h2 { text-align: center; color: #333; margin-top: 0; }
-    .hidden { display: none; }
-    input, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; }
-    button { background: #4F46E5; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    button:hover { background: #4338CA; }
-    .option-btn { background: #E0E7FF; color: #3730A3; border: 2px solid #C7D2FE; margin: 6px 0; }
-    .option-btn:hover { background: #C7D2FE; }
-    .option-btn.selected { background: #4F46E5; color: white; border-color: #4F46E5; }
-    .player-list { list-style: none; padding: 0; }
-    .player-list li { background: #F3F4F6; padding: 10px; margin: 4px 0; border-radius: 4px; display: flex; justify-content: space-between; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-top: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background: #4F46E5;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #4338CA;
+    }
+
+    .option-btn {
+      background: #E0E7FF;
+      color: #3730A3;
+      border: 2px solid #C7D2FE;
+      margin: 6px 0;
+    }
+
+    .option-btn:hover {
+      background: #C7D2FE;
+    }
+
+    .option-btn.selected {
+      background: #4F46E5;
+      color: white;
+      border-color: #4F46E5;
+    }
+
+    .player-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .player-list li {
+      background: #F3F4F6;
+      padding: 10px;
+      margin: 4px 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
   </style>
   <!-- Load Trystero WebRTC via Torrent Trackers -->
   <script type="module">
-    import { joinRoom } from 'https://cdn.skypack.dev/trystero/torrent';
+    import { joinRoom } from 'https://unpkg.com/trystero@0.22.0/dist/trystero-torrent.min.js';
 
     const QUESTIONS = [
       { q: "1. Preferred Study Environment?", opts: ["Quiet Library", "Bustling Cafe", "Bed with Music", "Outdoors"] },
@@ -53,7 +125,7 @@
 
       // Initialize WebRTC Room
       room = joinRoom({ appId: 'classroom-icebreaker-2026', password: roomCode }, roomCode);
-      
+
       const [makeSendAnswers, getAnswers] = room.makeAction('answers');
       const [makeSendGuesses, getGuesses] = room.makeAction('guesses');
       sendAnswers = makeSendAnswers;
@@ -85,7 +157,7 @@
     function updateLobby() {
       const list = document.getElementById('player-list');
       list.innerHTML = `<li><strong>${myName} (You)</strong></li>`;
-      
+
       Object.keys(peerData).forEach(id => {
         if (id !== 'me' && peerData[id].name !== myName) {
           const status = peerData[id].answers ? " Ready" : " Waiting...";
@@ -138,7 +210,7 @@
     function startGuessingPhase() {
       screenSetup.classList.add('hidden');
       screenGuess.classList.remove('hidden');
-      
+
       const otherPeerIds = Object.keys(peerData).filter(id => peerData[id].name !== myName);
       if (otherPeerIds.length === 0) {
         alert("You need at least 2 players to play!");
@@ -175,7 +247,7 @@
       let html = `<h2>Guessing for: <span style="color:#4F46E5">${targetName}</span></h2>
                   <p><strong>${q.q}</strong></p>
                   <p><small>Question ${qIdx + 1} of 10</small></p>`;
-      
+
       q.opts.forEach((opt, i) => {
         html += `<button class="option-btn" onclick="makeGuess('${targetId}', ${peerIndex}, ${qIdx}, ${i})">${opt}</button>`;
       });
@@ -212,7 +284,7 @@
         scores[guesserName] = 0;
 
         const guessMap = peersGuesses[guesserId]; // { targetId: [guesses] }
-        
+
         Object.keys(guessMap).forEach(targetId => {
           const actualAnswers = peerData[targetId] ? peerData[targetId].answers : null;
           if (actualAnswers) {
@@ -238,6 +310,7 @@
     }
   </script>
 </head>
+
 <body>
   <div class="card">
     <!-- Screen 1: Join -->
@@ -266,4 +339,5 @@
     <div id="screen-results" class="hidden"></div>
   </div>
 </body>
+
 </html>
