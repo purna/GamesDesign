@@ -7,7 +7,7 @@
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
     .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-    h1, h2 { text-align: center; color: #333; margin-top: 0; }
+    h1, h2, h3 { text-align: center; color: #333; margin-top: 0; }
     .hidden { display: none; }
     input, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; }
     button { background: #4F46E5; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -18,7 +18,6 @@
     .player-list { list-style: none; padding: 0; }
     .player-list li { background: #F3F4F6; padding: 10px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
     .badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; font-weight: bold; }
-    .badge-ready { background: #DEF7EC; color: #03543F; }
     .badge-host { background: #E0E7FF; color: #3730A3; }
     .info-text { text-align: center; font-size: 14px; color: #666; }
 
@@ -43,17 +42,26 @@
     .base-timer__path-remaining.orange { color: orange; }
     .base-timer__path-remaining.red { color: red; }
     .base-timer__label {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      top: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: #3730A3;
+      position: absolute; width: 100px; height: 100px; top: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold; color: #3730A3;
     }
+
+    /* Breakdown / Review Styles */
+    .review-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: left; }
+    .review-item { display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px; border-bottom: 1px dashed #E5E7EB; padding-bottom: 4px; }
+    .correct { color: #059669; font-weight: bold; }
+    .incorrect { color: #DC2626; font-weight: bold; }
+
+    /* Podium Leaderboard Styles */
+    .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 160px; margin: 20px 0; }
+    .podium-step { width: 30%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-radius: 8px 8px 0 0; color: white; font-weight: bold; transition: height 0.5s ease; }
+    .podium-1 { height: 100%; background: #FBBF24; order: 2; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4); }
+    .podium-2 { height: 75%; background: #9CA3AF; order: 1; box-shadow: 0 4px 10px rgba(156, 163, 175, 0.4); }
+    .podium-3 { height: 50%; background: #D97706; order: 3; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.4); }
+    .podium-name { font-size: 13px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; margin-bottom: 4px; }
+    .podium-score { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+    .podium-rank { font-size: 22px; font-weight: 900; opacity: 0.8; margin-bottom: 4px; }
   </style>
 
   <script type="module">
@@ -79,9 +87,10 @@
       { q: "10. In a Group Project, you are the:", opts: ["Leader", "Researcher", "Presenter", "Designer"] }
     ];
 
-    let room, sendAnswers, sendGuesses, sendAnnounce, sendFinalScores, sendStartGame, sendReject;
-    let myName = "", myAnswers = [], peerData = {}, peersGuesses = {};
+    let room, sendAnswers, sendAnnounce, sendStartGame, sendReject, sendMyScore;
+    let myName = "", myAnswers = [], peerData = {}, myGuesses = {};
     let isHost = false, hasJoined = false, joinedRoomCode = "";
+    let finalScores = {};
 
     function generateDynamicCode() {
       const epochMinute = Math.floor(Date.now() / 60000);
@@ -104,21 +113,19 @@
 
     function setRemainingPathColor(timeLeft) {
       const path = document.getElementById("base-timer-path-remaining");
+      if (!path) return;
       path.classList.remove("green", "orange", "red");
-      if (timeLeft <= ALERT_THRESHOLD) {
-        path.classList.add("red");
-      } else if (timeLeft <= WARNING_THRESHOLD) {
-        path.classList.add("orange");
-      } else {
-        path.classList.add("green");
-      }
+      if (timeLeft <= ALERT_THRESHOLD) path.classList.add("red");
+      else if (timeLeft <= WARNING_THRESHOLD) path.classList.add("orange");
+      else path.classList.add("green");
     }
 
     function setCircleDasharray(timeLeft) {
+      const path = document.getElementById("base-timer-path-remaining");
+      if (!path) return;
       const rawTimeFraction = timeLeft / TIME_LIMIT;
       const timeFraction = rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
-      const circleDasharray = `${(timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
-      document.getElementById("base-timer-path-remaining").setAttribute("stroke-dasharray", circleDasharray);
+      path.setAttribute("stroke-dasharray", `${(timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`);
     }
 
     setInterval(updateTotpUI, 1000);
@@ -136,24 +143,21 @@
       );
       
       const [makeSendAnswers, getAnswers] = room.makeAction('answers');
-      const [makeSendGuesses, getGuesses] = room.makeAction('guesses');
       const [makeSendAnnounce, getAnnounce] = room.makeAction('announce');
-      const [makeSendScores, getScores] = room.makeAction('scores');
       const [makeSendStart, getStart] = room.makeAction('start');
       const [makeSendReject, getReject] = room.makeAction('reject');
+      const [makeSendScore, getScore] = room.makeAction('score');
 
       sendAnswers = makeSendAnswers;
-      sendGuesses = makeSendGuesses;
       sendAnnounce = makeSendAnnounce;
-      sendFinalScores = makeSendScores;
       sendStartGame = makeSendStart;
       sendReject = makeSendReject;
+      sendMyScore = makeSendScore;
 
       hasJoined = true;
 
       room.onPeerLeave(peerId => {
         delete peerData[peerId];
-        delete peersGuesses[peerId];
         updateLobby();
 
         const activePeers = Object.keys(peerData);
@@ -166,8 +170,8 @@
           }
         }
 
+        const screenSetup = document.getElementById('screen-setup');
         if (!screenSetup.classList.contains('hidden')) checkAllAnswersIn();
-        if (!screenGuess.classList.contains('hidden')) checkAllGuessesIn();
       });
 
       room.onPeerJoin(peerId => {
@@ -193,8 +197,8 @@
       });
 
       getStart(() => {
-        screenLobby.classList.add('hidden');
-        screenSetup.classList.remove('hidden');
+        document.getElementById('screen-lobby').classList.add('hidden');
+        document.getElementById('screen-setup').classList.remove('hidden');
         renderSetupQuestion(0);
       });
 
@@ -205,28 +209,20 @@
         }
       });
 
-      getGuesses((data, peerId) => {
-        if (peerData[peerId]) {
-          peersGuesses[peerId] = data;
-          checkAllGuessesIn();
-        }
-      });
-
-      getScores(officialScores => {
-        renderLeaderboardUI(officialScores);
+      getScore((data, peerId) => {
+        finalScores[data.name] = data.score;
+        checkLeaderboardReady();
       });
 
       setTimeout(() => {
         const activePeers = Object.keys(peerData);
-        if (activePeers.length === 0) {
-          isHost = true;
-        }
+        if (activePeers.length === 0) isHost = true;
         sendAnnounce({ name: myName, isHost });
         updateLobby();
       }, 1000);
 
-      screenJoin.classList.add('hidden');
-      screenLobby.classList.remove('hidden');
+      document.getElementById('screen-join').classList.add('hidden');
+      document.getElementById('screen-lobby').classList.remove('hidden');
       updateLobby();
     };
 
@@ -244,7 +240,9 @@
       });
 
       const totalPlayers = activePeers.length + 1;
-      
+      const btnStart = document.getElementById('btn-start-setup');
+      const playerStatusText = document.getElementById('player-status-text');
+
       if (totalPlayers < MIN_PLAYERS) {
         btnStart.disabled = true;
         playerStatusText.innerText = `Waiting for players... Need at least ${MIN_PLAYERS} to start (${totalPlayers}/${MAX_PLAYERS})`;
@@ -256,14 +254,15 @@
       }
     }
 
-    btnStart.onclick = () => {
+    document.getElementById('btn-start-setup').onclick = () => {
       sendStartGame({});
-      screenLobby.classList.add('hidden');
-      screenSetup.classList.remove('hidden');
+      document.getElementById('screen-lobby').classList.add('hidden');
+      document.getElementById('screen-setup').classList.remove('hidden');
       renderSetupQuestion(0);
     };
 
     function renderSetupQuestion(idx) {
+      const screenSetup = document.getElementById('screen-setup');
       if (idx >= QUESTIONS.length) {
         peerData['me'] = { name: myName, answers: myAnswers, isHost };
         sendAnswers({ answers: myAnswers });
@@ -297,19 +296,16 @@
       }
     }
 
-    let myGuesses = {};
     function startGuessingPhase() {
-      screenSetup.classList.add('hidden');
-      screenGuess.classList.remove('hidden');
+      document.getElementById('screen-setup').classList.add('hidden');
+      document.getElementById('screen-guess').classList.remove('hidden');
       runGuessingForPlayer(0);
     }
 
     function runGuessingForPlayer(peerIndex) {
       const otherPeerIds = Object.keys(peerData).filter(id => id !== 'me');
       if (peerIndex >= otherPeerIds.length) {
-        screenGuess.innerHTML = `<h2>Guesses Submitted!</h2><p class="info-text">Waiting for remaining players...</p>`;
-        sendGuesses(myGuesses);
-        checkAllGuessesIn();
+        calculateAndShowBreakdown();
         return;
       }
 
@@ -337,7 +333,7 @@
       q.opts.forEach((opt, i) => {
         html += `<button class="option-btn" onclick="makeGuess('${targetId}', ${peerIndex}, ${qIdx}, ${i})">${opt}</button>`;
       });
-      screenGuess.innerHTML = html;
+      document.getElementById('screen-guess').innerHTML = html;
     }
 
     window.makeGuess = (targetId, peerIndex, qIdx, optIdx) => {
@@ -346,54 +342,107 @@
       renderGuessQuestion(peerIndex, targetId, targetName, qIdx + 1);
     };
 
-    function checkAllGuessesIn() {
-      const activePeers = Object.keys(peerData).filter(id => id !== 'me');
-      peersGuesses['me'] = myGuesses;
+    function calculateAndShowBreakdown() {
+      let myTotalScore = 0;
+      let reviewHtml = `<h2>Your Score Breakdown</h2>`;
+      const otherPeerIds = Object.keys(peerData).filter(id => id !== 'me');
 
-      const allGuessesReceived = activePeers.every(id => peersGuesses[id]);
+      otherPeerIds.forEach(targetId => {
+        const peer = peerData[targetId];
+        if (!peer || !peer.answers) return;
 
-      if (isHost && (allGuessesReceived || activePeers.length === 0)) {
-        calculateAndBroadcastScores();
+        let peerCorrectCount = 0;
+        let itemDetails = '';
+
+        QUESTIONS.forEach((q, qIdx) => {
+          const actualOptIdx = peer.answers[qIdx];
+          const myGuessOptIdx = myGuesses[targetId][qIdx];
+          const isCorrect = actualOptIdx === myGuessOptIdx;
+
+          if (isCorrect) peerCorrectCount++;
+
+          const actualText = q.opts[actualOptIdx];
+          const guessText = q.opts[myGuessOptIdx];
+
+          itemDetails += `
+            <div class="review-item">
+              <div>
+                <strong>Q${qIdx + 1}:</strong> Chosen: <em>${actualText}</em><br>
+                <small>Your Guess: ${guessText}</small>
+              </div>
+              <div class="${isCorrect ? 'correct' : 'incorrect'}">
+                ${isCorrect ? '✓ +1' : '✗ 0'}
+              </div>
+            </div>`;
+        });
+
+        myTotalScore += peerCorrectCount;
+        reviewHtml += `
+          <div class="review-card">
+            <h3>Guesses for ${peer.name} (${peerCorrectCount}/10)</h3>
+            ${itemDetails}
+          </div>`;
+      });
+
+      reviewHtml = `<h3>Total Score: ${myTotalScore} Points</h3>` + reviewHtml;
+      reviewHtml += `<button id="btn-show-leaderboard">View Leaderboard</button>`;
+
+      const screenBreakdown = document.getElementById('screen-breakdown');
+      document.getElementById('screen-guess').classList.add('hidden');
+      screenBreakdown.classList.remove('hidden');
+      screenBreakdown.innerHTML = reviewHtml;
+
+      // Broadcast client score
+      finalScores[myName] = myTotalScore;
+      sendMyScore({ name: myName, score: myTotalScore });
+
+      document.getElementById('btn-show-leaderboard').onclick = () => {
+        screenBreakdown.classList.add('hidden');
+        document.getElementById('screen-results').classList.remove('hidden');
+        renderLeaderboardUI();
+      };
+    }
+
+    function checkLeaderboardReady() {
+      const screenResults = document.getElementById('screen-results');
+      if (!screenResults.classList.contains('hidden')) {
+        renderLeaderboardUI();
       }
     }
 
-    function calculateAndBroadcastScores() {
-      const scores = {};
-      
-      Object.keys(peersGuesses).forEach(guesserId => {
-        if (guesserId !== 'me' && !peerData[guesserId]) return;
-        
-        const guesserName = guesserId === 'me' ? myName : peerData[guesserId].name;
-        scores[guesserName] = 0;
+    function renderLeaderboardUI() {
+      const sortedScores = Object.entries(finalScores).sort((a, b) => b[1] - a[1]);
+      const screenResults = document.getElementById('screen-results');
 
-        const guessMap = peersGuesses[guesserId];
-        Object.keys(guessMap).forEach(targetId => {
-          const actualAnswers = targetId === 'me' ? myAnswers : (peerData[targetId] ? peerData[targetId].answers : null);
-          if (actualAnswers) {
-            guessMap[targetId].forEach((guess, qIdx) => {
-              if (guess === actualAnswers[qIdx]) {
-                scores[guesserName] += 1;
-              }
-            });
-          }
-        });
+      const first = sortedScores[0] || ["-", 0];
+      const second = sortedScores[1] || ["-", 0];
+      const third = sortedScores[2] || ["-", 0];
+
+      let html = `<h2>Final Leaderboard</h2>
+        <div class="podium-container">
+          <div class="podium-step podium-2">
+            <span class="podium-name">${second[0]}</span>
+            <span class="podium-score">${second[1]}</span>
+            <span class="podium-rank">2</span>
+          </div>
+          <div class="podium-step podium-1">
+            <span class="podium-name">${first[0]}</span>
+            <span class="podium-score">${first[1]}</span>
+            <span class="podium-rank">1</span>
+          </div>
+          <div class="podium-step podium-3">
+            <span class="podium-name">${third[0]}</span>
+            <span class="podium-score">${third[1]}</span>
+            <span class="podium-rank">3</span>
+          </div>
+        </div>
+        <ul class="player-list">`;
+
+      sortedScores.slice(3).forEach(([name, score], rank) => {
+        html += `<li><span><strong>#${rank + 4} ${name}</strong></span> <span>${score} pts</span></li>`;
       });
 
-      const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-      sendFinalScores(sortedScores);
-      renderLeaderboardUI(sortedScores);
-    }
-
-    function renderLeaderboardUI(scoresArray) {
-      screenGuess.classList.add('hidden');
-      screenResults.classList.remove('hidden');
-
-      let html = `<h2>Final Leaderboard</h2><ul class="player-list">`;
-      scoresArray.forEach(([name, score], rank) => {
-        html += `<li><span><strong>#${rank + 1} ${name}</strong></span> <span>${score} pts</span></li>`;
-      });
       html += `</ul><button onclick="location.reload()">Play Again</button>`;
-
       screenResults.innerHTML = html;
     }
   </script>
@@ -406,7 +455,6 @@
         <div style="font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: bold;">Current Room Passcode</div>
         <div class="totp-code" id="totp-display">------</div>
         
-        <!-- Scaled SVG Base Timer -->
         <div class="base-timer">
           <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <g class="base-timer__circle">
@@ -442,6 +490,7 @@
 
     <div id="screen-setup" class="hidden"></div>
     <div id="screen-guess" class="hidden"></div>
+    <div id="screen-breakdown" class="hidden"></div>
     <div id="screen-results" class="hidden"></div>
   </div>
 </body>
