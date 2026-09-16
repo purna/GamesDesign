@@ -184,7 +184,6 @@
       box-shadow: 3px 3px 0px #ffffff; 
     }
 
-    /* Larger & Prominent Credits Bar */
     .credits-bar {
       background: #000000;
       border-top: 2px solid #ff4040;
@@ -221,6 +220,7 @@
     .intermission-card h2 { color: #ff4040; font-size: 1.6rem; margin: 0 0 10px 0; text-transform: uppercase; }
     .intermission-card p { font-weight: 700; font-size: 0.95rem; line-height: 1.4; color: #ccc; }
 
+    /* Modals (Game Over & Victory) */
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -232,24 +232,35 @@
       z-index: 100;
     }
 
-    .game-over-box {
+    .modal-box {
       background: #000;
       border: 4px solid #ff4040;
       padding: 24px 18px;
       text-align: center;
       box-shadow: 6px 6px 0px #fff;
+      max-width: 400px;
+      width: 100%;
     }
 
-    .game-over-box h2 {
+    .modal-box-victory {
+      border-color: #4caf50;
+      box-shadow: 6px 6px 0px #4caf50;
+    }
+
+    .modal-box h2 {
       color: #ff4040;
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin: 0 0 10px 0;
       text-transform: uppercase;
     }
 
-    .game-over-box p {
+    .modal-box-victory h2 {
+      color: #4caf50;
+    }
+
+    .modal-box p {
       color: #fff;
-      font-size: 1rem;
+      font-size: 0.95rem;
       line-height: 1.4;
       margin-bottom: 20px;
       font-weight: 700;
@@ -327,17 +338,26 @@
       </div>
     </div>
 
+    <!-- Game Over Modal (Stress 100%) -->
     <div id="game-over-modal" class="modal-overlay hidden">
-      <div class="game-over-box">
+      <div class="modal-box">
         <h2>ANXIETY OVERLOAD 100%</h2>
         <p>Stress reached maximum! Your anxiety guard-dog barked so loud it caused a total burnout crash.<br><br>Remember: Naming stress early to someone halves its size!</p>
         <button id="play-again-btn" class="choice-btn" style="text-align: center; width: 100%;">PLAY AGAIN ↺</button>
       </div>
     </div>
 
+    <!-- Victory Modal (Game Completed) -->
+    <div id="victory-modal" class="modal-overlay hidden">
+      <div class="modal-box modal-box-victory">
+        <h2>INDUCTION COMPLETED! 🎉</h2>
+        <p id="victory-summary-text">You successfully navigated Year 2 stress!<br><br>You've put your anxiety guard-dog back in its place using sleep anchors, physical movement, peer connection, and talking early to tutors.</p>
+        <button id="victory-play-again-btn" class="choice-btn" style="text-align: center; width: 100%; border-color: #4caf50;">PLAY AGAIN ↺</button>
+      </div>
+    </div>
+
     <div id="choices-panel" class="choices-panel"></div>
 
-    <!-- Prominent Credits Footer -->
     <footer class="credits-bar">
       INSPIRED BY NICKY CASE'S <a href="https://ncase.itch.io/anxiety" target="_blank" rel="noopener">ADVENTURES WITH ANXIETY</a> &amp; <a href="https://ncase.me/mental-health/" target="_blank" rel="noopener">MENTAL HEALTH GUIDE</a>
     </footer>
@@ -558,8 +578,7 @@
             wolfText: "I'LL STILL GUARD YOU—BUT YOU ARE IN THE DRIVER'S SEAT NOW.",
             desc: "INDUCTION COMPLETE: Pick your 'One Thing' commitment for the week:\n1. Anchor wake time\n2. Schedule a weekly pressure valve\n3. Save support numbers\n4. Talk to your tutor",
             choices: [
-              { text: "Restart Simulation", stress: 0, reset: true },
-              { text: "View Emergency Support Contacts", stress: 0, showContacts: true }
+              { text: "Finish Game & Claim Commitment", stress: 0, showVictory: true }
             ]
           }
         }
@@ -599,13 +618,13 @@
         currentRoundIdx = 0;
         currentNodeKey = "r1_q1";
         stressLevel = 40;
-        $("#intermission-card, #contacts-card, #game-over-modal").addClass("hidden");
+        $("#intermission-card, #contacts-card, #game-over-modal, #victory-modal").addClass("hidden");
         $(".speech-container, .characters-svg").removeClass("hidden");
         updateMeter(0);
         renderNode(currentNodeKey);
       }
 
-      $("#reset-btn, #play-again-btn").on("click", function() {
+      $("#reset-btn, #play-again-btn, #victory-play-again-btn").on("click", function() {
         resetGame();
       });
 
@@ -659,13 +678,9 @@
                 $("#audio-toggle-btn").text("SOUND: ON");
               }
 
-              if (choice.reset) {
-                resetGame();
-                return;
-              }
-
-              if (choice.showContacts) {
-                $("#contacts-card").removeClass("hidden").addClass("animate__animated animate__fadeInUp");
+              if (choice.showVictory) {
+                $("#victory-summary-text").html(`You completed the Induction with a final Anxiety level of <strong>${stressLevel}%</strong>!<br><br>Remember: Mental health is health. It moves, which means it can be moved—and everything that moves it can be worked on!`);
+                $("#victory-modal").removeClass("hidden");
                 return;
               }
 
