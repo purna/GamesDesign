@@ -1,733 +1,2071 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adventures With Anxiety: Year 2 Induction</title>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Narrative Visual Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+    :root {
+      /* Dark Theme (Default) */
+      --bg-main: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --bg-input: #0b0f19;
+      --border-color: #1f2937;
+      --border-color-subtle: #111827;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-inverse: #030712;
 
-    * { box-sizing: border-box; user-select: none; }
+      /* Brand / Accent Colors */
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      
+      --accent-event: #10b981;
+      --accent-npc: #a855f7;
+      --accent-terminal-start: #22c55e;
+      --accent-terminal-end: #f43f5e;
+      --accent-warning: #f59e0b;
 
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: 'Comic Neue', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      --grid-dot: #1f2937;
+      --wire-color: #38bdf8;
+      --wire-hover: #f43f5e;
+      --wire-temp: #f59e0b;
+      --shadow-color: rgba(0, 0, 0, 0.4);
     }
 
-    .game-viewport {
-      width: 100%;
-      max-width: 480px;
+    [data-theme="light"] {
+      --bg-main: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-input: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-color-subtle: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-inverse: #ffffff;
+
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-glow: rgba(2, 132, 199, 0.15);
+
+      --grid-dot: #cbd5e1;
+      --wire-color: #0284c7;
+      --wire-hover: #e11d48;
+      --wire-temp: #d97706;
+      --shadow-color: rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
       height: 100vh;
-      max-height: 880px;
-      background: #222;
-      position: relative;
+      overflow: hidden;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Sidebar Palette */
+    #sidebar {
+      width: 240px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      padding: 1.25rem 1rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      border: 4px solid #000;
-      box-shadow: 0 0 40px rgba(0,0,0,0.9);
-      overflow: hidden;
-    }
-
-    .hud-bar {
-      background: #000;
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 3px solid #ff4040;
-    }
-
-    .hud-title { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; }
-
-    .hud-controls {
-      display: flex;
-      gap: 6px;
-    }
-
-    .hud-btn {
-      background: #ff4040;
-      border: 2px solid #fff;
-      color: #fff;
-      font-family: inherit;
-      font-weight: 900;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      cursor: pointer;
-      transition: color 0.1s, background 0.1s;
-    }
-
-    .hud-btn:hover, .hud-btn:active, .hud-btn:focus {
-      color: #ffffff !important;
-      background: #d32f2f;
-    }
-
-    .hud-btn-reset {
-      background: #444;
-      border-color: #aaa;
-    }
-
-    .hud-btn-reset:hover, .hud-btn-reset:active, .hud-btn-reset:focus {
-      color: #ffffff !important;
-      background: #666;
-    }
-
-    .gauge-container { 
-      background: #111; 
-      padding: 8px 16px; 
-      border-bottom: 2px solid #000; 
-      position: relative;
+      gap: 0.85rem;
+      z-index: 5;
+      box-shadow: 2px 0 10px var(--shadow-color);
     }
     
-    .gauge-label { 
-      font-size: 0.75rem; 
-      color: #ff4040; 
-      font-weight: 900; 
-      display: flex; 
-      justify-content: space-between; 
-      margin-bottom: 4px; 
-    }
-
-    .gauge-track { background: #333; height: 16px; border: 2px solid #000; }
-    .gauge-fill { background: #ff4040; height: 100%; width: 40%; transition: width 0.4s ease; }
-
-    .stage {
-      flex-grow: 1;
-      position: relative;
-      background: radial-gradient(circle, #333 0%, #111 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .speech-container { width: 100%; margin-bottom: auto; margin-top: 10px; }
-    .wolf-bubble {
-      background: #000;
-      color: #fff;
-      border: 3px solid #ff4040;
-      padding: 12px 14px;
-      font-size: 1.1rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      line-height: 1.3;
-      box-shadow: 4px 4px 0px rgba(255, 64, 64, 0.4);
-    }
-
-    .desc-box {
-      background: #fff;
-      color: #000;
-      border: 3px solid #000;
-      padding: 10px;
-      font-size: 0.95rem;
+    #sidebar h2, #properties-panel h2 {
+      font-size: 0.75rem;
       font-weight: 700;
-      margin-top: 10px;
-      box-shadow: 3px 3px 0px #000;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
     }
 
-    .characters-svg {
-      width: 100%;
-      height: 180px;
+    .palette-item {
+      padding: 0.75rem 0.9rem;
+      border-radius: 8px;
+      cursor: grab;
+      font-weight: 600;
+      font-size: 0.85rem;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: center;
+      color: white;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .palette-item:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .palette-item:active { cursor: grabbing; transform: translateY(0); }
+    .palette-item span {
+      font-size: 0.65rem;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(4px);
+      padding: 3px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    #threat-star {
-      transform-origin: 70px 10px;
-      transition: transform 0.3s ease;
+    /* Main Canvas Area */
+    #main { flex: 1; display: flex; flex-direction: column; position: relative; }
+    
+    #toolbar {
+      height: 56px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      z-index: 5;
+      gap: 1rem;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .logo-icon {
+      width: 22px;
+      height: 22px;
+      fill: var(--primary);
+    }
+    #toolbar h1 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    
+    .status-text {
+      font-size: 0.8rem;
+      color: var(--accent-warning);
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .toolbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+    
+    .btn-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
-    .choices-panel {
-      background: #000;
-      padding: 14px;
-      border-top: 3px solid #ff4040;
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background-color: var(--border-color);
+      margin: 0 0.25rem;
+    }
+
+    /* Base Buttons */
+    .btn {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      font-weight: 500;
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--text-inverse);
+      border: none;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.2);
+    }
+    .btn-danger:hover {
+      background: #f43f5e;
+      color: white;
+    }
+
+    #viewport {
+      flex: 1;
+      position: relative;
+      background-color: var(--bg-main);
+      background-image: radial-gradient(var(--grid-dot) 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      overflow: hidden;
+    }
+    #svg-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+    /* Wire Styling */
+    path.edge {
+      stroke: var(--wire-color);
+      stroke-width: 3;
+      fill: none;
+      pointer-events: stroke;
+      cursor: pointer;
+      transition: stroke 0.15s;
+    }
+    path.edge:hover { stroke: var(--wire-hover); stroke-width: 5; }
+    path.temp-wire {
+      stroke: var(--wire-temp);
+      stroke-width: 3;
+      stroke-dasharray: 6 4;
+      fill: none;
+      pointer-events: none;
+    }
+
+    /* Node Container */
+    .node-wrapper {
+      position: absolute;
+      z-index: 2;
+      width: 120px;
+      height: 105px;
+      transition: filter 0.15s ease;
+    }
+    .node {
+      width: 100%;
+      height: 100%;
+      cursor: move;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    }
-
-    .choice-btn {
-      background: #222;
-      color: #ffffff;
-      border: 2px solid #ffffff;
-      padding: 10px 12px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      text-align: left;
-      cursor: pointer;
-      box-shadow: 3px 3px 0px #ff4040;
-      transition: background 0.1s, transform 0.1s, color 0.1s;
-    }
-
-    .choice-btn:hover, 
-    .choice-btn:active, 
-    .choice-btn:focus { 
-      background: #ff4040; 
-      color: #ffffff !important; 
-      border-color: #ffffff; 
-      box-shadow: 3px 3px 0px #ffffff; 
-    }
-
-    .credits-bar {
-      background: #000000;
-      border-top: 2px solid #ff4040;
-      padding: 10px 14px;
-      text-align: center;
-      font-size: 0.95rem;
-      color: #e0e0e0;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .credits-bar a {
-      color: #ff4040;
-      text-decoration: underline;
-      transition: color 0.2s, background 0.2s;
-      padding: 2px 4px;
-    }
-
-    .credits-bar a:hover, .credits-bar a:focus {
-      color: #ffffff;
-      background: #ff4040;
-      text-decoration: none;
-    }
-
-    .intermission-card {
-      background: #000;
-      border: 4px solid #ff4040;
-      padding: 20px;
-      text-align: center;
-      width: 100%;
-      box-shadow: 5px 5px 0px #fff;
-    }
-    .intermission-card h2 { color: #ff4040; font-size: 1.6rem; margin: 0 0 10px 0; text-transform: uppercase; }
-    .intermission-card p { font-weight: 700; font-size: 0.95rem; line-height: 1.4; color: #ccc; }
-
-    /* Modals (Game Over & Victory) */
-    .modal-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.92);
-      display: flex;
-      justify-content: center;
       align-items: center;
-      padding: 20px;
-      z-index: 100;
-    }
-
-    .modal-box {
-      background: #000;
-      border: 4px solid #ff4040;
-      padding: 24px 18px;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
       text-align: center;
-      box-shadow: 6px 6px 0px #fff;
-      max-width: 400px;
-      width: 100%;
+      box-shadow: 0 10px 15px -3px var(--shadow-color);
+      padding: 8px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .node-wrapper:hover .node {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 20px -4px var(--shadow-color);
+    }
+    .node-wrapper.selected .node {
+      box-shadow: 0 0 0 3px var(--bg-main), 0 0 0 5px var(--accent-warning) !important;
     }
 
-    .modal-box-victory {
-      border-color: #4caf50;
-      box-shadow: 6px 6px 0px #4caf50;
+    /* Visual Node Connectors (Ports) */
+    .port {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 3px solid var(--bg-main);
+      border-radius: 50%;
+      cursor: crosshair;
+      z-index: 10;
+      transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
     }
+    .port:hover { transform: scale(1.35); }
+    .port-in { left: -8px; top: calc(50% - 8px); background: var(--accent-terminal-start); }
+    .port-out { right: -8px; top: calc(50% - 8px); background: var(--accent-warning); }
+    .port.connected { box-shadow: 0 0 0 2px var(--bg-surface-elevated); }
+    .port.hidden { display: none; }
 
-    .modal-box h2 {
-      color: #ff4040;
-      font-size: 1.8rem;
-      margin: 0 0 10px 0;
-      text-transform: uppercase;
+    /* Shapes */
+    .shape-standard { background: #3b82f6; border-radius: 12px; }
+    .shape-event { background: var(--accent-event); border-radius: 50%; }
+    .shape-npc { background: var(--accent-npc); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+    .shape-terminal { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); justify-content: flex-end; padding-bottom: 14px; }
+    .shape-terminal.role-start { background: var(--accent-terminal-start); }
+    .shape-terminal.role-end { background: var(--accent-terminal-end); }
+
+    /* Properties Inspector Panel */
+    #properties-panel {
+      width: 320px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-color);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 5;
+      overflow-y: auto;
+      box-shadow: -2px 0 10px var(--shadow-color);
     }
-
-    .modal-box-victory h2 {
-      color: #4caf50;
-    }
-
-    .modal-box p {
-      color: #fff;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      margin-bottom: 20px;
-      font-weight: 700;
-    }
-
-    .contacts-card {
-      background: #fff;
-      color: #000;
-      border: 4px solid #000;
-      padding: 14px;
-      box-shadow: 4px 4px 0px #ff4040;
+    
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    
+    .form-group input, .form-group textarea, .form-group select {
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.55rem 0.75rem;
       font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .contacts-card h3 { margin: 0 0 8px 0; font-size: 1.1rem; text-transform: uppercase; }
-    .contacts-card ul { margin: 0; padding-left: 18px; font-weight: 700; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 90px;
+      user-select: text;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
 
-    .hidden { display: none !important; }
+    /* Outgoing Connection Cards */
+    .out-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .out-card-title {
+      font-size: 0.75rem;
+      color: var(--accent-warning);
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .out-card-delete {
+      color: #f43f5e;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .out-card-delete:hover { background: rgba(244, 63, 94, 0.15); }
+
+    /* Modals */
+    #modal, #var-modal, #gh-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 20;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-content, #var-modal-content, #gh-modal-content {
+      background: var(--bg-surface);
+      width: 580px;
+      max-width: 90%;
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    #twee-output {
+      width: 100%;
+      height: 260px;
+      background: var(--bg-input);
+      color: var(--primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.825rem;
+      resize: none;
+      user-select: text;
+      outline: none;
+    }
+    .var-row { display: flex; gap: 8px; align-items: center; }
+    .var-row input {
+      flex: 1;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.8rem;
+    }
+
+    /* Theme Toggle Switch */
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 6px;
+      padding: 0.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .theme-toggle-btn:hover { background: var(--bg-surface-elevated); }
+    .theme-toggle-btn svg { width: 16px; height: 16px; fill: currentColor; }
   </style>
 </head>
 <body>
 
-  <div class="game-viewport">
-    <div class="hud-bar">
-      <span id="round-title" class="hud-title">ROUND 1: WORKLOAD, SLEEP & HOME</span>
-      <div class="hud-controls">
-        <button id="reset-btn" class="hud-btn hud-btn-reset">RESET</button>
-        <button id="audio-toggle-btn" class="hud-btn">SOUND: OFF</button>
+  <!-- Sidebar Palette -->
+  <aside id="sidebar">
+    <h2>Add Story Nodes</h2>
+    <div class="palette-item" style="background: #3b82f6" draggable="true" data-type="standard">Standard <span>Square</span></div>
+    <div class="palette-item" style="background: var(--accent-event)" draggable="true" data-type="event">Event <span>Circle</span></div>
+    <div class="palette-item" style="background: var(--accent-npc)" draggable="true" data-type="npc">NPC <span>Pentagon</span></div>
+    <div class="palette-item" style="background: linear-gradient(135deg, var(--accent-terminal-start) 50%, var(--accent-terminal-end) 50%)" draggable="true" data-type="terminal">Start / End <span>Triangle</span></div>
+    
+    <div id="start-status" style="font-size: 0.8rem; color: var(--accent-warning); font-weight: 500; margin-top: auto; line-height: 1.4;"></div>
+  </aside>
+
+  <!-- Canvas Workspace -->
+  <main id="main">
+    <header id="toolbar">
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <h1>Narrative Editor</h1>
+      </div>
+
+      <span id="status" class="status-text"></span>
+
+      <div class="toolbar-actions">
+        <!-- Project Storage Actions -->
+        <div class="btn-group">
+          <button class="btn" id="save-local-btn" title="Save to Local Storage">Save</button>
+          <button class="btn" id="load-local-btn" title="Load from Local Storage">Load</button>
+          <button class="btn" id="import-btn" title="Import Twine Archive or Twee File">Import</button>
+          <input type="file" id="import-file-input" accept=".html,.twee,.txt" style="display:none;" />
+          <button class="btn" id="github-btn" title="Save or Load GitHub Gist">GitHub</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Story Execution & Tools -->
+        <div class="btn-group">
+          <button class="btn" id="variables-btn">Variables</button>
+          <button class="btn btn-primary" id="play-btn">Play</button>
+          <button class="btn" id="export-btn">Export</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- View Controls -->
+        <button class="theme-toggle-btn" id="theme-btn" title="Toggle Theme">
+          <svg id="theme-icon-sun" style="display:none;" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+          <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div id="viewport">
+      <svg id="svg-layer">
+        <path id="temp-wire" class="temp-wire" d="" />
+      </svg>
+    </div>
+  </main>
+
+  <!-- Properties Inspector Panel -->
+  <aside id="properties-panel">
+    <h2>Node Properties</h2>
+    <div id="no-selection" style="color: var(--text-muted); font-size: 0.85rem;">Select any node on the canvas to inspect and edit properties.</div>
+    <div id="editor-form" style="display: none;" class="form-group">
+      <div class="form-group">
+        <label>Passage Title</label>
+        <input type="text" id="prop-title" />
+      </div>
+      <div class="form-group" id="role-group" style="display:none;">
+        <label>Node Role</label>
+        <select id="prop-role">
+          <option value="start">Start (story begins here)</option>
+          <option value="end">End (story concludes here)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Story / Passage Text</label>
+        <textarea id="prop-text"></textarea>
+        <span style="color:var(--text-muted); font-size:0.72rem; line-height:1.4;">Tip: Type a variable name (e.g. <code>$health</code>) anywhere in this text and it will be replaced with its live value in Preview and in the exported story.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Variable Assignments</label>
+        <div id="assignments-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+        <button class="btn" id="add-assignment-btn" type="button" style="margin-top:0.35rem;">+ Add Assignment</button>
+      </div>
+
+      <div class="form-group">
+        <label>Advanced Code (optional)</label>
+        <div style="display:flex; gap:4px;">
+          <input type="text" id="prop-code" placeholder="<<set $key to true>>" style="flex:1;" />
+          <select id="insert-var-select" style="width:100px;">
+            <option value="">+ Insert</option>
+          </select>
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;" />
+
+      <h2>Outgoing Connections</h2>
+      <div id="outgoing-list"></div>
+
+      <button class="btn btn-danger" id="delete-node-btn" style="margin-top: 1rem;">Delete Node</button>
+    </div>
+  </aside>
+
+  <datalist id="variables-datalist"></datalist>
+
+  <!-- Variables Manager Modal -->
+  <div id="var-modal">
+    <div id="var-modal-content">
+      <h2 style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Story Variables</h2>
+      <div id="var-list" style="display:flex; flex-direction:column; gap:0.5rem; max-height:320px; overflow-y:auto;"></div>
+      <button class="btn" id="add-var-btn">+ Add Variable</button>
+      <div style="display:flex; justify-content: flex-end;">
+        <button class="btn btn-primary" id="close-var-modal">Done</button>
       </div>
     </div>
+  </div>
 
-    <div class="gauge-container">
-      <div class="gauge-label">
-        <span>ANXIETY LEVEL</span>
-        <span id="stress-num">40%</span>
+  <!-- GitHub Gist Storage Modal -->
+  <div id="gh-modal">
+    <div id="gh-modal-content">
+      <h2 style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">GitHub Gist Sync</h2>
+      <div class="form-group">
+        <label>GitHub Personal Access Token (PAT with 'gist' scope)</label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" />
       </div>
-      <div class="gauge-track">
-        <div id="gauge-fill" class="gauge-fill"></div>
+      <div class="form-group">
+        <label>Gist ID (Leave empty to create a new Gist)</label>
+        <input type="text" id="gh-gist-id" placeholder="e.g. a1b2c3d4e5f6..." />
       </div>
-    </div>
-
-    <div class="stage">
-      <div class="speech-container">
-        <div id="wolf-bubble" class="wolf-bubble">LOADING...</div>
-        <div id="desc-box" class="desc-box">Loading...</div>
-      </div>
-
-      <div class="characters-svg">
-        <svg width="90" height="140" viewBox="0 0 100 150">
-          <circle cx="50" cy="35" r="20" fill="#FFF" stroke="#000" stroke-width="4"/>
-          <path d="M50 55 L50 110 M50 70 L25 90 M50 70 L75 90 M50 110 L30 145 M50 110 L70 145" stroke="#FFF" stroke-width="5"/>
-          <circle cx="43" cy="35" r="2.5" fill="#000"/><circle cx="57" cy="35" r="2.5" fill="#000"/>
-        </svg>
-
-        <svg id="wolf-svg" width="130" height="150" viewBox="0 0 140 170">
-          <polygon id="threat-star" points="70,0 75,10 85,10 77,16 80,26 70,20 60,26 63,16 55,10 65,10" fill="#FF4040" stroke="#FFF" stroke-width="1.5" />
-          <path d="M 20 160 L 40 100 L 10 70 L 50 60 L 70 10 L 90 60 L 130 70 L 100 100 L 120 160 L 70 130 Z" fill="#FF4040" stroke="#000" stroke-width="4"/>
-          <circle cx="55" cy="55" r="6" fill="#FFF"/><circle cx="85" cy="55" r="6" fill="#FFF"/>
-          <circle cx="55" cy="55" r="2" fill="#000"/><circle cx="85" cy="55" r="2" fill="#000"/>
-        </svg>
-      </div>
-
-      <div id="intermission-card" class="intermission-card hidden">
-        <h2 id="intermission-title">END OF ROUND</h2>
-        <p id="intermission-body">Summary text...</p>
-      </div>
-
-      <div id="contacts-card" class="contacts-card hidden">
-        <h3>ESCG SUPPORT & CONTACTS</h3>
-        <ul>
-          <li>SAMARITANS: 116 123 (Free 24/7)</li>
-          <li>MIND: 0300 123 3393</li>
-          <li>ESCG Wellbeing Team: Sarah-Jayne Clarke</li>
-          <li>Confidential Hardship Fund Available</li>
-        </ul>
+      <div id="gh-status" style="font-size:0.8rem; color:var(--accent-warning);"></div>
+      <div style="display:flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn" id="gh-load-btn">Load Gist</button>
+        <button class="btn btn-primary" id="gh-save-btn">Save to Gist</button>
+        <button class="btn" id="gh-close-btn">Close</button>
       </div>
     </div>
+  </div>
 
-    <!-- Game Over Modal (Stress 100%) -->
-    <div id="game-over-modal" class="modal-overlay hidden">
-      <div class="modal-box">
-        <h2>ANXIETY OVERLOAD 100%</h2>
-        <p>Stress reached maximum! Your anxiety guard-dog barked so loud it caused a total burnout crash.<br><br>Remember: Naming stress early to someone halves its size!</p>
-        <button id="play-again-btn" class="choice-btn" style="text-align: center; width: 100%;">PLAY AGAIN ↺</button>
+  <!-- Play / Preview Modal -->
+  <div id="preview-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:25; align-items:center; justify-content:center;">
+    <div id="preview-modal-content" style="background:var(--bg-surface); color:var(--text-main); width:520px; max-width:92%; max-height:85vh; border-radius:12px; padding:1.5rem; display:flex; flex-direction:column; gap:1rem; border:1px solid var(--border-color); box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="preview-passage-title" style="font-weight:700; color:var(--primary); font-size:0.95rem;"></span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn" id="preview-restart-btn" style="padding:0.3rem 0.6rem;">Restart</button>
+          <button class="btn" id="preview-close-btn" style="padding:0.3rem 0.6rem;">Close</button>
+        </div>
+      </div>
+      <div id="preview-text" style="white-space:pre-wrap; line-height:1.6; font-size:0.925rem;"></div>
+      <div id="preview-choices"></div>
+      <details style="margin-top:0.5rem;">
+        <summary style="cursor:pointer; font-size:0.75rem; color:var(--text-muted); font-weight:600;">State Inspector (Variables)</summary>
+        <pre id="preview-vars" style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace; margin-top:0.4rem; white-space:pre-wrap; background:var(--bg-input); padding:0.5rem; border-radius:6px;"></pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="modal">
+    <div id="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Export Story</h2>
+        <div style="display:flex; gap:4px;">
+          <button class="btn" id="tab-twee" style="padding:0.3rem 0.6rem;">Twee</button>
+          <button class="btn" id="tab-play" style="padding:0.3rem 0.6rem;">Playable HTML</button>
+          <button class="btn" id="tab-html" style="padding:0.3rem 0.6rem;">Twine Archive</button>
+        </div>
+      </div>
+      <div id="export-note" style="color:var(--text-muted); font-size:0.75rem;"></div>
+      <div id="export-warning" style="display:none; color:var(--accent-warning); font-size:0.8rem;"></div>
+      <textarea id="twee-output" readonly></textarea>
+      <div style="display:flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn btn-primary" id="download-btn">Download File</button>
+        <button class="btn" id="close-modal">Close</button>
       </div>
     </div>
-
-    <!-- Victory Modal (Game Completed) -->
-    <div id="victory-modal" class="modal-overlay hidden">
-      <div class="modal-box modal-box-victory">
-        <h2>INDUCTION COMPLETED! 🎉</h2>
-        <p id="victory-summary-text">You successfully navigated Year 2 stress!<br><br>You've put your anxiety guard-dog back in its place using sleep anchors, physical movement, peer connection, and talking early to tutors.</p>
-        <button id="victory-play-again-btn" class="choice-btn" style="text-align: center; width: 100%; border-color: #4caf50;">PLAY AGAIN ↺</button>
-      </div>
-    </div>
-
-    <div id="choices-panel" class="choices-panel"></div>
-
-    <footer class="credits-bar">
-      INSPIRED BY NICKY CASE'S <a href="https://ncase.itch.io/anxiety" target="_blank" rel="noopener">ADVENTURES WITH ANXIETY</a> &amp; <a href="https://ncase.me/mental-health/" target="_blank" rel="noopener">MENTAL HEALTH GUIDE</a>
-    </footer>
   </div>
 
   <script>
-    const SoundController = {
-      ctx: null, isMuted: true,
-      init() {
-        if (!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-        if (this.ctx.state === 'suspended') { this.ctx.resume(); }
-        this.isMuted = false;
-      },
-      toggle() {
-        if (this.isMuted) { this.init(); return true; }
-        this.isMuted = true; return false;
-      },
-      playBark() {
-        if (this.isMuted || !this.ctx) return;
-        const now = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(380, now); osc.frequency.exponentialRampToValueAtTime(90, now + 0.12);
-        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(now); osc.stop(now + 0.16);
-      },
-      playChime() {
-        if (this.isMuted || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        [523, 659, 783].forEach((f, i) => {
-          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-          osc.type = 'sine'; osc.frequency.setValueAtTime(f, now + i*0.04);
-          gain.gain.setValueAtTime(0.12, now + i*0.04); gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.04 + 0.3);
-          osc.connect(gain); gain.connect(this.ctx.destination);
-          osc.start(now + i*0.04); osc.stop(now + i*0.04 + 0.35);
-        });
-      }
-    };
+    let nodes = [];
+    let connections = [];
+    let variables = [];
+    let nodeCount = 0;
+    let varCount = 0;
+    let assignCount = 0;
+    let selectedNodeId = null;
+    let draggedNode = null;
+    let dragOffset = { x: 0, y: 0 };
+    let exportMode = 'twee';
 
-    const storyRounds = [
-      {
-        title: "ROUND 1: WORKLOAD, SLEEP & HOME",
-        startNode: "r1_q1",
-        nodes: {
-          r1_q1: {
-            wolfText: "WORKLOAD TRIGGER! FMP AND INDUSTRY PLACEMENT HOURS ARE LANDING ALL AT ONCE!",
-            desc: "WORKLOAD: Final-year digital production, media and computing demands peak early.",
-            choices: [
-              { text: "Hide under the duvet & ignore the FMP document.", stress: 25, next: "r1_q2" },
-              { text: "Break the project brief into small, daily milestones.", stress: -15, next: "r1_q3" }
-            ]
-          },
-          r1_q2: {
-            wolfText: "AVOIDANCE TRAP! YOU DIDN'T OPEN THE PROJECT DOC AND NOW IT'S MIDNIGHT!",
-            desc: "WORKLOAD: Avoiding the exact thing causing stress provides short-term relief, but escalates panic.",
-            choices: [
-              { text: "Pull an all-nighter with high-caffeine energy drinks.", stress: 30, next: "r1_q3" },
-              { text: "Admit the scope is paralyzing and email your tutor.", stress: -15, next: "r1_q3" }
-            ]
-          },
-          r1_q3: {
-            wolfText: "SLEEP TRIGGER! YOU'RE SCROLLING AT 1:00 AM WHILE MEMORY IS TRYING TO SAVE!",
-            desc: "SLEEP: Memory is built while sleeping. Revision without sleep is pouring water into a cracked jug.",
-            choices: [
-              { text: "Anchor your wake time and charge the phone across the room.", stress: -15, next: "r1_q4" },
-              { text: "Keep doom-scrolling to quiet your racing thoughts.", stress: 25, next: "r1_q4" }
-            ]
-          },
-          r1_q4: {
-            wolfText: "SLEEP DEPRIVATION! YOU SAT AT YOUR LAPTOP FOR AN HOUR WITHOUT A USABLE DECISION!",
-            desc: "SLEEP: Emotional regulation and focus run on sleep. Tired brains make small problems feel enormous.",
-            choices: [
-              { text: "Control what you can: cut mid-afternoon caffeine.", stress: -10, next: "r1_q5" },
-              { text: "Chug more energy drinks to force concentration.", stress: 20, next: "r1_q5" }
-            ]
-          },
-          r1_q5: {
-            wolfText: "HOME LIFE TRIGGER! SHARED ROOM NOISE OR CARING RESPONSIBILITIES ARE PILE-ON!",
-            desc: "HOME LIFE: Real lives are messy. Shared rooms, evening shifts, and family care complicate things.",
-            choices: [
-              { text: "Tell your tutor so they can adjust how they support you.", stress: -15, next: "r1_q6" },
-              { text: "Keep quiet and pretend everything at home is perfectly fine.", stress: 20, next: "r1_q6" }
-            ]
-          },
-          r1_q6: {
-            wolfText: "TECHNICAL GAP PANIC! YOU DON'T KNOW HOW TO FINISH THIS PORTFOLIO UNIT!",
-            desc: "WORKLOAD: Skipping production sessions because Year 2 feels like the wrong time to admit a gap.",
-            choices: [
-              { text: "Admit the technical gap early to build skills in time.", stress: -15, next: "r1_q7" },
-              { text: "Skip class so nobody sees that you are struggling.", stress: 25, next: "r1_q7" }
-            ]
-          },
-          r1_q7: {
-            wolfText: "STRESS TRIGGER! CAN'T SWITCH OFF OR SHORT FUSE WITH PEOPLE YOU LIKE!",
-            desc: "STRESS: Unswitched-off stress isn't a personality flaw—it's a maintenance issue.",
-            choices: [
-              { text: "Schedule a non-work pressure valve activity this week.", stress: -15, intermission: 0 },
-              { text: "Try working 16 hours straight without a break.", stress: 30, intermission: 0 }
-            ]
-          }
+    // Theme Management
+    const themeBtn = document.getElementById('theme-btn');
+    const sunIcon = document.getElementById('theme-icon-sun');
+    const moonIcon = document.getElementById('theme-icon-moon');
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'light') {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      }
+      localStorage.setItem('editor-theme', theme);
+    }
+
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
+
+    const savedTheme = localStorage.getItem('editor-theme') || 
+      (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    setTheme(savedTheme);
+
+    // Wire Creation State
+    let wireSourceNodeId = null;
+    let tempWireActive = false;
+
+    // Play/Preview State
+    let previewVars = {};
+    let currentPreviewNodeId = null;
+    let previewHistory = [];
+
+    const storyIfid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID().toUpperCase() : 'A1234567-B890-C123-D456-E7890ABCDEF1';
+
+    const viewport = document.getElementById('viewport');
+    const svgLayer = document.getElementById('svg-layer');
+    const tempWire = document.getElementById('temp-wire');
+    const statusText = document.getElementById('status');
+    const startStatusEl = document.getElementById('start-status');
+
+    function updateStartStatus() {
+      const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+      startStatusEl.textContent = hasStart ? '' : 'Notice: No Start node set. Add a Start/End triangle.';
+    }
+
+    // Drag-and-Drop Spawning
+    document.querySelectorAll('.palette-item').forEach(item => {
+      item.addEventListener('dragstart', (e) => e.dataTransfer.setData('nodeType', item.dataset.type));
+    });
+
+    viewport.addEventListener('dragover', (e) => e.preventDefault());
+    viewport.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const type = e.dataTransfer.getData('nodeType');
+      if (!type) return;
+
+      const rect = viewport.getBoundingClientRect();
+      const x = Math.max(10, Math.min(rect.width - 130, e.clientX - rect.left - 60));
+      const y = Math.max(10, Math.min(rect.height - 110, e.clientY - rect.top - 50));
+
+      createNode(type, x, y);
+    });
+
+    function portVisibility(node) {
+      if (node.type === 'terminal') {
+        if (node.role === 'start') return { showIn: false, showOut: true };
+        if (node.role === 'end') return { showIn: true, showOut: false };
+      }
+      return { showIn: true, showOut: true };
+    }
+
+    function createNode(type, x, y, options = {}) {
+      nodeCount++;
+      const id = options.id || `Node_${nodeCount}`;
+      let role = options.role || null;
+      let title;
+
+      if (type === 'terminal') {
+        if (!role) {
+          const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+          role = hasStart ? 'end' : 'start';
         }
-      },
-      {
-        title: "ROUND 2: MONEY, PEOPLE & STRESS",
-        startNode: "r2_q1",
-        nodes: {
-          r2_q1: {
-            wolfText: "MONEY PRESSURE TRIGGER! TRAVEL, FOOD, AND EQUIPMENT BILLS ARE STACKING UP!",
-            desc: "MONEY: Financial stress is directly linked to mental health. It's circumstance, not character flaw.",
-            choices: [
-              { text: "Hide the bills and work extra late evening shifts.", stress: 25, next: "r2_q2" },
-              { text: "Apply confidentially for the ESCG Hardship Fund.", stress: -25, next: "r2_q3" }
-            ]
-          },
-          r2_q2: {
-            wolfText: "MONEY WORRIES ARE MAKING YOU WANT TO DISAPPEAR FROM COLLEGE ENTIRELY!",
-            desc: "MONEY: Financial worries are a reason to talk to support staff—not a reason to drop out.",
-            choices: [
-              { text: "Catch your tutor after class for the Hardship route.", stress: -20, next: "r2_q3" },
-              { text: "Stop attending sessions to save bus fare.", stress: 30, next: "r2_q3" }
-            ]
-          },
-          r2_q3: {
-            wolfText: "PEOPLE TRIGGER! YOU'RE GOING QUIET AND ISOLATING FROM YOUR CLASSMATES!",
-            desc: "PEOPLE / CONNECT: Isolation feeds stress; company starves it. Naming it halves its size.",
-            choices: [
-              { text: "Text a mate: 'You alright? Actually alright?'", stress: -15, next: "r2_q4" },
-              { text: "Isolate yourself completely in your bedroom.", stress: 25, next: "r2_q4" }
-            ]
-          },
-          r2_q4: {
-            wolfText: "A FRIEND IS STRUGGLING HEAVILY AND ASKED YOU TO KEEP IT A SECRET!",
-            desc: "PEOPLE: You can be loyal and still tell someone. Those are not opposites.",
-            choices: [
-              { text: "Inform the Wellbeing Team (Sarah-Jayne Clarke).", stress: -15, next: "r2_q5" },
-              { text: "Keep silent and carry their emergency alone.", stress: 20, next: "r2_q5" }
-            ]
-          },
-          r2_q5: {
-            wolfText: "STRESS TRIGGER! SHORT FUSE AND AVOIDING THE EXACT TASK CAUSING IT!",
-            desc: "STRESS: Spot stress early—irritability, sleep shifts, and avoidance are warning lights.",
-            choices: [
-              { text: "Talk to a trusted adult or tutor to name the stress.", stress: -20, next: "r2_q6" },
-              { text: "Ignore the symptoms and hope they magically disappear.", stress: 25, next: "r2_q6" }
-            ]
-          },
-          r2_q6: {
-            wolfText: "THE YEAR 2 PARADOX! NEEDING SUPPORT BUT AFRAID TO ASK FOR IT!",
-            desc: "PEOPLE / SUPPORT: Support drops in Year 2 when need peaks. Professional creatives use mentors daily.",
-            choices: [
-              { text: "Use support doors early to arrange adjustments.", stress: -20, next: "r2_q7" },
-              { text: "Wait until March when deadlines have passed.", stress: 30, next: "r2_q7" }
-            ]
-          },
-          r2_q7: {
-            wolfText: "YOUR ANXIETY WOLF IS BARKING ABOUT DISCLOSING HEALTH NEEDS!",
-            desc: "PEOPLE: Telling staff now means exam access and learning adjustments are ready before pressure arrives.",
-            choices: [
-              { text: "Disclose health/learning needs to Wellbeing Team.", stress: -20, intermission: 1 },
-              { text: "Keep details private and struggle without assistance.", stress: 20, intermission: 1 }
-            ]
-          }
+        title = options.title || (role === 'start' ? `Start_${nodeCount}` : `Ending_${nodeCount}`);
+      } else {
+        const titles = { standard: 'Passage', event: 'Event', npc: 'NPC' };
+        title = options.title || `${titles[type] || 'Node'}_${nodeCount}`;
+      }
+
+      const nodeData = {
+        id, type, role, title, x, y,
+        text: options.text || `Write narrative text for ${title} here...`,
+        code: options.code || '',
+        assignments: Array.isArray(options.assignments) ? options.assignments : []
+      };
+
+      nodes.push(nodeData);
+      renderNodeDOM(nodeData);
+      selectNode(nodeData.id);
+      renderConnections();
+      updateStartStatus();
+      autoSaveLocal();
+      return nodeData;
+    }
+
+    function renderNodeDOM(node) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'node-wrapper';
+      wrapper.id = node.id;
+      wrapper.style.left = `${node.x}px`;
+      wrapper.style.top = `${node.y}px`;
+
+      const el = document.createElement('div');
+      el.className = `node shape-${node.type}`;
+      if (node.type === 'terminal') el.classList.add(`role-${node.role}`);
+
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'node-title-label';
+      titleSpan.innerText = node.title;
+      el.appendChild(titleSpan);
+      wrapper.appendChild(el);
+
+      const vis = portVisibility(node);
+
+      const inPort = document.createElement('div');
+      inPort.className = 'port port-in' + (vis.showIn ? '' : ' hidden');
+      inPort.title = 'Input Port';
+      inPort.addEventListener('mousedown', (e) => e.stopPropagation());
+      inPort.addEventListener('mouseup', (e) => {
+        e.stopPropagation();
+        if (tempWireActive && wireSourceNodeId && wireSourceNodeId !== node.id) {
+          completeWireConnection(wireSourceNodeId, node.id);
         }
-      },
-      {
-        title: "ROUND 3: MOVEMENT & MAINTENANCE",
-        startNode: "r3_q1",
-        nodes: {
-          r3_q1: {
-            wolfText: "MOVEMENT TRIGGER! WE HAVE NO TIME FOR GYM WORKOUTS OR EXERCISE!",
-            desc: "MOVEMENT: Regular physical activity—a 20-minute walk counts. It lowers physiological stress.",
-            choices: [
-              { text: "Take a 20-minute walk outside to clear your head.", stress: -15, next: "r3_q2" },
-              { text: "Stay glued to your chair for 8 hours without moving.", stress: 25, next: "r3_q2" }
-            ]
-          },
-          r3_q2: {
-            wolfText: "STRESS MAINTENANCE! YOU CAN'T ELIMINATE ALL PRESSURE IN YEAR 2!",
-            desc: "STRESS: Stress in small doses is useful. It's when it stops switching off that it costs you.",
-            choices: [
-              { text: "Apply the 4 evidence moves: Move, Connect, Sleep, Talk.", stress: -15, next: "r3_q3" },
-              { text: "Expect yourself to be a perfect superhero without rest.", stress: 25, next: "r3_q3" }
-            ]
-          },
-          r3_q3: {
-            wolfText: "SLEEP HYGIENE! YOUR WAKE TIME IS FLAPPING ALL OVER THE PLACE!",
-            desc: "SLEEP: The wake-time anchor sets everything else. Pick the same wake time including weekends.",
-            choices: [
-              { text: "Anchor wake time consistently this week.", stress: -15, next: "r3_q4" },
-              { text: "Sleep in until 2:00 PM on Sunday to catch up.", stress: 20, next: "r3_q4" }
-            ]
-          },
-          r3_q4: {
-            wolfText: "MONEY AND HARDSHIP ROUTE IS CONFIDENTIAL AND READY TO HELP!",
-            desc: "MONEY: Emergency support for travel, food, and equipment exists so you can stay on track.",
-            choices: [
-              { text: "Save the Hardship Fund and support details.", stress: -15, next: "r3_q5" },
-              { text: "Pretend you don't need any financial resources.", stress: 15, next: "r3_q5" }
-            ]
-          },
-          r3_q5: {
-            wolfText: "LOOKING OUT FOR EACH OTHER! NOTICE, ASK, TELL SOMEONE!",
-            desc: "PEOPLE: Encouraging unity means noticing when someone goes quiet and acting.",
-            choices: [
-              { text: "Photograph support contacts (Samaritans, MIND, iRock).", stress: -15, next: "r3_q6" },
-              { text: "Skip saving support numbers on your phone.", stress: 15, next: "r3_q6" }
-            ]
-          },
-          r3_q6: {
-            wolfText: "NAMING STRESS HALVED MY BARKING! I'M SHRINKING DOWN!",
-            desc: "REFRAMING: Saying 'I'm struggling' is information, not weakness.",
-            choices: [
-              { text: "Acknowledge Anxiety: 'Thanks for guarding me, I got this.'", stress: -15, next: "r3_q7" },
-              { text: "Ignore maintenance habits and return to burnout.", stress: 25, next: "r3_q7" }
-            ]
-          },
-          r3_q7: {
-            wolfText: "I'LL STILL GUARD YOU—BUT YOU ARE IN THE DRIVER'S SEAT NOW.",
-            desc: "INDUCTION COMPLETE: Pick your 'One Thing' commitment for the week:\n1. Anchor wake time\n2. Schedule a weekly pressure valve\n3. Save support numbers\n4. Talk to your tutor",
-            choices: [
-              { text: "Finish Game & Claim Commitment", stress: 0, showVictory: true }
-            ]
-          }
-        }
-      }
-    ];
+      });
+      wrapper.appendChild(inPort);
 
-    $(document).ready(function () {
-      let currentRoundIdx = 0;
-      let currentNodeKey = "r1_q1";
-      let stressLevel = 40;
+      const outPort = document.createElement('div');
+      outPort.className = 'port port-out' + (vis.showOut ? '' : ' hidden');
+      outPort.title = 'Output Port';
+      outPort.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        startWireConnection(node.id);
+      });
+      wrapper.appendChild(outPort);
 
-      function saveGameState() {
-        const gameState = {
-          roundIdx: currentRoundIdx,
-          nodeKey: currentNodeKey,
-          stress: stressLevel
-        };
-        localStorage.setItem("anxiety_game_save", JSON.stringify(gameState));
-      }
+      wrapper.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        selectNode(node.id);
 
-      function loadGameState() {
-        const saved = localStorage.getItem("anxiety_game_save");
-        if (saved) {
-          try {
-            const data = JSON.parse(saved);
-            currentRoundIdx = data.roundIdx || 0;
-            currentNodeKey = data.nodeKey || "r1_q1";
-            stressLevel = data.stress || 40;
-          } catch(e) {
-            console.error("Save load failed, starting fresh.");
-          }
-        }
-      }
-
-      function resetGame() {
-        localStorage.removeItem("anxiety_game_save");
-        currentRoundIdx = 0;
-        currentNodeKey = "r1_q1";
-        stressLevel = 40;
-        $("#intermission-card, #contacts-card, #game-over-modal, #victory-modal").addClass("hidden");
-        $(".speech-container, .characters-svg").removeClass("hidden");
-        updateMeter(0);
-        renderNode(currentNodeKey);
-      }
-
-      $("#reset-btn, #play-again-btn, #victory-play-again-btn").on("click", function() {
-        resetGame();
+        draggedNode = node;
+        dragOffset.x = e.clientX - node.x;
+        dragOffset.y = e.clientY - node.y;
       });
 
-      $("#audio-toggle-btn").on("click", function () {
-        const active = SoundController.toggle();
-        $(this).text(active ? "SOUND: ON" : "SOUND: OFF");
-      });
+      viewport.appendChild(wrapper);
+    }
 
-      function updateMeter(change) {
-        stressLevel = Math.min(Math.max(stressLevel + change, 5), 100);
-        
-        if (change > 0) {
-          SoundController.playBark();
-          gsap.to("#wolf-svg", { x: 8, duration: 0.05, yoyo: true, repeat: 5 });
-        } else if (change < 0) {
-          SoundController.playChime();
-        }
+    function clearCanvas() {
+      document.querySelectorAll('.node-wrapper').forEach(el => el.remove());
+      nodes = [];
+      connections = [];
+      variables = [];
+      nodeCount = 0;
+      varCount = 0;
+      assignCount = 0;
+      selectedNodeId = null;
+      renderConnections();
+      renderPropertiesPanel();
+      refreshVariableUI();
+      updateStartStatus();
+    }
 
-        const starScale = 0.5 + (stressLevel / 100) * 2.0;
-        $("#threat-star").css("transform", `scale(${starScale})`);
-
-        $("#stress-num").text(stressLevel + "%");
-        $("#gauge-fill").css("width", stressLevel + "%");
-
-        if (stressLevel >= 100) {
-          $("#game-over-modal").removeClass("hidden");
-        }
-      }
-
-      function renderNode(nodeKey) {
-        currentNodeKey = nodeKey;
-        saveGameState();
-
-        const round = storyRounds[currentRoundIdx];
-        const node = round.nodes[nodeKey];
-
-        $("#round-title").text(round.title);
-        $("#wolf-bubble").text(node.wolfText);
-        $("#desc-box").text(node.desc);
-
-        const $panel = $("#choices-panel");
-        $panel.empty();
-
-        node.choices.forEach(choice => {
-          const $btn = $("<button></button>")
-            .text(choice.text)
-            .addClass("choice-btn")
-            .on("click", function () {
-              if (SoundController.isMuted && SoundController.ctx === null) {
-                SoundController.init();
-                $("#audio-toggle-btn").text("SOUND: ON");
-              }
-
-              if (choice.showVictory) {
-                $("#victory-summary-text").html(`You completed the Induction with a final Anxiety level of <strong>${stressLevel}%</strong>!<br><br>Remember: Mental health is health. It moves, which means it can be moved—and everything that moves it can be worked on!`);
-                $("#victory-modal").removeClass("hidden");
-                return;
-              }
-
-              updateMeter(choice.stress);
-
-              if (stressLevel < 100) {
-                if (choice.intermission !== undefined) {
-                  showIntermission(choice.intermission);
-                } else {
-                  renderNode(choice.next);
-                }
-              }
-            });
-          $panel.append($btn);
+    function setNodeRole(node, role) {
+      if (role === 'start') {
+        nodes.forEach(n => {
+          if (n.type === 'terminal' && n.id !== node.id && n.role === 'start') {
+            n.role = 'end';
+            cleanupInvalidConnections(n);
+            syncNodeVisual(n);
+          }
         });
       }
+      node.role = role;
+      cleanupInvalidConnections(node);
+      syncNodeVisual(node);
+      renderConnections();
+      updateStartStatus();
+      autoSaveLocal();
+    }
 
-      function showIntermission(roundCompletedIdx) {
-        $(".speech-container, .characters-svg").addClass("hidden");
-        $("#intermission-card").removeClass("hidden");
+    function cleanupInvalidConnections(node) {
+      const vis = portVisibility(node);
+      if (!vis.showIn) connections = connections.filter(c => c.to !== node.id);
+      if (!vis.showOut) connections = connections.filter(c => c.from !== node.id);
+    }
 
-        $("#intermission-title").text(`ROUND ${roundCompletedIdx + 1} COMPLETE`);
-        $("#intermission-body").html(`
-          Anxiety Level: <strong>${stressLevel}%</strong><br><br>
-          Remember: Mental health moves on a spectrum. Saying "I'm struggling" is information, not weakness.
-        `);
+    function syncNodeVisual(node) {
+      const wrapper = document.getElementById(node.id);
+      if (!wrapper) return;
+      const el = wrapper.querySelector('.node');
+      el.classList.remove('role-start', 'role-end');
+      if (node.type === 'terminal') el.classList.add(`role-${node.role}`);
+      const vis = portVisibility(node);
+      wrapper.querySelector('.port-in').classList.toggle('hidden', !vis.showIn);
+      wrapper.querySelector('.port-out').classList.toggle('hidden', !vis.showOut);
+    }
 
-        const $panel = $("#choices-panel");
-        $panel.empty();
+    function startWireConnection(sourceId) {
+      wireSourceNodeId = sourceId;
+      tempWireActive = true;
+      statusText.innerText = 'Drag connection wire to target Input Port...';
+    }
 
-        const $nextBtn = $("<button></button>")
-          .text("START NEXT ROUND →")
-          .addClass("choice-btn")
-          .on("click", function () {
-            currentRoundIdx++;
-            $("#intermission-card").addClass("hidden");
-            $(".speech-container, .characters-svg").removeClass("hidden");
-            renderNode(storyRounds[currentRoundIdx].startNode);
+    function completeWireConnection(sourceId, targetId, options = {}) {
+      connections.push({
+        id: options.id || `Conn_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        from: sourceId,
+        to: targetId,
+        label: options.label || 'Proceed',
+        conditionVar: options.conditionVar || '',
+        conditionOp: options.conditionOp || '==',
+        conditionVal: options.conditionVal || ''
+      });
+      renderConnections();
+      renderPropertiesPanel();
+      cancelWireConnection();
+      autoSaveLocal();
+    }
+
+    function cancelWireConnection() {
+      wireSourceNodeId = null;
+      tempWireActive = false;
+      tempWire.setAttribute('d', '');
+      statusText.innerText = '';
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (tempWireActive && wireSourceNodeId) {
+        const sourceNode = nodes.find(n => n.id === wireSourceNodeId);
+        if (sourceNode) {
+          const x1 = sourceNode.x + 120;
+          const y1 = sourceNode.y + 52;
+          const dx = Math.abs(mouseX - x1) / 2;
+          tempWire.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${mouseX - dx} ${mouseY}, ${mouseX} ${mouseY}`);
+        }
+      }
+
+      if (draggedNode) {
+        draggedNode.x = Math.max(10, Math.min(rect.width - 130, e.clientX - dragOffset.x));
+        draggedNode.y = Math.max(10, Math.min(rect.height - 110, e.clientY - dragOffset.y));
+
+        const wrapper = document.getElementById(draggedNode.id);
+        wrapper.style.left = `${draggedNode.x}px`;
+        wrapper.style.top = `${draggedNode.y}px`;
+
+        renderConnections();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (tempWireActive) cancelWireConnection();
+      if (draggedNode) autoSaveLocal();
+      draggedNode = null;
+    });
+
+    function renderConnections() {
+      svgLayer.querySelectorAll('path.edge').forEach(p => p.remove());
+
+      connections.forEach((conn, index) => {
+        const fromNode = nodes.find(n => n.id === conn.from);
+        const toNode = nodes.find(n => n.id === conn.to);
+        if (!fromNode || !toNode) return;
+
+        const x1 = fromNode.x + 120;
+        const y1 = fromNode.y + 52;
+        const x2 = toNode.x;
+        const y2 = toNode.y + 52;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const dx = Math.max(30, Math.abs(x2 - x1) / 2);
+        path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`);
+        path.setAttribute('class', 'edge');
+        path.title = 'Click connection wire to remove';
+
+        path.addEventListener('click', (e) => {
+          e.stopPropagation();
+          connections.splice(index, 1);
+          renderConnections();
+          renderPropertiesPanel();
+          autoSaveLocal();
+        });
+
+        svgLayer.appendChild(path);
+      });
+
+      updatePortStates();
+    }
+
+    function updatePortStates() {
+      nodes.forEach(node => {
+        const wrapper = document.getElementById(node.id);
+        if (!wrapper) return;
+        const hasIn = connections.some(c => c.to === node.id);
+        const hasOut = connections.some(c => c.from === node.id);
+        wrapper.querySelector('.port-in').classList.toggle('connected', hasIn);
+        wrapper.querySelector('.port-out').classList.toggle('connected', hasOut);
+      });
+    }
+
+    // Properties Inspector
+    const noSel = document.getElementById('no-selection');
+    const editorForm = document.getElementById('editor-form');
+    const propTitle = document.getElementById('prop-title');
+    const propText = document.getElementById('prop-text');
+    const propCode = document.getElementById('prop-code');
+    const roleGroup = document.getElementById('role-group');
+    const propRole = document.getElementById('prop-role');
+    const outgoingList = document.getElementById('outgoing-list');
+    const insertVarSelect = document.getElementById('insert-var-select');
+    const variablesDatalist = document.getElementById('variables-datalist');
+    const assignmentsList = document.getElementById('assignments-list');
+    const addAssignmentBtn = document.getElementById('add-assignment-btn');
+
+    function selectNode(id) {
+      selectedNodeId = id;
+      document.querySelectorAll('.node-wrapper').forEach(n => n.classList.remove('selected'));
+      const wrapper = document.getElementById(id);
+      if (wrapper) wrapper.classList.add('selected');
+
+      renderPropertiesPanel();
+    }
+
+    function renderPropertiesPanel() {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (!node) {
+        noSel.style.display = 'block';
+        editorForm.style.display = 'none';
+        return;
+      }
+
+      noSel.style.display = 'none';
+      editorForm.style.display = 'flex';
+      propTitle.value = node.title;
+      propText.value = node.text;
+      propCode.value = node.code || '';
+      renderAssignmentsPanel(node);
+
+      if (node.type === 'terminal') {
+        roleGroup.style.display = 'flex';
+        propRole.value = node.role;
+      } else {
+        roleGroup.style.display = 'none';
+      }
+
+      outgoingList.innerHTML = '';
+      const outConns = connections.filter(c => c.from === node.id);
+
+      if (outConns.length === 0) {
+        const msg = node.type === 'terminal' && node.role === 'end'
+          ? 'End nodes have no outgoing wires — the story terminates here.'
+          : 'No outgoing connections. Drag from the right port of this node to establish a link.';
+        outgoingList.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">${msg}</span>`;
+      } else {
+        outConns.forEach((conn) => {
+          const targetNode = nodes.find(n => n.id === conn.to);
+          const card = document.createElement('div');
+          card.className = 'out-card';
+
+          card.innerHTML = `
+            <div class="out-card-title">
+              <span>To: ${targetNode ? targetNode.title : 'Unknown'}</span>
+              <span class="out-card-delete" id="del-conn-${conn.id}">Remove</span>
+            </div>
+            <div class="form-group">
+              <label>Choice Button Label</label>
+              <input type="text" value="${conn.label}" id="lbl-${conn.id}" />
+            </div>
+            <div class="form-group">
+              <label>Condition Builder (Optional)</label>
+              <div style="display:flex; gap: 4px;">
+                <input type="text" placeholder="$variable" value="${conn.conditionVar}" id="var-${conn.id}" list="variables-datalist" style="flex:1;" />
+                <select id="op-${conn.id}" style="width:55px;">
+                  <option value="==" ${conn.conditionOp === '==' ? 'selected' : ''}>==</option>
+                  <option value=">=" ${conn.conditionOp === '>=' ? 'selected' : ''}>&gt;=</option>
+                  <option value="<=" ${conn.conditionOp === '<=' ? 'selected' : ''}>&lt;=</option>
+                  <option value=">" ${conn.conditionOp === '>' ? 'selected' : ''}>&gt;</option>
+                  <option value="<" ${conn.conditionOp === '<' ? 'selected' : ''}>&lt;</option>
+                  <option value="!=" ${conn.conditionOp === '!=' ? 'selected' : ''}>!=</option>
+                </select>
+                <input type="text" placeholder="value" value="${conn.conditionVal}" id="val-${conn.id}" style="flex:1;" />
+              </div>
+            </div>
+          `;
+
+          outgoingList.appendChild(card);
+
+          document.getElementById(`del-conn-${conn.id}`).addEventListener('click', () => {
+            connections = connections.filter(c => c.id !== conn.id);
+            renderConnections();
+            renderPropertiesPanel();
+            autoSaveLocal();
           });
 
-        $panel.append($nextBtn);
+          document.getElementById(`lbl-${conn.id}`).addEventListener('input', (e) => { conn.label = e.target.value; autoSaveLocal(); });
+          document.getElementById(`var-${conn.id}`).addEventListener('input', (e) => { conn.conditionVar = e.target.value; autoSaveLocal(); });
+          document.getElementById(`op-${conn.id}`).addEventListener('change', (e) => { conn.conditionOp = e.target.value; autoSaveLocal(); });
+          document.getElementById(`val-${conn.id}`).addEventListener('input', (e) => { conn.conditionVal = e.target.value; autoSaveLocal(); });
+        });
+      }
+    }
+
+    propTitle.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) {
+        node.title = e.target.value;
+        const label = document.querySelector(`#${node.id} .node-title-label`);
+        if (label) label.innerText = node.title;
+        renderConnections();
+        autoSaveLocal();
+      }
+    });
+
+    propRole.addEventListener('change', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) {
+        setNodeRole(node, e.target.value);
+        renderPropertiesPanel();
+      }
+    });
+
+    propText.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) { node.text = e.target.value; autoSaveLocal(); }
+    });
+
+    propCode.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) { node.code = e.target.value; autoSaveLocal(); }
+    });
+
+    insertVarSelect.addEventListener('change', (e) => {
+      const varName = e.target.value;
+      if (!varName) return;
+      const v = variables.find(x => x.name === varName);
+      const snippet = `<<set ${varName} to ${v && v.value ? v.value : '0'}>>`;
+      propCode.value = propCode.value ? `${propCode.value}\n${snippet}` : snippet;
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) node.code = propCode.value;
+      e.target.value = '';
+      autoSaveLocal();
+    });
+
+    // Variable Assignments (structured: select a variable + set/++/-- or new value)
+    function renderAssignmentsPanel(node) {
+      assignmentsList.innerHTML = '';
+      const assignments = node.assignments || [];
+
+      if (!assignments.length) {
+        assignmentsList.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">No variable assignments on this node yet. Add one to set, increase, or decrease a story variable when this node is reached.</span>`;
+        return;
       }
 
-      loadGameState();
-      updateMeter(0);
-      renderNode(currentNodeKey);
+      assignments.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'out-card';
+
+        const opLabels = { set: 'New Value', inc: 'Increase By', dec: 'Decrease By', mul: 'Multiply By', div: 'Divide By' };
+        const opLabel = opLabels[a.op] || 'New Value';
+        const valPlaceholder = a.op === 'set' ? 'e.g. true, 5, "text", $other' : (a.op === 'mul' || a.op === 'div') ? '2' : '1';
+        const varOptions = variables.length
+          ? variables.map(v => `<option value="${v.name}" ${v.name === a.name ? 'selected' : ''}>${v.name}</option>`).join('')
+          : '<option value="">No variables yet — use the Variables button</option>';
+
+        card.innerHTML = `
+          <div class="out-card-title">
+            <span>Assignment</span>
+            <span class="out-card-delete" id="del-assign-${a.id}">Delete</span>
+          </div>
+          <div class="form-group">
+            <label>Variable</label>
+            <select id="var-assign-${a.id}">${varOptions}</select>
+          </div>
+          <div class="form-group">
+            <label>Operation</label>
+            <select id="op-assign-${a.id}">
+              <option value="set" ${a.op === 'set' ? 'selected' : ''}>Set to new value ( = )</option>
+              <option value="inc" ${a.op === 'inc' ? 'selected' : ''}>Increase ( ++ )</option>
+              <option value="dec" ${a.op === 'dec' ? 'selected' : ''}>Decrease ( -- )</option>
+              <option value="mul" ${a.op === 'mul' ? 'selected' : ''}>Multiply ( * )</option>
+              <option value="div" ${a.op === 'div' ? 'selected' : ''}>Divide ( / )</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>${opLabel}</label>
+            <input type="text" id="val-assign-${a.id}" placeholder="${valPlaceholder}" value="${a.value || ''}" />
+          </div>
+        `;
+
+        assignmentsList.appendChild(card);
+
+        document.getElementById(`del-assign-${a.id}`).addEventListener('click', () => {
+          node.assignments = node.assignments.filter(x => x.id !== a.id);
+          renderAssignmentsPanel(node);
+          autoSaveLocal();
+        });
+        document.getElementById(`var-assign-${a.id}`).addEventListener('change', (e) => {
+          a.name = e.target.value;
+          autoSaveLocal();
+        });
+        document.getElementById(`op-assign-${a.id}`).addEventListener('change', (e) => {
+          a.op = e.target.value;
+          renderAssignmentsPanel(node);
+          autoSaveLocal();
+        });
+        document.getElementById(`val-assign-${a.id}`).addEventListener('input', (e) => {
+          a.value = e.target.value;
+          autoSaveLocal();
+        });
+      });
+    }
+
+    addAssignmentBtn.addEventListener('click', () => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (!node) return;
+      if (!variables.length) {
+        alert('Create a story variable first — click "Variables" in the toolbar — then add an assignment.');
+        return;
+      }
+      if (!node.assignments) node.assignments = [];
+      assignCount++;
+      node.assignments.push({ id: `Assign_${assignCount}`, name: variables[0].name, op: 'set', value: '' });
+      renderAssignmentsPanel(node);
+      autoSaveLocal();
     });
+
+    // Compiles a node's structured variable assignments into SugarCube <<set>> lines
+    function assignmentCode(node) {
+      const assignments = node.assignments || [];
+      return assignments
+        .filter(a => a.name)
+        .map(a => {
+          let expr;
+          const hasVal = a.value !== '' && a.value != null;
+          if (a.op === 'inc') {
+            expr = `${a.name} + ${hasVal ? a.value : '1'}`;
+          } else if (a.op === 'dec') {
+            expr = `${a.name} - ${hasVal ? a.value : '1'}`;
+          } else if (a.op === 'mul') {
+            expr = `${a.name} * ${hasVal ? a.value : '2'}`;
+          } else if (a.op === 'div') {
+            expr = `${a.name} / ${hasVal ? a.value : '2'}`;
+          } else {
+            expr = hasVal ? a.value : '0';
+          }
+          return `<<set ${a.name} to ${expr}>>`;
+        })
+        .join('\n');
+    }
+
+    // Combines structured assignments with any hand-written advanced code for a node
+    function getEffectiveCode(node) {
+      const ac = assignmentCode(node);
+      const custom = (node.code || '').trim();
+      if (ac && custom) return `${ac}\n${custom}`;
+      return ac || custom;
+    }
+
+    document.getElementById('delete-node-btn').addEventListener('click', () => {
+      if (!selectedNodeId) return;
+      nodes = nodes.filter(n => n.id !== selectedNodeId);
+      connections = connections.filter(c => c.from !== selectedNodeId && c.to !== selectedNodeId);
+
+      const wrapper = document.getElementById(selectedNodeId);
+      if (wrapper) wrapper.remove();
+
+      selectedNodeId = null;
+      renderPropertiesPanel();
+      renderConnections();
+      updateStartStatus();
+      autoSaveLocal();
+    });
+
+    // Story Variables
+    const varModal = document.getElementById('var-modal');
+    const varList = document.getElementById('var-list');
+
+    document.getElementById('variables-btn').addEventListener('click', () => {
+      renderVariablesModal();
+      varModal.style.display = 'flex';
+    });
+    document.getElementById('close-var-modal').addEventListener('click', () => {
+      varModal.style.display = 'none';
+    });
+    document.getElementById('add-var-btn').addEventListener('click', () => {
+      varCount++;
+      variables.push({ id: `Var_${varCount}`, name: `$variable${varCount}`, value: '' });
+      renderVariablesModal();
+      refreshVariableUI();
+      autoSaveLocal();
+    });
+
+    function renderVariablesModal() {
+      varList.innerHTML = '';
+      if (variables.length === 0) {
+        varList.innerHTML = '<span style="color:var(--text-muted); font-size:0.8rem;">No variables defined. Add a variable to track state across passages.</span>';
+        return;
+      }
+      variables.forEach(v => {
+        const row = document.createElement('div');
+        row.className = 'var-row';
+        row.innerHTML = `
+          <input type="text" value="${v.name}" placeholder="$variableName" />
+          <input type="text" value="${v.value}" placeholder="default value" />
+          <span class="out-card-delete" style="cursor:pointer; padding:0 6px;">Delete</span>
+        `;
+        const [nameInput, valueInput] = row.querySelectorAll('input');
+
+        nameInput.addEventListener('input', (e) => {
+          v.name = e.target.value.trim();
+          refreshVariableUI();
+          autoSaveLocal();
+        });
+        nameInput.addEventListener('blur', (e) => {
+          if (v.name && !v.name.startsWith('$')) {
+            v.name = '$' + v.name;
+            e.target.value = v.name;
+            refreshVariableUI();
+            autoSaveLocal();
+          }
+        });
+        valueInput.addEventListener('input', (e) => { v.value = e.target.value; autoSaveLocal(); });
+
+        row.querySelector('.out-card-delete').addEventListener('click', () => {
+          variables = variables.filter(x => x.id !== v.id);
+          renderVariablesModal();
+          refreshVariableUI();
+          autoSaveLocal();
+        });
+
+        varList.appendChild(row);
+      });
+    }
+
+    function refreshVariableUI() {
+      variablesDatalist.innerHTML = variables.map(v => `<option value="${v.name}"></option>`).join('');
+      insertVarSelect.innerHTML = '<option value="">+ Insert</option>' +
+        variables.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) renderAssignmentsPanel(node);
+    }
+
+    // Local Storage Operations
+    const LOCAL_STORAGE_KEY = 'nve_story_data';
+
+    function getStoryPayload() {
+      return JSON.stringify({
+        nodes,
+        connections,
+        variables,
+        nodeCount,
+        varCount,
+        assignCount
+      });
+    }
+
+    function loadStoryPayload(jsonString) {
+      try {
+        const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+        clearCanvas();
+
+        if (data.nodeCount) nodeCount = data.nodeCount;
+        if (data.varCount) varCount = data.varCount;
+        if (data.assignCount) assignCount = data.assignCount;
+        if (Array.isArray(data.variables)) variables = data.variables;
+
+        if (Array.isArray(data.nodes)) {
+          data.nodes.forEach(n => {
+            if (!Array.isArray(n.assignments)) n.assignments = [];
+            nodes.push(n);
+            renderNodeDOM(n);
+          });
+        }
+
+        if (Array.isArray(data.connections)) {
+          connections = data.connections;
+        }
+
+        renderConnections();
+        refreshVariableUI();
+        updateStartStatus();
+        return true;
+      } catch (err) {
+        console.error('Failed to load story data:', err);
+        return false;
+      }
+    }
+
+    function autoSaveLocal() {
+      localStorage.setItem(LOCAL_STORAGE_KEY, getStoryPayload());
+    }
+
+    document.getElementById('save-local-btn').addEventListener('click', () => {
+      autoSaveLocal();
+      alert('Project saved successfully to local storage.');
+    });
+
+    document.getElementById('load-local-btn').addEventListener('click', () => {
+      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!savedData) {
+        alert('No saved project found in local storage.');
+        return;
+      }
+      if (confirm('Loading will overwrite your current workspace. Proceed?')) {
+        loadStoryPayload(savedData);
+      }
+    });
+
+    const initialSavedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (initialSavedData) {
+      loadStoryPayload(initialSavedData);
+    }
+
+    // GitHub Gist Sync
+    const ghModal = document.getElementById('gh-modal');
+    const ghTokenInput = document.getElementById('gh-token');
+    const ghGistIdInput = document.getElementById('gh-gist-id');
+    const ghStatus = document.getElementById('gh-status');
+
+    ghTokenInput.value = localStorage.getItem('nve_gh_token') || '';
+    ghGistIdInput.value = localStorage.getItem('nve_gh_gist_id') || '';
+
+    document.getElementById('github-btn').addEventListener('click', () => {
+      ghStatus.textContent = '';
+      ghModal.style.display = 'flex';
+    });
+    document.getElementById('gh-close-btn').addEventListener('click', () => {
+      ghModal.style.display = 'none';
+    });
+
+    document.getElementById('gh-save-btn').addEventListener('click', async () => {
+      const token = ghTokenInput.value.trim();
+      let gistId = ghGistIdInput.value.trim();
+
+      if (!token) {
+        ghStatus.textContent = 'Personal Access Token required.';
+        return;
+      }
+
+      localStorage.setItem('nve_gh_token', token);
+      ghStatus.textContent = 'Saving to GitHub Gist...';
+
+      const payload = {
+        description: 'Narrative Editor Save Data',
+        public: false,
+        files: {
+          'narrative_story.json': {
+            content: getStoryPayload()
+          }
+        }
+      };
+
+      try {
+        const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+        const method = gistId ? 'PATCH' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(`GitHub API error: ${res.statusText}`);
+
+        const result = await res.json();
+        gistId = result.id;
+        ghGistIdInput.value = gistId;
+        localStorage.setItem('nve_gh_gist_id', gistId);
+        ghStatus.textContent = 'Successfully saved to Gist.';
+      } catch (err) {
+        ghStatus.textContent = `Error saving: ${err.message}`;
+      }
+    });
+
+    document.getElementById('gh-load-btn').addEventListener('click', async () => {
+      const token = ghTokenInput.value.trim();
+      const gistId = ghGistIdInput.value.trim();
+
+      if (!gistId) {
+        ghStatus.textContent = 'Gist ID required to load.';
+        return;
+      }
+
+      ghStatus.textContent = 'Fetching from GitHub...';
+      const headers = { 'Accept': 'application/vnd.github+json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        localStorage.setItem('nve_gh_token', token);
+      }
+
+      try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers });
+        if (!res.ok) throw new Error(`GitHub API error: ${res.statusText}`);
+
+        const result = await res.json();
+        const file = result.files['narrative_story.json'];
+        if (!file || !file.content) throw new Error('narrative_story.json not found in target Gist.');
+
+        if (confirm('Loading Gist will replace your current workspace. Proceed?')) {
+          loadStoryPayload(file.content);
+          localStorage.setItem('nve_gh_gist_id', gistId);
+          ghStatus.textContent = 'Successfully loaded Gist.';
+        }
+      } catch (err) {
+        ghStatus.textContent = `Error loading: ${err.message}`;
+      }
+    });
+
+    // Twine & Twee Importer
+    const importBtn = document.getElementById('import-btn');
+    const importFileInput = document.getElementById('import-file-input');
+
+    importBtn.addEventListener('click', () => importFileInput.click());
+
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const content = evt.target.result;
+        if (file.name.endsWith('.html') || content.includes('<tw-storydata')) {
+          parseTwineArchiveHTML(content);
+        } else {
+          parseTweeCode(content);
+        }
+        importFileInput.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    function parseTwineArchiveHTML(htmlText) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+      const storyData = doc.querySelector('tw-storydata');
+
+      if (!storyData) {
+        alert('Could not locate valid Twine 2 story data in HTML file.');
+        return;
+      }
+
+      const startPid = storyData.getAttribute('startnode');
+      const passageNodes = doc.querySelectorAll('tw-passagedata');
+
+      if (!confirm(`Import ${passageNodes.length} passages into workspace? Current workspace will be cleared.`)) return;
+
+      clearCanvas();
+
+      const pidToNodeIdMap = {};
+      const passageLinks = [];
+
+      passageNodes.forEach((el, index) => {
+        const pid = el.getAttribute('pid');
+        const title = el.getAttribute('name') || `Passage_${index + 1}`;
+        const tags = (el.getAttribute('tags') || '').split(' ');
+        const posAttr = el.getAttribute('position');
+        
+        let x = 100 + (index % 5) * 180;
+        let y = 100 + Math.floor(index / 5) * 140;
+        if (posAttr) {
+          const coords = posAttr.split(',').map(Number);
+          if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            x = Math.max(20, coords[0]);
+            y = Math.max(20, coords[1]);
+          }
+        }
+
+        let type = 'standard';
+        let role = null;
+
+        if (pid === startPid || tags.includes('start')) {
+          type = 'terminal';
+          role = 'start';
+        } else if (tags.includes('end')) {
+          type = 'terminal';
+          role = 'end';
+        } else if (tags.includes('event')) {
+          type = 'event';
+        } else if (tags.includes('npc')) {
+          type = 'npc';
+        }
+
+        const rawContent = el.textContent || '';
+        const parsed = extractLinksAndCode(rawContent);
+
+        const createdNode = createNode(type, x, y, {
+          title,
+          text: parsed.text,
+          code: parsed.code,
+          role
+        });
+
+        pidToNodeIdMap[title] = createdNode.id;
+        passageLinks.push({ sourceId: createdNode.id, links: parsed.links });
+      });
+
+      passageLinks.forEach(item => {
+        item.links.forEach(link => {
+          const targetNodeId = pidToNodeIdMap[link.targetTitle];
+          if (targetNodeId) {
+            completeWireConnection(item.sourceId, targetNodeId, { label: link.label });
+          }
+        });
+      });
+
+      autoSaveLocal();
+    }
+
+    function parseTweeCode(tweeText) {
+      const passageBlocks = tweeText.split(/^::\s+/m).filter(b => b.trim().length > 0);
+      if (passageBlocks.length === 0) {
+        alert('No Twee passages found in file.');
+        return;
+      }
+
+      if (!confirm(`Import ${passageBlocks.length} Twee passages? Current workspace will be replaced.`)) return;
+
+      clearCanvas();
+
+      const titleToNodeIdMap = {};
+      const passageLinks = [];
+
+      passageBlocks.forEach((block, index) => {
+        const lines = block.split('\n');
+        const header = lines.shift() || '';
+        const body = lines.join('\n');
+
+        const headerMatch = header.match(/^([^\[\{]+)(?:\[(.*?)\])?/);
+        if (!headerMatch) return;
+
+        const title = headerMatch[1].trim();
+        if (title === 'StoryTitle' || title === 'StoryData' || title === 'StoryInit') return;
+
+        const tags = (headerMatch[2] || '').split(/\s+/);
+        
+        let type = 'standard';
+        let role = null;
+
+        if (tags.includes('start')) {
+          type = 'terminal';
+          role = 'start';
+        } else if (tags.includes('end')) {
+          type = 'terminal';
+          role = 'end';
+        } else if (tags.includes('event')) {
+          type = 'event';
+        } else if (tags.includes('npc')) {
+          type = 'npc';
+        }
+
+        const x = 100 + (index % 5) * 180;
+        const y = 100 + Math.floor(index / 5) * 140;
+
+        const parsed = extractLinksAndCode(body);
+
+        const createdNode = createNode(type, x, y, {
+          title,
+          text: parsed.text,
+          code: parsed.code,
+          role
+        });
+
+        titleToNodeIdMap[title] = createdNode.id;
+        passageLinks.push({ sourceId: createdNode.id, links: parsed.links });
+      });
+
+      passageLinks.forEach(item => {
+        item.links.forEach(link => {
+          const targetNodeId = titleToNodeIdMap[link.targetTitle];
+          if (targetNodeId) {
+            completeWireConnection(item.sourceId, targetNodeId, { label: link.label });
+          }
+        });
+      });
+
+      autoSaveLocal();
+    }
+
+    function extractLinksAndCode(content) {
+      let text = content;
+      let code = '';
+      const links = [];
+
+      const setMatches = text.match(/<<set\s+.*?>>/g);
+      if (setMatches) {
+        code = setMatches.join('\n');
+        text = text.replace(/<<set\s+.*?>>/g, '');
+      }
+
+      const linkRegex = /\[\[(?:([^\]\|]+)->|([^\]\|]+)\|)?([^\]]+)\]\]/g;
+      let match;
+      while ((match = linkRegex.exec(text)) !== null) {
+        const rawLabel = match[1] || match[2] || '';
+        const targetTitle = match[3].trim();
+        const label = rawLabel.trim() || targetTitle;
+        links.push({ label, targetTitle });
+      }
+
+      text = text.replace(linkRegex, '').trim();
+
+      return { text, code, links };
+    }
+
+    // Interactive Preview Engine
+    const previewModal = document.getElementById('preview-modal');
+    const previewTextEl = document.getElementById('preview-text');
+    const previewChoicesEl = document.getElementById('preview-choices');
+    const previewPassageTitle = document.getElementById('preview-passage-title');
+    const previewVarsEl = document.getElementById('preview-vars');
+
+    function evalExpr(expr) {
+      const transformed = expr.trim().replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, (m, n) => `previewVars["$${n}"]`);
+      return Function('previewVars', `"use strict"; return (${transformed});`)(previewVars);
+    }
+
+    // Replaces $variableName references in passage text with their current live value
+    function interpolateText(text) {
+      return text.replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, (m, n) => {
+        const key = '$' + n;
+        return Object.prototype.hasOwnProperty.call(previewVars, key) ? String(previewVars[key]) : m;
+      });
+    }
+
+    function initPreviewVars() {
+      previewVars = {};
+      variables.forEach(v => {
+        const raw = v.value;
+        previewVars[v.name] = (raw !== '' && !isNaN(raw)) ? Number(raw) : raw;
+      });
+    }
+
+    function renderPreviewNode(node) {
+      currentPreviewNodeId = node.id;
+
+      const effectiveCode = getEffectiveCode(node);
+      if (effectiveCode) {
+        const setRe = /<<set\s+\$([a-zA-Z_][a-zA-Z0-9_]*)\s+to\s+(.+?)>>/g;
+        let m;
+        while ((m = setRe.exec(effectiveCode))) {
+          try { previewVars['$' + m[1]] = evalExpr(m[2]); } catch (e) { }
+        }
+      }
+
+      previewPassageTitle.innerText = node.title;
+      previewTextEl.innerText = interpolateText(node.text);
+
+      const outConns = connections.filter(c => c.from === node.id).filter(c => {
+        if (!c.conditionVar || c.conditionVal === '') return true;
+        try {
+          const left = evalExpr(c.conditionVar);
+          const rightRaw = c.conditionVal;
+          const right = isNaN(rightRaw) ? rightRaw : Number(rightRaw);
+          switch (c.conditionOp) {
+            case '==': return left == right;
+            case '!=': return left != right;
+            case '>=': return left >= right;
+            case '<=': return left <= right;
+            case '>': return left > right;
+            case '<': return left < right;
+            default: return true;
+          }
+        } catch (e) { return true; }
+      });
+
+      previewChoicesEl.innerHTML = '';
+      if (outConns.length === 0) {
+        const endMsg = document.createElement('div');
+        endMsg.style.cssText = 'color:var(--text-muted); font-style:italic; margin-top:0.5rem;';
+        endMsg.innerText = (node.type === 'terminal' && node.role === 'end') ? 'Story Concluded' : '(No available choices from here)';
+        previewChoicesEl.appendChild(endMsg);
+      } else {
+        outConns.forEach(c => {
+          const targetNode = nodes.find(n => n.id === c.to);
+          if (!targetNode) return;
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.cssText = 'display:block; width:100%; text-align:left; margin-top:0.5rem; background:var(--bg-surface-elevated); color:var(--text-main); border-color:var(--border-color);';
+          btn.innerText = c.label || 'Continue';
+          btn.addEventListener('click', () => {
+            previewHistory.push(node.id);
+            renderPreviewNode(targetNode);
+          });
+          previewChoicesEl.appendChild(btn);
+        });
+      }
+
+      previewVarsEl.textContent = Object.keys(previewVars).length ? JSON.stringify(previewVars, null, 2) : '(none)';
+    }
+
+    function startPreview() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+      if (!startNode) {
+        alert('Add a Start/End triangle node to the canvas and set its role to Start before playing.');
+        return;
+      }
+      initPreviewVars();
+      previewHistory = [];
+      previewModal.style.display = 'flex';
+      renderPreviewNode(startNode);
+    }
+
+    document.getElementById('play-btn').addEventListener('click', startPreview);
+    document.getElementById('preview-restart-btn').addEventListener('click', startPreview);
+    document.getElementById('preview-close-btn').addEventListener('click', () => {
+      previewModal.style.display = 'none';
+    });
+
+    // Story Export Generation
+    function passageTags(node) {
+      if (node.type === 'terminal') return node.role === 'end' ? ['end'] : ['start'];
+      if (node.type === 'event') return ['event'];
+      if (node.type === 'npc') return ['npc'];
+      return [];
+    }
+
+    function buildPassageBody(node) {
+      let body = '';
+      const effectiveCode = getEffectiveCode(node);
+      if (effectiveCode) body += `${effectiveCode}\n`;
+      body += `${node.text}`;
+
+      const outConnections = connections.filter(c => c.from === node.id);
+      outConnections.forEach(c => {
+        const targetNode = nodes.find(n => n.id === c.to);
+        if (!targetNode) return;
+        const label = (c.label || '').trim();
+        const link = (!label || label === targetNode.title) ? targetNode.title : `${label}->${targetNode.title}`;
+        if (c.conditionVar && c.conditionVal) {
+          body += `\n<<if ${c.conditionVar} ${c.conditionOp} ${c.conditionVal}>>\n  [[${link}]]\n<</if>>`;
+        } else {
+          body += `\n[[${link}]]`;
+        }
+      });
+      return body;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function generateTweeCode() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+
+      let code = `:: StoryTitle\nNarrative Editor Project\n\n:: StoryData\n{\n  "ifid": "${storyIfid}",\n  "format": "SugarCube",\n  "format-version": "2.36.1"${startNode ? `,\n  "start": "${startNode.title}"` : ''}\n}\n\n`;
+
+      if (variables.length) {
+        code += `:: StoryInit\n`;
+        code += variables.map(v => `<<set ${v.name} to ${v.value || 0}>>`).join('\n');
+        code += `\n\n`;
+      }
+
+      nodes.forEach(node => {
+        const tags = passageTags(node);
+        code += `:: ${node.title}${tags.length ? ' [' + tags.join(' ') + ']' : ''}\n`;
+        code += buildPassageBody(node);
+        code += `\n\n`;
+      });
+
+      return code;
+    }
+
+    function generateTwineArchiveHTML() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+      const startPid = startNode ? (nodes.indexOf(startNode) + 1) : 1;
+
+      let passagesHtml = '';
+      nodes.forEach((node, i) => {
+        const pid = i + 1;
+        const tags = passageTags(node).join(' ');
+        const body = buildPassageBody(node);
+        passagesHtml += `  <tw-passagedata pid="${pid}" name="${escapeHtml(node.title)}" tags="${escapeHtml(tags)}" position="${Math.round(node.x)},${Math.round(node.y)}" size="100,100">${escapeHtml(body)}</tw-passagedata>\n`;
+      });
+
+      if (variables.length) {
+        const initBody = variables.map(v => `<<set ${v.name} to ${v.value || 0}>>`).join('\n');
+        passagesHtml += `  <tw-passagedata pid="${nodes.length + 1}" name="StoryInit" tags="" position="0,0" size="100,100">${escapeHtml(initBody)}</tw-passagedata>\n`;
+      }
+
+      return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Narrative Editor Project</title></head>
+<body>
+<tw-storydata name="Narrative Editor Project" startnode="${startPid}" creator="Narrative Editor" creator-version="1.0" ifid="${storyIfid}" format="SugarCube" format-version="2.36.1" options="" tags="" zoom="1">
+${passagesHtml}</tw-storydata>
+</body>
+</html>`;
+    }
+
+    function generatePlayableHTML() {
+      const storyTitle = 'Narrative Editor Project';
+      const storyData = {
+        nodes: nodes.map(n => ({ id: n.id, type: n.type, role: n.role, title: n.title, text: n.text, code: getEffectiveCode(n) })),
+        connections: connections.map(c => ({ from: c.from, to: c.to, label: c.label, conditionVar: c.conditionVar, conditionOp: c.conditionOp, conditionVal: c.conditionVal })),
+        variables: variables.map(v => ({ name: v.name, value: v.value }))
+      };
+      const json = JSON.stringify(storyData).replace(/</g, '\\u003c');
+
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(storyTitle)}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  #game { max-width: 640px; width: 100%; background: #1e293b; border-radius: 12px; padding: 2.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); border: 1px solid #334155; }
+  #passage-title { font-size: 0.9rem; color: #38bdf8; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; font-family: sans-serif; font-weight: 700; }
+  #passage-text { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; margin-bottom: 2rem; }
+  .choice-btn { display: block; width: 100%; text-align: left; background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.85rem 1.1rem; margin-bottom: 0.7rem; font-size: 0.95rem; cursor: pointer; font-family: sans-serif; transition: 0.15s; }
+  .choice-btn:hover { background: #38bdf8; color: #0f172a; border-color: #38bdf8; font-weight: 600; }
+  #end-msg { font-style: italic; color: #94a3b8; margin-top: 1rem; font-family: sans-serif; }
+  #restart-btn { margin-top: 1.5rem; background: none; border: 1px solid #475569; color: #94a3b8; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: sans-serif; }
+  #restart-btn:hover { color: #f8fafc; border-color: #94a3b8; }
+</style>
+</head>
+<body>
+  <div id="game">
+    <div id="passage-title"></div>
+    <div id="passage-text"></div>
+    <div id="choices"></div>
+    <button id="restart-btn">Restart</button>
+  </div>
+
+  <script>
+    var STORY = ${json};
+    var vars = {};
+
+    function evalExpr(expr) {
+      var t = expr.trim().replace(/\\$([a-zA-Z_][a-zA-Z0-9_]*)/g, function (m, n) { return 'vars["$' + n + '"]'; });
+      return Function('vars', '"use strict"; return (' + t + ');')(vars);
+    }
+
+    function interpolateText(text) {
+      return text.replace(/\\$([a-zA-Z_][a-zA-Z0-9_]*)/g, function (m, n) {
+        var key = '$' + n;
+        return Object.prototype.hasOwnProperty.call(vars, key) ? String(vars[key]) : m;
+      });
+    }
+
+    function initVars() {
+      vars = {};
+      STORY.variables.forEach(function (v) {
+        var raw = v.value;
+        vars[v.name] = (raw !== '' && !isNaN(raw)) ? Number(raw) : raw;
+      });
+    }
+
+    function findNode(id) {
+      for (var i = 0; i < STORY.nodes.length; i++) if (STORY.nodes[i].id === id) return STORY.nodes[i];
+      return null;
+    }
+
+    function renderNode(node) {
+      if (node.code) {
+        var setRe = /<<set\\s+\\$([a-zA-Z_][a-zA-Z0-9_]*)\\s+to\\s+(.+?)>>/g;
+        var m;
+        while ((m = setRe.exec(node.code))) {
+          try { vars['$' + m[1]] = evalExpr(m[2]); } catch (e) { }
+        }
+      }
+
+      document.getElementById('passage-title').textContent = node.title;
+      document.getElementById('passage-text').textContent = interpolateText(node.text);
+
+      var outConns = STORY.connections.filter(function (c) { return c.from === node.id; }).filter(function (c) {
+        if (!c.conditionVar || c.conditionVal === '') return true;
+        try {
+          var left = evalExpr(c.conditionVar);
+          var right = isNaN(c.conditionVal) ? c.conditionVal : Number(c.conditionVal);
+          switch (c.conditionOp) {
+            case '==': return left == right;
+            case '!=': return left != right;
+            case '>=': return left >= right;
+            case '<=': return left <= right;
+            case '>': return left > right;
+            case '<': return left < right;
+            default: return true;
+          }
+        } catch (e) { return true; }
+      });
+
+      var choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+      if (outConns.length === 0) {
+        var msg = document.createElement('div');
+        msg.id = 'end-msg';
+        msg.textContent = (node.type === 'terminal' && node.role === 'start') ? 'Story Concluded' : '(No further choices)';
+        choicesEl.appendChild(msg);
+      } else {
+        outConns.forEach(function (c) {
+          var target = findNode(c.to);
+          if (!target) return;
+          var btn = document.createElement('button');
+          btn.className = 'choice-btn';
+          btn.textContent = c.label || 'Continue';
+          btn.addEventListener('click', function () { renderNode(target); });
+          choicesEl.appendChild(btn);
+        });
+      }
+    }
+
+    function start() {
+      var startNode = null;
+      for (var i = 0; i < STORY.nodes.length; i++) {
+        if (STORY.nodes[i].type === 'terminal' && STORY.nodes[i].role === 'start') { startNode = STORY.nodes[i]; break; }
+      }
+      if (!startNode) {
+        document.getElementById('passage-text').textContent = 'This story has no Start passage set.';
+        return;
+      }
+      initVars();
+      renderNode(startNode);
+    }
+
+    document.getElementById('restart-btn').addEventListener('click', start);
+    start();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    const modal = document.getElementById('modal');
+    const tweeOutput = document.getElementById('twee-output');
+    const exportNote = document.getElementById('export-note');
+    const exportWarning = document.getElementById('export-warning');
+    const tabTwee = document.getElementById('tab-twee');
+    const tabPlay = document.getElementById('tab-play');
+    const tabHtml = document.getElementById('tab-html');
+    const downloadBtn = document.getElementById('download-btn');
+
+    const EXPORT_TABS = { twee: tabTwee, play: tabPlay, html: tabHtml };
+
+    function setActiveExportTab(mode) {
+      exportMode = mode;
+      Object.keys(EXPORT_TABS).forEach(key => {
+        if (key === mode) {
+          EXPORT_TABS[key].classList.add('btn-primary');
+        } else {
+          EXPORT_TABS[key].classList.remove('btn-primary');
+        }
+      });
+      refreshExportOutput();
+    }
+
+    function refreshExportOutput() {
+      const startNode = nodes.find(n => n.type === 'terminal' && n.role === 'start');
+      if (!startNode) {
+        exportWarning.style.display = 'block';
+        exportWarning.textContent = 'Notice: No Start node set. Add a Start/End node to the canvas before exporting or testing.';
+        downloadBtn.disabled = true;
+        downloadBtn.style.opacity = '0.5';
+        downloadBtn.style.cursor = 'not-allowed';
+      } else {
+        exportWarning.style.display = 'none';
+        downloadBtn.disabled = false;
+        downloadBtn.style.opacity = '1';
+        downloadBtn.style.cursor = 'pointer';
+      }
+
+      const startSuffix = startNode ? ` Starting passage: "${startNode.title}".` : '';
+      if (exportMode === 'twee') {
+        exportNote.textContent = `Plain-text Twee 3 source code. Compile with Tweego or import into Twine.${startSuffix}`;
+        tweeOutput.value = generateTweeCode();
+      } else if (exportMode === 'play') {
+        exportNote.textContent = `Standalone playable HTML file. Ready for direct browser testing.${startSuffix}`;
+        tweeOutput.value = generatePlayableHTML();
+      } else {
+        exportNote.textContent = `Twine 2 story archive HTML format for importing into Twine.${startSuffix}`;
+        tweeOutput.value = generateTwineArchiveHTML();
+      }
+    }
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+      setActiveExportTab('twee');
+      modal.style.display = 'flex';
+    });
+
+    tabTwee.addEventListener('click', () => setActiveExportTab('twee'));
+    tabPlay.addEventListener('click', () => setActiveExportTab('play'));
+    tabHtml.addEventListener('click', () => setActiveExportTab('html'));
+
+    document.getElementById('close-modal').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+      const hasStart = nodes.some(n => n.type === 'terminal' && n.role === 'start');
+      if (!hasStart) return;
+      const mimeType = exportMode === 'twee' ? 'text/plain' : 'text/html';
+      const filenames = {
+        twee: 'Narrative_Story.twee',
+        play: 'Narrative_Story_Playable.html',
+        html: 'Narrative_Story_Archive.html'
+      };
+      const blob = new Blob([tweeOutput.value], { type: mimeType });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filenames[exportMode];
+      a.click();
+    });
+
+    refreshVariableUI();
+    updateStartStatus();
   </script>
 </body>
 </html>
