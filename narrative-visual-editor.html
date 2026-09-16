@@ -526,8 +526,15 @@
         <label>Story / Passage Text</label>
         <textarea id="prop-text"></textarea>
       </div>
+
       <div class="form-group">
-        <label>SugarCube Entry Logic</label>
+        <label>Variable Assignments</label>
+        <div id="assignments-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+        <button class="btn" id="add-assignment-btn" type="button" style="margin-top:0.35rem;">+ Add Assignment</button>
+      </div>
+
+      <div class="form-group">
+        <label>Advanced Code (optional)</label>
         <div style="display:flex; gap:4px;">
           <input type="text" id="prop-code" placeholder="<<set $key to true>>" style="flex:1;" />
           <select id="insert-var-select" style="width:100px;">
@@ -626,6 +633,7 @@
     let variables = [];
     let nodeCount = 0;
     let varCount = 0;
+    let assignCount = 0;
     let selectedNodeId = null;
     let draggedNode = null;
     let dragOffset = { x: 0, y: 0 };
@@ -725,7 +733,8 @@
       const nodeData = {
         id, type, role, title, x, y,
         text: options.text || `Write narrative text for ${title} here...`,
-        code: options.code || ''
+        code: options.code || '',
+        assignments: Array.isArray(options.assignments) ? options.assignments : []
       };
 
       nodes.push(nodeData);
@@ -796,6 +805,7 @@
       variables = [];
       nodeCount = 0;
       varCount = 0;
+      assignCount = 0;
       selectedNodeId = null;
       renderConnections();
       renderPropertiesPanel();
@@ -955,6 +965,8 @@
     const outgoingList = document.getElementById('outgoing-list');
     const insertVarSelect = document.getElementById('insert-var-select');
     const variablesDatalist = document.getElementById('variables-datalist');
+    const assignmentsList = document.getElementById('assignments-list');
+    const addAssignmentBtn = document.getElementById('add-assignment-btn');
 
     function selectNode(id) {
       selectedNodeId = id;
@@ -978,6 +990,7 @@
       propTitle.value = node.title;
       propText.value = node.text;
       propCode.value = node.code || '';
+      renderAssignmentsPanel(node);
 
       if (node.type === 'terminal') {
         roleGroup.style.display = 'flex';
@@ -1084,6 +1097,115 @@
       autoSaveLocal();
     });
 
+    // Variable Assignments (structured: select a variable + set/++/-- or new value)
+    function renderAssignmentsPanel(node) {
+      assignmentsList.innerHTML = '';
+      const assignments = node.assignments || [];
+
+      if (!assignments.length) {
+        assignmentsList.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">No variable assignments on this node yet. Add one to set, increase, or decrease a story variable when this node is reached.</span>`;
+        return;
+      }
+
+      assignments.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'out-card';
+
+        const opLabel = a.op === 'inc' ? 'Increase By' : (a.op === 'dec' ? 'Decrease By' : 'New Value');
+        const valPlaceholder = a.op === 'set' ? 'e.g. true, 5, $other' : '1';
+        const varOptions = variables.length
+          ? variables.map(v => `<option value="${v.name}" ${v.name === a.name ? 'selected' : ''}>${v.name}</option>`).join('')
+          : '<option value="">No variables yet — use the Variables button</option>';
+
+        card.innerHTML = `
+          <div class="out-card-title">
+            <span>Assignment</span>
+            <span class="out-card-delete" id="del-assign-${a.id}">Delete</span>
+          </div>
+          <div class="form-group">
+            <label>Variable</label>
+            <select id="var-assign-${a.id}">${varOptions}</select>
+          </div>
+          <div class="form-group">
+            <label>Operation</label>
+            <select id="op-assign-${a.id}">
+              <option value="set" ${a.op === 'set' ? 'selected' : ''}>Set to new value</option>
+              <option value="inc" ${a.op === 'inc' ? 'selected' : ''}>Increase ( ++ )</option>
+              <option value="dec" ${a.op === 'dec' ? 'selected' : ''}>Decrease ( -- )</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>${opLabel}</label>
+            <input type="text" id="val-assign-${a.id}" placeholder="${valPlaceholder}" value="${a.value || ''}" />
+          </div>
+        `;
+
+        assignmentsList.appendChild(card);
+
+        document.getElementById(`del-assign-${a.id}`).addEventListener('click', () => {
+          node.assignments = node.assignments.filter(x => x.id !== a.id);
+          renderAssignmentsPanel(node);
+          autoSaveLocal();
+        });
+        document.getElementById(`var-assign-${a.id}`).addEventListener('change', (e) => {
+          a.name = e.target.value;
+          autoSaveLocal();
+        });
+        document.getElementById(`op-assign-${a.id}`).addEventListener('change', (e) => {
+          a.op = e.target.value;
+          renderAssignmentsPanel(node);
+          autoSaveLocal();
+        });
+        document.getElementById(`val-assign-${a.id}`).addEventListener('input', (e) => {
+          a.value = e.target.value;
+          autoSaveLocal();
+        });
+      });
+    }
+
+    addAssignmentBtn.addEventListener('click', () => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (!node) return;
+      if (!variables.length) {
+        alert('Create a story variable first — click "Variables" in the toolbar — then add an assignment.');
+        return;
+      }
+      if (!node.assignments) node.assignments = [];
+      assignCount++;
+      node.assignments.push({ id: `Assign_${assignCount}`, name: variables[0].name, op: 'set', value: '' });
+      renderAssignmentsPanel(node);
+      autoSaveLocal();
+    });
+
+    // Compiles a node's structured variable assignments into SugarCube <<set>> lines
+    function assignmentCode(node) {
+      const assignments = node.assignments || [];
+      return assignments
+        .filter(a => a.name)
+        .map(a => {
+          let expr;
+          if (a.op === 'inc') {
+            const amt = (a.value !== '' && a.value != null) ? a.value : '1';
+            expr = `${a.name} + ${amt}`;
+          } else if (a.op === 'dec') {
+            const amt = (a.value !== '' && a.value != null) ? a.value : '1';
+            expr = `${a.name} - ${amt}`;
+          } else {
+            expr = (a.value !== '' && a.value != null) ? a.value : '0';
+          }
+          return `<<set ${a.name} to ${expr}>>`;
+        })
+        .join('\n');
+    }
+
+    // Combines structured assignments with any hand-written advanced code for a node
+    function getEffectiveCode(node) {
+      const ac = assignmentCode(node);
+      const custom = (node.code || '').trim();
+      if (ac && custom) return `${ac}\n${custom}`;
+      return ac || custom;
+    }
+
     document.getElementById('delete-node-btn').addEventListener('click', () => {
       if (!selectedNodeId) return;
       nodes = nodes.filter(n => n.id !== selectedNodeId);
@@ -1164,6 +1286,8 @@
       variablesDatalist.innerHTML = variables.map(v => `<option value="${v.name}"></option>`).join('');
       insertVarSelect.innerHTML = '<option value="">+ Insert</option>' +
         variables.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) renderAssignmentsPanel(node);
     }
 
     // Local Storage Operations
@@ -1175,7 +1299,8 @@
         connections,
         variables,
         nodeCount,
-        varCount
+        varCount,
+        assignCount
       });
     }
 
@@ -1186,10 +1311,12 @@
 
         if (data.nodeCount) nodeCount = data.nodeCount;
         if (data.varCount) varCount = data.varCount;
+        if (data.assignCount) assignCount = data.assignCount;
         if (Array.isArray(data.variables)) variables = data.variables;
 
         if (Array.isArray(data.nodes)) {
           data.nodes.forEach(n => {
+            if (!Array.isArray(n.assignments)) n.assignments = [];
             nodes.push(n);
             renderNodeDOM(n);
           });
@@ -1551,10 +1678,11 @@
     function renderPreviewNode(node) {
       currentPreviewNodeId = node.id;
 
-      if (node.code) {
+      const effectiveCode = getEffectiveCode(node);
+      if (effectiveCode) {
         const setRe = /<<set\s+\$([a-zA-Z_][a-zA-Z0-9_]*)\s+to\s+(.+?)>>/g;
         let m;
-        while ((m = setRe.exec(node.code))) {
+        while ((m = setRe.exec(effectiveCode))) {
           try { previewVars['$' + m[1]] = evalExpr(m[2]); } catch (e) { }
         }
       }
@@ -1633,7 +1761,8 @@
 
     function buildPassageBody(node) {
       let body = '';
-      if (node.code) body += `${node.code}\n`;
+      const effectiveCode = getEffectiveCode(node);
+      if (effectiveCode) body += `${effectiveCode}\n`;
       body += `${node.text}`;
 
       const outConnections = connections.filter(c => c.from === node.id);
@@ -1710,7 +1839,7 @@ ${passagesHtml}</tw-storydata>
     function generatePlayableHTML() {
       const storyTitle = 'Narrative Editor Project';
       const storyData = {
-        nodes: nodes.map(n => ({ id: n.id, type: n.type, role: n.role, title: n.title, text: n.text, code: n.code })),
+        nodes: nodes.map(n => ({ id: n.id, type: n.type, role: n.role, title: n.title, text: n.text, code: getEffectiveCode(n) })),
         connections: connections.map(c => ({ from: c.from, to: c.to, label: c.label, conditionVar: c.conditionVar, conditionOp: c.conditionOp, conditionVal: c.conditionVal })),
         variables: variables.map(v => ({ name: v.name, value: v.value }))
       };
