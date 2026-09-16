@@ -525,6 +525,7 @@
       <div class="form-group">
         <label>Story / Passage Text</label>
         <textarea id="prop-text"></textarea>
+        <span style="color:var(--text-muted); font-size:0.72rem; line-height:1.4;">Tip: Type a variable name (e.g. <code>$health</code>) anywhere in this text and it will be replaced with its live value in Preview and in the exported story.</span>
       </div>
 
       <div class="form-group">
@@ -1673,6 +1674,14 @@
       return Function('previewVars', `"use strict"; return (${transformed});`)(previewVars);
     }
 
+    // Replaces $variableName references in passage text with their current live value
+    function interpolateText(text) {
+      return text.replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, (m, n) => {
+        const key = '$' + n;
+        return Object.prototype.hasOwnProperty.call(previewVars, key) ? String(previewVars[key]) : m;
+      });
+    }
+
     function initPreviewVars() {
       previewVars = {};
       variables.forEach(v => {
@@ -1694,7 +1703,7 @@
       }
 
       previewPassageTitle.innerText = node.title;
-      previewTextEl.innerText = node.text;
+      previewTextEl.innerText = interpolateText(node.text);
 
       const outConns = connections.filter(c => c.from === node.id).filter(c => {
         if (!c.conditionVar || c.conditionVal === '') return true;
@@ -1886,6 +1895,13 @@ ${passagesHtml}</tw-storydata>
       return Function('vars', '"use strict"; return (' + t + ');')(vars);
     }
 
+    function interpolateText(text) {
+      return text.replace(/\\$([a-zA-Z_][a-zA-Z0-9_]*)/g, function (m, n) {
+        var key = '$' + n;
+        return Object.prototype.hasOwnProperty.call(vars, key) ? String(vars[key]) : m;
+      });
+    }
+
     function initVars() {
       vars = {};
       STORY.variables.forEach(function (v) {
@@ -1909,7 +1925,7 @@ ${passagesHtml}</tw-storydata>
       }
 
       document.getElementById('passage-title').textContent = node.title;
-      document.getElementById('passage-text').textContent = node.text;
+      document.getElementById('passage-text').textContent = interpolateText(node.text);
 
       var outConns = STORY.connections.filter(function (c) { return c.from === node.id; }).filter(function (c) {
         if (!c.conditionVar || c.conditionVal === '') return true;
