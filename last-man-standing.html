@@ -72,6 +72,14 @@
   #arena-label { font-size: 11px; color: #b8a693; text-align: right; }
   #arena-code { font-size: 13px; color: #f5ebe0; font-weight: bold; letter-spacing: 1px; }
   #alive-count { font-size: 11px; color: #b8a693; }
+  #room-info { font-size: 11px; color: #d4a373; margin-top: 2px; }
+  #room-toast {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(122,46,46,.92); border: 1px solid #f87171; padding: 5px 12px;
+    border-radius: 20px; font-size: 11px; color: #ffdada; z-index: 7; text-align: center;
+    max-width: 90%; opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  #room-toast.show { opacity: 1; }
 
   /* Radial countdown ring */
   .base-timer { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
@@ -158,8 +166,8 @@
 
   <!-- JOIN SCREEN -->
   <div id="screen-join">
-    <h1>Last Man Standing</h1>
-    <p>Top-down arena battle royale. Grab weapons &amp; shields, dodge the roaming enemies, and be the last one standing. A fresh arena opens automatically every 60 seconds — up to 10 players per arena.</p>
+    <h1>⚔️ Last Man Standing</h1>
+    <p>Top-down arena battle royale. The arena is a 5x5 grid of rooms linked by doors — you only ever see your own room. Grab weapons &amp; shields, dodge roaming enemies, and be the last one standing. A room locks once 2 players are inside, and unlocks when one leaves or dies. A fresh arena opens automatically every 60 seconds — up to 12 players per arena.</p>
 
     <div class="totp-box">
       <div class="totp-caption">Current Arena</div>
@@ -234,9 +242,11 @@
       </div>
     </div>
     <div id="alive-count">Players alive: --</div>
+    <div id="room-info">Room: --</div>
 
     <div id="game-container">
       <div id="spectator-banner" class="hidden">Spectating until next round</div>
+      <div id="room-toast"></div>
       <div id="winner-banner" class="hidden"><h2 id="winner-text"></h2><p>Next arena starts automatically</p></div>
     </div>
 
@@ -268,7 +278,9 @@ const MOVE_COOLDOWN = 150;
 const WEAPON_DURATION = 10000;
 const SHIELD_DURATION = 5000;
 const ITEM_RESPAWN_MS = 12000;
-const MAX_PLAYERS = 10;
+const GRID_SIZE = 5; // 5x5 grid of rooms
+const DOOR_LO = 5, DOOR_HI = 7; // door gap tile range (0-indexed) on each room wall
+const MAX_PLAYERS = 12;
 const APP_ID = 'last-man-standing-2026-v1';
 const FULL_DASH_ARRAY = 283;
 const WARNING_THRESHOLD = 15;
@@ -280,40 +292,74 @@ function generateDynamicCode(bucket) {
   return Math.abs(Math.floor(hash)).toString(36).substring(0, 6).toUpperCase().padStart(6, 'X');
 }
 
-const MAP = [];
-for (let r = 0; r < ROWS; r++) {
-  const row = [];
-  for (let c = 0; c < COLS; c++) {
-    let wall = 0;
-    if (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1) wall = 1;
-    if (r >= 5 && r <= 7 && c >= 5 && c <= 7) wall = 1; // center pillar block
-    if ((r === 3 && c === 3) || (r === 3 && c === 9) || (r === 9 && c === 3) || (r === 9 && c === 9)) wall = 1;
-    row.push(wall);
-  }
-  MAP.push(row);
+/* ---------------------------------------------------------------------
+   ROOM GRID
+   A 5x5 grid of rooms connected by doors to every orthogonal neighbor
+   (a plain grid graph — no missing cells). Room "type" is just a label:
+
+     x 0 0 0 x        x = corner room  (2 doors)  — linked, no spawn
+     0 X X X 0        0 = spawn room   (3 doors)  — one of 12 start rooms
+     0 X X X 0        X = interior room(4 doors)  — linked, no spawn
+     0 X X X 0
+     x 0 0 0 x
+
+   Players never see anything outside their current room.
+--------------------------------------------------------------------- */
+function isInterior(row, col) { return row >= 1 && row <= 3 && col >= 1 && col <= 3; }
+function isCorner(row, col) { return (row === 0 || row === GRID_SIZE - 1) && (col === 0 || col === GRID_SIZE - 1); }
+function roomNeighbors(row, col) {
+  return { up: row > 0, down: row < GRID_SIZE - 1, left: col > 0, right: col < GRID_SIZE - 1 };
 }
+function roomTypeLabel(row, col) { return isCorner(row, col) ? 'Corner' : (isInterior(row, col) ? 'Interior' : 'Spawn'); }
 
-const SPAWNS = [
-  { x: 1, y: 1 }, { x: 11, y: 1 }, { x: 1, y: 11 }, { x: 11, y: 11 },
-  { x: 6, y: 1 }, { x: 6, y: 11 }, { x: 1, y: 6 }, { x: 11, y: 6 },
-  { x: 3, y: 1 }, { x: 9, y: 11 }
+const SPAWN_ROOMS = [
+  { row: 0, col: 1 }, { row: 0, col: 2 }, { row: 0, col: 3 },
+  { row: 1, col: 0 }, { row: 1, col: 4 },
+  { row: 2, col: 0 }, { row: 2, col: 4 },
+  { row: 3, col: 0 }, { row: 3, col: 4 },
+  { row: 4, col: 1 }, { row: 4, col: 2 }, { row: 4, col: 3 }
+];
+const INTERIOR_ROOMS = [];
+for (let r = 1; r <= 3; r++) for (let c = 1; c <= 3; c++) INTERIOR_ROOMS.push({ row: r, col: c });
+const CORNER_ROOMS = [
+  { row: 0, col: 0 }, { row: 0, col: 4 }, { row: 4, col: 0 }, { row: 4, col: 4 }
 ];
 
-const DEFAULT_ITEMS = [
-  { id: 'w1', type: 'weapon', x: 2, y: 2 },
-  { id: 'w2', type: 'weapon', x: 10, y: 2 },
-  { id: 'w3', type: 'weapon', x: 2, y: 10 },
-  { id: 'w4', type: 'weapon', x: 10, y: 10 },
-  { id: 's1', type: 'shield', x: 6, y: 2 },
-  { id: 's2', type: 'shield', x: 2, y: 6 },
-  { id: 's3', type: 'shield', x: 10, y: 6 }
-];
+// Builds the local 13x13 tile map for a room, given which sides have doors.
+function buildRoomMap(neighbors, hasPillar) {
+  const m = [];
+  for (let r = 0; r < ROWS; r++) {
+    const row = [];
+    for (let c = 0; c < COLS; c++) {
+      const isBorder = (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1);
+      let wall = isBorder ? 1 : 0;
+      if (isBorder) {
+        if (r === 0 && neighbors.up && c >= DOOR_LO && c <= DOOR_HI) wall = 0;
+        if (r === ROWS - 1 && neighbors.down && c >= DOOR_LO && c <= DOOR_HI) wall = 0;
+        if (c === 0 && neighbors.left && r >= DOOR_LO && r <= DOOR_HI) wall = 0;
+        if (c === COLS - 1 && neighbors.right && r >= DOOR_LO && r <= DOOR_HI) wall = 0;
+      }
+      row.push(wall);
+    }
+    m.push(row);
+  }
+  if (hasPillar) m[6][6] = 1; // small cover pillar in interior rooms only
+  return m;
+}
+function getRoomMap(row, col) { return buildRoomMap(roomNeighbors(row, col), isInterior(row, col)); }
+// All interior rooms share the same 4-door + pillar shape, so enemy AI (which only
+// ever lives in interior rooms) can share one map instance for collision checks.
+const ENEMY_ROOM_MAP = getRoomMap(1, 1);
 
-const DEFAULT_ENEMIES = [
-  { id: 'e1', x: 6, y: 3 },
-  { id: 'e2', x: 3, y: 6 },
-  { id: 'e3', x: 9, y: 6 }
-];
+const DEFAULT_ITEMS = [];
+INTERIOR_ROOMS.forEach((rm, idx) => {
+  DEFAULT_ITEMS.push({ id: `item-i${idx}`, type: idx % 2 === 0 ? 'weapon' : 'shield', roomRow: rm.row, roomCol: rm.col, x: 4, y: 4 });
+});
+CORNER_ROOMS.forEach((rm, idx) => {
+  DEFAULT_ITEMS.push({ id: `item-c${idx}`, type: 'weapon', roomRow: rm.row, roomCol: rm.col, x: 6, y: 6 });
+});
+
+const DEFAULT_ENEMIES = INTERIOR_ROOMS.map((rm, idx) => ({ id: `enemy-i${idx}`, roomRow: rm.row, roomCol: rm.col, x: 8, y: 4 }));
 
 function freshItems() { return DEFAULT_ITEMS.map(i => ({ ...i, available: true, claimedBy: null, claimedAt: 0 })); }
 function freshEnemies() { return DEFAULT_ENEMIES.map(e => ({ ...e, renderX: e.x * TILE, renderY: e.y * TILE })); }
@@ -349,10 +395,11 @@ let inLobbyPhase = true;
 let manualStartTriggered = false;
 
 const me = {
-  x: 1, y: 1, renderX: TILE, renderY: TILE, facing: 'down',
+  roomRow: 0, roomCol: 1, x: 6, y: 6, renderX: 6 * TILE, renderY: 6 * TILE, facing: 'down',
   health: 10, alive: true, hasWeapon: false, weaponUntil: 0,
   hasShield: false, shieldUntil: 0, isAttacking: false, lastMove: 0
 };
+let currentRoomMap = getRoomMap(me.roomRow, me.roomCol);
 
 function isHost() { return isHostFlag; }
 function aliveRoster() {
@@ -364,6 +411,19 @@ function aliveRoster() {
   return list;
 }
 
+// A room's occupancy — used to lock doors once 2 (alive, non-spectator) players are
+// inside it, and to auto-unlock as soon as one leaves or dies (no stored flag needed,
+// this is just recomputed on demand from current player state).
+function playersInRoom(row, col) {
+  let count = 0;
+  if (me.alive && !isSpectator && me.roomRow === row && me.roomCol === col) count++;
+  Object.keys(peers).forEach(id => {
+    const p = peers[id];
+    if (p && p.name && p.alive && !p.spectator && p.roomRow === row && p.roomCol === col) count++;
+  });
+  return count;
+}
+
 /* =====================================================================
    PIXI SETUP
 ===================================================================== */
@@ -372,26 +432,61 @@ await app.init({ width: VIEW, height: VIEW, backgroundColor: 0x0e0b08, antialias
 document.getElementById('game-container').prepend(app.canvas);
 
 const mapLayer = new PIXI.Graphics();
+const doorLayer = new PIXI.Graphics();
 const itemLayer = new PIXI.Graphics();
 const enemyLayer = new PIXI.Graphics();
 const playerLayer = new PIXI.Graphics();
 const labelLayer = new PIXI.Container();
-app.stage.addChild(mapLayer, itemLayer, enemyLayer, playerLayer, labelLayer);
+app.stage.addChild(mapLayer, doorLayer, itemLayer, enemyLayer, playerLayer, labelLayer);
 
 function drawMap() {
   mapLayer.clear();
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const isWall = MAP[r][c] === 1;
-      mapLayer.rect(c * TILE, r * TILE, TILE, TILE)
-        .fill(isWall ? '#3a2f22' : ((r + c) % 2 === 0 ? '#20180f' : '#241b11'));
+      const isWall = currentRoomMap[r][c] === 1;
+      const isBorder = (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1);
+      const isDoor = isBorder && !isWall;
+      let fillColor = isWall ? '#3a2f22' : ((r + c) % 2 === 0 ? '#20180f' : '#241b11');
+      if (isDoor) fillColor = '#6b4a2b';
+      mapLayer.rect(c * TILE, r * TILE, TILE, TILE).fill(fillColor);
       if (isWall) {
         mapLayer.rect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4).stroke({ width: 1, color: '#5a4632' });
+      } else if (isDoor) {
+        mapLayer.rect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4).stroke({ width: 1, color: '#d4a373' });
       }
     }
   }
 }
 drawMap();
+
+// Redraws a thin red barrier over any door whose neighboring room is currently
+// locked (2 alive players already inside it) — a visual warning before you walk in.
+function updateDoorOverlay() {
+  doorLayer.clear();
+  const n = roomNeighbors(me.roomRow, me.roomCol);
+  const bar = 8;
+  if (n.up && playersInRoom(me.roomRow - 1, me.roomCol) >= 2) {
+    doorLayer.rect(DOOR_LO * TILE, 0, (DOOR_HI - DOOR_LO + 1) * TILE, bar).fill({ color: '#f87171', alpha: 0.85 });
+  }
+  if (n.down && playersInRoom(me.roomRow + 1, me.roomCol) >= 2) {
+    doorLayer.rect(DOOR_LO * TILE, ROWS * TILE - bar, (DOOR_HI - DOOR_LO + 1) * TILE, bar).fill({ color: '#f87171', alpha: 0.85 });
+  }
+  if (n.left && playersInRoom(me.roomRow, me.roomCol - 1) >= 2) {
+    doorLayer.rect(0, DOOR_LO * TILE, bar, (DOOR_HI - DOOR_LO + 1) * TILE).fill({ color: '#f87171', alpha: 0.85 });
+  }
+  if (n.right && playersInRoom(me.roomRow, me.roomCol + 1) >= 2) {
+    doorLayer.rect(COLS * TILE - bar, DOOR_LO * TILE, bar, (DOOR_HI - DOOR_LO + 1) * TILE).fill({ color: '#f87171', alpha: 0.85 });
+  }
+}
+
+let roomToastTimer = null;
+function showRoomToast(text) {
+  const el = document.getElementById('room-toast');
+  el.textContent = text;
+  el.classList.add('show');
+  if (roomToastTimer) clearTimeout(roomToastTimer);
+  roomToastTimer = setTimeout(() => el.classList.remove('show'), 1200);
+}
 
 const nameLabels = {}; // id -> PIXI.Text
 function getLabel(id) {
@@ -411,12 +506,15 @@ function currentBucket() { return Math.floor(Date.now() / BUCKET_MS); }
 function roomNameFor(bucket) { return 'lms-arena-' + generateDynamicCode(bucket); }
 
 function resetLocalRoundState(spawnIndex) {
-  const spawn = SPAWNS[spawnIndex % SPAWNS.length];
-  me.x = spawn.x; me.y = spawn.y;
-  me.renderX = spawn.x * TILE; me.renderY = spawn.y * TILE;
+  const spawnRoom = SPAWN_ROOMS[spawnIndex % SPAWN_ROOMS.length];
+  me.roomRow = spawnRoom.row; me.roomCol = spawnRoom.col;
+  me.x = 6; me.y = 6;
+  me.renderX = 6 * TILE; me.renderY = 6 * TILE;
   me.health = 10; me.alive = true; me.hasWeapon = false; me.weaponUntil = 0;
   me.hasShield = false; me.shieldUntil = 0; me.isAttacking = false; me.facing = 'down';
   appliedClaims = {};
+  currentRoomMap = getRoomMap(me.roomRow, me.roomCol);
+  drawMap();
   document.getElementById('winner-banner').classList.add('hidden');
 }
 
@@ -523,7 +621,8 @@ function connectToRoom(bucket) {
 
 function myStatePayload() {
   return {
-    name: myName, x: me.x, y: me.y, health: me.health, alive: me.alive,
+    name: myName, x: me.x, y: me.y, roomRow: me.roomRow, roomCol: me.roomCol,
+    health: me.health, alive: me.alive,
     hasWeapon: me.hasWeapon, weaponUntil: me.weaponUntil,
     hasShield: me.hasShield, shieldUntil: me.shieldUntil,
     isAttacking: me.isAttacking, facing: me.facing, spectator: isSpectator
@@ -552,7 +651,7 @@ function applyItemClaims() {
 
 function checkPickupHere() {
   if (isSpectator || !me.alive) return;
-  const item = items.find(i => i.available && i.x === me.x && i.y === me.y);
+  const item = items.find(i => i.available && i.roomRow === me.roomRow && i.roomCol === me.roomCol && i.x === me.x && i.y === me.y);
   if (item) {
     if (isHost()) processPickup(item.id, selfId);
     else sendPickup({ itemId: item.id });
@@ -568,9 +667,40 @@ function tryMove(dx, dy, facing) {
   if (now - me.lastMove < MOVE_COOLDOWN) return;
   me.facing = facing;
   const nx = me.x + dx, ny = me.y + dy;
-  if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) { broadcastMe(); return; }
-  if (MAP[ny][nx] === 1) { broadcastMe(); return; }
-  me.x = nx; me.y = ny; me.lastMove = now;
+
+  // Ordinary move within the current room.
+  if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS) {
+    if (currentRoomMap[ny][nx] === 1) { broadcastMe(); return; }
+    me.x = nx; me.y = ny; me.lastMove = now;
+    broadcastMe();
+    checkPickupHere();
+    return;
+  }
+
+  // Stepping through a door into a neighboring room.
+  let targetRow = me.roomRow, targetCol = me.roomCol, entryX = me.x, entryY = me.y;
+  if (ny < 0) { targetRow -= 1; entryY = ROWS - 1; }
+  else if (ny >= ROWS) { targetRow += 1; entryY = 0; }
+  else if (nx < 0) { targetCol -= 1; entryX = COLS - 1; }
+  else if (nx >= COLS) { targetCol += 1; entryX = 0; }
+
+  if (targetRow < 0 || targetRow >= GRID_SIZE || targetCol < 0 || targetCol >= GRID_SIZE) {
+    broadcastMe(); return; // no room out there (shouldn't happen — no door leads to it)
+  }
+
+  if (playersInRoom(targetRow, targetCol) >= 2) {
+    me.lastMove = now;
+    showRoomToast('Room locked — 2 players already inside');
+    broadcastMe();
+    return;
+  }
+
+  me.roomRow = targetRow; me.roomCol = targetCol;
+  me.x = entryX; me.y = entryY;
+  me.renderX = entryX * TILE; me.renderY = entryY * TILE;
+  me.lastMove = now;
+  currentRoomMap = getRoomMap(me.roomRow, me.roomCol);
+  drawMap();
   broadcastMe();
   checkPickupHere();
 }
@@ -611,29 +741,34 @@ function stepEnemies() {
   const now = Date.now();
   if (now - lastEnemyStep < 500) return;
   lastEnemyStep = now;
-  const targets = aliveRoster().filter(p => p.alive && !p.spectator).map(p => {
-    if (p.id === selfId) return { x: me.x, y: me.y };
-    const pd = peers[p.id];
-    return pd ? { x: pd.x, y: pd.y } : null;
-  }).filter(Boolean);
-  if (targets.length === 0) return;
 
   enemies.forEach(enemy => {
+    const targets = [];
+    if (me.alive && !isSpectator && me.roomRow === enemy.roomRow && me.roomCol === enemy.roomCol) {
+      targets.push({ x: me.x, y: me.y });
+    }
+    Object.keys(peers).forEach(id => {
+      const p = peers[id];
+      if (p && p.name && p.alive && !p.spectator && p.roomRow === enemy.roomRow && p.roomCol === enemy.roomCol && p.x !== undefined) {
+        targets.push({ x: p.x, y: p.y });
+      }
+    });
+    if (targets.length === 0) return;
+
     let best = null, bestDist = Infinity;
     targets.forEach(t => {
       const d = Math.abs(t.x - enemy.x) + Math.abs(t.y - enemy.y);
       if (d < bestDist) { bestDist = d; best = t; }
     });
-    if (!best) return;
     const dx = best.x - enemy.x, dy = best.y - enemy.y;
     let mx = 0, my = 0;
     if (Math.abs(dx) > Math.abs(dy)) mx = Math.sign(dx); else if (dy !== 0) my = Math.sign(dy); else mx = Math.sign(dx);
     let nx = enemy.x + mx, ny = enemy.y + my;
-    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || MAP[ny][nx] === 1) {
+    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || ENEMY_ROOM_MAP[ny][nx] === 1) {
       // try the other axis
       nx = enemy.x + (mx === 0 ? Math.sign(dx) : 0);
       ny = enemy.y + (my === 0 ? Math.sign(dy) : 0);
-      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || MAP[ny][nx] === 1) { nx = enemy.x; ny = enemy.y; }
+      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || ENEMY_ROOM_MAP[ny][nx] === 1) { nx = enemy.x; ny = enemy.y; }
     }
     enemy.x = nx; enemy.y = ny;
   });
@@ -644,7 +779,7 @@ function hostTick() {
   stepEnemies();
   const now = Date.now();
   items.forEach(i => { if (!i.available && now - i.claimedAt > ITEM_RESPAWN_MS) { i.available = true; i.claimedBy = null; } });
-  sendWorldState({ items, enemies: enemies.map(e => ({ id: e.id, x: e.x, y: e.y })) });
+  sendWorldState({ items, enemies: enemies.map(e => ({ id: e.id, roomRow: e.roomRow, roomCol: e.roomCol, x: e.x, y: e.y })) });
 }
 
 /* =====================================================================
@@ -655,11 +790,12 @@ function damageTick() {
   const now = Date.now();
   let underAttack = false;
 
-  enemies.forEach(en => { if (en.x === me.x && en.y === me.y) underAttack = true; });
+  enemies.forEach(en => { if (en.roomRow === me.roomRow && en.roomCol === me.roomCol && en.x === me.x && en.y === me.y) underAttack = true; });
 
   Object.keys(peers).forEach(id => {
     const p = peers[id];
     if (!p || !p.alive || p.spectator) return;
+    if (p.roomRow !== me.roomRow || p.roomCol !== me.roomCol) return;
     if (!(p.hasWeapon && p.weaponUntil > now)) return;
     if (!p.isAttacking) return;
     const dist = Math.max(Math.abs(p.x - me.x), Math.abs(p.y - me.y));
@@ -785,15 +921,17 @@ function drawEntity(g, px, py, color, alive, spectator) {
 function render() {
   // interpolate enemies
   enemies.forEach(e => {
-    e.renderX += (e.x * TILE - e.renderX) * 0.25;
-    e.renderY += (e.y * TILE - e.renderY) * 0.25;
+    e.renderX = e.renderX === undefined ? e.x * TILE : e.renderX + (e.x * TILE - e.renderX) * 0.25;
+    e.renderY = e.renderY === undefined ? e.y * TILE : e.renderY + (e.y * TILE - e.renderY) * 0.25;
   });
   me.renderX += (me.x * TILE - me.renderX) * 0.3;
   me.renderY += (me.y * TILE - me.renderY) * 0.3;
 
+  updateDoorOverlay();
+
   itemLayer.clear();
   items.forEach(i => {
-    if (!i.available) return;
+    if (!i.available || i.roomRow !== me.roomRow || i.roomCol !== me.roomCol) return;
     const cx = i.x * TILE + TILE / 2, cy = i.y * TILE + TILE / 2;
     if (i.type === 'weapon') {
       itemLayer.poly([cx, cy - 10, cx + 9, cy + 8, cx - 9, cy + 8]).fill('#f87171').stroke({ width: 2, color: '#7a2e2e' });
@@ -804,21 +942,24 @@ function render() {
 
   enemyLayer.clear();
   enemies.forEach(e => {
+    if (e.roomRow !== me.roomRow || e.roomCol !== me.roomCol) return;
     enemyLayer.rect(e.renderX + 6, e.renderY + 6, TILE - 12, TILE - 12).fill('#8b1a1a').stroke({ width: 2, color: '#2a0a0a' });
   });
 
   playerLayer.clear();
   Object.keys(nameLabels).forEach(id => { if (id !== selfId && !peers[id]) { nameLabels[id].destroy(); delete nameLabels[id]; } });
 
-  // other players
+  // other players — only those sharing my current room are visible at all
   Object.keys(peers).forEach(id => {
     const p = peers[id];
-    if (!p || !p.name || p.x === undefined) return;
+    const inRoom = p && p.name && p.x !== undefined && p.roomRow === me.roomRow && p.roomCol === me.roomCol;
+    const lbl = getLabel(id);
+    lbl.visible = !!inRoom;
+    if (!inRoom) return;
     const px = p.x * TILE, py = p.y * TILE;
     drawEntity(playerLayer, px, py, colorForId(id), p.alive, p.spectator);
     if (p.hasShield && p.shieldUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
     if (p.hasWeapon && p.weaponUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
-    const lbl = getLabel(id);
     lbl.text = p.name + (p.spectator ? ' (spec)' : '');
     lbl.position.set(px + TILE / 2, py - 3);
   });
@@ -828,6 +969,7 @@ function render() {
   if (me.hasShield && me.shieldUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
   if (me.hasWeapon && me.weaponUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
   const myLbl = getLabel(selfId);
+  myLbl.visible = true;
   myLbl.text = myName + ' (you)';
   myLbl.position.set(me.renderX + TILE / 2, me.renderY - 3);
 
@@ -849,6 +991,10 @@ function render() {
   } else {
     sPill.textContent = 'no shield'; sPill.classList.remove('active-shield');
   }
+
+  const roomHere = playersInRoom(me.roomRow, me.roomCol);
+  document.getElementById('room-info').textContent =
+    `Room (${me.roomRow + 1},${me.roomCol + 1}) · ${roomTypeLabel(me.roomRow, me.roomCol)} · ${roomHere}/2 here`;
 
   const roster = aliveRoster();
   const aliveN = roster.filter(p => p.alive && !p.spectator).length;
