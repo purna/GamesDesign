@@ -1111,8 +1111,9 @@
         const card = document.createElement('div');
         card.className = 'out-card';
 
-        const opLabel = a.op === 'inc' ? 'Increase By' : (a.op === 'dec' ? 'Decrease By' : 'New Value');
-        const valPlaceholder = a.op === 'set' ? 'e.g. true, 5, $other' : '1';
+        const opLabels = { set: 'New Value', inc: 'Increase By', dec: 'Decrease By', mul: 'Multiply By', div: 'Divide By' };
+        const opLabel = opLabels[a.op] || 'New Value';
+        const valPlaceholder = a.op === 'set' ? 'e.g. true, 5, "text", $other' : (a.op === 'mul' || a.op === 'div') ? '2' : '1';
         const varOptions = variables.length
           ? variables.map(v => `<option value="${v.name}" ${v.name === a.name ? 'selected' : ''}>${v.name}</option>`).join('')
           : '<option value="">No variables yet — use the Variables button</option>';
@@ -1129,9 +1130,11 @@
           <div class="form-group">
             <label>Operation</label>
             <select id="op-assign-${a.id}">
-              <option value="set" ${a.op === 'set' ? 'selected' : ''}>Set to new value</option>
+              <option value="set" ${a.op === 'set' ? 'selected' : ''}>Set to new value ( = )</option>
               <option value="inc" ${a.op === 'inc' ? 'selected' : ''}>Increase ( ++ )</option>
               <option value="dec" ${a.op === 'dec' ? 'selected' : ''}>Decrease ( -- )</option>
+              <option value="mul" ${a.op === 'mul' ? 'selected' : ''}>Multiply ( * )</option>
+              <option value="div" ${a.op === 'div' ? 'selected' : ''}>Divide ( / )</option>
             </select>
           </div>
           <div class="form-group">
@@ -1184,14 +1187,17 @@
         .filter(a => a.name)
         .map(a => {
           let expr;
+          const hasVal = a.value !== '' && a.value != null;
           if (a.op === 'inc') {
-            const amt = (a.value !== '' && a.value != null) ? a.value : '1';
-            expr = `${a.name} + ${amt}`;
+            expr = `${a.name} + ${hasVal ? a.value : '1'}`;
           } else if (a.op === 'dec') {
-            const amt = (a.value !== '' && a.value != null) ? a.value : '1';
-            expr = `${a.name} - ${amt}`;
+            expr = `${a.name} - ${hasVal ? a.value : '1'}`;
+          } else if (a.op === 'mul') {
+            expr = `${a.name} * ${hasVal ? a.value : '2'}`;
+          } else if (a.op === 'div') {
+            expr = `${a.name} / ${hasVal ? a.value : '2'}`;
           } else {
-            expr = (a.value !== '' && a.value != null) ? a.value : '0';
+            expr = hasVal ? a.value : '0';
           }
           return `<<set ${a.name} to ${expr}>>`;
         })
