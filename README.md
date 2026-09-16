@@ -7,3 +7,4 @@
 [Last Man Standing](https://purna.github.io/GamesDesign/last-man-standing.html)
 
 
+[Induction - Myself](https://purna.github.io/GamesDesign/induction-myself.html)
