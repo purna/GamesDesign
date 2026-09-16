@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adventures With Anxiety: Year 2 Induction</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+    * { box-sizing: border-box; user-select: none; }
+
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: 'Comic Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game-viewport {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      max-height: 880px;
+      background: #222;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 4px solid #000;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+      overflow: hidden;
+    }
+
+    .hud-bar {
+      background: #000;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #ff4040;
+    }
+
+    .hud-title { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; }
+
+    .hud-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .hud-btn {
+      background: #ff4040;
+      border: 2px solid #fff;
+      color: #fff;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: color 0.1s, background 0.1s;
+    }
+
+    .hud-btn:hover, .hud-btn:active, .hud-btn:focus {
+      color: #ffffff !important;
+      background: #d32f2f;
+    }
+
+    .hud-btn-reset {
+      background: #444;
+      border-color: #aaa;
+    }
+
+    .hud-btn-reset:hover, .hud-btn-reset:active, .hud-btn-reset:focus {
+      color: #ffffff !important;
+      background: #666;
+    }
+
+    .gauge-container { 
+      background: #111; 
+      padding: 8px 16px; 
+      border-bottom: 2px solid #000; 
+      position: relative;
+    }
+    
+    .gauge-label { 
+      font-size: 0.75rem; 
+      color: #ff4040; 
+      font-weight: 900; 
+      display: flex; 
+      justify-content: space-between; 
+      margin-bottom: 4px; 
+    }
+
+    .gauge-track { background: #333; height: 16px; border: 2px solid #000; }
+    .gauge-fill { background: #ff4040; height: 100%; width: 40%; transition: width 0.4s ease; }
+
+    .stage {
+      flex-grow: 1;
+      position: relative;
+      background: radial-gradient(circle, #333 0%, #111 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .speech-container { width: 100%; margin-bottom: auto; margin-top: 10px; }
+    .wolf-bubble {
+      background: #000;
+      color: #fff;
+      border: 3px solid #ff4040;
+      padding: 12px 14px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1.3;
+      box-shadow: 4px 4px 0px rgba(255, 64, 64, 0.4);
+    }
+
+    .desc-box {
+      background: #fff;
+      color: #000;
+      border: 3px solid #000;
+      padding: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 10px;
+      box-shadow: 3px 3px 0px #000;
+    }
+
+    .characters-svg {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    #threat-star {
+      transform-origin: 70px 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .choices-panel {
+      background: #000;
+      padding: 14px;
+      border-top: 3px solid #ff4040;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .choice-btn {
+      background: #222;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 3px 3px 0px #ff4040;
+      transition: background 0.1s, transform 0.1s, color 0.1s;
+    }
+
+    .choice-btn:hover, 
+    .choice-btn:active, 
+    .choice-btn:focus { 
+      background: #ff4040; 
+      color: #ffffff !important; 
+      border-color: #ffffff; 
+      box-shadow: 3px 3px 0px #ffffff; 
+    }
+
+    /* Larger & Prominent Credits Bar */
+    .credits-bar {
+      background: #000000;
+      border-top: 2px solid #ff4040;
+      padding: 10px 14px;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #e0e0e0;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .credits-bar a {
+      color: #ff4040;
+      text-decoration: underline;
+      transition: color 0.2s, background 0.2s;
+      padding: 2px 4px;
+    }
+
+    .credits-bar a:hover, .credits-bar a:focus {
+      color: #ffffff;
+      background: #ff4040;
+      text-decoration: none;
+    }
+
+    .intermission-card {
+      background: #000;
+      border: 4px solid #ff4040;
+      padding: 20px;
+      text-align: center;
+      width: 100%;
+      box-shadow: 5px 5px 0px #fff;
+    }
+    .intermission-card h2 { color: #ff4040; font-size: 1.6rem; margin: 0 0 10px 0; text-transform: uppercase; }
+    .intermission-card p { font-weight: 700; font-size: 0.95rem; line-height: 1.4; color: #ccc; }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .game-over-box {
+      background: #000;
+      border: 4px solid #ff4040;
+      padding: 24px 18px;
+      text-align: center;
+      box-shadow: 6px 6px 0px #fff;
+    }
+
+    .game-over-box h2 {
+      color: #ff4040;
+      font-size: 2rem;
+      margin: 0 0 10px 0;
+      text-transform: uppercase;
+    }
+
+    .game-over-box p {
+      color: #fff;
+      font-size: 1rem;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .contacts-card {
+      background: #fff;
+      color: #000;
+      border: 4px solid #000;
+      padding: 14px;
+      box-shadow: 4px 4px 0px #ff4040;
+      font-size: 0.85rem;
+    }
+    .contacts-card h3 { margin: 0 0 8px 0; font-size: 1.1rem; text-transform: uppercase; }
+    .contacts-card ul { margin: 0; padding-left: 18px; font-weight: 700; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="game-viewport">
+    <div class="hud-bar">
+      <span id="round-title" class="hud-title">ROUND 1: WORKLOAD, SLEEP & HOME</span>
+      <div class="hud-controls">
+        <button id="reset-btn" class="hud-btn hud-btn-reset">RESET</button>
+        <button id="audio-toggle-btn" class="hud-btn">SOUND: OFF</button>
+      </div>
+    </div>
+
+    <div class="gauge-container">
+      <div class="gauge-label">
+        <span>ANXIETY LEVEL</span>
+        <span id="stress-num">40%</span>
+      </div>
+      <div class="gauge-track">
+        <div id="gauge-fill" class="gauge-fill"></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="speech-container">
+        <div id="wolf-bubble" class="wolf-bubble">LOADING...</div>
+        <div id="desc-box" class="desc-box">Loading...</div>
+      </div>
+
+      <div class="characters-svg">
+        <svg width="90" height="140" viewBox="0 0 100 150">
+          <circle cx="50" cy="35" r="20" fill="#FFF" stroke="#000" stroke-width="4"/>
+          <path d="M50 55 L50 110 M50 70 L25 90 M50 70 L75 90 M50 110 L30 145 M50 110 L70 145" stroke="#FFF" stroke-width="5"/>
+          <circle cx="43" cy="35" r="2.5" fill="#000"/><circle cx="57" cy="35" r="2.5" fill="#000"/>
+        </svg>
+
+        <svg id="wolf-svg" width="130" height="150" viewBox="0 0 140 170">
+          <polygon id="threat-star" points="70,0 75,10 85,10 77,16 80,26 70,20 60,26 63,16 55,10 65,10" fill="#FF4040" stroke="#FFF" stroke-width="1.5" />
+          <path d="M 20 160 L 40 100 L 10 70 L 50 60 L 70 10 L 90 60 L 130 70 L 100 100 L 120 160 L 70 130 Z" fill="#FF4040" stroke="#000" stroke-width="4"/>
+          <circle cx="55" cy="55" r="6" fill="#FFF"/><circle cx="85" cy="55" r="6" fill="#FFF"/>
+          <circle cx="55" cy="55" r="2" fill="#000"/><circle cx="85" cy="55" r="2" fill="#000"/>
+        </svg>
+      </div>
+
+      <div id="intermission-card" class="intermission-card hidden">
+        <h2 id="intermission-title">END OF ROUND</h2>
+        <p id="intermission-body">Summary text...</p>
+      </div>
+
+      <div id="contacts-card" class="contacts-card hidden">
+        <h3>ESCG SUPPORT & CONTACTS</h3>
+        <ul>
+          <li>SAMARITANS: 116 123 (Free 24/7)</li>
+          <li>MIND: 0300 123 3393</li>
+          <li>ESCG Wellbeing Team: Sarah-Jayne Clarke</li>
+          <li>Confidential Hardship Fund Available</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="game-over-modal" class="modal-overlay hidden">
+      <div class="game-over-box">
+        <h2>ANXIETY OVERLOAD 100%</h2>
+        <p>Stress reached maximum! Your anxiety guard-dog barked so loud it caused a total burnout crash.<br><br>Remember: Naming stress early to someone halves its size!</p>
+        <button id="play-again-btn" class="choice-btn" style="text-align: center; width: 100%;">PLAY AGAIN ↺</button>
+      </div>
+    </div>
+
+    <div id="choices-panel" class="choices-panel"></div>
+
+    <!-- Prominent Credits Footer -->
+    <footer class="credits-bar">
+      INSPIRED BY NICKY CASE'S <a href="https://ncase.itch.io/anxiety" target="_blank" rel="noopener">ADVENTURES WITH ANXIETY</a> &amp; <a href="https://ncase.me/mental-health/" target="_blank" rel="noopener">MENTAL HEALTH GUIDE</a>
+    </footer>
+  </div>
+
+  <script>
+    const SoundController = {
+      ctx: null, isMuted: true,
+      init() {
+        if (!this.ctx) { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        if (this.ctx.state === 'suspended') { this.ctx.resume(); }
+        this.isMuted = false;
+      },
+      toggle() {
+        if (this.isMuted) { this.init(); return true; }
+        this.isMuted = true; return false;
+      },
+      playBark() {
+        if (this.isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(380, now); osc.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.16);
+      },
+      playChime() {
+        if (this.isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523, 659, 783].forEach((f, i) => {
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(f, now + i*0.04);
+          gain.gain.setValueAtTime(0.12, now + i*0.04); gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.04 + 0.3);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(now + i*0.04); osc.stop(now + i*0.04 + 0.35);
+        });
+      }
+    };
+
+    const storyRounds = [
+      {
+        title: "ROUND 1: WORKLOAD, SLEEP & HOME",
+        startNode: "r1_q1",
+        nodes: {
+          r1_q1: {
+            wolfText: "WORKLOAD TRIGGER! FMP AND INDUSTRY PLACEMENT HOURS ARE LANDING ALL AT ONCE!",
+            desc: "WORKLOAD: Final-year digital production, media and computing demands peak early.",
+            choices: [
+              { text: "Hide under the duvet & ignore the FMP document.", stress: 25, next: "r1_q2" },
+              { text: "Break the project brief into small, daily milestones.", stress: -15, next: "r1_q3" }
+            ]
+          },
+          r1_q2: {
+            wolfText: "AVOIDANCE TRAP! YOU DIDN'T OPEN THE PROJECT DOC AND NOW IT'S MIDNIGHT!",
+            desc: "WORKLOAD: Avoiding the exact thing causing stress provides short-term relief, but escalates panic.",
+            choices: [
+              { text: "Pull an all-nighter with high-caffeine energy drinks.", stress: 30, next: "r1_q3" },
+              { text: "Admit the scope is paralyzing and email your tutor.", stress: -15, next: "r1_q3" }
+            ]
+          },
+          r1_q3: {
+            wolfText: "SLEEP TRIGGER! YOU'RE SCROLLING AT 1:00 AM WHILE MEMORY IS TRYING TO SAVE!",
+            desc: "SLEEP: Memory is built while sleeping. Revision without sleep is pouring water into a cracked jug.",
+            choices: [
+              { text: "Anchor your wake time and charge the phone across the room.", stress: -15, next: "r1_q4" },
+              { text: "Keep doom-scrolling to quiet your racing thoughts.", stress: 25, next: "r1_q4" }
+            ]
+          },
+          r1_q4: {
+            wolfText: "SLEEP DEPRIVATION! YOU SAT AT YOUR LAPTOP FOR AN HOUR WITHOUT A USABLE DECISION!",
+            desc: "SLEEP: Emotional regulation and focus run on sleep. Tired brains make small problems feel enormous.",
+            choices: [
+              { text: "Control what you can: cut mid-afternoon caffeine.", stress: -10, next: "r1_q5" },
+              { text: "Chug more energy drinks to force concentration.", stress: 20, next: "r1_q5" }
+            ]
+          },
+          r1_q5: {
+            wolfText: "HOME LIFE TRIGGER! SHARED ROOM NOISE OR CARING RESPONSIBILITIES ARE PILE-ON!",
+            desc: "HOME LIFE: Real lives are messy. Shared rooms, evening shifts, and family care complicate things.",
+            choices: [
+              { text: "Tell your tutor so they can adjust how they support you.", stress: -15, next: "r1_q6" },
+              { text: "Keep quiet and pretend everything at home is perfectly fine.", stress: 20, next: "r1_q6" }
+            ]
+          },
+          r1_q6: {
+            wolfText: "TECHNICAL GAP PANIC! YOU DON'T KNOW HOW TO FINISH THIS PORTFOLIO UNIT!",
+            desc: "WORKLOAD: Skipping production sessions because Year 2 feels like the wrong time to admit a gap.",
+            choices: [
+              { text: "Admit the technical gap early to build skills in time.", stress: -15, next: "r1_q7" },
+              { text: "Skip class so nobody sees that you are struggling.", stress: 25, next: "r1_q7" }
+            ]
+          },
+          r1_q7: {
+            wolfText: "STRESS TRIGGER! CAN'T SWITCH OFF OR SHORT FUSE WITH PEOPLE YOU LIKE!",
+            desc: "STRESS: Unswitched-off stress isn't a personality flaw—it's a maintenance issue.",
+            choices: [
+              { text: "Schedule a non-work pressure valve activity this week.", stress: -15, intermission: 0 },
+              { text: "Try working 16 hours straight without a break.", stress: 30, intermission: 0 }
+            ]
+          }
+        }
+      },
+      {
+        title: "ROUND 2: MONEY, PEOPLE & STRESS",
+        startNode: "r2_q1",
+        nodes: {
+          r2_q1: {
+            wolfText: "MONEY PRESSURE TRIGGER! TRAVEL, FOOD, AND EQUIPMENT BILLS ARE STACKING UP!",
+            desc: "MONEY: Financial stress is directly linked to mental health. It's circumstance, not character flaw.",
+            choices: [
+              { text: "Hide the bills and work extra late evening shifts.", stress: 25, next: "r2_q2" },
+              { text: "Apply confidentially for the ESCG Hardship Fund.", stress: -25, next: "r2_q3" }
+            ]
+          },
+          r2_q2: {
+            wolfText: "MONEY WORRIES ARE MAKING YOU WANT TO DISAPPEAR FROM COLLEGE ENTIRELY!",
+            desc: "MONEY: Financial worries are a reason to talk to support staff—not a reason to drop out.",
+            choices: [
+              { text: "Catch your tutor after class for the Hardship route.", stress: -20, next: "r2_q3" },
+              { text: "Stop attending sessions to save bus fare.", stress: 30, next: "r2_q3" }
+            ]
+          },
+          r2_q3: {
+            wolfText: "PEOPLE TRIGGER! YOU'RE GOING QUIET AND ISOLATING FROM YOUR CLASSMATES!",
+            desc: "PEOPLE / CONNECT: Isolation feeds stress; company starves it. Naming it halves its size.",
+            choices: [
+              { text: "Text a mate: 'You alright? Actually alright?'", stress: -15, next: "r2_q4" },
+              { text: "Isolate yourself completely in your bedroom.", stress: 25, next: "r2_q4" }
+            ]
+          },
+          r2_q4: {
+            wolfText: "A FRIEND IS STRUGGLING HEAVILY AND ASKED YOU TO KEEP IT A SECRET!",
+            desc: "PEOPLE: You can be loyal and still tell someone. Those are not opposites.",
+            choices: [
+              { text: "Inform the Wellbeing Team (Sarah-Jayne Clarke).", stress: -15, next: "r2_q5" },
+              { text: "Keep silent and carry their emergency alone.", stress: 20, next: "r2_q5" }
+            ]
+          },
+          r2_q5: {
+            wolfText: "STRESS TRIGGER! SHORT FUSE AND AVOIDING THE EXACT TASK CAUSING IT!",
+            desc: "STRESS: Spot stress early—irritability, sleep shifts, and avoidance are warning lights.",
+            choices: [
+              { text: "Talk to a trusted adult or tutor to name the stress.", stress: -20, next: "r2_q6" },
+              { text: "Ignore the symptoms and hope they magically disappear.", stress: 25, next: "r2_q6" }
+            ]
+          },
+          r2_q6: {
+            wolfText: "THE YEAR 2 PARADOX! NEEDING SUPPORT BUT AFRAID TO ASK FOR IT!",
+            desc: "PEOPLE / SUPPORT: Support drops in Year 2 when need peaks. Professional creatives use mentors daily.",
+            choices: [
+              { text: "Use support doors early to arrange adjustments.", stress: -20, next: "r2_q7" },
+              { text: "Wait until March when deadlines have passed.", stress: 30, next: "r2_q7" }
+            ]
+          },
+          r2_q7: {
+            wolfText: "YOUR ANXIETY WOLF IS BARKING ABOUT DISCLOSING HEALTH NEEDS!",
+            desc: "PEOPLE: Telling staff now means exam access and learning adjustments are ready before pressure arrives.",
+            choices: [
+              { text: "Disclose health/learning needs to Wellbeing Team.", stress: -20, intermission: 1 },
+              { text: "Keep details private and struggle without assistance.", stress: 20, intermission: 1 }
+            ]
+          }
+        }
+      },
+      {
+        title: "ROUND 3: MOVEMENT & MAINTENANCE",
+        startNode: "r3_q1",
+        nodes: {
+          r3_q1: {
+            wolfText: "MOVEMENT TRIGGER! WE HAVE NO TIME FOR GYM WORKOUTS OR EXERCISE!",
+            desc: "MOVEMENT: Regular physical activity—a 20-minute walk counts. It lowers physiological stress.",
+            choices: [
+              { text: "Take a 20-minute walk outside to clear your head.", stress: -15, next: "r3_q2" },
+              { text: "Stay glued to your chair for 8 hours without moving.", stress: 25, next: "r3_q2" }
+            ]
+          },
+          r3_q2: {
+            wolfText: "STRESS MAINTENANCE! YOU CAN'T ELIMINATE ALL PRESSURE IN YEAR 2!",
+            desc: "STRESS: Stress in small doses is useful. It's when it stops switching off that it costs you.",
+            choices: [
+              { text: "Apply the 4 evidence moves: Move, Connect, Sleep, Talk.", stress: -15, next: "r3_q3" },
+              { text: "Expect yourself to be a perfect superhero without rest.", stress: 25, next: "r3_q3" }
+            ]
+          },
+          r3_q3: {
+            wolfText: "SLEEP HYGIENE! YOUR WAKE TIME IS FLAPPING ALL OVER THE PLACE!",
+            desc: "SLEEP: The wake-time anchor sets everything else. Pick the same wake time including weekends.",
+            choices: [
+              { text: "Anchor wake time consistently this week.", stress: -15, next: "r3_q4" },
+              { text: "Sleep in until 2:00 PM on Sunday to catch up.", stress: 20, next: "r3_q4" }
+            ]
+          },
+          r3_q4: {
+            wolfText: "MONEY AND HARDSHIP ROUTE IS CONFIDENTIAL AND READY TO HELP!",
+            desc: "MONEY: Emergency support for travel, food, and equipment exists so you can stay on track.",
+            choices: [
+              { text: "Save the Hardship Fund and support details.", stress: -15, next: "r3_q5" },
+              { text: "Pretend you don't need any financial resources.", stress: 15, next: "r3_q5" }
+            ]
+          },
+          r3_q5: {
+            wolfText: "LOOKING OUT FOR EACH OTHER! NOTICE, ASK, TELL SOMEONE!",
+            desc: "PEOPLE: Encouraging unity means noticing when someone goes quiet and acting.",
+            choices: [
+              { text: "Photograph support contacts (Samaritans, MIND, iRock).", stress: -15, next: "r3_q6" },
+              { text: "Skip saving support numbers on your phone.", stress: 15, next: "r3_q6" }
+            ]
+          },
+          r3_q6: {
+            wolfText: "NAMING STRESS HALVED MY BARKING! I'M SHRINKING DOWN!",
+            desc: "REFRAMING: Saying 'I'm struggling' is information, not weakness.",
+            choices: [
+              { text: "Acknowledge Anxiety: 'Thanks for guarding me, I got this.'", stress: -15, next: "r3_q7" },
+              { text: "Ignore maintenance habits and return to burnout.", stress: 25, next: "r3_q7" }
+            ]
+          },
+          r3_q7: {
+            wolfText: "I'LL STILL GUARD YOU—BUT YOU ARE IN THE DRIVER'S SEAT NOW.",
+            desc: "INDUCTION COMPLETE: Pick your 'One Thing' commitment for the week:\n1. Anchor wake time\n2. Schedule a weekly pressure valve\n3. Save support numbers\n4. Talk to your tutor",
+            choices: [
+              { text: "Restart Simulation", stress: 0, reset: true },
+              { text: "View Emergency Support Contacts", stress: 0, showContacts: true }
+            ]
+          }
+        }
+      }
+    ];
+
+    $(document).ready(function () {
+      let currentRoundIdx = 0;
+      let currentNodeKey = "r1_q1";
+      let stressLevel = 40;
+
+      function saveGameState() {
+        const gameState = {
+          roundIdx: currentRoundIdx,
+          nodeKey: currentNodeKey,
+          stress: stressLevel
+        };
+        localStorage.setItem("anxiety_game_save", JSON.stringify(gameState));
+      }
+
+      function loadGameState() {
+        const saved = localStorage.getItem("anxiety_game_save");
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            currentRoundIdx = data.roundIdx || 0;
+            currentNodeKey = data.nodeKey || "r1_q1";
+            stressLevel = data.stress || 40;
+          } catch(e) {
+            console.error("Save load failed, starting fresh.");
+          }
+        }
+      }
+
+      function resetGame() {
+        localStorage.removeItem("anxiety_game_save");
+        currentRoundIdx = 0;
+        currentNodeKey = "r1_q1";
+        stressLevel = 40;
+        $("#intermission-card, #contacts-card, #game-over-modal").addClass("hidden");
+        $(".speech-container, .characters-svg").removeClass("hidden");
+        updateMeter(0);
+        renderNode(currentNodeKey);
+      }
+
+      $("#reset-btn, #play-again-btn").on("click", function() {
+        resetGame();
+      });
+
+      $("#audio-toggle-btn").on("click", function () {
+        const active = SoundController.toggle();
+        $(this).text(active ? "SOUND: ON" : "SOUND: OFF");
+      });
+
+      function updateMeter(change) {
+        stressLevel = Math.min(Math.max(stressLevel + change, 5), 100);
+        
+        if (change > 0) {
+          SoundController.playBark();
+          gsap.to("#wolf-svg", { x: 8, duration: 0.05, yoyo: true, repeat: 5 });
+        } else if (change < 0) {
+          SoundController.playChime();
+        }
+
+        const starScale = 0.5 + (stressLevel / 100) * 2.0;
+        $("#threat-star").css("transform", `scale(${starScale})`);
+
+        $("#stress-num").text(stressLevel + "%");
+        $("#gauge-fill").css("width", stressLevel + "%");
+
+        if (stressLevel >= 100) {
+          $("#game-over-modal").removeClass("hidden");
+        }
+      }
+
+      function renderNode(nodeKey) {
+        currentNodeKey = nodeKey;
+        saveGameState();
+
+        const round = storyRounds[currentRoundIdx];
+        const node = round.nodes[nodeKey];
+
+        $("#round-title").text(round.title);
+        $("#wolf-bubble").text(node.wolfText);
+        $("#desc-box").text(node.desc);
+
+        const $panel = $("#choices-panel");
+        $panel.empty();
+
+        node.choices.forEach(choice => {
+          const $btn = $("<button></button>")
+            .text(choice.text)
+            .addClass("choice-btn")
+            .on("click", function () {
+              if (SoundController.isMuted && SoundController.ctx === null) {
+                SoundController.init();
+                $("#audio-toggle-btn").text("SOUND: ON");
+              }
+
+              if (choice.reset) {
+                resetGame();
+                return;
+              }
+
+              if (choice.showContacts) {
+                $("#contacts-card").removeClass("hidden").addClass("animate__animated animate__fadeInUp");
+                return;
+              }
+
+              updateMeter(choice.stress);
+
+              if (stressLevel < 100) {
+                if (choice.intermission !== undefined) {
+                  showIntermission(choice.intermission);
+                } else {
+                  renderNode(choice.next);
+                }
+              }
+            });
+          $panel.append($btn);
+        });
+      }
+
+      function showIntermission(roundCompletedIdx) {
+        $(".speech-container, .characters-svg").addClass("hidden");
+        $("#intermission-card").removeClass("hidden");
+
+        $("#intermission-title").text(`ROUND ${roundCompletedIdx + 1} COMPLETE`);
+        $("#intermission-body").html(`
+          Anxiety Level: <strong>${stressLevel}%</strong><br><br>
+          Remember: Mental health moves on a spectrum. Saying "I'm struggling" is information, not weakness.
+        `);
+
+        const $panel = $("#choices-panel");
+        $panel.empty();
+
+        const $nextBtn = $("<button></button>")
+          .text("START NEXT ROUND →")
+          .addClass("choice-btn")
+          .on("click", function () {
+            currentRoundIdx++;
+            $("#intermission-card").addClass("hidden");
+            $(".speech-container, .characters-svg").removeClass("hidden");
+            renderNode(storyRounds[currentRoundIdx].startNode);
+          });
+
+        $panel.append($nextBtn);
+      }
+
+      loadGameState();
+      updateMeter(0);
+      renderNode(currentNodeKey);
+    });
+  </script>
+</body>
+</html>
