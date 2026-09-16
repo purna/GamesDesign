@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Last Man Standing - Arena</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body {
+    background: #14100c; color: #f5ebe0; font-family: 'Segoe UI', monospace;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 12px; overflow-x: hidden;
+  }
+  .hidden { display: none !important; }
+
+  /* ---------- Join screen ---------- */
+  #screen-join {
+    background: #1f1811; border: 2px solid #d4a373; border-radius: 12px;
+    padding: 28px; width: 100%; max-width: 380px; text-align: center;
+  }
+  #screen-join h1 { font-size: 22px; color: #f5ebe0; margin-bottom: 6px; }
+  #screen-join p { font-size: 13px; color: #b8a693; margin-bottom: 18px; line-height: 1.5; }
+  #screen-join input {
+    width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px;
+    border: 1px solid #6e5a45; background: #14100c; color: #f5ebe0; font-size: 16px;
+  }
+  #screen-join button, .overlay button {
+    width: 100%; padding: 12px; border-radius: 6px; border: none;
+    background: #d4a373; color: #1a1410; font-weight: bold; font-size: 15px; cursor: pointer;
+  }
+  #screen-join button:hover, .overlay button:hover { background: #e9c46a; }
+  #connect-status { margin-top: 10px; font-size: 12px; color: #7fd88f; min-height: 16px; }
+
+  /* ---------- Lobby screen ---------- */
+  #screen-lobby {
+    background: #1f1811; border: 2px solid #d4a373; border-radius: 12px;
+    padding: 28px; width: 100%; max-width: 380px; text-align: center;
+  }
+  #screen-lobby h1 { font-size: 20px; margin-bottom: 6px; }
+  #screen-lobby p { font-size: 12px; color: #b8a693; margin-bottom: 16px; line-height: 1.5; }
+  .info-text { font-size: 12px; color: #b8a693; margin: 8px 0; }
+  #lobby-player-list { margin: 10px 0; max-height: 180px; overflow-y: auto; }
+  #lobby-player-list div {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #2c2219; padding: 8px 12px; margin: 5px 0; border-radius: 6px; font-size: 13px;
+  }
+  .badge-host-pill {
+    font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #7a2e2e; color: #ffdada; font-weight: bold;
+  }
+  #btn-start-now {
+    width: 100%; padding: 12px; margin-top: 6px; border-radius: 6px; border: none;
+    background: #d4a373; color: #1a1410; font-weight: bold; font-size: 14px; cursor: pointer;
+  }
+  #btn-start-now:hover { background: #e9c46a; }
+  #btn-start-now:disabled { background: #554438; color: #9a8b7a; cursor: not-allowed; }
+
+  /* ---------- Game screen ---------- */
+  #screen-game { width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; }
+
+  #topbar {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; padding: 6px 4px; gap: 6px;
+  }
+  #hearts { letter-spacing: 1px; color: #f87171; font-size: 15px; }
+  #buffs { display: flex; gap: 8px; font-size: 11px; }
+  .buff-pill {
+    padding: 3px 8px; border-radius: 10px; background: #2c2219; border: 1px solid #554438; color: #776656;
+  }
+  .buff-pill.active-weapon { background: #7a2e2e; border-color: #f87171; color: #ffdada; }
+  .buff-pill.active-shield { background: #23506b; border-color: #5ec8ff; color: #dff3ff; }
+  #room-timer { display: flex; align-items: center; gap: 8px; }
+  #arena-label { font-size: 11px; color: #b8a693; text-align: right; }
+  #arena-code { font-size: 13px; color: #f5ebe0; font-weight: bold; letter-spacing: 1px; }
+  #alive-count { font-size: 11px; color: #b8a693; }
+
+  /* Radial countdown ring */
+  .base-timer { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+  .base-timer__svg { transform: scaleX(-1); width: 46px; height: 46px; }
+  .base-timer__circle { fill: none; stroke: none; }
+  .base-timer__path-elapsed { stroke-width: 8px; stroke: #3a2f22; }
+  .base-timer__path-remaining {
+    stroke-width: 8px; stroke-linecap: round; transform: rotate(90deg); transform-origin: center;
+    transition: 1s linear all; fill-rule: nonzero; stroke: currentColor;
+  }
+  .base-timer__path-remaining.green { color: #7fd88f; }
+  .base-timer__path-remaining.orange { color: orange; }
+  .base-timer__path-remaining.red { color: #f87171; }
+  .base-timer__label {
+    position: absolute; width: 46px; height: 46px; top: 0; display: flex;
+    align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #f5ebe0;
+  }
+
+  #game-container {
+    position: relative; width: 100%; max-width: 520px; aspect-ratio: 1;
+    background: #0e0b08; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  #game-container canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+  #spectator-banner {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(20,16,12,.85); border: 1px solid #d4a373; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; color: #d4a373; z-index: 5; text-align: center; max-width: 90%;
+  }
+
+  #winner-banner {
+    position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%);
+    background: rgba(20,16,12,.92); border: 2px solid #7fd88f; padding: 16px 28px;
+    border-radius: 10px; text-align: center; z-index: 6;
+  }
+  #winner-banner h2 { color: #7fd88f; font-size: 20px; margin-bottom: 4px; }
+  #winner-banner p { font-size: 12px; color: #b8a693; }
+
+  .totp-box {
+    background: #2c2219; border: 2px dashed #d4a373; padding: 14px; border-radius: 8px;
+    text-align: center; margin-bottom: 14px; display: flex; flex-direction: column; align-items: center;
+  }
+  .totp-box .totp-caption { font-size: 11px; text-transform: uppercase; color: #b8a693; font-weight: bold; letter-spacing: 1px; }
+  .totp-box .totp-code { font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #f5ebe0; margin-top: 4px; }
+  .totp-box .base-timer { width: 70px; height: 70px; margin-top: 10px; }
+  .totp-box .base-timer__svg { width: 70px; height: 70px; }
+  .totp-box .base-timer__label { width: 70px; height: 70px; font-size: 15px; }
+
+  #controls {
+    width: 100%; max-width: 520px; margin-top: 16px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .dpad { position: relative; width: 120px; height: 120px; }
+  .btn {
+    position: absolute; background: #2c2219; border: 2px solid #d4a373; color: #f5ebe0;
+    font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; touch-action: manipulation; box-shadow: 0 4px 6px rgba(0,0,0,.4); cursor: pointer;
+  }
+  .btn:active { background: #d4a373; color: #2c2219; }
+  #btn-up { top: 0; left: 40px; width: 40px; height: 40px; }
+  #btn-down { bottom: 0; left: 40px; width: 40px; height: 40px; }
+  #btn-left { top: 40px; left: 0; width: 40px; height: 40px; }
+  #btn-right { top: 40px; right: 0; width: 40px; height: 40px; }
+
+  #btn-attack {
+    width: 78px; height: 78px; border-radius: 50%; font-size: 12px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    background: #221a14; border: 3px solid #554438; color: #665648; opacity: .6;
+  }
+  #btn-attack.ready {
+    background: #7a2e2e; border-color: #f87171; color: #fff; opacity: 1;
+    box-shadow: 0 0 16px rgba(248,113,113,.6);
+  }
+  #btn-attack.swinging { background: #f87171; transform: scale(1.06); }
+
+  #playerlist {
+    width: 100%; max-width: 520px; margin-top: 14px; font-size: 11px; color: #8a7a68;
+    max-height: 90px; overflow-y: auto;
+  }
+  #playerlist div { display: flex; justify-content: space-between; padding: 2px 4px; }
+</style>
+</head>
+<body>
+
+  <!-- JOIN SCREEN -->
+  <div id="screen-join">
+    <h1>⚔️ Last Man Standing</h1>
+    <p>Top-down arena battle royale. Grab weapons &amp; shields, dodge the roaming enemies, and be the last one standing. A fresh arena opens automatically every 60 seconds — up to 10 players per arena.</p>
+
+    <div class="totp-box">
+      <div class="totp-caption">Current Arena</div>
+      <div class="totp-code" id="join-arena-code">------</div>
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path id="join-base-timer-path-remaining" stroke-dasharray="283" class="base-timer__path-remaining green"
+              d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"></path>
+          </g>
+        </svg>
+        <span id="join-base-timer-label" class="base-timer__label">60s</span>
+      </div>
+    </div>
+
+    <input type="text" id="username" placeholder="Enter your name" maxlength="14">
+    <button id="btn-enter">Enter Arena</button>
+    <div id="connect-status"></div>
+  </div>
+
+  <!-- LOBBY SCREEN -->
+  <div id="screen-lobby" class="hidden">
+    <h1>Arena Lobby</h1>
+    <p>Players gathering for this arena. The match starts automatically, or the host can start early.</p>
+
+    <div class="totp-box">
+      <div class="totp-caption">Match starts in</div>
+      <div class="totp-code" id="lobby-arena-code">------</div>
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path id="lobby-base-timer-path-remaining" stroke-dasharray="283" class="base-timer__path-remaining green"
+              d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"></path>
+          </g>
+        </svg>
+        <span id="lobby-base-timer-label" class="base-timer__label">12s</span>
+      </div>
+    </div>
+
+    <div id="lobby-status-text" class="info-text">Waiting for players…</div>
+    <div id="lobby-player-list"></div>
+    <button id="btn-start-now" disabled>Start Now (Host Only)</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="hidden">
+    <div id="topbar">
+      <div>
+        <div id="hearts">♥♥♥♥♥♥♥♥♥♥</div>
+        <div id="buffs">
+          <span id="pill-weapon" class="buff-pill">no weapon</span>
+          <span id="pill-shield" class="buff-pill">no shield</span>
+        </div>
+      </div>
+      <div id="room-timer">
+        <div>
+          <div id="arena-label">Arena</div>
+          <div id="arena-code">------</div>
+        </div>
+        <div class="base-timer">
+          <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="base-timer__circle">
+              <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+              <path id="base-timer-path-remaining" stroke-dasharray="283" class="base-timer__path-remaining green"
+                d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"></path>
+            </g>
+          </svg>
+          <span id="base-timer-label" class="base-timer__label">60s</span>
+        </div>
+      </div>
+    </div>
+    <div id="alive-count">Players alive: --</div>
+
+    <div id="game-container">
+      <div id="spectator-banner" class="hidden">Spectating until next round</div>
+      <div id="winner-banner" class="hidden"><h2 id="winner-text"></h2><p>Next arena starts automatically</p></div>
+    </div>
+
+    <div id="controls">
+      <div class="dpad">
+        <div class="btn" id="btn-up">▲</div>
+        <div class="btn" id="btn-left">◀</div>
+        <div class="btn" id="btn-right">▶</div>
+        <div class="btn" id="btn-down">▼</div>
+      </div>
+      <div id="btn-attack">ATTACK</div>
+    </div>
+
+    <div id="playerlist"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@8.6.6/dist/pixi.min.js"></script>
+<script type="module">
+import { joinRoom, selfId } from 'https://esm.sh/trystero@0.22.0/nostr';
+
+/* =====================================================================
+   CONSTANTS
+===================================================================== */
+const TILE = 40;
+const COLS = 13, ROWS = 13;
+const VIEW = COLS * TILE; // 520
+const BUCKET_MS = 60000;
+const MOVE_COOLDOWN = 150;
+const WEAPON_DURATION = 10000;
+const SHIELD_DURATION = 5000;
+const ITEM_RESPAWN_MS = 12000;
+const MAX_PLAYERS = 10;
+const APP_ID = 'last-man-standing-2026-v1';
+const FULL_DASH_ARRAY = 283;
+const WARNING_THRESHOLD = 15;
+const ALERT_THRESHOLD = 5;
+const LOBBY_SECONDS = 12; // first N seconds of every arena bucket are lobby time
+
+function generateDynamicCode(bucket) {
+  const hash = Math.sin(bucket) * 1000000;
+  return Math.abs(Math.floor(hash)).toString(36).substring(0, 6).toUpperCase().padStart(6, 'X');
+}
+
+const MAP = [];
+for (let r = 0; r < ROWS; r++) {
+  const row = [];
+  for (let c = 0; c < COLS; c++) {
+    let wall = 0;
+    if (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1) wall = 1;
+    if (r >= 5 && r <= 7 && c >= 5 && c <= 7) wall = 1; // center pillar block
+    if ((r === 3 && c === 3) || (r === 3 && c === 9) || (r === 9 && c === 3) || (r === 9 && c === 9)) wall = 1;
+    row.push(wall);
+  }
+  MAP.push(row);
+}
+
+const SPAWNS = [
+  { x: 1, y: 1 }, { x: 11, y: 1 }, { x: 1, y: 11 }, { x: 11, y: 11 },
+  { x: 6, y: 1 }, { x: 6, y: 11 }, { x: 1, y: 6 }, { x: 11, y: 6 },
+  { x: 3, y: 1 }, { x: 9, y: 11 }
+];
+
+const DEFAULT_ITEMS = [
+  { id: 'w1', type: 'weapon', x: 2, y: 2 },
+  { id: 'w2', type: 'weapon', x: 10, y: 2 },
+  { id: 'w3', type: 'weapon', x: 2, y: 10 },
+  { id: 'w4', type: 'weapon', x: 10, y: 10 },
+  { id: 's1', type: 'shield', x: 6, y: 2 },
+  { id: 's2', type: 'shield', x: 2, y: 6 },
+  { id: 's3', type: 'shield', x: 10, y: 6 }
+];
+
+const DEFAULT_ENEMIES = [
+  { id: 'e1', x: 6, y: 3 },
+  { id: 'e2', x: 3, y: 6 },
+  { id: 'e3', x: 9, y: 6 }
+];
+
+function freshItems() { return DEFAULT_ITEMS.map(i => ({ ...i, available: true, claimedBy: null, claimedAt: 0 })); }
+function freshEnemies() { return DEFAULT_ENEMIES.map(e => ({ ...e, renderX: e.x * TILE, renderY: e.y * TILE })); }
+
+function colorForId(id) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue},70%,55%)`;
+}
+function hexColorForId(id) {
+  const c = colorForId(id);
+  const m = c.match(/hsl\((\d+)/);
+  return PIXI.Color.shared.setValue(c).toNumber ? PIXI.Color.shared.setValue(c).toNumber() : 0xffffff;
+}
+
+/* =====================================================================
+   STATE
+===================================================================== */
+let myName = '';
+let room = null, sendAnnounce, sendPlayerState, sendWorldState, sendPickup, sendStartGame;
+let peers = {}; // peerId -> { name, x,y, health, alive, hasWeapon, weaponUntil, hasShield, shieldUntil, isAttacking, facing, spectator }
+let items = freshItems();
+let enemies = freshEnemies();
+let appliedClaims = {}; // itemId -> claimedAt already applied to me
+
+let activeBucket = null;
+let isSpectator = false;
+let spectatorReason = 'Spectating until next round';
+let isHostFlag = false;
+let hasJoined = false;
+let inLobbyPhase = true;
+let manualStartTriggered = false;
+
+const me = {
+  x: 1, y: 1, renderX: TILE, renderY: TILE, facing: 'down',
+  health: 10, alive: true, hasWeapon: false, weaponUntil: 0,
+  hasShield: false, shieldUntil: 0, isAttacking: false, lastMove: 0
+};
+
+function isHost() { return isHostFlag; }
+function aliveRoster() {
+  const list = [{ id: selfId, alive: me.alive, spectator: isSpectator, name: myName }];
+  Object.keys(peers).forEach(id => {
+    const p = peers[id];
+    if (p && p.name) list.push({ id, alive: !!p.alive, spectator: !!p.spectator, name: p.name });
+  });
+  return list;
+}
+
+/* =====================================================================
+   PIXI SETUP
+===================================================================== */
+const app = new PIXI.Application();
+await app.init({ width: VIEW, height: VIEW, backgroundColor: 0x0e0b08, antialias: false });
+document.getElementById('game-container').prepend(app.canvas);
+
+const mapLayer = new PIXI.Graphics();
+const itemLayer = new PIXI.Graphics();
+const enemyLayer = new PIXI.Graphics();
+const playerLayer = new PIXI.Graphics();
+const labelLayer = new PIXI.Container();
+app.stage.addChild(mapLayer, itemLayer, enemyLayer, playerLayer, labelLayer);
+
+function drawMap() {
+  mapLayer.clear();
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const isWall = MAP[r][c] === 1;
+      mapLayer.rect(c * TILE, r * TILE, TILE, TILE)
+        .fill(isWall ? '#3a2f22' : ((r + c) % 2 === 0 ? '#20180f' : '#241b11'));
+      if (isWall) {
+        mapLayer.rect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4).stroke({ width: 1, color: '#5a4632' });
+      }
+    }
+  }
+}
+drawMap();
+
+const nameLabels = {}; // id -> PIXI.Text
+function getLabel(id) {
+  if (!nameLabels[id]) {
+    const t = new PIXI.Text({ text: '', style: { fontFamily: 'monospace', fontSize: 10, fill: 0xf5ebe0, fontWeight: 'bold' } });
+    t.anchor.set(0.5, 1);
+    labelLayer.addChild(t);
+    nameLabels[id] = t;
+  }
+  return nameLabels[id];
+}
+
+/* =====================================================================
+   NETWORKING
+===================================================================== */
+function currentBucket() { return Math.floor(Date.now() / BUCKET_MS); }
+function roomNameFor(bucket) { return 'lms-arena-' + generateDynamicCode(bucket); }
+
+function resetLocalRoundState(spawnIndex) {
+  const spawn = SPAWNS[spawnIndex % SPAWNS.length];
+  me.x = spawn.x; me.y = spawn.y;
+  me.renderX = spawn.x * TILE; me.renderY = spawn.y * TILE;
+  me.health = 10; me.alive = true; me.hasWeapon = false; me.weaponUntil = 0;
+  me.hasShield = false; me.shieldUntil = 0; me.isAttacking = false; me.facing = 'down';
+  appliedClaims = {};
+  document.getElementById('winner-banner').classList.add('hidden');
+}
+
+function connectToRoom(bucket) {
+  if (room) { try { room.leave(); } catch (e) {} }
+  peers = {};
+  activeBucket = bucket;
+
+  const existingCount = 0; // fresh room each bucket -- spawn index assigned as peers announce in
+  const roomName = roomNameFor(bucket);
+  room = joinRoom({ appId: APP_ID, relayUrls: ['wss://relay.damus.io', 'wss://nos.lol'] }, roomName);
+
+  const [sa, ga] = room.makeAction('announce');
+  const [sp, gp] = room.makeAction('pstate');
+  const [sw, gw] = room.makeAction('wstate');
+  const [spk, gpk] = room.makeAction('pickup');
+  const [sr, gr] = room.makeAction('reject');
+  const [ss, gst] = room.makeAction('start');
+  sendAnnounce = sa; sendPlayerState = sp; sendWorldState = sw; sendPickup = spk; sendStartGame = ss;
+
+  manualStartTriggered = false;
+
+  gst(() => {
+    manualStartTriggered = true;
+  });
+
+  ga((data, peerId) => {
+    peers[peerId] = peers[peerId] || {};
+    if (peers[peerId].joinIndex === undefined) {
+      peers[peerId].joinIndex = Object.keys(peers).filter(id => peers[id].joinIndex !== undefined).length;
+    }
+    peers[peerId].name = data.name;
+    peers[peerId].isHost = !!data.isHost;
+  });
+
+  gp((data, peerId) => {
+    peers[peerId] = peers[peerId] || {};
+    Object.assign(peers[peerId], data);
+  });
+
+  gw((data) => {
+    if (data.items) items = data.items;
+    if (data.enemies) enemies = data.enemies.map(e => {
+      const prev = enemies.find(x => x.id === e.id);
+      return { ...e, renderX: prev ? prev.renderX : e.x * TILE, renderY: prev ? prev.renderY : e.y * TILE };
+    });
+  });
+
+  gpk((data, peerId) => {
+    if (isHostFlag) processPickup(data.itemId, peerId);
+  });
+
+  // Dropped/rejected players: the host enforces the MAX_PLAYERS cap. A peer that
+  // connects once the arena is already full gets told to stand down as a spectator
+  // rather than silently occupying a slot.
+  gr((data) => {
+    isSpectator = true;
+    spectatorReason = data.reason || 'Arena is full — spectating until next round';
+    updateSpectatorBanner();
+  });
+
+  room.onPeerJoin((peerId) => {
+    const currentCount = Object.keys(peers).filter(id => peers[id] && peers[id].name).length + 1;
+    if (isHostFlag && currentCount > MAX_PLAYERS) {
+      sr({ reason: `Arena is full! Maximum ${MAX_PLAYERS} players.` });
+      return;
+    }
+    sendAnnounce({ name: myName, isHost: isHostFlag });
+    sendPlayerState(myStatePayload());
+  });
+
+  // Host player: the first person into an arena becomes host. If the host later
+  // drops, the remaining players deterministically elect the peer with the
+  // lowest connection id as the new host, so exactly one authority always exists.
+  room.onPeerLeave((peerId) => {
+    delete peers[peerId];
+    const activeIds = Object.keys(peers).filter(id => peers[id] && peers[id].name);
+    const hostExists = activeIds.some(id => peers[id].isHost);
+    if (!hostExists) {
+      const all = activeIds.concat([selfId]).sort();
+      if (all[0] === selfId) {
+        isHostFlag = true;
+        sendAnnounce({ name: myName, isHost: true });
+      }
+    }
+  });
+
+  // determine my spawn slot based on how many are already in this arena
+  const priorCount = Object.keys(peers).length; // usually 0 right after join
+  const spawnIndex = priorCount;
+  isSpectator = priorCount >= MAX_PLAYERS;
+  if (isSpectator) spectatorReason = `Arena is full! Maximum ${MAX_PLAYERS} players.`;
+  resetLocalRoundState(spawnIndex);
+
+  setTimeout(() => {
+    const activeIds = Object.keys(peers).filter(id => peers[id] && peers[id].name);
+    if (activeIds.length === 0) isHostFlag = true;
+    if (isHostFlag) { items = freshItems(); enemies = freshEnemies(); }
+    sendAnnounce({ name: myName, isHost: isHostFlag });
+    sendPlayerState(myStatePayload());
+    updateSpectatorBanner();
+  }, 800);
+}
+
+function myStatePayload() {
+  return {
+    name: myName, x: me.x, y: me.y, health: me.health, alive: me.alive,
+    hasWeapon: me.hasWeapon, weaponUntil: me.weaponUntil,
+    hasShield: me.hasShield, shieldUntil: me.shieldUntil,
+    isAttacking: me.isAttacking, facing: me.facing, spectator: isSpectator
+  };
+}
+function broadcastMe() { if (sendPlayerState) sendPlayerState(myStatePayload()); }
+
+function processPickup(itemId, claimantId) {
+  const item = items.find(i => i.id === itemId);
+  if (!item || !item.available) return;
+  item.available = false;
+  item.claimedBy = claimantId;
+  item.claimedAt = Date.now();
+}
+
+function applyItemClaims() {
+  items.forEach(item => {
+    if (item.claimedBy === selfId && appliedClaims[item.id] !== item.claimedAt) {
+      appliedClaims[item.id] = item.claimedAt;
+      if (item.type === 'weapon') { me.hasWeapon = true; me.weaponUntil = Date.now() + WEAPON_DURATION; }
+      else { me.hasShield = true; me.shieldUntil = Date.now() + SHIELD_DURATION; }
+      broadcastMe();
+    }
+  });
+}
+
+function checkPickupHere() {
+  if (isSpectator || !me.alive) return;
+  const item = items.find(i => i.available && i.x === me.x && i.y === me.y);
+  if (item) {
+    if (isHost()) processPickup(item.id, selfId);
+    else sendPickup({ itemId: item.id });
+  }
+}
+
+/* =====================================================================
+   MOVEMENT & ATTACK
+===================================================================== */
+function tryMove(dx, dy, facing) {
+  if (isSpectator || !me.alive) return;
+  const now = Date.now();
+  if (now - me.lastMove < MOVE_COOLDOWN) return;
+  me.facing = facing;
+  const nx = me.x + dx, ny = me.y + dy;
+  if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) { broadcastMe(); return; }
+  if (MAP[ny][nx] === 1) { broadcastMe(); return; }
+  me.x = nx; me.y = ny; me.lastMove = now;
+  broadcastMe();
+  checkPickupHere();
+}
+
+const attackBtn = document.getElementById('btn-attack');
+function setAttacking(v) {
+  if (isSpectator || !me.alive) return;
+  if (v && !(me.hasWeapon && me.weaponUntil > Date.now())) return;
+  me.isAttacking = v;
+  attackBtn.classList.toggle('swinging', v);
+  broadcastMe();
+}
+
+document.getElementById('btn-up').addEventListener('pointerdown', e => { e.preventDefault(); tryMove(0, -1, 'up'); });
+document.getElementById('btn-down').addEventListener('pointerdown', e => { e.preventDefault(); tryMove(0, 1, 'down'); });
+document.getElementById('btn-left').addEventListener('pointerdown', e => { e.preventDefault(); tryMove(-1, 0, 'left'); });
+document.getElementById('btn-right').addEventListener('pointerdown', e => { e.preventDefault(); tryMove(1, 0, 'right'); });
+attackBtn.addEventListener('pointerdown', e => { e.preventDefault(); setAttacking(true); });
+attackBtn.addEventListener('pointerup', e => { e.preventDefault(); setAttacking(false); });
+attackBtn.addEventListener('pointerleave', e => { setAttacking(false); });
+
+window.addEventListener('keydown', e => {
+  switch (e.key.toLowerCase()) {
+    case 'arrowup': case 'w': tryMove(0, -1, 'up'); break;
+    case 'arrowdown': case 's': tryMove(0, 1, 'down'); break;
+    case 'arrowleft': case 'a': tryMove(-1, 0, 'left'); break;
+    case 'arrowright': case 'd': tryMove(1, 0, 'right'); break;
+    case ' ': e.preventDefault(); setAttacking(true); break;
+  }
+});
+window.addEventListener('keyup', e => { if (e.key === ' ') setAttacking(false); });
+
+/* =====================================================================
+   HOST-ONLY ENEMY AI
+===================================================================== */
+let lastEnemyStep = 0;
+function stepEnemies() {
+  const now = Date.now();
+  if (now - lastEnemyStep < 500) return;
+  lastEnemyStep = now;
+  const targets = aliveRoster().filter(p => p.alive && !p.spectator).map(p => {
+    if (p.id === selfId) return { x: me.x, y: me.y };
+    const pd = peers[p.id];
+    return pd ? { x: pd.x, y: pd.y } : null;
+  }).filter(Boolean);
+  if (targets.length === 0) return;
+
+  enemies.forEach(enemy => {
+    let best = null, bestDist = Infinity;
+    targets.forEach(t => {
+      const d = Math.abs(t.x - enemy.x) + Math.abs(t.y - enemy.y);
+      if (d < bestDist) { bestDist = d; best = t; }
+    });
+    if (!best) return;
+    const dx = best.x - enemy.x, dy = best.y - enemy.y;
+    let mx = 0, my = 0;
+    if (Math.abs(dx) > Math.abs(dy)) mx = Math.sign(dx); else if (dy !== 0) my = Math.sign(dy); else mx = Math.sign(dx);
+    let nx = enemy.x + mx, ny = enemy.y + my;
+    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || MAP[ny][nx] === 1) {
+      // try the other axis
+      nx = enemy.x + (mx === 0 ? Math.sign(dx) : 0);
+      ny = enemy.y + (my === 0 ? Math.sign(dy) : 0);
+      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || MAP[ny][nx] === 1) { nx = enemy.x; ny = enemy.y; }
+    }
+    enemy.x = nx; enemy.y = ny;
+  });
+}
+
+function hostTick() {
+  if (!isHost()) return;
+  stepEnemies();
+  const now = Date.now();
+  items.forEach(i => { if (!i.available && now - i.claimedAt > ITEM_RESPAWN_MS) { i.available = true; i.claimedBy = null; } });
+  sendWorldState({ items, enemies: enemies.map(e => ({ id: e.id, x: e.x, y: e.y })) });
+}
+
+/* =====================================================================
+   DAMAGE TICK (self-authoritative, once per second)
+===================================================================== */
+function damageTick() {
+  if (isSpectator || !me.alive) return;
+  const now = Date.now();
+  let underAttack = false;
+
+  enemies.forEach(en => { if (en.x === me.x && en.y === me.y) underAttack = true; });
+
+  Object.keys(peers).forEach(id => {
+    const p = peers[id];
+    if (!p || !p.alive || p.spectator) return;
+    if (!(p.hasWeapon && p.weaponUntil > now)) return;
+    if (!p.isAttacking) return;
+    const dist = Math.max(Math.abs(p.x - me.x), Math.abs(p.y - me.y));
+    if (dist <= 1) underAttack = true;
+  });
+
+  const shielded = me.hasShield && me.shieldUntil > now;
+  if (me.hasShield && me.shieldUntil <= now) me.hasShield = false;
+  if (me.hasWeapon && me.weaponUntil <= now) { me.hasWeapon = false; setAttacking(false); }
+
+  if (underAttack && !shielded) {
+    me.health -= 1;
+    if (me.health <= 0) { me.health = 0; me.alive = false; setAttacking(false); }
+  }
+  broadcastMe();
+}
+
+/* =====================================================================
+   ROUND / COUNTDOWN
+===================================================================== */
+function checkWinner() {
+  const roster = aliveRoster().filter(p => !p.spectator);
+  if (roster.length < 2) return null;
+  const aliveOnes = roster.filter(p => p.alive);
+  if (aliveOnes.length === 1) return aliveOnes[0].name;
+  return null;
+}
+
+function updateCountdownAndRotate() {
+  const now = Date.now();
+  const secsIntoBucket = Math.floor((now % BUCKET_MS) / 1000);
+  const secsLeft = 60 - secsIntoBucket;
+  const bucket = currentBucket();
+  const code = generateDynamicCode(bucket);
+
+  document.getElementById('base-timer-label').textContent = secsLeft + 's';
+  document.getElementById('arena-code').textContent = code;
+  setCircleDasharray(secsLeft, 60, 'base-timer-path-remaining');
+  setRemainingPathColor(secsLeft, 'base-timer-path-remaining');
+
+  document.getElementById('join-base-timer-label').textContent = secsLeft + 's';
+  document.getElementById('join-arena-code').textContent = code;
+  setCircleDasharray(secsLeft, 60, 'join-base-timer-path-remaining');
+  setRemainingPathColor(secsLeft, 'join-base-timer-path-remaining');
+
+  const lobbySecsLeft = Math.max(0, LOBBY_SECONDS - secsIntoBucket);
+  document.getElementById('lobby-base-timer-label').textContent = lobbySecsLeft + 's';
+  document.getElementById('lobby-arena-code').textContent = code;
+  setCircleDasharray(lobbySecsLeft, LOBBY_SECONDS, 'lobby-base-timer-path-remaining');
+  setRemainingPathColor(lobbySecsLeft, 'lobby-base-timer-path-remaining');
+
+  if (hasJoined) {
+    const shouldBeInLobby = !manualStartTriggered && secsIntoBucket < LOBBY_SECONDS;
+    if (shouldBeInLobby !== inLobbyPhase) {
+      inLobbyPhase = shouldBeInLobby;
+      showScreen(inLobbyPhase ? 'lobby' : 'game');
+    }
+    if (inLobbyPhase) updateLobbyRosterUI();
+  }
+
+  if (activeBucket !== null && bucket !== activeBucket) {
+    connectToRoom(bucket);
+  }
+}
+
+function showScreen(which) {
+  document.getElementById('screen-lobby').classList.toggle('hidden', which !== 'lobby');
+  document.getElementById('screen-game').classList.toggle('hidden', which !== 'game');
+}
+
+function updateLobbyRosterUI() {
+  const rows = [{ name: myName + ' (You)', host: isHostFlag }];
+  Object.keys(peers).forEach(id => {
+    const p = peers[id];
+    if (p && p.name) rows.push({ name: p.name, host: !!p.isHost });
+  });
+  document.getElementById('lobby-player-list').innerHTML = rows.map(r =>
+    `<div><span>${r.name}</span>${r.host ? '<span class="badge-host-pill">HOST</span>' : ''}</div>`
+  ).join('');
+  document.getElementById('lobby-status-text').textContent = `${rows.length}/${MAX_PLAYERS} players in this arena`;
+  const startBtn = document.getElementById('btn-start-now');
+  startBtn.disabled = !isHostFlag;
+  startBtn.textContent = isHostFlag ? 'Start Now' : 'Waiting for host to start…';
+}
+
+function updateSpectatorBanner() {
+  const el = document.getElementById('spectator-banner');
+  el.textContent = spectatorReason;
+  el.classList.toggle('hidden', !isSpectator);
+}
+
+function setRemainingPathColor(timeLeft, pathId) {
+  const path = document.getElementById(pathId);
+  if (!path) return;
+  path.classList.remove('green', 'orange', 'red');
+  if (timeLeft <= ALERT_THRESHOLD) path.classList.add('red');
+  else if (timeLeft <= WARNING_THRESHOLD) path.classList.add('orange');
+  else path.classList.add('green');
+}
+
+function setCircleDasharray(timeLeft, totalSecs, pathId) {
+  const path = document.getElementById(pathId);
+  if (!path) return;
+  const rawTimeFraction = timeLeft / totalSecs;
+  const timeFraction = rawTimeFraction - (1 / totalSecs) * (1 - rawTimeFraction);
+  path.setAttribute('stroke-dasharray', `${(timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`);
+}
+
+/* =====================================================================
+   RENDER
+===================================================================== */
+function heartsString(hp) {
+  const full = Math.max(0, Math.round(hp));
+  return '♥'.repeat(full) + '♡'.repeat(Math.max(0, 10 - full));
+}
+
+function drawEntity(g, px, py, color, alive, spectator) {
+  const alpha = spectator ? 0.35 : (alive ? 1 : 0.25);
+  g.circle(px + TILE / 2, py + TILE / 2, TILE * 0.32).fill({ color, alpha });
+  g.circle(px + TILE / 2, py + TILE / 2, TILE * 0.32).stroke({ width: 2, color: '#14100c', alpha });
+}
+
+function render() {
+  // interpolate enemies
+  enemies.forEach(e => {
+    e.renderX += (e.x * TILE - e.renderX) * 0.25;
+    e.renderY += (e.y * TILE - e.renderY) * 0.25;
+  });
+  me.renderX += (me.x * TILE - me.renderX) * 0.3;
+  me.renderY += (me.y * TILE - me.renderY) * 0.3;
+
+  itemLayer.clear();
+  items.forEach(i => {
+    if (!i.available) return;
+    const cx = i.x * TILE + TILE / 2, cy = i.y * TILE + TILE / 2;
+    if (i.type === 'weapon') {
+      itemLayer.poly([cx, cy - 10, cx + 9, cy + 8, cx - 9, cy + 8]).fill('#f87171').stroke({ width: 2, color: '#7a2e2e' });
+    } else {
+      itemLayer.circle(cx, cy, 10).fill('#5ec8ff').stroke({ width: 2, color: '#23506b' });
+    }
+  });
+
+  enemyLayer.clear();
+  enemies.forEach(e => {
+    enemyLayer.rect(e.renderX + 6, e.renderY + 6, TILE - 12, TILE - 12).fill('#8b1a1a').stroke({ width: 2, color: '#2a0a0a' });
+  });
+
+  playerLayer.clear();
+  Object.keys(nameLabels).forEach(id => { if (id !== selfId && !peers[id]) { nameLabels[id].destroy(); delete nameLabels[id]; } });
+
+  // other players
+  Object.keys(peers).forEach(id => {
+    const p = peers[id];
+    if (!p || !p.name || p.x === undefined) return;
+    const px = p.x * TILE, py = p.y * TILE;
+    drawEntity(playerLayer, px, py, colorForId(id), p.alive, p.spectator);
+    if (p.hasShield && p.shieldUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
+    if (p.hasWeapon && p.weaponUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
+    const lbl = getLabel(id);
+    lbl.text = p.name + (p.spectator ? ' (spec)' : '');
+    lbl.position.set(px + TILE / 2, py - 3);
+  });
+
+  // me
+  drawEntity(playerLayer, me.renderX, me.renderY, colorForId(selfId), me.alive, isSpectator);
+  if (me.hasShield && me.shieldUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
+  if (me.hasWeapon && me.weaponUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
+  const myLbl = getLabel(selfId);
+  myLbl.text = myName + ' (you)';
+  myLbl.position.set(me.renderX + TILE / 2, me.renderY - 3);
+
+  // HUD
+  document.getElementById('hearts').textContent = heartsString(me.health);
+  const wPill = document.getElementById('pill-weapon');
+  const sPill = document.getElementById('pill-shield');
+  const now = Date.now();
+  if (me.hasWeapon && me.weaponUntil > now) {
+    wPill.textContent = 'weapon ' + Math.ceil((me.weaponUntil - now) / 1000) + 's';
+    wPill.classList.add('active-weapon');
+    attackBtn.classList.add('ready');
+  } else {
+    wPill.textContent = 'no weapon'; wPill.classList.remove('active-weapon'); attackBtn.classList.remove('ready', 'swinging');
+  }
+  if (me.hasShield && me.shieldUntil > now) {
+    sPill.textContent = 'shield ' + Math.ceil((me.shieldUntil - now) / 1000) + 's';
+    sPill.classList.add('active-shield');
+  } else {
+    sPill.textContent = 'no shield'; sPill.classList.remove('active-shield');
+  }
+
+  const roster = aliveRoster();
+  const aliveN = roster.filter(p => p.alive && !p.spectator).length;
+  const totalN = roster.filter(p => !p.spectator).length;
+  document.getElementById('alive-count').textContent = `Players alive: ${aliveN} / ${totalN}`;
+
+  const winnerBanner = document.getElementById('winner-banner');
+  const w = checkWinner();
+  if (w) {
+    document.getElementById('winner-text').textContent = '🏆 ' + w + ' wins!';
+    winnerBanner.classList.remove('hidden');
+  } else {
+    winnerBanner.classList.add('hidden');
+  }
+
+  const listEl = document.getElementById('playerlist');
+  listEl.innerHTML = roster.map(p =>
+    `<div><span>${p.name}${p.id === selfId ? ' (you)' : ''}${p.spectator ? ' · spectating' : ''}</span><span>${p.alive ? 'alive' : 'eliminated'}</span></div>`
+  ).join('');
+}
+
+/* =====================================================================
+   MAIN LOOPS
+===================================================================== */
+app.ticker.add(render);
+setInterval(() => { applyItemClaims(); hostTick(); }, 200);
+setInterval(damageTick, 1000);
+setInterval(updateCountdownAndRotate, 250);
+updateCountdownAndRotate(); // paint the arena code + ring immediately, even before joining
+
+/* =====================================================================
+   JOIN FLOW
+===================================================================== */
+document.getElementById('btn-enter').addEventListener('click', () => {
+  const val = document.getElementById('username').value.trim();
+  if (!val) { alert('Please enter a name!'); return; }
+  myName = val;
+  document.getElementById('screen-join').classList.add('hidden');
+  hasJoined = true;
+  connectToRoom(currentBucket());
+
+  const secsIntoBucket = Math.floor((Date.now() % BUCKET_MS) / 1000);
+  inLobbyPhase = secsIntoBucket < LOBBY_SECONDS;
+  showScreen(inLobbyPhase ? 'lobby' : 'game');
+});
+
+document.getElementById('btn-start-now').addEventListener('click', () => {
+  if (!isHostFlag) return;
+  manualStartTriggered = true;
+  sendStartGame({});
+});
+</script>
+</body>
+</html>
