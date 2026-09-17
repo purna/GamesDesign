@@ -12,8 +12,8 @@
 
 #Unit 1
 
-[studio-team-builder](04-unit1-studio-team-builder.html)
+[studio-team-builder](https://purna.github.io/GamesDesign/04-unit1-studio-team-builder.html)
 
-[sort-the-process](05-unit1-sort-the-process.html)
+[sort-the-process](https://purna.github.io/GamesDesign/05-unit1-sort-the-process.html)
 
-[double-diamond-creative-process](05-unit1-double-diamond-creative-process.html)
+[double-diamond-creative-process](https://purna.github.io/GamesDesign/05-unit1-double-diamond-creative-process.html)
