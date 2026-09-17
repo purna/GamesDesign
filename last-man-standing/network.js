@@ -12,7 +12,7 @@ import {
 } from './config.js';
 import { state, freshItems, freshEnemies } from './state.js';
 import { roomNameFor } from './time.js';
-import { electHost, electFailoverHost } from './host.js';
+import { electRoundHost, electFailoverHost, resolveHostConflict } from './host.js';
 import { validateNameFormat } from './username.js';
 import {
   resetLocalRoundState,
@@ -24,8 +24,53 @@ import {
   showGameScreen,
   showPodiumScreen,
   refreshSpectatorBanner,
-  updateLobby
+  updateLobby,
+  setSpectator
 } from './game.js';
+
+const JOIN_GRACE_MS = 1500;
+
+function isLateArrival(startedAt) {
+  return !!startedAt && !!state.joinedRoomAt && startedAt < state.joinedRoomAt - JOIN_GRACE_MS;
+}
+
+function markLateArrival() {
+  setSpectator(true, 'Match in progress — you join the next arena');
+  state.me.alive = false;
+  document.getElementById('game-in-progress-overlay').classList.remove('hidden');
+  if (state.sendPlayerState) state.sendPlayerState(myStatePayload());
+}
+
+function rosterIds() {
+  return Object.keys(state.peers).filter(id => state.peers[id] && state.peers[id].name);
+}
+
+/**
+ * Resolves the "two clients both think they are host" case. Every client runs
+ * the same election over the same union roster, so whichever one is not the
+ * elected id stands down and says so. Called whenever a host claim arrives and
+ * once per game tick as a safety net.
+ */
+export function reconcileHost() {
+  if (!state.room || state.activeBucket === null) return;
+  const ids = rosterIds();
+  const claimants = ids.filter(id => state.peers[id].isHost);
+  const allClaimants = claimants.concat(state.isHostFlag ? [state.selfId] : []);
+  if (allClaimants.length <= 1) {
+    state.hostId = allClaimants[0] || state.hostId;
+    return;
+  }
+  const elected = electHost(allClaimants, state.activeBucket + state.failoverSeq);
+  state.hostId = elected;
+  if (state.isHostFlag && elected !== state.selfId) {
+    state.isHostFlag = false;
+    if (state.sendAnnounce) state.sendAnnounce({ name: state.myName, isHost: false });
+    updateLobby();
+  }
+  ids.forEach(id => {
+    if (state.peers[id].isHost && id !== elected) state.peers[id].isHost = false;
+  });
+}
 
 export function connectToRoom(bucket) {
   // Re-check the stored name on every (re)connect, so a name can never reach
@@ -58,6 +103,7 @@ export function connectToRoom(bucket) {
   state.gameEndAt = 0;
   state.winnerAnnouncedAt = null;
   state.pendingRejoin = false;
+  state.joinedRoomAt = Date.now();
 
   const room = joinRoom({ appId: APP_ID, relayUrls: RELAY_URLS }, roomNameFor(bucket));
   state.room = room;
@@ -91,16 +137,26 @@ export function connectToRoom(bucket) {
       state.gameState = GAME_STATE.IN_GAME;
       state.gameStartedAt = data.startedAt || Date.now();
       showGameScreen();
-      document.getElementById('game-in-progress-overlay').classList.add('hidden');
+      if (isLateArrival(state.gameStartedAt)) {
+        // The match was already running when this client joined the room, so it
+        // watches rather than playing: no spawn, no damage, not in the roster.
+        markLateArrival();
+      } else {
+        document.getElementById('game-in-progress-overlay').classList.add('hidden');
+      }
     } else if (data.state === GAME_STATE.PODIUM) {
       state.gameState = GAME_STATE.PODIUM;
       state.forcedWinner = data.winner || state.forcedWinner || null;
+      if (data.host) state.lastHostId = data.host;
       state.gameEndAt = data.endsAt || (Date.now() + (PODIUM_SECONDS * 1000));
+      if (data.nextHost) state.nextHostHint = data.nextHost;
       showPodiumScreen(state.forcedWinner);
     } else if (data.state === GAME_STATE.GAME_OVER) {
       state.gameState = GAME_STATE.PODIUM;
       state.forcedWinner = data.winner || state.forcedWinner || null;
+      if (data.host) state.lastHostId = data.host;
       state.gameEndAt = (data.endsAt || Date.now()) + GAME_OVER_DELAY_MS;
+      if (data.nextHost) state.nextHostHint = data.nextHost;
       showPodiumScreen(state.forcedWinner);
     }
   });
@@ -114,8 +170,13 @@ export function connectToRoom(bucket) {
     }
     state.peers[peerId].name = data.name;
     state.peers[peerId].isHost = !!data.isHost;
-    if (data.isHost) state.hostId = peerId;
-    if (state.isHostFlag && state.hostAssignedRooms[peerId] === undefined) {
+    if (data.isHost) {
+      state.hostId = peerId;
+      reconcileHost();
+    } else if (state.hostId === peerId) {
+      state.hostId = state.isHostFlag ? state.selfId : null;
+    }
+    if (state.isHostFlag && state.gameState !== GAME_STATE.IN_GAME && state.hostAssignedRooms[peerId] === undefined) {
       const spawnIndex = pickFreeSpawnIndex();
       state.hostAssignedRooms[peerId] = spawnIndex;
       sendAssign({ spawnIndex }, peerId);
@@ -157,15 +218,23 @@ export function connectToRoom(bucket) {
   });
 
   getReject(data => {
-    state.isSpectator = true;
-    state.spectatorReason = data.reason || 'Arena is full — spectating until next round';
+    setSpectator(true, (data && data.reason) || 'Arena is full — spectating until next round');
+    state.me.alive = false;
+    if (state.sendPlayerState) state.sendPlayerState(myStatePayload());
     refreshSpectatorBanner();
   });
 
   room.onPeerJoin(peerId => {
     const currentCount = Object.keys(state.peers).filter(id => state.peers[id] && state.peers[id].name).length + 1;
     if (state.isHostFlag && currentCount > MAX_PLAYERS) {
-      sendReject({ reason: `Arena is full! Maximum ${MAX_PLAYERS} players.` });
+      sendReject({ reason: `Arena is full! Maximum ${MAX_PLAYERS} players.` }, peerId);
+      return;
+    }
+    if (state.isHostFlag && state.gameState === GAME_STATE.IN_GAME) {
+      // Authoritative side of the late-arrival rule: the host tells the newcomer
+      // to spectate, and never assigns it a spawn room.
+      sendReject({ reason: 'Match in progress — you join the next arena' }, peerId);
+      sendGameState({ state: GAME_STATE.IN_GAME, startedAt: state.gameStartedAt }, peerId);
       return;
     }
     sendAnnounce({ name: state.myName, isHost: state.isHostFlag });
@@ -208,10 +277,16 @@ export function connectToRoom(bucket) {
     if (hostAlreadyClaimed) {
       state.hostId = activeIds.find(id => state.peers[id].isHost) || state.hostId;
       state.isHostFlag = false;
+    } else if (state.nextHostHint && (state.nextHostHint === selfId || activeIds.includes(state.nextHostHint))) {
+      // The previous round nominated who runs this one.
+      state.hostId = state.nextHostHint;
+      state.isHostFlag = state.nextHostHint === selfId;
+      state.nextHostHint = null;
     } else {
-      // Rotate the host per arena: the bucket is the round key, so a new
-      // arena picks the next player in the sorted roster.
-      const elected = electHost(activeIds.concat([selfId]), bucket);
+      // No usable nomination (first arena, or the nominee did not come back):
+      // fall back to the deterministic election keyed on the arena bucket.
+      state.nextHostHint = null;
+      const elected = electRoundHost(activeIds.concat([selfId]), bucket, state.lastHostId);
       state.hostId = elected;
       state.isHostFlag = elected === selfId;
     }

@@ -40,6 +40,7 @@ import {
 } from './ui.js';
 import { drawMap } from './render.js';
 import { currentBucket, generateDynamicCode } from './time.js';
+import { nextHostAfter } from './host.js';
 
 let roomConnector = null;
 
@@ -133,9 +134,20 @@ export function processPickup(itemId, claimantId) {
 
 export function applyItemClaims() {
   if (state.gameState !== GAME_STATE.IN_GAME) return;
+  if (state.isSpectator || !state.me.alive) {
+    // Nothing is picked up after death: drop any pending claim and the minimap.
+    state.mapActiveUntil = 0;
+    state.items.forEach(item => {
+      if (item.claimedBy === state.selfId) state.appliedClaims[item.id] = item.claimedAt;
+    });
+    return;
+  }
   state.items.forEach(item => {
     if (item.claimedBy === state.selfId && state.appliedClaims[item.id] !== item.claimedAt) {
       state.appliedClaims[item.id] = item.claimedAt;
+      // A claim that lands after elimination is swallowed, not applied — the
+      // map in particular must never light up for a dead or spectating player.
+      if (!state.me.alive || state.isSpectator) return;
       if (item.type === 'weapon') state.me.weaponCount += 1;
       else if (item.type === 'map') state.mapActiveUntil = Date.now() + MAP_DURATION_MS;
       else state.me.shieldCount += 1;
@@ -468,6 +480,7 @@ export function startGame() {
     state.gameState = GAME_STATE.IN_GAME;
     state.gameStartedAt = Date.now();
     state.manualStartTriggered = true;
+    state.mapActiveUntil = 0;
     if (isHost() && state.sendGameState) {
       state.sendGameState({ state: GAME_STATE.IN_GAME, startedAt: state.gameStartedAt });
     }
@@ -486,10 +499,20 @@ export function endGame(winnerOverride = null) {
   state.podiumStartedAt = Date.now();
   state.gameEndAt = state.podiumStartedAt + (PODIUM_SECONDS * 1000);
   state.winnerAnnouncedAt = state.podiumStartedAt;
+  state.lastHostId = state.hostId || (isHost() ? state.selfId : state.lastHostId);
   state.mapActiveUntil = 0;
   showPodiumScreen(winner);
   if (isHost() && state.sendGameState) {
-    state.sendGameState({ state: GAME_STATE.PODIUM, endsAt: state.gameEndAt, winner });
+    // Nominate a different host for the next arena. Everyone still connected
+    // gets the same nomination, so rotation survives a same-bucket restart.
+    const rosterIds = aliveRoster().filter(player => player.name).map(player => player.id);
+    state.nextHostHint = nextHostAfter(rosterIds, state.selfId);
+    state.sendGameState({
+      state: GAME_STATE.PODIUM,
+      endsAt: state.gameEndAt,
+      winner,
+      nextHost: state.nextHostHint
+    });
   }
 }
 
@@ -548,6 +571,7 @@ export function restartToLobby() {
   // receipt, so PODIUM is the single owner of the end-of-match transition.
   if (state.gameState !== GAME_STATE.PODIUM) return;
   state.gameState = GAME_STATE.WAITING;
+  state.mapActiveUntil = 0;
   state.gameEndAt = 0;
   state.podiumStartedAt = 0;
   state.winnerAnnouncedAt = null;
@@ -700,6 +724,7 @@ export function setHost(value) {
 }
 
 export function setSpectator(value, reason = 'Spectating until next round') {
+  if (value) state.mapActiveUntil = 0;
   state.isSpectator = value;
   state.spectatorReason = reason;
   updateSpectatorBanner();

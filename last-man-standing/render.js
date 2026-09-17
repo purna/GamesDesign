@@ -18,7 +18,7 @@ import {
 import { state, aliveRoster, playersInRoom, checkWinner } from './state.js';
 import { roomNeighbors, roomTypeLabel } from './room.js';
 import { getRoomClosureWarning, isRoomClosed } from './room-closure.js';
-import { bakeRoomMap, getTorchPlacements } from './lms-tiles.js';
+import { bakeRoomMap, getTorchPlacements, resolveTheme } from './lms-tiles.js';
 
 let app;
 let mapLayer;
@@ -39,6 +39,7 @@ let embers = [];
 let ambientParticles = [];
 let flickerPhase = 0;
 let minimapCells = null;
+let currentTheme = resolveTheme('spawn');
 
 export async function setupRender() {
   app = new PIXI.Application();
@@ -66,6 +67,10 @@ export async function setupRender() {
 
 /* ---------------------------------------------------------------- lighting */
 
+function hexToNumber(hex) {
+  return parseInt(String(hex).replace('#', ''), 16);
+}
+
 function radialTexture(size, stops) {
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -83,18 +88,19 @@ function buildLighting() {
   const vignetteSize = VIEW * 2;
   const vignetteTexture = radialTexture(vignetteSize, [
     [0, 'rgba(0,0,0,0)'],
-    [0.16, 'rgba(0,0,0,0)'],
-    [0.30, `rgba(8,5,3,${(FX.VIGNETTE_ALPHA * 0.45).toFixed(3)})`],
-    [0.55, `rgba(8,5,3,${FX.VIGNETTE_ALPHA})`],
-    [1, `rgba(8,5,3,${FX.VIGNETTE_ALPHA})`]
+    [0.10, 'rgba(6,4,3,0.06)'],
+    [0.18, `rgba(6,4,3,${(FX.VIGNETTE_ALPHA * 0.45).toFixed(3)})`],
+    [0.28, `rgba(6,4,3,${(FX.VIGNETTE_ALPHA * 0.8).toFixed(3)})`],
+    [0.38, `rgba(6,4,3,${FX.VIGNETTE_ALPHA})`],
+    [1, `rgba(6,4,3,${FX.VIGNETTE_ALPHA})`]
   ]);
   vignetteSprite = new PIXI.Sprite(vignetteTexture);
   vignetteSprite.anchor.set(0.5);
 
   const glowSize = FX.TORCH_LIGHT_RADIUS * 2;
   const glowTexture = radialTexture(glowSize, [
-    [0, 'rgba(255,196,102,0.55)'],
-    [0.45, 'rgba(255,150,64,0.22)'],
+    [0, 'rgba(255,196,102,0.30)'],
+    [0.45, 'rgba(255,150,64,0.12)'],
     [1, 'rgba(255,140,66,0)']
   ]);
   torchLightSprite = new PIXI.Sprite(glowTexture);
@@ -110,6 +116,8 @@ export function drawMap() {
   if (!mapLayer) return;
   mapLayer.clear();
   const roomType = roomTypeLabel(state.me.roomRow, state.me.roomCol).toLowerCase();
+  currentTheme = resolveTheme(roomType);
+  if (app && app.renderer) app.renderer.background.color = hexToNumber(currentTheme.mortar);
   const baked = bakeRoomMap(state.currentRoomMap, roomType);
   const texture = PIXI.Texture.from(baked);
   texture.source.scaleMode = 'nearest';
@@ -204,7 +212,7 @@ function drawParticles() {
   ambientParticles.forEach(particle => {
     fxLayer
       .rect(particle.x, particle.y, particle.size, particle.size)
-      .fill({ color: '#f5ebe0', alpha: particle.alpha });
+      .fill({ color: currentTheme.pebbleLight, alpha: particle.alpha });
   });
 }
 
@@ -223,7 +231,7 @@ function updateLighting() {
   vignetteSprite.scale.set(flicker);
   torchLightSprite.position.set(centerX, centerY);
   torchLightSprite.scale.set(flicker);
-  torchLightSprite.alpha = 0.85 + Math.sin(flickerPhase * 2.2) * 0.12;
+  torchLightSprite.alpha = FX.TORCH_LIGHT_ALPHA * (1 + Math.sin(flickerPhase * 2.2) * 0.12);
 }
 
 /* -------------------------------------------------------------- minimap */

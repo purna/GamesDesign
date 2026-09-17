@@ -4,7 +4,7 @@ import {
   COUNTDOWN_INTERVAL_MS
 } from './config.js';
 import { setupRender } from './render.js';
-import { connectToRoom } from './network.js';
+import { connectToRoom, reconcileHost } from './network.js';
 import {
   setRoomConnector,
   updateCountdownAndRotate,
@@ -31,6 +31,7 @@ await setupRender();
 
 setInterval(() => {
   applyItemClaims();
+  reconcileHost();
   hostTick();
   checkGameEndByClosure();
 }, GAME_TICK_INTERVAL_MS);
@@ -131,8 +132,15 @@ defendButton.addEventListener('pointerdown', event => {
   activateShield();
 });
 
+const MOVEMENT_KEYS = new Set(['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', ' ']);
+
 window.addEventListener('keydown', event => {
-  switch (event.key.toLowerCase()) {
+  const key = event.key.toLowerCase();
+  // Arrow keys and space scroll the document by default, which is what made the
+  // arena jump up and down while playing.
+  const typing = /^(input|textarea|select)$/i.test((event.target && event.target.tagName) || '');
+  if (MOVEMENT_KEYS.has(key) && !typing) event.preventDefault();
+  switch (key) {
     case 'arrowup':
     case 'w':
       tryMove(0, -1, 'up');

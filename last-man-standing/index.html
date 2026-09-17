@@ -5,22 +5,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <link rel="icon" type="image/png" href="https://purna.github.io/GamesDesign/last-man-standing//favicon-96x96.png"
+  <link rel="icon" type="image/png" href="https://github.com/purna/GamesDesign/last-man-standing/favicon-96x96.png"
     sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="https://purna.github.io/GamesDesign/last-man-standing//favicon.svg" />
-  <link rel="shortcut icon" href="https://purna.github.io/GamesDesign/last-man-standing//favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="https://github.com/purna/GamesDesign/last-man-standing/favicon.svg" />
+  <link rel="shortcut icon" href="https://github.com/purna/GamesDesign/last-man-standing/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180"
-    href="https://purna.github.io/GamesDesign/last-man-standing//apple-touch-icon.png" />
+    href="https://github.com/purna/GamesDesign/last-man-standing/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="last-man-standing" />
-  <link rel="manifest" href="https://purna.github.io/GamesDesign/last-man-standing//site.webmanifest" />
+  <link rel="manifest" href="https://github.com/purna/GamesDesign/last-man-standing/site.webmanifest" />
 
   <title>Last Man Standing - Arena</title>
   <link rel="stylesheet" href="styles.css">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One" rel="stylesheet">
-
 </head>
 
 <body>
@@ -28,8 +23,7 @@
     <h1 class="sr-only">Last Man Standing</h1>
     <p><img alt="last man standing" src="logo.png" class="logo" /></p>
     <p>Top-down arena battle royale. The arena is a 5x5 grid of rooms linked by doors — you only ever see your own room.
-      Collect weapons &amp; shields (you can stack multiple), grab a map to reveal the arena for 10 seconds, dodge
-      roaming enemies, and be the last one standing —
+      Collect weapons &amp; shields (you can stack multiple), grab a map to reveal the arena for 10 seconds, dodge roaming enemies, and be the last one standing —
       attacking and defending only start burning down their timers once you actually use them. A room locks once 2
       players are inside, and unlocks when one leaves or dies. New arrivals within the same 60-second window are grouped
       into one arena; once a match starts it runs until there's a winner, then everyone moves into a fresh arena — up to
@@ -51,16 +45,15 @@
     </div>
 
     <label class="sr-label" for="username">Player name</label>
-    <input type="text" id="username" placeholder="your-name" maxlength="10" autocomplete="off" autocapitalize="off"
-      spellcheck="false" inputmode="latin">
+    <input type="text" id="username" placeholder="your-name" maxlength="10" autocomplete="off"
+      autocapitalize="off" spellcheck="false" inputmode="latin">
     <p id="name-rule" class="name-rule">Lowercase a–z and single hyphens, up to 10 characters.</p>
     <button id="btn-enter">Enter Arena</button>
     <div id="connect-status" role="status" aria-live="polite"></div>
   </div>
 
   <div id="screen-lobby" class="hidden">
-    <h1 class="black-ops-one-regular">Arena Lobby</h1>
-    <img alt="logo" src="favicon.svg" class="logo" />
+    <h1>Arena Lobby</h1>
     <p>Players gathering for this arena. The match starts automatically, or the host can start early.</p>
 
     <div class="totp-box">
@@ -87,6 +80,7 @@
     <div id="topbar">
       <div id="topbar-player">
         <div id="player-name-display">—</div>
+        <div id="alive-count">Players alive: --</div>
       </div>
       <div id="room-timer">
         <div>
@@ -110,27 +104,27 @@
         <div id="health-bar-fill"></div><span id="health-bar-label">10/10</span>
       </div>
     </div>
-    <div id="alive-count">Players alive: --</div>
     <div id="room-info">Room: --</div>
 
     <div id="game-container">
       <div id="inventory-panel">
         <div class="inventory-title">Inventory</div>
         <div id="inventory-list">
-          <div id="inventory-weapon" class="inventory-item">Weapon <span>0</span></div>
-          <div id="inventory-shield" class="inventory-item">Shield <span>0</span></div>
-          <div id="inventory-map" class="inventory-item">Map <span></span></div>
+          <div id="inventory-weapon" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3.2v4.3l-9.6 9.6-4.3-4.3L15.7 3.2z"/><path d="M8.3 15.6 4.6 19.3"/><path d="M3.1 17.6 6.4 20.9"/></g></svg><em>Weapon</em><span>0</span></div>
+          <div id="inventory-shield" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.6c0 4.3-3.3 7.6-8 9.6-4.7-2-8-5.3-8-9.6V6z"/><path d="M12 7.4v9.2"/></g></svg><em>Shield</em><span>0</span></div>
+          <div id="inventory-map" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.4 3.2 6.1v14.5L9 17.9l6 2.7 5.8-2.7V3.4L15 6.1z"/><path d="M9 3.4v14.5"/><path d="M15 6.1v14.5"/></g></svg><em>Map</em><span></span></div>
           <div id="inventory-empty" class="inventory-empty">No items</div>
         </div>
       </div>
+      <div id="left-stack">
       <div id="minimap" class="hidden" aria-hidden="true">
         <div class="minimap-head">
-          <span>Arena map</span><span id="minimap-timer">10s</span>
+          <span class="minimap-title"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.4 3.2 6.1v14.5L9 17.9l6 2.7 5.8-2.7V3.4L15 6.1z"/><path d="M9 3.4v14.5"/><path d="M15 6.1v14.5"/></g></svg>Arena map</span><span id="minimap-timer">10s</span>
         </div>
         <div id="minimap-grid" class="minimap-grid"></div>
-        <div class="minimap-bar">
-          <div id="minimap-bar-fill"></div>
-        </div>
+        <div class="minimap-bar"><div id="minimap-bar-fill"></div></div>
+      </div>
+      <div id="playerlist"></div>
       </div>
       <div id="spectator-banner" class="hidden">Spectating until next round</div>
       <div id="room-toast"></div>
@@ -167,12 +161,11 @@
         <div class="btn" id="btn-down">▼</div>
       </div>
       <div class="action-buttons">
-        <div id="btn-defend">DEFEND</div>
-        <div id="btn-attack">ATTACK</div>
+        <button type="button" id="btn-defend" aria-label="Defend"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.6c0 4.3-3.3 7.6-8 9.6-4.7-2-8-5.3-8-9.6V6z"/><path d="M12 7.4v9.2"/></g></svg><span class="ctrl-label">Defend</span></button>
+        <button type="button" id="btn-attack" aria-label="Attack"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3.2v4.3l-9.6 9.6-4.3-4.3L15.7 3.2z"/><path d="M8.3 15.6 4.6 19.3"/><path d="M3.1 17.6 6.4 20.9"/></g></svg><span class="ctrl-label">Attack</span></button>
       </div>
     </div>
 
-    <div id="playerlist"></div>
   </div>
 
   <div id="screen-podium" class="hidden">

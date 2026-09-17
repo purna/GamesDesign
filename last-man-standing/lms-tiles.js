@@ -1,6 +1,4 @@
-import { TILE, LMS_PALETTE, DECOR, ROOM_THEMES, TILE_ID } from './config.js';
-
-const flame = LMS_PALETTE;
+import { TILE, DECOR, ROOM_THEMES, TILE_ID } from './config.js';
 
 /**
  * Room themes are keyed by room type ('corner' | 'interior' | 'spawn'), so the
@@ -15,63 +13,216 @@ function getStitchNoise(px, py) {
   return value - Math.floor(value);
 }
 
+/**
+ * Integer hash rather than the sin-based one: the sine version repeats along
+ * diagonals, which made the decoration read as a visible lattice.
+ */
 function getDecorNoise(col, row, salt = 0) {
-  const value = Math.sin((col + 1) * 12.9898 + (row + 1) * 78.233 + salt * 37.719) * 43758.5453123;
-  return value - Math.floor(value);
+  let hash = Math.imul(col + 1, 374761393) ^ Math.imul(row + 1, 668265263) ^ Math.imul(salt + 1, 2246822519);
+  hash = Math.imul(hash ^ (hash >>> 13), 1274126177);
+  return ((hash ^ (hash >>> 16)) >>> 0) / 4294967296;
+}
+
+function drawCrack(context, tx, ty, col, row, theme) {
+  let x = tx + 7 + getDecorNoise(col, row, 41) * 12;
+  let y = ty + 7 + getDecorNoise(col, row, 43) * 10;
+  context.save();
+  context.strokeStyle = theme.crack;
+  context.globalAlpha = 0.48;
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(x, y);
+  for (let index = 0; index < 4; index++) {
+    x += (getDecorNoise(col + index, row + index, 47 + index) - 0.5) * 16;
+    y += 5 + getDecorNoise(col + index, row + index, 53 + index) * 7;
+    context.lineTo(x, y);
+  }
+  context.stroke();
+  context.restore();
+}
+
+function drawMoss(context, tx, ty, col, row, theme) {
+  context.save();
+  context.fillStyle = theme.moss;
+  context.globalAlpha = 0.42;
+  for (let index = 0; index < 5; index++) {
+    const x = tx + 6 + getDecorNoise(col, row, 61 + index) * 28;
+    const y = ty + 6 + getDecorNoise(col, row, 67 + index) * 28;
+    const radius = 2 + getDecorNoise(col, row, 71 + index) * 4;
+    context.beginPath();
+    context.ellipse(x, y, radius, radius * 0.65, getDecorNoise(col, row, 73 + index), 0, Math.PI * 2);
+    context.fill();
+  }
+  context.restore();
+}
+
+function drawPebbles(context, tx, ty, col, row, theme) {
+  context.save();
+  for (let index = 0; index < 3; index++) {
+    const x = tx + 5 + getDecorNoise(col, row, 81 + index) * 29;
+    const y = ty + 5 + getDecorNoise(col, row, 83 + index) * 29;
+    const size = 2 + getDecorNoise(col, row, 87 + index) * 3;
+    context.fillStyle = index % 2 ? theme.pebbleDark : theme.pebbleLight;
+    context.globalAlpha = 0.65;
+    context.beginPath();
+    context.ellipse(x, y, size, size * 0.7, getDecorNoise(col, row, 89 + index), 0, Math.PI * 2);
+    context.fill();
+  }
+  context.restore();
+}
+
+/** Irregular soaked-in blotch: grime, soot or something older. */
+function drawStain(context, tx, ty, col, row, theme) {
+  const centerX = tx + 8 + getDecorNoise(col, row, 141) * 24;
+  const centerY = ty + 8 + getDecorNoise(col, row, 143) * 24;
+  context.save();
+  context.fillStyle = theme.stain;
+  for (let ring = 0; ring < 3; ring++) {
+    context.globalAlpha = 0.26 - ring * 0.07;
+    context.beginPath();
+    for (let step = 0; step <= 10; step++) {
+      const angle = (step / 10) * Math.PI * 2;
+      const wobble = 5 + ring * 3 + getDecorNoise(col + step, row, 147 + ring) * 5;
+      const x = centerX + Math.cos(angle) * wobble;
+      const y = centerY + Math.sin(angle) * wobble * 0.72;
+      if (step === 0) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    }
+    context.closePath();
+    context.fill();
+  }
+  context.restore();
+}
+
+/** Shallow standing water with a rim and a couple of specular flecks. */
+function drawPuddle(context, tx, ty, col, row, theme) {
+  const centerX = tx + 10 + getDecorNoise(col, row, 151) * 20;
+  const centerY = ty + 12 + getDecorNoise(col, row, 153) * 16;
+  const width = 7 + getDecorNoise(col, row, 157) * 8;
+  const height = width * (0.5 + getDecorNoise(col, row, 159) * 0.2);
+  context.save();
+  context.globalAlpha = 0.46;
+  context.fillStyle = theme.puddle;
+  context.beginPath();
+  context.ellipse(centerX, centerY, width, height, 0, 0, Math.PI * 2);
+  context.fill();
+  context.globalAlpha = 0.5;
+  context.strokeStyle = theme.crack;
+  context.lineWidth = 1;
+  context.stroke();
+  context.globalAlpha = 0.55;
+  context.fillStyle = theme.puddleLight;
+  context.fillRect(centerX - width * 0.5, centerY - height * 0.4, Math.max(2, width * 0.5), 1);
+  context.fillRect(centerX + width * 0.1, centerY + height * 0.15, Math.max(2, width * 0.28), 1);
+  context.restore();
+}
+
+/** Straw, splinters, bone chips — the floor of a room nobody sweeps. */
+function drawLitter(context, tx, ty, col, row, theme) {
+  context.save();
+  for (let index = 0; index < 5; index++) {
+    const x = tx + 4 + getDecorNoise(col, row, 161 + index) * 30;
+    const y = ty + 4 + getDecorNoise(col, row, 167 + index) * 30;
+    const length = 2 + getDecorNoise(col, row, 173 + index) * 5;
+    const angle = getDecorNoise(col, row, 179 + index) * Math.PI;
+    context.globalAlpha = 0.5 + getDecorNoise(col, row, 181 + index) * 0.3;
+    context.strokeStyle = index % 3 === 0 ? theme.rubble : theme.litter;
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(x, y);
+    context.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
+    context.stroke();
+  }
+  context.restore();
+}
+
+/** Weeds pushing up through the joints. */
+function drawPlant(context, tx, ty, col, row, theme) {
+  const baseX = tx + 8 + getDecorNoise(col, row, 191) * 24;
+  const baseY = ty + 26 + getDecorNoise(col, row, 193) * 8;
+  context.save();
+  context.globalAlpha = 0.8;
+  for (let stem = 0; stem < 3; stem++) {
+    const lean = (getDecorNoise(col, row, 197 + stem) - 0.5) * 7;
+    const height = 6 + getDecorNoise(col, row, 199 + stem) * 7;
+    const x = baseX + (stem - 1) * 3;
+    context.strokeStyle = theme.plant;
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(x, baseY);
+    context.quadraticCurveTo(x + lean * 0.5, baseY - height * 0.6, x + lean, baseY - height);
+    context.stroke();
+    context.fillStyle = stem % 2 ? theme.plantLight : theme.plant;
+    context.beginPath();
+    context.ellipse(x + lean, baseY - height, 2.2, 1.4, lean * 0.2, 0, Math.PI * 2);
+    context.fill();
+  }
+  context.fillStyle = theme.moss;
+  context.globalAlpha = 0.45;
+  context.beginPath();
+  context.ellipse(baseX, baseY + 1, 5, 2, 0, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
+/** A flagstone that has given up: sunken, chipped, showing the rubble beneath. */
+function drawBrokenTile(context, tx, ty, col, row, theme) {
+  const x = tx + 4 + getDecorNoise(col, row, 203) * 12;
+  const y = ty + 4 + getDecorNoise(col, row, 207) * 12;
+  const width = 10 + getDecorNoise(col, row, 211) * 12;
+  const height = 8 + getDecorNoise(col, row, 213) * 12;
+  const jitter = (salt, scale) => (getDecorNoise(col, row, salt) - 0.5) * scale;
+  context.save();
+  // Sunken slab: darker floor, not a black hole.
+  context.globalAlpha = 0.5;
+  context.fillStyle = theme.floorDark;
+  context.beginPath();
+  context.moveTo(x + jitter(215, 4), y + jitter(217, 3));
+  context.lineTo(x + width + jitter(219, 5), y + jitter(221, 4));
+  context.lineTo(x + width + jitter(223, 4), y + height + jitter(227, 4));
+  context.lineTo(x + jitter(229, 5), y + height + jitter(231, 3));
+  context.closePath();
+  context.fill();
+  context.globalAlpha = 0.65;
+  context.strokeStyle = theme.crack;
+  context.lineWidth = 1;
+  context.stroke();
+  // Split across the slab, offset per tile.
+  context.beginPath();
+  context.moveTo(x + 1, y + height * (0.35 + getDecorNoise(col, row, 233) * 0.3));
+  context.lineTo(x + width - 1, y + height * (0.4 + getDecorNoise(col, row, 239) * 0.3));
+  context.stroke();
+  context.globalAlpha = 0.6;
+  context.fillStyle = theme.pebbleDark;
+  for (let index = 0; index < 3; index++) {
+    context.fillRect(
+      x + 2 + getDecorNoise(col, row, 241 + index) * (width - 4),
+      y + 2 + getDecorNoise(col, row, 251 + index) * (height - 4),
+      2, 2
+    );
+  }
+  context.restore();
 }
 
 function drawGroundDetails(context, tx, ty, col, row, theme, roomType) {
   const crackNoise = getDecorNoise(col, row, 11);
   const mossNoise = getDecorNoise(col, row, 23);
   const pebbleNoise = getDecorNoise(col, row, 37);
+  const stainNoise = getDecorNoise(col, row, 139);
+  const puddleNoise = getDecorNoise(col, row, 149);
+  const litterNoise = getDecorNoise(col, row, 163);
+  const plantNoise = getDecorNoise(col, row, 189);
+  const brokenNoise = getDecorNoise(col, row, 201);
 
-  if (crackNoise < DECOR.CRACK_PROBABILITY) {
-    let x = tx + 7 + getDecorNoise(col, row, 41) * 12;
-    let y = ty + 7 + getDecorNoise(col, row, 43) * 10;
-    context.save();
-    context.strokeStyle = theme.crack;
-    context.globalAlpha = 0.48;
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(x, y);
-    for (let index = 0; index < 4; index++) {
-      x += (getDecorNoise(col + index, row + index, 47 + index) - 0.5) * 16;
-      y += 5 + getDecorNoise(col + index, row + index, 53 + index) * 7;
-      context.lineTo(x, y);
-    }
-    context.stroke();
-    context.restore();
-  }
-
-  if (mossNoise < DECOR.MOSS_PROBABILITY) {
-    context.save();
-    context.fillStyle = theme.moss;
-    context.globalAlpha = 0.42;
-    for (let index = 0; index < 4; index++) {
-      const x = tx + 6 + getDecorNoise(col, row, 61 + index) * 28;
-      const y = ty + 6 + getDecorNoise(col, row, 67 + index) * 28;
-      const radius = 2 + getDecorNoise(col, row, 71 + index) * 4;
-      context.beginPath();
-      context.ellipse(x, y, radius, radius * 0.65, getDecorNoise(col, row, 73 + index), 0, Math.PI * 2);
-      context.fill();
-    }
-    context.restore();
-  }
-
-  if (pebbleNoise > 1 - DECOR.PEBBLE_PROBABILITY) {
-    context.save();
-    for (let index = 0; index < 3; index++) {
-      const x = tx + 5 + getDecorNoise(col, row, 81 + index) * 29;
-      const y = ty + 5 + getDecorNoise(col, row, 83 + index) * 29;
-      const size = 2 + getDecorNoise(col, row, 87 + index) * 3;
-      context.fillStyle = index % 2 ? theme.pebbleDark : theme.pebbleLight;
-      context.globalAlpha = 0.65;
-      context.beginPath();
-      context.ellipse(x, y, size, size * 0.7, getDecorNoise(col, row, 89 + index), 0, Math.PI * 2);
-      context.fill();
-    }
-    context.restore();
-  }
+  // Order matters: ground damage first, then what has grown or collected on it.
+  if (brokenNoise < DECOR.BROKEN_TILE_PROBABILITY) drawBrokenTile(context, tx, ty, col, row, theme);
+  if (crackNoise < DECOR.CRACK_PROBABILITY) drawCrack(context, tx, ty, col, row, theme);
+  if (stainNoise < DECOR.STAIN_PROBABILITY) drawStain(context, tx, ty, col, row, theme);
+  if (puddleNoise < DECOR.PUDDLE_PROBABILITY) drawPuddle(context, tx, ty, col, row, theme);
+  if (mossNoise < DECOR.MOSS_PROBABILITY) drawMoss(context, tx, ty, col, row, theme);
+  if (plantNoise < DECOR.PLANT_PROBABILITY) drawPlant(context, tx, ty, col, row, theme);
+  if (pebbleNoise > 1 - DECOR.PEBBLE_PROBABILITY) drawPebbles(context, tx, ty, col, row, theme);
+  if (litterNoise < DECOR.LITTER_PROBABILITY) drawLitter(context, tx, ty, col, row, theme);
 
   // Corner rooms are the ruined ones: extra rubble scatter.
   if (roomType === 'corner' && pebbleNoise > 0.72) {
@@ -161,15 +312,15 @@ function drawTorch(context, placement, theme) {
 
   context.save();
   const glow = context.createRadialGradient(flameX, flameY, 1, flameX, flameY, DECOR.TORCH_GLOW_RADIUS);
-  glow.addColorStop(0, 'rgba(255, 183, 3, 0.42)');
-  glow.addColorStop(0.55, 'rgba(255, 140, 66, 0.18)');
-  glow.addColorStop(1, 'rgba(255, 140, 66, 0)');
+  glow.addColorStop(0, `rgba(${theme.glowRgb}, 0.42)`);
+  glow.addColorStop(0.55, `rgba(${theme.glowRgb}, 0.18)`);
+  glow.addColorStop(1, `rgba(${theme.glowRgb}, 0)`);
   context.fillStyle = glow;
   context.beginPath();
   context.arc(flameX, flameY, DECOR.TORCH_GLOW_RADIUS, 0, Math.PI * 2);
   context.fill();
 
-  context.strokeStyle = flame.torch_handle;
+  context.strokeStyle = theme.torchHandle;
   context.lineWidth = 3;
   context.beginPath();
   context.moveTo(bracketX, bracketY);
@@ -178,15 +329,15 @@ function drawTorch(context, placement, theme) {
   context.fillStyle = theme.pillar;
   context.fillRect(bracketX - 3, bracketY - 2, 6, 4);
 
-  context.fillStyle = flame.torch_red;
+  context.fillStyle = theme.flameOuter;
   context.beginPath();
   context.ellipse(flameX, flameY, 4.5, 7, vertical ? Math.PI / 2 : 0, 0, Math.PI * 2);
   context.fill();
-  context.fillStyle = flame.torch_orange;
+  context.fillStyle = theme.flameMid;
   context.beginPath();
   context.ellipse(flameX, flameY, 2.8, 4.8, vertical ? Math.PI / 2 : 0, 0, Math.PI * 2);
   context.fill();
-  context.fillStyle = flame.torch_yellow;
+  context.fillStyle = theme.flameCore;
   context.beginPath();
   context.ellipse(flameX, flameY, 1.4, 2.5, vertical ? Math.PI / 2 : 0, 0, Math.PI * 2);
   context.fill();
@@ -197,7 +348,7 @@ function drawTorch(context, placement, theme) {
     const distance = 7 + getDecorNoise(placement.col, placement.row, 127 + index) * 10;
     const emberX = flameX + Math.cos(angle) * distance;
     const emberY = flameY + Math.sin(angle) * distance - 3;
-    context.fillStyle = index % 2 ? flame.torch_yellow : flame.torch_orange;
+    context.fillStyle = index % 2 ? theme.flameCore : theme.flameMid;
     context.globalAlpha = 0.35 + getDecorNoise(placement.col, placement.row, 131 + index) * 0.25;
     context.fillRect(emberX, emberY, 1.5, 1.5);
   }
@@ -268,36 +419,48 @@ function drawWallTile(context, tx, ty, col, row, theme) {
 }
 
 function drawDoorTile(context, tx, ty, col, row, theme, cols) {
-  // Planks run across the threshold, perpendicular to the direction of travel.
+  // Doors are deliberately a different material family from the clay walls:
+  // dark green-blue timber with iron banding, so an exit reads at a glance.
   const horizontalPassage = col === 0 || col === cols - 1;
-  context.fillStyle = theme.door;
+  context.fillStyle = theme.doorFrame;
   context.fillRect(tx, ty, TILE, TILE);
-  context.fillStyle = theme.mortar;
-  for (let offset = 0; offset < TILE; offset += 8) {
-    if (horizontalPassage) context.fillRect(tx + offset, ty, 2, TILE);
-    else context.fillRect(tx, ty + offset, TILE, 2);
+  context.fillStyle = theme.door;
+  if (horizontalPassage) context.fillRect(tx, ty + 3, TILE, TILE - 6);
+  else context.fillRect(tx + 3, ty, TILE - 6, TILE);
+
+  for (let offset = 0; offset < TILE; offset += 9) {
+    context.fillStyle = theme.doorDark;
+    if (horizontalPassage) context.fillRect(tx + offset, ty + 3, 2, TILE - 6);
+    else context.fillRect(tx + 3, ty + offset, TILE - 6, 2);
+    context.fillStyle = theme.doorLight;
+    if (horizontalPassage) context.fillRect(tx + offset + 3, ty + 3, 1, TILE - 6);
+    else context.fillRect(tx + 3, ty + offset + 3, TILE - 6, 1);
   }
+
   for (let y = 0; y < TILE; y += 2) {
     for (let x = 0; x < TILE; x += 2) {
       const seed = getStitchNoise(col * TILE + x * 3, row * TILE + y * 3);
-      if (seed > 0.86) {
-        context.fillStyle = theme.pebbleLight;
-        context.fillRect(tx + x, ty + y, horizontalPassage ? 2 : 4, horizontalPassage ? 4 : 2);
-      } else if (seed < 0.08) {
-        context.fillStyle = theme.crack;
+      if (seed > 0.9) {
+        context.fillStyle = theme.doorLight;
+        context.fillRect(tx + x, ty + y, 2, 2);
+      } else if (seed < 0.06) {
+        context.fillStyle = theme.doorDark;
         context.fillRect(tx + x, ty + y, 2, 2);
       }
     }
   }
-  // Iron studs at the jambs.
-  context.fillStyle = theme.pillar;
-  if (horizontalPassage) {
-    context.fillRect(tx + 4, ty + 6, 3, 3);
-    context.fillRect(tx + TILE - 7, ty + TILE - 9, 3, 3);
-  } else {
-    context.fillRect(tx + 6, ty + 4, 3, 3);
-    context.fillRect(tx + TILE - 9, ty + TILE - 7, 3, 3);
-  }
+
+  // Iron band across the middle plus corner studs.
+  context.fillStyle = theme.doorFrame;
+  if (horizontalPassage) context.fillRect(tx, ty + TILE / 2 - 2, TILE, 4);
+  else context.fillRect(tx + TILE / 2 - 2, ty, 4, TILE);
+  context.fillStyle = theme.pebbleLight;
+  context.globalAlpha = 0.7;
+  context.fillRect(tx + 5, ty + 5, 2, 2);
+  context.fillRect(tx + TILE - 7, ty + 5, 2, 2);
+  context.fillRect(tx + 5, ty + TILE - 7, 2, 2);
+  context.fillRect(tx + TILE - 7, ty + TILE - 7, 2, 2);
+  context.globalAlpha = 1;
 }
 
 function drawPillarTile(context, tx, ty, theme) {

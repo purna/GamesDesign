@@ -6,6 +6,38 @@
     -webkit-user-select: none;
   }
 
+  html {
+    height: 100%;
+  }
+
+  /* How far the controls ride over the bottom of the canvas. Zero on a roomy
+     window; the shorter the viewport, the more they overlap, and the canvas is
+     sized from whatever is left. */
+  :root {
+    --control-overlap: 0px;
+    --game-chrome: 210px;
+  }
+
+  @media (max-height: 800px) {
+    :root {
+      --control-overlap: 34px;
+    }
+  }
+
+  @media (max-height: 720px) {
+    :root {
+      --control-overlap: 62px;
+    }
+  }
+
+  @media (max-height: 640px) {
+    :root {
+      --control-overlap: 84px;
+    }
+  }
+
+  /* The game screen is sized to the viewport: nothing below the canvas is
+     allowed to push the page into scrolling. */
   body {
     background: #14100c;
     color: #f5ebe0;
@@ -14,22 +46,24 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 12px;
-    overflow-x: hidden;
+    height: 100vh;
+    height: 100dvh;
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  /* Menu screens may still be taller than a short window. */
+  #screen-join,
+  #screen-lobby,
+  #screen-podium {
+    max-height: 100%;
+    overflow-y: auto;
   }
 
   .hidden,
   .sr-only {
     display: none !important;
   }
-
-  .black-ops-one-regular {
-    font-family: "Black Ops One", system-ui;
-    font-weight: 400;
-    font-style: normal;
-  }
-
 
   /* Visually hidden, still announced by screen readers. */
   .sr-label,
@@ -207,9 +241,11 @@
   #screen-game {
     width: 100%;
     max-width: 520px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
 
   #topbar {
@@ -218,8 +254,9 @@
     grid-template-columns: 1fr auto;
     align-items: center;
     font-size: 12px;
-    padding: 6px 4px;
+    padding: 2px 4px;
     gap: 10px;
+    flex: 0 0 auto;
   }
 
   #topbar-player {
@@ -239,7 +276,12 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 4px 0 7px;
+    padding: 4px 0 6px;
+    flex: 0 0 auto;
+  }
+
+  #health-bar-wrap {
+    height: 24px;
   }
 
   #health-bar-wrap {
@@ -323,6 +365,9 @@
   #alive-count {
     font-size: 11px;
     color: #b8a693;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   #room-toast {
@@ -407,9 +452,12 @@
     color: #f5ebe0;
   }
 
+  /* Square, and never taller than the space left once the chrome and the
+     partly overlapping controls have had their share of the viewport. */
   #game-container {
     position: relative;
-    width: 100%;
+    flex: 0 0 auto;
+    width: min(100%, calc(100dvh - var(--game-chrome) + var(--control-overlap)));
     max-width: 520px;
     aspect-ratio: 1;
     background: #0e0b08;
@@ -487,12 +535,20 @@
     color: #776656;
   }
 
-  /* ---------- Minimap (map pickup, 10s) ---------- */
-  #minimap {
+  #left-stack {
     position: absolute;
     top: 10px;
     left: 10px;
     z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: calc(100% - 96px);
+    width: 132px;
+  }
+
+  /* ---------- Minimap (map pickup, 10s) ---------- */
+  #minimap {
     padding: 8px;
     background: rgba(20, 16, 12, .92);
     border: 1px solid #d4a373;
@@ -777,35 +833,69 @@
     font-size: 15px;
   }
 
-  #controls {
-    width: 100%;
-    max-width: 520px;
-    margin-top: 16px;
+  #playerlist {
+    min-height: 0;
+    padding: 7px 8px;
+    font-size: 10px;
+    color: #b8a693;
+    background: rgba(20, 16, 12, .72);
+    border: 1px solid #554438;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 132px;
+  }
+
+  #playerlist div {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    gap: 6px;
+    padding: 1px 0;
+  }
+
+  #playerlist div span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ---------- Controls: overlap the bottom wall row, never the play area ---------- */
+  #controls {
+    position: relative;
+    z-index: 7;
+    /* Same width as the canvas, so the pad and buttons sit over its corners. */
+    width: min(100%, calc(100dvh - var(--game-chrome) + var(--control-overlap)));
+    max-width: 520px;
+    margin-top: calc(-1 * var(--control-overlap));
+    padding: 0 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex: 0 0 auto;
   }
 
   .dpad {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 108px;
+    height: 108px;
   }
 
   .btn {
     position: absolute;
-    background: #2c2219;
+    background: rgba(44, 34, 25, .82);
+    backdrop-filter: blur(2px);
     border: 2px solid #d4a373;
     color: #f5ebe0;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     touch-action: manipulation;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, .4);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, .55);
     cursor: pointer;
+    width: 36px;
+    height: 36px;
   }
 
   .btn:active {
@@ -815,87 +905,99 @@
 
   #btn-up {
     top: 0;
-    left: 40px;
-    width: 40px;
-    height: 40px;
+    left: 36px;
   }
 
   #btn-down {
     bottom: 0;
-    left: 40px;
-    width: 40px;
-    height: 40px;
+    left: 36px;
   }
 
   #btn-left {
-    top: 40px;
+    top: 36px;
     left: 0;
-    width: 40px;
-    height: 40px;
   }
 
   #btn-right {
-    top: 40px;
+    top: 36px;
     right: 0;
-    width: 40px;
-    height: 40px;
   }
 
   .action-buttons {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 10px;
   }
 
-  #btn-attack {
-    width: 78px;
-    height: 78px;
+  #btn-attack,
+  #btn-defend {
     border-radius: 50%;
-    font-size: 12px;
-    font-weight: bold;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    background: #221a14;
+    gap: 2px;
+    cursor: pointer;
+    touch-action: manipulation;
+    backdrop-filter: blur(2px);
+    transition: transform .12s ease, box-shadow .2s ease;
+  }
+
+  #btn-attack {
+    width: 74px;
+    height: 74px;
+    background: rgba(34, 26, 20, .82);
     border: 3px solid #554438;
-    color: #665648;
-    opacity: .6;
+    color: #7d6a58;
+    opacity: .75;
+  }
+
+  #btn-defend {
+    width: 58px;
+    height: 58px;
+    background: rgba(34, 26, 20, .82);
+    border: 3px solid #554438;
+    color: #7d6a58;
+    opacity: .75;
+  }
+
+  .ctrl-icon {
+    width: 26px;
+    height: 26px;
+    display: block;
+    color: currentColor;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .6));
+  }
+
+  #btn-defend .ctrl-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ctrl-label {
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: .5px;
   }
 
   #btn-attack.ready {
-    background: #7a2e2e;
+    background: rgba(122, 46, 46, .92);
     border-color: #f87171;
-    color: #fff;
+    color: #ffe4e4;
     opacity: 1;
-    box-shadow: 0 0 16px rgba(248, 113, 113, .6);
+    box-shadow: 0 0 16px rgba(248, 113, 113, .55);
   }
 
   #btn-attack.swinging {
     background: #f87171;
+    color: #2c1414;
     transform: scale(1.06);
   }
 
-  #btn-defend {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: #221a14;
-    border: 3px solid #554438;
-    color: #665648;
-    opacity: .6;
-  }
-
   #btn-defend.ready {
-    background: #1e3a4d;
+    background: rgba(30, 58, 77, .92);
     border-color: #5ec8ff;
-    color: #fff;
+    color: #dff3ff;
     opacity: 1;
     box-shadow: 0 0 12px rgba(94, 200, 255, .5);
   }
@@ -906,18 +1008,35 @@
     transform: scale(1.06);
   }
 
-  #playerlist {
-    width: 100%;
-    max-width: 520px;
-    margin-top: 14px;
-    font-size: 11px;
-    color: #8a7a68;
-    max-height: 90px;
-    overflow-y: auto;
+  /* Inventory rows carry the same icons as the controls. */
+  .inventory-item .ctrl-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
   }
 
-  #playerlist div {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 4px;
+  .inventory-item {
+    align-items: center;
+  }
+
+  .inventory-item em {
+    flex: 1;
+    font-style: normal;
+  }
+
+  .minimap-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .minimap-title .ctrl-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  @media (max-height: 620px) {
+    #playerlist {
+      display: none;
+    }
   }

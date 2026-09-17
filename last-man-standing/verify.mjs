@@ -60,6 +60,18 @@ for (const file of moduleFiles) {
   });
 }
 
+console.log('\nNo duplicate top-level declarations');
+for (const file of moduleFiles) {
+  const source = readFileSync(join(root, file), 'utf8');
+  const declared = [...source.matchAll(/^(?:export\s+)?(?:async\s+)?(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/gm)]
+    .map(match => match[1]);
+  const seen = new Set();
+  const duplicates = declared.filter(name => (seen.has(name) ? true : (seen.add(name), false)));
+  // ES modules are strict mode: a repeated top-level declaration is a load-time
+  // SyntaxError that `node --check` (script mode) does not report.
+  check(file, () => assert(duplicates.length === 0, `declared twice: ${[...new Set(duplicates)].join(', ')}`));
+}
+
 console.log('\nDOM ids referenced by modules exist in index.html');
 const html = readFileSync(join(root, 'index.html'), 'utf8');
 const htmlIds = new Set([...html.matchAll(/id="([^"]+)"/g)].map(match => match[1]));
@@ -163,6 +175,112 @@ check('startGame enforces the minimum itself', () => {
   const source = readFileSync(join(root, 'game.js'), 'utf8');
   const body = source.slice(source.indexOf('export function startGame'));
   assert(body.slice(0, 600).includes('MIN_PLAYERS_TO_START'), 'no minimum check inside startGame');
+});
+
+const { electRoundHost, resolveHostConflict, nextHostAfter } = await import('./host.js');
+const { ROOM_THEMES, FX } = await import('./config.js');
+const networkSource = readFileSync(join(root, 'network.js'), 'utf8');
+const gameSource = readFileSync(join(root, 'game.js'), 'utf8');
+const tilesSource = readFileSync(join(root, 'lms-tiles.js'), 'utf8');
+const css = readFileSync(join(root, 'styles.css'), 'utf8');
+
+console.log('\nLate arrivals cannot join a live match');
+check('host turns joiners away while IN_GAME', () => {
+  assert(/state\.isHostFlag && state\.gameState === GAME_STATE\.IN_GAME/.test(networkSource), 'no in-match join guard');
+  assert(/sendReject\([^)]*Match in progress/.test(networkSource), 'joiner is not rejected during a match');
+});
+check('a late arrival becomes a spectator, not a player', () => {
+  assert(networkSource.includes('function isLateArrival'), 'no late-arrival test');
+  assert(/markLateArrival[\s\S]{0,300}setSpectator\(true/.test(networkSource), 'late arrival is not made a spectator');
+  assert(/markLateArrival[\s\S]{0,300}state\.me\.alive = false/.test(networkSource), 'late arrival still counts as alive');
+  assert(networkSource.includes('state.joinedRoomAt = Date.now()'), 'join time is never recorded');
+});
+check('no spawn room is assigned during a live match', () => {
+  assert(/state\.isHostFlag && state\.gameState !== GAME_STATE\.IN_GAME && state\.hostAssignedRooms/.test(networkSource));
+});
+
+console.log('\nHost rotation and duplicate hosts (14)');
+const trio = ['aaa', 'bbb', 'ccc'];
+check('round election skips the previous host', () => {
+  for (const key of [10, 11, 12, 16]) {
+    const previous = electRoundHost(trio, key);
+    assert(electRoundHost(trio, key, previous) !== previous, `repeated host at key ${key}`);
+  }
+});
+check('round election is still deterministic across clients', () => {
+  assert(electRoundHost(trio, 12, 'aaa') === electRoundHost([...trio].reverse(), 12, 'aaa'));
+});
+check('two claimants resolve to exactly one host', () => {
+  const selfWins = resolveHostConflict('aaa', 'bbb', trio, 5);
+  const peerView = resolveHostConflict('bbb', 'aaa', trio, 5);
+  assert(selfWins === peerView, `disagreement: ${selfWins} vs ${peerView}`);
+  assert([selfWins === 'aaa', peerView === 'bbb'].filter(Boolean).length === 1, 'both or neither stayed host');
+});
+check('conflict resolution converges even with mismatched rosters', () => {
+  const left = resolveHostConflict('aaa', 'bbb', ['aaa', 'bbb', 'zzz'], 9);
+  const right = resolveHostConflict('bbb', 'aaa', ['aaa', 'bbb'], 9);
+  assert(left === right || [left, right].every(id => ['aaa', 'bbb'].includes(id)), 'no convergence path');
+});
+check('the podium broadcast nominates the next host', () => {
+  assert(/state: GAME_STATE\.PODIUM[\s\S]{0,240}nextHost:/.test(gameSource), 'no nomination on the wire');
+  assert(networkSource.includes('state.nextHostHint = data.nextHost'), 'clients ignore the nomination');
+});
+check('the nomination always moves to a different player', () => {
+  const ids = ['aaa', 'bbb', 'ccc'];
+  assert(nextHostAfter(ids, 'aaa') === 'bbb');
+  assert(nextHostAfter(ids, 'ccc') === 'aaa');
+  assert(nextHostAfter(['solo'], 'solo') === 'solo');
+  assert(nextHostAfter(ids, 'unknown') === 'aaa');
+});
+
+console.log('\nMinimap lifetime (12)');
+check('dead or spectating players apply no claims and lose the map', () => {
+  assert(/isSpectator \|\| !state\.me\.alive[\s\S]{0,200}mapActiveUntil = 0/.test(gameSource));
+});
+for (const marker of ['startGame', 'endGame', 'restartToLobby', 'setSpectator']) {
+  check(`${marker} clears mapActiveUntil`, () => {
+    const body = gameSource.slice(gameSource.indexOf(`function ${marker}`));
+    assert(body.slice(0, 900).includes('mapActiveUntil = 0'), 'not cleared');
+  });
+}
+
+console.log('\nRoom theming (4.6)');
+const themeNames = Object.keys(ROOM_THEMES);
+const themeKeys = Object.keys(ROOM_THEMES.interior);
+check('every theme defines the same keys', () => {
+  for (const name of themeNames) {
+    const missing = themeKeys.filter(key => !ROOM_THEMES[name][key]);
+    assert(missing.length === 0, `${name} is missing ${missing.join(', ')}`);
+  }
+});
+check('the three themes are visually distinct', () => {
+  for (const key of ['floor', 'wall', 'door']) {
+    const values = new Set(themeNames.map(name => ROOM_THEMES[name][key]));
+    assert(values.size === themeNames.length, `themes share a ${key} colour`);
+  }
+});
+check('doors do not reuse a wall colour', () => {
+  for (const name of themeNames) {
+    const theme = ROOM_THEMES[name];
+    assert(![theme.wall, theme.wallDark, theme.wallLight].includes(theme.door), `${name} door matches a wall tone`);
+  }
+});
+check('the tile renderer no longer falls back to the generic palette', () => {
+  assert(!tilesSource.includes('LMS_PALETTE'), 'LMS_PALETTE still referenced');
+});
+check('all decoration types are drawn', () => {
+  for (const drawer of ['drawStain', 'drawPuddle', 'drawLitter', 'drawPlant', 'drawBrokenTile', 'drawMoss']) {
+    assert(tilesSource.includes(`${drawer}(context`), `${drawer} missing`);
+  }
+});
+
+console.log('\nLayout and lighting');
+check('the outer edge sits at 90% darkness', () => assert(FX.VIGNETTE_ALPHA === 0.9, `got ${FX.VIGNETTE_ALPHA}`));
+check('the page cannot scroll', () => assert(/body\s*\{[^}]*overflow:\s*hidden/.test(css)));
+check('the canvas is sized from the viewport height', () => assert(css.includes('100dvh - var(--game-chrome)')));
+check('controls overlap the canvas by a viewport-dependent amount', () => {
+  assert(css.includes('--control-overlap'), 'no overlap variable');
+  assert(css.includes('margin-top: calc(-1 * var(--control-overlap))'), 'controls do not use it');
 });
 
 console.log(`\n${checks - failures}/${checks} checks passed.`);
