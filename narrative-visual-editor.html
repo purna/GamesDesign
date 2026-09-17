@@ -486,6 +486,7 @@
         <!-- Story Execution & Tools -->
         <div class="btn-group">
           <button class="btn" id="variables-btn">Variables</button>
+          <button class="btn" id="characters-btn">Characters</button>
           <button class="btn btn-primary" id="play-btn">Play</button>
           <button class="btn" id="export-btn">Export</button>
         </div>
@@ -521,6 +522,19 @@
           <option value="start">Start (story begins here)</option>
           <option value="end">End (story concludes here)</option>
         </select>
+      </div>
+      <div class="form-group" id="character-group" style="display:none;">
+        <label>Assigned Character</label>
+        <select id="prop-character">
+          <option value="">-- None --</option>
+        </select>
+        <span id="character-summary" style="color:var(--text-muted); font-size:0.72rem; line-height:1.4;"></span>
+        <button class="btn" id="manage-characters-btn" type="button" style="margin-top:0.35rem;">Manage Characters</button>
+      </div>
+      <div class="form-group">
+        <label>Twine Tags</label>
+        <input type="text" id="prop-tags" placeholder="e.g. important dangerous" />
+        <span style="color:var(--text-muted); font-size:0.72rem; line-height:1.4;">Space or comma separated. Combined with any automatic tags (start, end, event, npc) on export.</span>
       </div>
       <div class="form-group">
         <label>Story / Passage Text</label>
@@ -563,6 +577,19 @@
       <button class="btn" id="add-var-btn">+ Add Variable</button>
       <div style="display:flex; justify-content: flex-end;">
         <button class="btn btn-primary" id="close-var-modal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Character Library Modal -->
+  <div id="char-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:20; align-items:center; justify-content:center;">
+    <div id="char-modal-content" style="background:var(--bg-surface); width:640px; max-width:92%; border-radius:12px; padding:1.5rem; display:flex; flex-direction:column; gap:1.2rem; border:1px solid var(--border-color); box-shadow:0 20px 25px -5px rgba(0,0,0,0.3);">
+      <h2 style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Character Library</h2>
+      <span style="color:var(--text-muted); font-size:0.78rem; line-height:1.4;">Define reusable NPC characters here — each with a type, a name, and a location variable — then assign one to any NPC node from its Properties panel. When the player reaches that node, the character's location variable is automatically updated to the passage title.</span>
+      <div id="char-list" style="display:flex; flex-direction:column; gap:0.5rem; max-height:320px; overflow-y:auto;"></div>
+      <button class="btn" id="add-char-btn">+ Add Character</button>
+      <div style="display:flex; justify-content: flex-end;">
+        <button class="btn btn-primary" id="close-char-modal">Done</button>
       </div>
     </div>
   </div>
@@ -632,9 +659,11 @@
     let nodes = [];
     let connections = [];
     let variables = [];
+    let characters = [];
     let nodeCount = 0;
     let varCount = 0;
     let assignCount = 0;
+    let charCount = 0;
     let selectedNodeId = null;
     let draggedNode = null;
     let dragOffset = { x: 0, y: 0 };
@@ -735,7 +764,9 @@
         id, type, role, title, x, y,
         text: options.text || `Write narrative text for ${title} here...`,
         code: options.code || '',
-        assignments: Array.isArray(options.assignments) ? options.assignments : []
+        assignments: Array.isArray(options.assignments) ? options.assignments : [],
+        tags: Array.isArray(options.tags) ? options.tags : [],
+        characterId: options.characterId || null
       };
 
       nodes.push(nodeData);
@@ -804,9 +835,11 @@
       nodes = [];
       connections = [];
       variables = [];
+      characters = [];
       nodeCount = 0;
       varCount = 0;
       assignCount = 0;
+      charCount = 0;
       selectedNodeId = null;
       renderConnections();
       renderPropertiesPanel();
@@ -968,6 +1001,11 @@
     const variablesDatalist = document.getElementById('variables-datalist');
     const assignmentsList = document.getElementById('assignments-list');
     const addAssignmentBtn = document.getElementById('add-assignment-btn');
+    const characterGroup = document.getElementById('character-group');
+    const propCharacterSelect = document.getElementById('prop-character');
+    const characterSummary = document.getElementById('character-summary');
+    const manageCharactersBtn = document.getElementById('manage-characters-btn');
+    const propTags = document.getElementById('prop-tags');
 
     function selectNode(id) {
       selectedNodeId = id;
@@ -991,6 +1029,7 @@
       propTitle.value = node.title;
       propText.value = node.text;
       propCode.value = node.code || '';
+      propTags.value = (node.tags || []).join(' ');
       renderAssignmentsPanel(node);
 
       if (node.type === 'terminal') {
@@ -998,6 +1037,13 @@
         propRole.value = node.role;
       } else {
         roleGroup.style.display = 'none';
+      }
+
+      if (node.type === 'npc') {
+        characterGroup.style.display = 'flex';
+        renderCharacterSelect(node);
+      } else {
+        characterGroup.style.display = 'none';
       }
 
       outgoingList.innerHTML = '';
@@ -1084,6 +1130,46 @@
     propCode.addEventListener('input', (e) => {
       const node = nodes.find(n => n.id === selectedNodeId);
       if (node) { node.code = e.target.value; autoSaveLocal(); }
+    });
+
+    propTags.addEventListener('input', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node) {
+        node.tags = e.target.value.split(/[\s,]+/).map(t => t.trim()).filter(Boolean);
+        autoSaveLocal();
+      }
+    });
+
+    // Character assignment (NPC nodes only)
+    function renderCharacterSelect(node) {
+      propCharacterSelect.innerHTML = '<option value="">-- None --</option>' +
+        characters.map(c => `<option value="${c.id}" ${c.id === node.characterId ? 'selected' : ''}>${c.name || 'Unnamed'} (${c.charType || 'Character'})</option>`).join('');
+      updateCharacterSummary(node);
+    }
+
+    function updateCharacterSummary(node) {
+      const char = characters.find(c => c.id === node.characterId);
+      if (!char) {
+        characterSummary.textContent = characters.length
+          ? 'No character assigned.'
+          : 'No characters yet — click Manage Characters to create one.';
+        return;
+      }
+      const locPart = char.locationVar ? ` — updates ${char.locationVar} on entry` : '';
+      characterSummary.textContent = `${char.name || 'Unnamed'} — ${char.charType || 'Character'}${locPart}`;
+    }
+
+    propCharacterSelect.addEventListener('change', (e) => {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (!node) return;
+      node.characterId = e.target.value || null;
+      updateCharacterSummary(node);
+      autoSaveLocal();
+    });
+
+    manageCharactersBtn.addEventListener('click', () => {
+      renderCharactersModal();
+      charModal.style.display = 'flex';
     });
 
     insertVarSelect.addEventListener('change', (e) => {
@@ -1205,12 +1291,19 @@
         .join('\n');
     }
 
-    // Combines structured assignments with any hand-written advanced code for a node
+    // Auto-generated code that updates an assigned character's location variable on entry
+    function characterLocationCode(node) {
+      if (node.type !== 'npc' || !node.characterId) return '';
+      const char = characters.find(c => c.id === node.characterId);
+      if (!char || !char.locationVar) return '';
+      const safeTitle = String(node.title).replace(/"/g, '\\"');
+      return `<<set ${char.locationVar} to "${safeTitle}">>`;
+    }
+
+    // Combines the character's location update, structured assignments, and any hand-written advanced code for a node
     function getEffectiveCode(node) {
-      const ac = assignmentCode(node);
-      const custom = (node.code || '').trim();
-      if (ac && custom) return `${ac}\n${custom}`;
-      return ac || custom;
+      const parts = [characterLocationCode(node), assignmentCode(node), (node.code || '').trim()].filter(Boolean);
+      return parts.join('\n');
     }
 
     document.getElementById('delete-node-btn').addEventListener('click', () => {
@@ -1297,6 +1390,72 @@
       if (node) renderAssignmentsPanel(node);
     }
 
+    // Character Library (reusable NPC profiles: type, name, location variable)
+    const charModal = document.getElementById('char-modal');
+    const charList = document.getElementById('char-list');
+
+    document.getElementById('characters-btn').addEventListener('click', () => {
+      renderCharactersModal();
+      charModal.style.display = 'flex';
+    });
+    document.getElementById('close-char-modal').addEventListener('click', () => {
+      charModal.style.display = 'none';
+      refreshCharacterUI();
+    });
+    document.getElementById('add-char-btn').addEventListener('click', () => {
+      charCount++;
+      characters.push({ id: `Char_${charCount}`, charType: '', name: `Character ${charCount}`, locationVar: '' });
+      renderCharactersModal();
+      refreshCharacterUI();
+      autoSaveLocal();
+    });
+
+    function renderCharactersModal() {
+      charList.innerHTML = '';
+      if (characters.length === 0) {
+        charList.innerHTML = '<span style="color:var(--text-muted); font-size:0.8rem;">No characters defined. Add a character to reuse across NPC nodes.</span>';
+        return;
+      }
+      characters.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'var-row';
+        row.innerHTML = `
+          <input type="text" value="${c.charType || ''}" placeholder="Type (e.g. Merchant)" style="max-width:130px;" />
+          <input type="text" value="${c.name || ''}" placeholder="Name" />
+          <input type="text" value="${c.locationVar || ''}" placeholder="$locationVar" list="variables-datalist" />
+          <span class="out-card-delete" style="cursor:pointer; padding:0 6px;">Delete</span>
+        `;
+        const [typeInput, nameInput, locInput] = row.querySelectorAll('input');
+
+        typeInput.addEventListener('input', (e) => { c.charType = e.target.value; refreshCharacterUI(); autoSaveLocal(); });
+        nameInput.addEventListener('input', (e) => { c.name = e.target.value; refreshCharacterUI(); autoSaveLocal(); });
+        locInput.addEventListener('input', (e) => { c.locationVar = e.target.value; autoSaveLocal(); });
+        locInput.addEventListener('blur', (e) => {
+          if (c.locationVar && !c.locationVar.startsWith('$')) {
+            c.locationVar = '$' + c.locationVar;
+            e.target.value = c.locationVar;
+            refreshCharacterUI();
+            autoSaveLocal();
+          }
+        });
+
+        row.querySelector('.out-card-delete').addEventListener('click', () => {
+          characters = characters.filter(x => x.id !== c.id);
+          nodes.forEach(n => { if (n.characterId === c.id) n.characterId = null; });
+          renderCharactersModal();
+          refreshCharacterUI();
+          autoSaveLocal();
+        });
+
+        charList.appendChild(row);
+      });
+    }
+
+    function refreshCharacterUI() {
+      const node = nodes.find(n => n.id === selectedNodeId);
+      if (node && node.type === 'npc') renderCharacterSelect(node);
+    }
+
     // Local Storage Operations
     const LOCAL_STORAGE_KEY = 'nve_story_data';
 
@@ -1305,9 +1464,11 @@
         nodes,
         connections,
         variables,
+        characters,
         nodeCount,
         varCount,
-        assignCount
+        assignCount,
+        charCount
       });
     }
 
@@ -1319,11 +1480,15 @@
         if (data.nodeCount) nodeCount = data.nodeCount;
         if (data.varCount) varCount = data.varCount;
         if (data.assignCount) assignCount = data.assignCount;
+        if (data.charCount) charCount = data.charCount;
         if (Array.isArray(data.variables)) variables = data.variables;
+        if (Array.isArray(data.characters)) characters = data.characters;
 
         if (Array.isArray(data.nodes)) {
           data.nodes.forEach(n => {
             if (!Array.isArray(n.assignments)) n.assignments = [];
+            if (!Array.isArray(n.tags)) n.tags = [];
+            if (n.characterId === undefined) n.characterId = null;
             nodes.push(n);
             renderNodeDOM(n);
           });
@@ -1541,6 +1706,9 @@
           type = 'npc';
         }
 
+        const knownTags = ['start', 'end', 'event', 'npc'];
+        const customTags = tags.filter(t => t && !knownTags.includes(t));
+
         const rawContent = el.textContent || '';
         const parsed = extractLinksAndCode(rawContent);
 
@@ -1548,7 +1716,8 @@
           title,
           text: parsed.text,
           code: parsed.code,
-          role
+          role,
+          tags: customTags
         });
 
         pidToNodeIdMap[title] = createdNode.id;
@@ -1609,6 +1778,9 @@
           type = 'npc';
         }
 
+        const knownTags = ['start', 'end', 'event', 'npc'];
+        const customTags = tags.filter(t => t && !knownTags.includes(t));
+
         const x = 100 + (index % 5) * 180;
         const y = 100 + Math.floor(index / 5) * 140;
 
@@ -1618,7 +1790,8 @@
           title,
           text: parsed.text,
           code: parsed.code,
-          role
+          role,
+          tags: customTags
         });
 
         titleToNodeIdMap[title] = createdNode.id;
@@ -1768,10 +1941,12 @@
 
     // Story Export Generation
     function passageTags(node) {
-      if (node.type === 'terminal') return node.role === 'end' ? ['end'] : ['start'];
-      if (node.type === 'event') return ['event'];
-      if (node.type === 'npc') return ['npc'];
-      return [];
+      const auto = [];
+      if (node.type === 'terminal') auto.push(node.role === 'end' ? 'end' : 'start');
+      else if (node.type === 'event') auto.push('event');
+      else if (node.type === 'npc') auto.push('npc');
+      const custom = Array.isArray(node.tags) ? node.tags : [];
+      return Array.from(new Set([...auto, ...custom]));
     }
 
     function buildPassageBody(node) {
