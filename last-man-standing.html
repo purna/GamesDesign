@@ -405,8 +405,9 @@ function hexColorForId(id) {
    STATE
 ===================================================================== */
 let myName = '';
-let room = null, sendAnnounce, sendPlayerState, sendWorldState, sendPickup, sendStartGame;
+let room = null, sendAnnounce, sendPlayerState, sendWorldState, sendPickup, sendStartGame, sendAssign;
 let peers = {}; // peerId -> { name, x,y, health, alive, weaponCount, weaponActiveUntil, shieldCount, shieldActiveUntil, isAttacking, facing, spectator }
+let hostAssignedRooms = {}; // host-local bookkeeping: peerId -> spawnIndex already handed out this arena
 let items = freshItems();
 let enemies = freshEnemies();
 let appliedClaims = {}; // itemId -> claimedAt already applied to me
@@ -543,6 +544,26 @@ function resetLocalRoundState(spawnIndex) {
   document.getElementById('winner-banner').classList.add('hidden');
 }
 
+// Host-only: picks a spawn room nobody currently known to be in this arena
+// occupies, using everyone's actual last-broadcast room as ground truth. This
+// is what the host hands out to each joiner instead of every client guessing
+// its own index locally (which was landing everyone in the same room).
+function pickFreeSpawnIndex(excludeSelf) {
+  const occupied = new Set();
+  if (!excludeSelf && me.roomRow !== undefined && me.roomCol !== undefined) occupied.add(me.roomRow + ',' + me.roomCol);
+  Object.keys(peers).forEach(id => {
+    const p = peers[id];
+    if (p && p.name && p.roomRow !== undefined && p.roomCol !== undefined) occupied.add(p.roomRow + ',' + p.roomCol);
+  });
+  const free = [];
+  for (let i = 0; i < SPAWN_ROOMS.length; i++) {
+    const r = SPAWN_ROOMS[i];
+    if (!occupied.has(r.row + ',' + r.col)) free.push(i);
+  }
+  if (free.length === 0) return Math.floor(Math.random() * SPAWN_ROOMS.length); // arena's genuinely full — MAX_PLAYERS should prevent this
+  return free[Math.floor(Math.random() * free.length)];
+}
+
 function connectToRoom(bucket) {
   if (room) { try { room.leave(); } catch (e) {} }
   peers = {};
@@ -550,8 +571,8 @@ function connectToRoom(bucket) {
   isHostFlag = false; // re-decided fresh for every arena — a leftover flag from a
                        // previous match would otherwise create two hosts at once
   nextEnemySpawnAt = 0; enemySpawnSeq = 0;
+  hostAssignedRooms = {};
 
-  const existingCount = 0; // fresh room each bucket -- spawn index assigned as peers announce in
   const roomName = roomNameFor(bucket);
   room = joinRoom({ appId: APP_ID, relayUrls: ['wss://relay.damus.io', 'wss://nos.lol'] }, roomName);
 
@@ -561,7 +582,8 @@ function connectToRoom(bucket) {
   const [spk, gpk] = room.makeAction('pickup');
   const [sr, gr] = room.makeAction('reject');
   const [ss, gst] = room.makeAction('start');
-  sendAnnounce = sa; sendPlayerState = sp; sendWorldState = sw; sendPickup = spk; sendStartGame = ss;
+  const [sax, gax] = room.makeAction('assign');
+  sendAnnounce = sa; sendPlayerState = sp; sendWorldState = sw; sendPickup = spk; sendStartGame = ss; sendAssign = sax;
 
   manualStartTriggered = false;
 
@@ -576,6 +598,20 @@ function connectToRoom(bucket) {
     }
     peers[peerId].name = data.name;
     peers[peerId].isHost = !!data.isHost;
+    if (isHostFlag && hostAssignedRooms[peerId] === undefined) {
+      const idx = pickFreeSpawnIndex();
+      hostAssignedRooms[peerId] = idx;
+      sax({ spawnIndex: idx }, peerId);
+    }
+  });
+
+  // A player's real room comes from the host, not a local guess — this is what
+  // actually keeps two joiners from landing in the same spawn room.
+  gax((data) => {
+    if (data && typeof data.spawnIndex === 'number') {
+      resetLocalRoundState(data.spawnIndex);
+      broadcastMe();
+    }
   });
 
   gp((data, peerId) => {
@@ -587,7 +623,13 @@ function connectToRoom(bucket) {
     if (data.items) items = data.items;
     if (data.enemies) enemies = data.enemies.map(e => {
       const prev = enemies.find(x => x.id === e.id);
-      return { ...e, renderX: prev ? prev.renderX : e.x * TILE, renderY: prev ? prev.renderY : e.y * TILE };
+      const roomKey = e.roomRow + ',' + e.roomCol;
+      const sameRoom = prev && prev._roomKey === roomKey;
+      return {
+        ...e, _roomKey: roomKey,
+        renderX: sameRoom ? prev.renderX : e.x * TILE,
+        renderY: sameRoom ? prev.renderY : e.y * TILE
+      };
     });
   });
 
@@ -630,17 +672,35 @@ function connectToRoom(bucket) {
     }
   });
 
-  // determine my spawn slot based on how many are already in this arena
-  const priorCount = Object.keys(peers).length; // usually 0 right after join
-  const spawnIndex = priorCount;
-  isSpectator = priorCount >= MAX_PLAYERS;
-  if (isSpectator) spectatorReason = `Arena is full! Maximum ${MAX_PLAYERS} players.`;
-  resetLocalRoundState(spawnIndex);
+  // Temporary placement until the host hands out a real spawn room via 'assign'
+  // (see gax above) — usually corrected within a few hundred ms of connecting.
+  isSpectator = false;
+  resetLocalRoundState(0);
 
   setTimeout(() => {
     const activeIds = Object.keys(peers).filter(id => peers[id] && peers[id].name);
-    if (activeIds.length === 0) isHostFlag = true;
-    if (isHostFlag) { items = freshItems(); enemies = freshEnemies(); nextEnemySpawnAt = 0; enemySpawnSeq = 0; }
+    const hostAlreadyClaimed = activeIds.some(id => peers[id].isHost);
+    if (!isHostFlag && !hostAlreadyClaimed) {
+      // Deterministic tie-break: lowest connection id among everyone visible
+      // right now becomes host — works whether we're alone or several people
+      // connected within the same window (same rule used for host handoff below).
+      const all = activeIds.concat([selfId]).sort();
+      if (all[0] === selfId) isHostFlag = true;
+    }
+    if (isHostFlag) {
+      items = freshItems(); enemies = freshEnemies(); nextEnemySpawnAt = 0; enemySpawnSeq = 0;
+      const myIdx = pickFreeSpawnIndex(true);
+      hostAssignedRooms[selfId] = myIdx;
+      resetLocalRoundState(myIdx);
+      // Assign anyone who announced before we knew we were host.
+      activeIds.forEach(id => {
+        if (hostAssignedRooms[id] === undefined) {
+          const idx = pickFreeSpawnIndex();
+          hostAssignedRooms[id] = idx;
+          sendAssign({ spawnIndex: idx }, id);
+        }
+      });
+    }
     sendAnnounce({ name: myName, isHost: isHostFlag });
     sendPlayerState(myStatePayload());
     updateSpectatorBanner();
@@ -793,6 +853,35 @@ window.addEventListener('keyup', e => { if (e.key === ' ') setAttacking(false); 
    HOST-ONLY ENEMY AI
 ===================================================================== */
 let lastEnemyStep = 0;
+
+// Mirrors the player's door-crossing logic in tryMove, but for enemies:
+// no room-lock check (that's a player-only rule) and it works for whichever
+// room the enemy currently happens to be in (interior, corner, or spawn).
+function tryEnemyMove(enemy, dx, dy) {
+  const map = getRoomMap(enemy.roomRow, enemy.roomCol);
+  const nx = enemy.x + dx, ny = enemy.y + dy;
+
+  if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS) {
+    if (map[ny][nx] === 1) return false;
+    enemy.x = nx; enemy.y = ny;
+    return true;
+  }
+
+  let targetRow = enemy.roomRow, targetCol = enemy.roomCol, entryX = enemy.x, entryY = enemy.y;
+  if (ny < 0) { targetRow -= 1; entryY = ROWS - 1; }
+  else if (ny >= ROWS) { targetRow += 1; entryY = 0; }
+  else if (nx < 0) { targetCol -= 1; entryX = COLS - 1; }
+  else if (nx >= COLS) { targetCol += 1; entryX = 0; }
+  if (targetRow < 0 || targetRow >= GRID_SIZE || targetCol < 0 || targetCol >= GRID_SIZE) return false; // no door leads out here
+
+  enemy.roomRow = targetRow; enemy.roomCol = targetCol;
+  enemy.x = entryX; enemy.y = entryY;
+  enemy.renderX = entryX * TILE; enemy.renderY = entryY * TILE;
+  return true;
+}
+
+const ENEMY_WANDER_CHANCE = 0.5; // per 500ms tick, when nobody's around to chase
+
 function stepEnemies() {
   const now = Date.now();
   if (now - lastEnemyStep < 500) return;
@@ -809,24 +898,27 @@ function stepEnemies() {
         targets.push({ x: p.x, y: p.y });
       }
     });
-    if (targets.length === 0) return;
 
-    let best = null, bestDist = Infinity;
-    targets.forEach(t => {
-      const d = Math.abs(t.x - enemy.x) + Math.abs(t.y - enemy.y);
-      if (d < bestDist) { bestDist = d; best = t; }
-    });
-    const dx = best.x - enemy.x, dy = best.y - enemy.y;
-    let mx = 0, my = 0;
-    if (Math.abs(dx) > Math.abs(dy)) mx = Math.sign(dx); else if (dy !== 0) my = Math.sign(dy); else mx = Math.sign(dx);
-    let nx = enemy.x + mx, ny = enemy.y + my;
-    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || ENEMY_ROOM_MAP[ny][nx] === 1) {
-      // try the other axis
-      nx = enemy.x + (mx === 0 ? Math.sign(dx) : 0);
-      ny = enemy.y + (my === 0 ? Math.sign(dy) : 0);
-      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS || ENEMY_ROOM_MAP[ny][nx] === 1) { nx = enemy.x; ny = enemy.y; }
+    if (targets.length > 0) {
+      let best = null, bestDist = Infinity;
+      targets.forEach(t => {
+        const d = Math.abs(t.x - enemy.x) + Math.abs(t.y - enemy.y);
+        if (d < bestDist) { bestDist = d; best = t; }
+      });
+      const dx = best.x - enemy.x, dy = best.y - enemy.y;
+      let mx = 0, my = 0;
+      if (Math.abs(dx) > Math.abs(dy)) mx = Math.sign(dx); else if (dy !== 0) my = Math.sign(dy); else mx = Math.sign(dx);
+      if (!tryEnemyMove(enemy, mx, my)) {
+        tryEnemyMove(enemy, mx === 0 ? Math.sign(dx) : 0, my === 0 ? Math.sign(dy) : 0);
+      }
+      return;
     }
-    enemy.x = nx; enemy.y = ny;
+
+    // Nobody here to chase — roam the arena, including out through doors.
+    if (Math.random() >= ENEMY_WANDER_CHANCE) return;
+    const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+    for (let i = dirs.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[dirs[i], dirs[j]] = [dirs[j], dirs[i]]; }
+    for (const [dx, dy] of dirs) { if (tryEnemyMove(enemy, dx, dy)) break; }
   });
 }
 
@@ -1048,10 +1140,15 @@ function drawHealthBar(g, px, py, health) {
 }
 
 function render() {
-  // interpolate enemies
+  // interpolate enemies (snap on room change, rather than sliding from a stale pixel spot)
   enemies.forEach(e => {
-    e.renderX = e.renderX === undefined ? e.x * TILE : e.renderX + (e.x * TILE - e.renderX) * 0.25;
-    e.renderY = e.renderY === undefined ? e.y * TILE : e.renderY + (e.y * TILE - e.renderY) * 0.25;
+    const roomKey = e.roomRow + ',' + e.roomCol;
+    if (e._roomKey !== roomKey || e.renderX === undefined) {
+      e.renderX = e.x * TILE; e.renderY = e.y * TILE; e._roomKey = roomKey;
+    } else {
+      e.renderX += (e.x * TILE - e.renderX) * 0.25;
+      e.renderY += (e.y * TILE - e.renderY) * 0.25;
+    }
   });
   me.renderX += (me.x * TILE - me.renderX) * 0.3;
   me.renderY += (me.y * TILE - me.renderY) * 0.3;
