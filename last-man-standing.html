@@ -61,7 +61,15 @@
     width: 100%; display: flex; justify-content: space-between; align-items: center;
     font-size: 12px; padding: 6px 4px; gap: 6px;
   }
-  #hearts { letter-spacing: 1px; color: #f87171; font-size: 15px; }
+  #health-bar-wrap {
+    position: relative; width: 92px; height: 16px; background: #2c2219; border: 1px solid #554438;
+    border-radius: 8px; overflow: hidden;
+  }
+  #health-bar-fill { height: 100%; background: #7fd88f; transition: width .3s ease, background .3s ease; }
+  #health-bar-label {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: bold; color: #f5ebe0; text-shadow: 0 1px 2px rgba(0,0,0,.8);
+  }
   #buffs { display: flex; gap: 8px; font-size: 11px; }
   .buff-pill {
     padding: 3px 8px; border-radius: 10px; background: #2c2219; border: 1px solid #554438; color: #776656;
@@ -69,6 +77,7 @@
   .buff-pill.active-weapon { background: #7a2e2e; border-color: #f87171; color: #ffdada; }
   .buff-pill.active-shield { background: #23506b; border-color: #5ec8ff; color: #dff3ff; }
   #room-timer { display: flex; align-items: center; gap: 8px; }
+  #room-timer .base-timer { display: none; } /* countdown only matters before you're matched into an arena */
   #arena-label { font-size: 11px; color: #b8a693; text-align: right; }
   #arena-code { font-size: 13px; color: #f5ebe0; font-weight: bold; letter-spacing: 1px; }
   #alive-count { font-size: 11px; color: #b8a693; }
@@ -144,6 +153,8 @@
   #btn-left { top: 40px; left: 0; width: 40px; height: 40px; }
   #btn-right { top: 40px; right: 0; width: 40px; height: 40px; }
 
+  .action-buttons { display: flex; align-items: center; gap: 10px; }
+
   #btn-attack {
     width: 78px; height: 78px; border-radius: 50%; font-size: 12px; font-weight: bold;
     display: flex; align-items: center; justify-content: center; text-align: center;
@@ -154,6 +165,17 @@
     box-shadow: 0 0 16px rgba(248,113,113,.6);
   }
   #btn-attack.swinging { background: #f87171; transform: scale(1.06); }
+
+  #btn-defend {
+    width: 60px; height: 60px; border-radius: 50%; font-size: 10px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    background: #221a14; border: 3px solid #554438; color: #665648; opacity: .6;
+  }
+  #btn-defend.ready {
+    background: #1e3a4d; border-color: #5ec8ff; color: #fff; opacity: 1;
+    box-shadow: 0 0 12px rgba(94,200,255,.5);
+  }
+  #btn-defend.active { background: #23506b; border-color: #dff3ff; transform: scale(1.06); }
 
   #playerlist {
     width: 100%; max-width: 520px; margin-top: 14px; font-size: 11px; color: #8a7a68;
@@ -167,7 +189,7 @@
   <!-- JOIN SCREEN -->
   <div id="screen-join">
     <h1>⚔️ Last Man Standing</h1>
-    <p>Top-down arena battle royale. The arena is a 5x5 grid of rooms linked by doors — you only ever see your own room. Grab weapons &amp; shields, dodge roaming enemies, and be the last one standing. A room locks once 2 players are inside, and unlocks when one leaves or dies. A fresh arena opens automatically every 60 seconds — up to 12 players per arena.</p>
+    <p>Top-down arena battle royale. The arena is a 5x5 grid of rooms linked by doors — you only ever see your own room. Collect weapons &amp; shields (you can stack multiple), dodge roaming enemies, and be the last one standing — attacking and defending only start burning down their timers once you actually use them. A room locks once 2 players are inside, and unlocks when one leaves or dies. New arrivals within the same 60-second window are grouped into one arena; once a match starts it runs until there's a winner, then everyone moves into a fresh arena — up to 12 players per arena.</p>
 
     <div class="totp-box">
       <div class="totp-caption">Current Arena</div>
@@ -218,7 +240,7 @@
   <div id="screen-game" class="hidden">
     <div id="topbar">
       <div>
-        <div id="hearts">♥♥♥♥♥♥♥♥♥♥</div>
+        <div id="health-bar-wrap"><div id="health-bar-fill"></div><span id="health-bar-label">10/10</span></div>
         <div id="buffs">
           <span id="pill-weapon" class="buff-pill">no weapon</span>
           <span id="pill-shield" class="buff-pill">no shield</span>
@@ -257,7 +279,10 @@
         <div class="btn" id="btn-right">▶</div>
         <div class="btn" id="btn-down">▼</div>
       </div>
-      <div id="btn-attack">ATTACK</div>
+      <div class="action-buttons">
+        <div id="btn-defend">DEFEND</div>
+        <div id="btn-attack">ATTACK</div>
+      </div>
     </div>
 
     <div id="playerlist"></div>
@@ -381,7 +406,7 @@ function hexColorForId(id) {
 ===================================================================== */
 let myName = '';
 let room = null, sendAnnounce, sendPlayerState, sendWorldState, sendPickup, sendStartGame;
-let peers = {}; // peerId -> { name, x,y, health, alive, hasWeapon, weaponUntil, hasShield, shieldUntil, isAttacking, facing, spectator }
+let peers = {}; // peerId -> { name, x,y, health, alive, weaponCount, weaponActiveUntil, shieldCount, shieldActiveUntil, isAttacking, facing, spectator }
 let items = freshItems();
 let enemies = freshEnemies();
 let appliedClaims = {}; // itemId -> claimedAt already applied to me
@@ -396,8 +421,8 @@ let manualStartTriggered = false;
 
 const me = {
   roomRow: 0, roomCol: 1, x: 6, y: 6, renderX: 6 * TILE, renderY: 6 * TILE, facing: 'down',
-  health: 10, alive: true, hasWeapon: false, weaponUntil: 0,
-  hasShield: false, shieldUntil: 0, isAttacking: false, lastMove: 0
+  health: 10, alive: true, weaponCount: 0, weaponActiveUntil: 0,
+  shieldCount: 0, shieldActiveUntil: 0, isAttacking: false, lastMove: 0
 };
 let currentRoomMap = getRoomMap(me.roomRow, me.roomCol);
 
@@ -510,8 +535,8 @@ function resetLocalRoundState(spawnIndex) {
   me.roomRow = spawnRoom.row; me.roomCol = spawnRoom.col;
   me.x = 6; me.y = 6;
   me.renderX = 6 * TILE; me.renderY = 6 * TILE;
-  me.health = 10; me.alive = true; me.hasWeapon = false; me.weaponUntil = 0;
-  me.hasShield = false; me.shieldUntil = 0; me.isAttacking = false; me.facing = 'down';
+  me.health = 10; me.alive = true; me.weaponCount = 0; me.weaponActiveUntil = 0;
+  me.shieldCount = 0; me.shieldActiveUntil = 0; me.isAttacking = false; me.facing = 'down';
   appliedClaims = {};
   currentRoomMap = getRoomMap(me.roomRow, me.roomCol);
   drawMap();
@@ -522,6 +547,9 @@ function connectToRoom(bucket) {
   if (room) { try { room.leave(); } catch (e) {} }
   peers = {};
   activeBucket = bucket;
+  isHostFlag = false; // re-decided fresh for every arena — a leftover flag from a
+                       // previous match would otherwise create two hosts at once
+  nextEnemySpawnAt = 0; enemySpawnSeq = 0;
 
   const existingCount = 0; // fresh room each bucket -- spawn index assigned as peers announce in
   const roomName = roomNameFor(bucket);
@@ -612,7 +640,7 @@ function connectToRoom(bucket) {
   setTimeout(() => {
     const activeIds = Object.keys(peers).filter(id => peers[id] && peers[id].name);
     if (activeIds.length === 0) isHostFlag = true;
-    if (isHostFlag) { items = freshItems(); enemies = freshEnemies(); }
+    if (isHostFlag) { items = freshItems(); enemies = freshEnemies(); nextEnemySpawnAt = 0; enemySpawnSeq = 0; }
     sendAnnounce({ name: myName, isHost: isHostFlag });
     sendPlayerState(myStatePayload());
     updateSpectatorBanner();
@@ -623,8 +651,8 @@ function myStatePayload() {
   return {
     name: myName, x: me.x, y: me.y, roomRow: me.roomRow, roomCol: me.roomCol,
     health: me.health, alive: me.alive,
-    hasWeapon: me.hasWeapon, weaponUntil: me.weaponUntil,
-    hasShield: me.hasShield, shieldUntil: me.shieldUntil,
+    weaponCount: me.weaponCount, weaponActiveUntil: me.weaponActiveUntil,
+    shieldCount: me.shieldCount, shieldActiveUntil: me.shieldActiveUntil,
     isAttacking: me.isAttacking, facing: me.facing, spectator: isSpectator
   };
 }
@@ -642,8 +670,8 @@ function applyItemClaims() {
   items.forEach(item => {
     if (item.claimedBy === selfId && appliedClaims[item.id] !== item.claimedAt) {
       appliedClaims[item.id] = item.claimedAt;
-      if (item.type === 'weapon') { me.hasWeapon = true; me.weaponUntil = Date.now() + WEAPON_DURATION; }
-      else { me.hasShield = true; me.shieldUntil = Date.now() + SHIELD_DURATION; }
+      if (item.type === 'weapon') { me.weaponCount += 1; }
+      else { me.shieldCount += 1; }
       broadcastMe();
     }
   });
@@ -706,11 +734,37 @@ function tryMove(dx, dy, facing) {
 }
 
 const attackBtn = document.getElementById('btn-attack');
+const defendBtn = document.getElementById('btn-defend');
+
+// Weapons are collected into an inventory (me.weaponCount) and don't start ticking
+// down until the player actually attacks with one — that first press consumes one
+// charge and opens a WEAPON_DURATION window during which attacks are free to repeat.
 function setAttacking(v) {
   if (isSpectator || !me.alive) return;
-  if (v && !(me.hasWeapon && me.weaponUntil > Date.now())) return;
-  me.isAttacking = v;
-  attackBtn.classList.toggle('swinging', v);
+  const now = Date.now();
+  if (v) {
+    if (me.weaponActiveUntil <= now) {
+      if (me.weaponCount <= 0) return; // nothing to attack with
+      me.weaponCount -= 1;
+      me.weaponActiveUntil = now + WEAPON_DURATION;
+    }
+    me.isAttacking = true;
+  } else {
+    me.isAttacking = false;
+  }
+  attackBtn.classList.toggle('swinging', me.isAttacking);
+  broadcastMe();
+}
+
+// Shields work the same way: pressing Defend consumes one charge and starts the
+// SHIELD_DURATION protection window right then, not at pickup time.
+function activateShield() {
+  if (isSpectator || !me.alive) return;
+  const now = Date.now();
+  if (me.shieldActiveUntil > now) return; // already shielded, let it run out
+  if (me.shieldCount <= 0) return;
+  me.shieldCount -= 1;
+  me.shieldActiveUntil = now + SHIELD_DURATION;
   broadcastMe();
 }
 
@@ -721,6 +775,7 @@ document.getElementById('btn-right').addEventListener('pointerdown', e => { e.pr
 attackBtn.addEventListener('pointerdown', e => { e.preventDefault(); setAttacking(true); });
 attackBtn.addEventListener('pointerup', e => { e.preventDefault(); setAttacking(false); });
 attackBtn.addEventListener('pointerleave', e => { setAttacking(false); });
+defendBtn.addEventListener('pointerdown', e => { e.preventDefault(); activateShield(); });
 
 window.addEventListener('keydown', e => {
   switch (e.key.toLowerCase()) {
@@ -729,6 +784,7 @@ window.addEventListener('keydown', e => {
     case 'arrowleft': case 'a': tryMove(-1, 0, 'left'); break;
     case 'arrowright': case 'd': tryMove(1, 0, 'right'); break;
     case ' ': e.preventDefault(); setAttacking(true); break;
+    case 'e': case 'shift': e.preventDefault(); activateShield(); break;
   }
 });
 window.addEventListener('keyup', e => { if (e.key === ' ') setAttacking(false); });
@@ -778,8 +834,48 @@ function hostTick() {
   if (!isHost()) return;
   stepEnemies();
   const now = Date.now();
+  maybeSpawnEnemies(now);
   items.forEach(i => { if (!i.available && now - i.claimedAt > ITEM_RESPAWN_MS) { i.available = true; i.claimedBy = null; } });
   sendWorldState({ items, enemies: enemies.map(e => ({ id: e.id, roomRow: e.roomRow, roomCol: e.roomCol, x: e.x, y: e.y })) });
+}
+
+/* ---------------------------------------------------------------------
+   Escalation: the longer the match runs, the more enemies show up. Every
+   few (randomized) seconds, the host drops a random-sized batch of fresh
+   enemies into random interior rooms, up to a sane safety cap.
+--------------------------------------------------------------------- */
+const ENEMY_SPAWN_MIN_MS = 6000, ENEMY_SPAWN_MAX_MS = 12000;
+const ENEMY_SPAWN_MIN_COUNT = 1, ENEMY_SPAWN_MAX_COUNT = 3;
+const MAX_ENEMIES = 40;
+let nextEnemySpawnAt = 0;
+let enemySpawnSeq = 0;
+
+function randomOpenTile() {
+  let x, y, tries = 0;
+  do {
+    x = 1 + Math.floor(Math.random() * (COLS - 2));
+    y = 1 + Math.floor(Math.random() * (ROWS - 2));
+    tries++;
+  } while (ENEMY_ROOM_MAP[y][x] === 1 && tries < 30);
+  return { x, y };
+}
+
+function maybeSpawnEnemies(now) {
+  if (nextEnemySpawnAt === 0) { nextEnemySpawnAt = now + ENEMY_SPAWN_MIN_MS + Math.random() * (ENEMY_SPAWN_MAX_MS - ENEMY_SPAWN_MIN_MS); return; }
+  if (now < nextEnemySpawnAt) return;
+  nextEnemySpawnAt = now + ENEMY_SPAWN_MIN_MS + Math.random() * (ENEMY_SPAWN_MAX_MS - ENEMY_SPAWN_MIN_MS);
+  if (enemies.length >= MAX_ENEMIES) return;
+
+  const n = ENEMY_SPAWN_MIN_COUNT + Math.floor(Math.random() * (ENEMY_SPAWN_MAX_COUNT - ENEMY_SPAWN_MIN_COUNT + 1));
+  for (let i = 0; i < n && enemies.length < MAX_ENEMIES; i++) {
+    const room = INTERIOR_ROOMS[Math.floor(Math.random() * INTERIOR_ROOMS.length)];
+    const tile = randomOpenTile();
+    enemySpawnSeq += 1;
+    enemies.push({
+      id: `enemy-spawn-${enemySpawnSeq}`, roomRow: room.row, roomCol: room.col,
+      x: tile.x, y: tile.y, renderX: tile.x * TILE, renderY: tile.y * TILE
+    });
+  }
 }
 
 /* =====================================================================
@@ -796,15 +892,14 @@ function damageTick() {
     const p = peers[id];
     if (!p || !p.alive || p.spectator) return;
     if (p.roomRow !== me.roomRow || p.roomCol !== me.roomCol) return;
-    if (!(p.hasWeapon && p.weaponUntil > now)) return;
+    if (!(p.weaponActiveUntil > now)) return;
     if (!p.isAttacking) return;
     const dist = Math.max(Math.abs(p.x - me.x), Math.abs(p.y - me.y));
     if (dist <= 1) underAttack = true;
   });
 
-  const shielded = me.hasShield && me.shieldUntil > now;
-  if (me.hasShield && me.shieldUntil <= now) me.hasShield = false;
-  if (me.hasWeapon && me.weaponUntil <= now) { me.hasWeapon = false; setAttacking(false); }
+  const shielded = me.shieldActiveUntil > now;
+  if (me.isAttacking && me.weaponActiveUntil <= now) setAttacking(false);
 
   if (underAttack && !shielded) {
     me.health -= 1;
@@ -816,48 +911,77 @@ function damageTick() {
 /* =====================================================================
    ROUND / COUNTDOWN
 ===================================================================== */
+const DRAW_RESULT = '__DRAW__';
 function checkWinner() {
   const roster = aliveRoster().filter(p => !p.spectator);
   if (roster.length < 2) return null;
   const aliveOnes = roster.filter(p => p.alive);
   if (aliveOnes.length === 1) return aliveOnes[0].name;
+  if (aliveOnes.length === 0) return DRAW_RESULT; // simultaneous elimination — round still ends
   return null;
 }
 
+let winnerAnnouncedAt = null;
+const NEXT_ARENA_DELAY_MS = 6000;
+
 function updateCountdownAndRotate() {
   const now = Date.now();
-  const secsIntoBucket = Math.floor((now % BUCKET_MS) / 1000);
-  const secsLeft = 60 - secsIntoBucket;
-  const bucket = currentBucket();
-  const code = generateDynamicCode(bucket);
 
-  document.getElementById('base-timer-label').textContent = secsLeft + 's';
-  document.getElementById('arena-code').textContent = code;
-  setCircleDasharray(secsLeft, 60, 'base-timer-path-remaining');
-  setRemainingPathColor(secsLeft, 'base-timer-path-remaining');
+  // Wall-clock bucket — purely for grouping simultaneous joiners into the same
+  // arena. It keeps rotating every 60s in the background, but no longer tears
+  // down a match that's already in progress.
+  const wallSecsIntoBucket = Math.floor((now % BUCKET_MS) / 1000);
+  const wallSecsLeft = 60 - wallSecsIntoBucket;
+  const wallBucket = currentBucket();
+  const wallCode = generateDynamicCode(wallBucket);
 
-  document.getElementById('join-base-timer-label').textContent = secsLeft + 's';
-  document.getElementById('join-arena-code').textContent = code;
-  setCircleDasharray(secsLeft, 60, 'join-base-timer-path-remaining');
-  setRemainingPathColor(secsLeft, 'join-base-timer-path-remaining');
+  document.getElementById('join-base-timer-label').textContent = wallSecsLeft + 's';
+  document.getElementById('join-arena-code').textContent = wallCode;
+  setCircleDasharray(wallSecsLeft, 60, 'join-base-timer-path-remaining');
+  setRemainingPathColor(wallSecsLeft, 'join-base-timer-path-remaining');
 
-  const lobbySecsLeft = Math.max(0, LOBBY_SECONDS - secsIntoBucket);
-  document.getElementById('lobby-base-timer-label').textContent = lobbySecsLeft + 's';
-  document.getElementById('lobby-arena-code').textContent = code;
-  setCircleDasharray(lobbySecsLeft, LOBBY_SECONDS, 'lobby-base-timer-path-remaining');
-  setRemainingPathColor(lobbySecsLeft, 'lobby-base-timer-path-remaining');
+  if (hasJoined && activeBucket !== null) {
+    const myCode = generateDynamicCode(activeBucket);
+    // Elapsed time since MY arena was created — never wraps, so the lobby
+    // window only ever happens once per match instead of every 60s.
+    const mySecsIntoBucket = Math.floor((now - activeBucket * BUCKET_MS) / 1000);
 
-  if (hasJoined) {
-    const shouldBeInLobby = !manualStartTriggered && secsIntoBucket < LOBBY_SECONDS;
+    document.getElementById('arena-code').textContent = myCode;
+
+    const lobbySecsLeft = Math.max(0, LOBBY_SECONDS - mySecsIntoBucket);
+    document.getElementById('lobby-base-timer-label').textContent = lobbySecsLeft + 's';
+    document.getElementById('lobby-arena-code').textContent = myCode;
+    setCircleDasharray(lobbySecsLeft, LOBBY_SECONDS, 'lobby-base-timer-path-remaining');
+    setRemainingPathColor(lobbySecsLeft, 'lobby-base-timer-path-remaining');
+
+    const shouldBeInLobby = !manualStartTriggered && mySecsIntoBucket < LOBBY_SECONDS;
     if (shouldBeInLobby !== inLobbyPhase) {
       inLobbyPhase = shouldBeInLobby;
       showScreen(inLobbyPhase ? 'lobby' : 'game');
     }
     if (inLobbyPhase) updateLobbyRosterUI();
-  }
 
-  if (activeBucket !== null && bucket !== activeBucket) {
-    connectToRoom(bucket);
+    // A spectator (arena was full when they tried to join) isn't part of a live
+    // match, so let them hop into whatever arena is currently forming instead
+    // of being stuck watching forever.
+    if (isSpectator && wallBucket !== activeBucket) {
+      connectToRoom(wallBucket);
+      return;
+    }
+
+    // Once there's a winner, give everyone a few seconds to see the banner,
+    // then move the whole match into the currently-live arena to start fresh.
+    const w = checkWinner();
+    if (w) {
+      if (winnerAnnouncedAt === null) winnerAnnouncedAt = now;
+      else if (now - winnerAnnouncedAt > NEXT_ARENA_DELAY_MS) {
+        winnerAnnouncedAt = null;
+        connectToRoom(currentBucket());
+        return;
+      }
+    } else {
+      winnerAnnouncedAt = null;
+    }
   }
 }
 
@@ -907,15 +1031,20 @@ function setCircleDasharray(timeLeft, totalSecs, pathId) {
 /* =====================================================================
    RENDER
 ===================================================================== */
-function heartsString(hp) {
-  const full = Math.max(0, Math.round(hp));
-  return '♥'.repeat(full) + '♡'.repeat(Math.max(0, 10 - full));
-}
-
 function drawEntity(g, px, py, color, alive, spectator) {
   const alpha = spectator ? 0.35 : (alive ? 1 : 0.25);
   g.circle(px + TILE / 2, py + TILE / 2, TILE * 0.32).fill({ color, alpha });
   g.circle(px + TILE / 2, py + TILE / 2, TILE * 0.32).stroke({ width: 2, color: '#14100c', alpha });
+}
+
+function healthBarColor(pct) { return pct <= 0.3 ? '#f87171' : (pct <= 0.6 ? 'orange' : '#7fd88f'); }
+
+function drawHealthBar(g, px, py, health) {
+  const w = TILE - 14, h = 4;
+  const x = px + 7, y = py - 4;
+  const pct = Math.max(0, Math.min(1, (health || 0) / 10));
+  g.rect(x, y, w, h).fill({ color: '#2c2219' });
+  if (pct > 0) g.rect(x, y, w * pct, h).fill({ color: healthBarColor(pct) });
 }
 
 function render() {
@@ -958,38 +1087,55 @@ function render() {
     if (!inRoom) return;
     const px = p.x * TILE, py = p.y * TILE;
     drawEntity(playerLayer, px, py, colorForId(id), p.alive, p.spectator);
-    if (p.hasShield && p.shieldUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
-    if (p.hasWeapon && p.weaponUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
+    drawHealthBar(playerLayer, px, py, p.health);
+    if (p.shieldActiveUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
+    if (p.weaponActiveUntil > Date.now()) playerLayer.circle(px + TILE / 2, py + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
     lbl.text = p.name + (p.spectator ? ' (spec)' : '');
-    lbl.position.set(px + TILE / 2, py - 3);
+    lbl.position.set(px + TILE / 2, py - 10);
   });
 
   // me
   drawEntity(playerLayer, me.renderX, me.renderY, colorForId(selfId), me.alive, isSpectator);
-  if (me.hasShield && me.shieldUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
-  if (me.hasWeapon && me.weaponUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
+  drawHealthBar(playerLayer, me.renderX, me.renderY, me.health);
+  if (me.shieldActiveUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
+  if (me.weaponActiveUntil > Date.now()) playerLayer.circle(me.renderX + TILE / 2, me.renderY + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
   const myLbl = getLabel(selfId);
   myLbl.visible = true;
   myLbl.text = myName + ' (you)';
-  myLbl.position.set(me.renderX + TILE / 2, me.renderY - 3);
+  myLbl.position.set(me.renderX + TILE / 2, me.renderY - 10);
 
   // HUD
-  document.getElementById('hearts').textContent = heartsString(me.health);
+  const hpPct = Math.max(0, Math.min(1, me.health / 10));
+  const fillEl = document.getElementById('health-bar-fill');
+  fillEl.style.width = (hpPct * 100) + '%';
+  fillEl.style.background = healthBarColor(hpPct);
+  document.getElementById('health-bar-label').textContent = `${Math.max(0, me.health)}/10`;
+
   const wPill = document.getElementById('pill-weapon');
   const sPill = document.getElementById('pill-shield');
   const now = Date.now();
-  if (me.hasWeapon && me.weaponUntil > now) {
-    wPill.textContent = 'weapon ' + Math.ceil((me.weaponUntil - now) / 1000) + 's';
+  if (me.weaponActiveUntil > now) {
+    wPill.textContent = 'weapon ' + Math.ceil((me.weaponActiveUntil - now) / 1000) + 's' + (me.weaponCount > 0 ? ` (+${me.weaponCount})` : '');
     wPill.classList.add('active-weapon');
+    attackBtn.classList.add('ready');
+  } else if (me.weaponCount > 0) {
+    wPill.textContent = `weapon x${me.weaponCount} (ready)`;
+    wPill.classList.remove('active-weapon');
     attackBtn.classList.add('ready');
   } else {
     wPill.textContent = 'no weapon'; wPill.classList.remove('active-weapon'); attackBtn.classList.remove('ready', 'swinging');
   }
-  if (me.hasShield && me.shieldUntil > now) {
-    sPill.textContent = 'shield ' + Math.ceil((me.shieldUntil - now) / 1000) + 's';
+  if (me.shieldActiveUntil > now) {
+    sPill.textContent = 'shield ' + Math.ceil((me.shieldActiveUntil - now) / 1000) + 's' + (me.shieldCount > 0 ? ` (+${me.shieldCount})` : '');
     sPill.classList.add('active-shield');
+    defendBtn.classList.add('ready', 'active');
+  } else if (me.shieldCount > 0) {
+    sPill.textContent = `shield x${me.shieldCount} (ready)`;
+    sPill.classList.remove('active-shield');
+    defendBtn.classList.add('ready');
+    defendBtn.classList.remove('active');
   } else {
-    sPill.textContent = 'no shield'; sPill.classList.remove('active-shield');
+    sPill.textContent = 'no shield'; sPill.classList.remove('active-shield'); defendBtn.classList.remove('ready', 'active');
   }
 
   const roomHere = playersInRoom(me.roomRow, me.roomCol);
@@ -1004,7 +1150,7 @@ function render() {
   const winnerBanner = document.getElementById('winner-banner');
   const w = checkWinner();
   if (w) {
-    document.getElementById('winner-text').textContent = '🏆 ' + w + ' wins!';
+    document.getElementById('winner-text').textContent = w === DRAW_RESULT ? '💀 No survivors' : ('🏆 ' + w + ' wins!');
     winnerBanner.classList.remove('hidden');
   } else {
     winnerBanner.classList.add('hidden');
