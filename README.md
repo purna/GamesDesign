@@ -12,4 +12,8 @@
 
 #Unit 1
 
-05-unit1-sort-the-process.html
+[studio-team-builder](04-unit1-studio-team-builder.html)
+
+[sort-the-process](05-unit1-sort-the-process.html)
+
+[double-diamond-creative-process](05-unit1-double-diamond-creative-process.html)
