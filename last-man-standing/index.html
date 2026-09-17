@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="icon" type="image/png" href="https://github.com/purna/GamesDesign/last-man-standing/favicon-96x96.png"
+    sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="https://github.com/purna/GamesDesign/last-man-standing/favicon.svg" />
+  <link rel="shortcut icon" href="https://github.com/purna/GamesDesign/last-man-standing/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180"
+    href="https://github.com/purna/GamesDesign/last-man-standing/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="last-man-standing" />
+  <link rel="manifest" href="https://github.com/purna/GamesDesign/last-man-standing/site.webmanifest" />
+
+  <title>Last Man Standing - Arena</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One" rel="stylesheet">
+
+</head>
+
+<body>
+  <div id="screen-join">
+    <h1 class="sr-only">Last Man Standing</h1>
+    <p><img alt="last man standing" src="logo.png" class="logo" /></p>
+    <p>Top-down arena battle royale. The arena is a 5x5 grid of rooms linked by doors — you only ever see your own room.
+      Collect weapons &amp; shields (you can stack multiple), grab a map to reveal the arena for 10 seconds, dodge
+      roaming enemies, and be the last one standing —
+      attacking and defending only start burning down their timers once you actually use them. A room locks once 2
+      players are inside, and unlocks when one leaves or dies. New arrivals within the same 60-second window are grouped
+      into one arena; once a match starts it runs until there's a winner, then everyone moves into a fresh arena — up to
+      12 players per arena.</p>
+
+    <div class="totp-box">
+      <div class="totp-caption">Current Arena</div>
+      <div class="totp-code" id="join-arena-code">------</div>
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path id="join-base-timer-path-remaining" stroke-dasharray="283" class="base-timer__path-remaining green"
+              d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"></path>
+          </g>
+        </svg>
+        <span id="join-base-timer-label" class="base-timer__label">60s</span>
+      </div>
+    </div>
+
+    <label class="sr-label" for="username">Player name</label>
+    <input type="text" id="username" placeholder="your-name" maxlength="10" autocomplete="off" autocapitalize="off"
+      spellcheck="false" inputmode="latin">
+    <p id="name-rule" class="name-rule">Lowercase a–z and single hyphens, up to 10 characters.</p>
+    <button id="btn-enter">Enter Arena</button>
+    <div id="connect-status" role="status" aria-live="polite"></div>
+  </div>
+
+  <div id="screen-lobby" class="hidden">
+    <h1 class="black-ops-one-regular">Arena Lobby</h1>
+    <img alt="logo" src="favicon.svg" class="logo" />
+    <p>Players gathering for this arena. The match starts automatically, or the host can start early.</p>
+
+    <div class="totp-box">
+      <div class="totp-caption">Match starts in</div>
+      <div class="totp-code" id="lobby-arena-code">------</div>
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path id="lobby-base-timer-path-remaining" stroke-dasharray="283" class="base-timer__path-remaining green"
+              d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"></path>
+          </g>
+        </svg>
+        <span id="lobby-base-timer-label" class="base-timer__label">12s</span>
+      </div>
+    </div>
+
+    <div id="lobby-status-text" class="info-text">Waiting for players…</div>
+    <div id="lobby-player-list"></div>
+    <button id="btn-start-now" disabled>Start Now (Host Only)</button>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div id="topbar">
+      <div id="topbar-player">
+        <div id="player-name-display">—</div>
+      </div>
+      <div id="room-timer">
+        <div>
+          <div id="arena-label">Player</div>
+          <div id="arena-code">—</div>
+        </div>
+        <div class="base-timer">
+          <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="base-timer__circle">
+              <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+              <path id="base-timer-path-remaining" stroke-dasharray="283" class="base-timer__path-remaining green"
+                d="M 50,50 m -45,0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"></path>
+            </g>
+          </svg>
+          <span id="base-timer-label" class="base-timer__label">60s</span>
+        </div>
+      </div>
+    </div>
+    <div id="health-row">
+      <div id="health-bar-wrap">
+        <div id="health-bar-fill"></div><span id="health-bar-label">10/10</span>
+      </div>
+    </div>
+    <div id="alive-count">Players alive: --</div>
+    <div id="room-info">Room: --</div>
+
+    <div id="game-container">
+      <div id="inventory-panel">
+        <div class="inventory-title">Inventory</div>
+        <div id="inventory-list">
+          <div id="inventory-weapon" class="inventory-item">Weapon <span>0</span></div>
+          <div id="inventory-shield" class="inventory-item">Shield <span>0</span></div>
+          <div id="inventory-map" class="inventory-item">Map <span></span></div>
+          <div id="inventory-empty" class="inventory-empty">No items</div>
+        </div>
+      </div>
+      <div id="minimap" class="hidden" aria-hidden="true">
+        <div class="minimap-head">
+          <span>Arena map</span><span id="minimap-timer">10s</span>
+        </div>
+        <div id="minimap-grid" class="minimap-grid"></div>
+        <div class="minimap-bar">
+          <div id="minimap-bar-fill"></div>
+        </div>
+      </div>
+      <div id="spectator-banner" class="hidden">Spectating until next round</div>
+      <div id="room-toast"></div>
+      <div id="winner-banner" class="hidden">
+        <span class="cup-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M9 2h6v2h4v3a5 5 0 0 1-4.35 4.95A6 6 0 0 1 13 15.92V18h3v3H8v-3h3v-2.08a6 6 0 0 1-1.65-3.97A5 5 0 0 1 5 7V5h4V2Z"
+              fill="currentColor"></path>
+          </svg>
+        </span>
+        <h2 id="winner-text"></h2>
+        <p>Next arena starts automatically</p>
+      </div>
+      <div id="game-in-progress-overlay" class="hidden">
+        <div
+          style="position:absolute;inset:0;background:rgba(20,16,12,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:8;border-radius:6px;">
+          <div style="font-size:32px;margin-bottom:8px;">⚔️</div>
+          <div style="font-size:18px;font-weight:bold;color:#f87171;margin-bottom:4px;">GAME IN PROGRESS</div>
+          <div style="font-size:12px;color:#b8a693;text-align:center;max-width:80%;line-height:1.5;">
+            A match is currently underway.<br>Please wait for it to finish,<br>then you'll join the next round
+            automatically.
+          </div>
+          <div id="waiting-countdown" style="margin-top:12px;font-size:13px;color:#d4a373;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="controls">
+      <div class="dpad">
+        <div class="btn" id="btn-up">▲</div>
+        <div class="btn" id="btn-left">◀</div>
+        <div class="btn" id="btn-right">▶</div>
+        <div class="btn" id="btn-down">▼</div>
+      </div>
+      <div class="action-buttons">
+        <div id="btn-defend">DEFEND</div>
+        <div id="btn-attack">ATTACK</div>
+      </div>
+    </div>
+
+    <div id="playerlist"></div>
+  </div>
+
+  <div id="screen-podium" class="hidden">
+    <div class="podium-card">
+      <div class="podium-crown" aria-label="Winner">
+        <svg class="cup-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M9 2h6v2h4v3a5 5 0 0 1-4.35 4.95A6 6 0 0 1 13 15.92V18h3v3H8v-3h3v-2.08a6 6 0 0 1-1.65-3.97A5 5 0 0 1 5 7V5h4V2Z"
+            fill="currentColor"></path>
+        </svg>
+      </div>
+      <h1>Match Complete</h1>
+      <div id="podium-winner" class="podium-winner">Winner</div>
+      <div id="podium-standings" class="podium-standings"></div>
+      <p id="podium-copy" class="podium-copy">The next arena is being prepared.</p>
+      <div id="podium-countdown" class="podium-countdown">Restarting soon…</div>
+      <button id="btn-return-lobby">Return to Lobby</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.6.6/dist/pixi.min.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>
