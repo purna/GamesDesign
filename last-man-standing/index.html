@@ -16,6 +16,21 @@
 
   <title>Last Man Standing - Arena</title>
   <link rel="stylesheet" href="styles.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One" rel="stylesheet">
+  <style>
+    .black-ops-one-regular {
+      font-family: "Black Ops One", system-ui;
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    #screen-lobby h1 {
+      font-size: 40px;
+    }
+  </style>
 </head>
 
 <body>
@@ -23,7 +38,8 @@
     <h1 class="sr-only">Last Man Standing</h1>
     <p><img alt="last man standing" src="logo.png" class="logo" /></p>
     <p>Top-down arena battle royale. The arena is a 5x5 grid of rooms linked by doors — you only ever see your own room.
-      Collect weapons &amp; shields (you can stack multiple), grab a map to reveal the arena for 10 seconds, dodge roaming enemies, and be the last one standing —
+      Collect weapons &amp; shields (you can stack multiple), grab a map to reveal the arena for 10 seconds, dodge
+      roaming enemies, and be the last one standing —
       attacking and defending only start burning down their timers once you actually use them. A room locks once 2
       players are inside, and unlocks when one leaves or dies. New arrivals within the same 60-second window are grouped
       into one arena; once a match starts it runs until there's a winner, then everyone moves into a fresh arena — up to
@@ -45,8 +61,8 @@
     </div>
 
     <label class="sr-label" for="username">Player name</label>
-    <input type="text" id="username" placeholder="your-name" maxlength="10" autocomplete="off"
-      autocapitalize="off" spellcheck="false" inputmode="latin">
+    <input type="text" id="username" placeholder="your-name" maxlength="10" autocomplete="off" autocapitalize="off"
+      spellcheck="false" inputmode="latin">
     <p id="name-rule" class="name-rule">Lowercase a–z and single hyphens, up to 10 characters.</p>
     <button id="btn-enter">Enter Arena</button>
     <div id="connect-status" role="status" aria-live="polite"></div>
@@ -110,21 +126,48 @@
       <div id="inventory-panel">
         <div class="inventory-title">Inventory</div>
         <div id="inventory-list">
-          <div id="inventory-weapon" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3.2v4.3l-9.6 9.6-4.3-4.3L15.7 3.2z"/><path d="M8.3 15.6 4.6 19.3"/><path d="M3.1 17.6 6.4 20.9"/></g></svg><em>Weapon</em><span>0</span></div>
-          <div id="inventory-shield" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.6c0 4.3-3.3 7.6-8 9.6-4.7-2-8-5.3-8-9.6V6z"/><path d="M12 7.4v9.2"/></g></svg><em>Shield</em><span>0</span></div>
-          <div id="inventory-map" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.4 3.2 6.1v14.5L9 17.9l6 2.7 5.8-2.7V3.4L15 6.1z"/><path d="M9 3.4v14.5"/><path d="M15 6.1v14.5"/></g></svg><em>Map</em><span></span></div>
+          <div id="inventory-weapon" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24"
+              aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 3.2v4.3l-9.6 9.6-4.3-4.3L15.7 3.2z" />
+                <path d="M8.3 15.6 4.6 19.3" />
+                <path d="M3.1 17.6 6.4 20.9" />
+              </g>
+            </svg><em>Weapon</em><span>0</span></div>
+          <div id="inventory-shield" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24"
+              aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.8 20 6v5.6c0 4.3-3.3 7.6-8 9.6-4.7-2-8-5.3-8-9.6V6z" />
+                <path d="M12 7.4v9.2" />
+              </g>
+            </svg><em>Shield</em><span>0</span></div>
+          <div id="inventory-map" class="inventory-item"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3.4 3.2 6.1v14.5L9 17.9l6 2.7 5.8-2.7V3.4L15 6.1z" />
+                <path d="M9 3.4v14.5" />
+                <path d="M15 6.1v14.5" />
+              </g>
+            </svg><em>Map</em><span></span></div>
           <div id="inventory-empty" class="inventory-empty">No items</div>
         </div>
       </div>
       <div id="left-stack">
-      <div id="minimap" class="hidden" aria-hidden="true">
-        <div class="minimap-head">
-          <span class="minimap-title"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.4 3.2 6.1v14.5L9 17.9l6 2.7 5.8-2.7V3.4L15 6.1z"/><path d="M9 3.4v14.5"/><path d="M15 6.1v14.5"/></g></svg>Arena map</span><span id="minimap-timer">10s</span>
+        <div id="minimap" class="hidden" aria-hidden="true">
+          <div class="minimap-head">
+            <span class="minimap-title"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 3.4 3.2 6.1v14.5L9 17.9l6 2.7 5.8-2.7V3.4L15 6.1z" />
+                  <path d="M9 3.4v14.5" />
+                  <path d="M15 6.1v14.5" />
+                </g>
+              </svg>Arena map</span><span id="minimap-timer">10s</span>
+          </div>
+          <div id="minimap-grid" class="minimap-grid"></div>
+          <div class="minimap-bar">
+            <div id="minimap-bar-fill"></div>
+          </div>
         </div>
-        <div id="minimap-grid" class="minimap-grid"></div>
-        <div class="minimap-bar"><div id="minimap-bar-fill"></div></div>
-      </div>
-      <div id="playerlist"></div>
+        <div id="playerlist"></div>
       </div>
       <div id="spectator-banner" class="hidden">Spectating until next round</div>
       <div id="room-toast"></div>
@@ -161,8 +204,21 @@
         <div class="btn" id="btn-down">▼</div>
       </div>
       <div class="action-buttons">
-        <button type="button" id="btn-defend" aria-label="Defend"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v5.6c0 4.3-3.3 7.6-8 9.6-4.7-2-8-5.3-8-9.6V6z"/><path d="M12 7.4v9.2"/></g></svg><span class="ctrl-label">Defend</span></button>
-        <button type="button" id="btn-attack" aria-label="Attack"><svg class="ctrl-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3.2v4.3l-9.6 9.6-4.3-4.3L15.7 3.2z"/><path d="M8.3 15.6 4.6 19.3"/><path d="M3.1 17.6 6.4 20.9"/></g></svg><span class="ctrl-label">Attack</span></button>
+        <button type="button" id="btn-defend" aria-label="Defend"><svg class="ctrl-icon" viewBox="0 0 24 24"
+            aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2.8 20 6v5.6c0 4.3-3.3 7.6-8 9.6-4.7-2-8-5.3-8-9.6V6z" />
+              <path d="M12 7.4v9.2" />
+            </g>
+          </svg><span class="ctrl-label">Defend</span></button>
+        <button type="button" id="btn-attack" aria-label="Attack"><svg class="ctrl-icon" viewBox="0 0 24 24"
+            aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 3.2v4.3l-9.6 9.6-4.3-4.3L15.7 3.2z" />
+              <path d="M8.3 15.6 4.6 19.3" />
+              <path d="M3.1 17.6 6.4 20.9" />
+            </g>
+          </svg><span class="ctrl-label">Attack</span></button>
       </div>
     </div>
 
