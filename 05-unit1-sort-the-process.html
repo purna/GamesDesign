@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sort the Process — Creative Process Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12141c;
+    --surface:#1b1e2a;
+    --surface-hi:#232838;
+    --border:#2e3346;
+    --text:#eef0f6;
+    --muted:#8b91a8;
+    --discover:#4fc3d9;
+    --define:#f2b84b;
+    --develop:#ef6461;
+    --deliver:#6fcf97;
+    --good:#6fcf97;
+    --bad:#ef6461;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  header.top{margin-bottom:22px;}
+  .kicker{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.02em;
+    color:var(--muted);
+    margin:0 0 4px;
+  }
+  h1{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,5vw,40px);
+    line-height:1.05;
+    margin:0 0 8px;
+    letter-spacing:0.01em;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:15px;
+    max-width:60ch;
+    line-height:1.5;
+    margin:0 0 20px;
+  }
+
+  .status-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  .progress-track{
+    flex:1;
+    min-width:180px;
+    height:8px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:5px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--discover),var(--define),var(--develop),var(--deliver));
+    transition:width .35s ease;
+  }
+  .progress-label{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .progress-label strong{color:var(--text);}
+
+  .timer{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:6px 14px;
+    font-family:'Rajdhani',sans-serif;
+  }
+  .timer-label{
+    font-size:12px;
+    color:var(--muted);
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .timer-value{
+    font-size:18px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    min-width:44px;
+  }
+  .timer.urgent .timer-value{color:var(--bad);}
+
+  /* Pipeline */
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:26px;
+  }
+  @media (max-width:760px){
+    .pipeline{grid-template-columns:1fr;}
+  }
+  .stage{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 12px 12px;
+    display:flex;
+    flex-direction:column;
+    min-height:150px;
+    position:relative;
+  }
+  .stage.dragover{
+    border-color:var(--stage-color);
+    background:var(--surface-hi);
+  }
+  .stage-bar{
+    height:4px;
+    border-radius:2px;
+    margin:-14px -12px 12px;
+    background:var(--stage-color);
+  }
+  .stage-head{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .stage-num{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--stage-color);
+  }
+  .stage-name{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:0.01em;
+  }
+  .stage-desc{
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.4;
+    margin:0 0 10px;
+  }
+  .stage-drop{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-height:60px;
+    border:1.5px dashed var(--border);
+    border-radius:8px;
+    padding:6px;
+  }
+  .stage-drop:empty::before{
+    content:"Drop cards here";
+    display:block;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding:14px 4px;
+  }
+
+  /* Cards */
+  .pool-label{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--muted);
+    margin:0 0 10px;
+  }
+  .pool{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:14px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    min-height:64px;
+    margin-bottom:22px;
+  }
+  .pool:empty::before{
+    content:"All cards placed — hit Check My Answers below.";
+    color:var(--muted);
+    font-size:13px;
+    padding:8px 4px;
+  }
+  .card{
+    background:var(--surface-hi);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:9px 12px;
+    font-size:13.5px;
+    line-height:1.35;
+    max-width:230px;
+    cursor:grab;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-user-drag:none;
+    touch-action:none;
+    position:relative;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .card *{user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none;}
+  .card:focus-visible{
+    outline:2px solid var(--discover);
+    outline-offset:2px;
+  }
+  .card:hover{border-color:#454c68;}
+  .card.picked{
+    box-shadow:0 0 0 2px var(--text);
+    transform:translateY(-2px);
+  }
+  .card.source-dragging{
+    opacity:0.35;
+  }
+  .card.placed{max-width:none;width:100%;}
+  .card .num{
+    display:inline-block;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    color:var(--muted);
+    margin-right:6px;
+  }
+  .card.correct{border-color:var(--good);box-shadow:0 0 0 1px var(--good) inset;}
+  .card.incorrect{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad) inset;}
+  .card .verdict{
+    display:block;
+    margin-top:6px;
+    font-size:11.5px;
+    font-weight:600;
+    font-family:'Rajdhani',sans-serif;
+    letter-spacing:0.01em;
+  }
+  .card.correct .verdict{color:var(--good);}
+  .card.incorrect .verdict{color:var(--bad);}
+  .card .reason{
+    display:block;
+    margin-top:3px;
+    font-size:12px;
+    color:var(--muted);
+    font-weight:400;
+  }
+
+  .ghost{
+    position:fixed;
+    pointer-events:none;
+    z-index:999;
+    opacity:0.9;
+    transform:translate(-50%,-50%) rotate(-2deg);
+  }
+
+  /* Controls */
+  .controls{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  button{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.01em;
+    border-radius:8px;
+    padding:11px 20px;
+    cursor:pointer;
+    border:1px solid var(--border);
+    transition:background .15s ease, border-color .15s ease, opacity .15s ease;
+  }
+  button:focus-visible{outline:2px solid var(--discover);outline-offset:2px;}
+  .btn-primary{
+    background:var(--text);
+    color:#12141c;
+    border-color:var(--text);
+  }
+  .btn-primary:hover{opacity:0.88;}
+  .btn-primary:disabled{opacity:0.35;cursor:not-allowed;}
+  .btn-ghost{
+    background:transparent;
+    color:var(--text);
+  }
+  .btn-ghost:hover{background:var(--surface-hi);}
+
+  /* Results */
+  .results{
+    display:none;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    margin-top:8px;
+  }
+  .results.show{display:block;}
+  .results h2{
+    font-family:'Rajdhani',sans-serif;
+    font-size:22px;
+    margin:0 0 4px;
+  }
+  .results .score{
+    color:var(--muted);
+    font-size:14px;
+    margin:0 0 4px;
+  }
+  .results .score strong{color:var(--text);font-size:16px;}
+
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(8,9,14,0.72);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:28px 26px;
+    max-width:380px;
+    width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.45);
+  }
+  .modal-card h2{
+    font-family:'Rajdhani',sans-serif;
+    font-size:26px;
+    font-weight:700;
+    margin:0 0 10px;
+    color:var(--bad);
+  }
+  .modal-card p{
+    font-size:14px;
+    line-height:1.55;
+    color:var(--text);
+    margin:0 0 20px;
+  }
+  .modal-card p strong{color:var(--text);}
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  footer{
+    margin-top:30px;
+    color:var(--muted);
+    font-size:12px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="kicker">Unit 5 · The Creative Process</p>
+    <h1>Sort the Process</h1>
+    <p class="sub">Twelve real game-development tasks are scattered below. Drag each one — or tap to pick it up, then tap a stage — into Discover, Define, Develop or Deliver. Place all twelve, then check your answers.</p>
+  </header>
+
+  <div class="status-row">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <p class="progress-label" id="progressLabel"><strong>0</strong> / 12 placed</p>
+    <div class="timer" id="timerChip">
+      <span class="timer-label">Time left</span>
+      <span class="timer-value" id="timerValue">5:00</span>
+    </div>
+  </div>
+
+  <div class="pipeline" id="pipeline"></div>
+
+  <p class="pool-label">Unsorted cards</p>
+  <div class="pool" id="pool"></div>
+
+  <div class="controls">
+    <button class="btn-primary" id="checkBtn" disabled>Check My Answers</button>
+    <button class="btn-ghost" id="resetBtn">Reset &amp; Reshuffle</button>
+  </div>
+
+  <div class="results" id="results">
+    <h2 id="resultsHeading">Results</h2>
+    <p class="score" id="resultsScore"></p>
+    <p class="score" id="resultsHint"></p>
+  </div>
+
+  <footer>Games Development &amp; Creative Industries · Unit 5 activity</footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+  <div class="modal-card">
+    <h2 id="modalHeading">Time's Up!</h2>
+    <p id="modalScore"></p>
+    <div class="modal-actions">
+      <button class="btn-primary" id="modalTryAgain">Try Again</button>
+      <button class="btn-ghost" id="modalReview">Review Board</button>
+    </div>
+  </div>
+</div>
+
+<div id="liveRegion" class="sr-only" aria-live="polite"></div>
+
+<script>
+const STAGES = [
+  {id:'discover', name:'Discover', num:1, color:'var(--discover)', desc:'Explore the problem. Research, watch, ask, gather insight.'},
+  {id:'define',   name:'Define',   num:2, color:'var(--define)',   desc:'Narrow it down to one clear brief or problem statement.'},
+  {id:'develop',  name:'Develop',  num:3, color:'var(--develop)',  desc:'Generate ideas, prototype, test, and refine.'},
+  {id:'deliver',  name:'Deliver',  num:4, color:'var(--deliver)',  desc:'Finalise, launch, and evaluate against the goal.'}
+];
+
+const CARDS = [
+  {id:1, text:'Surveying players about what mechanics they want in a new update', stage:'discover', reason:'Gathering opinions before anything is decided is research — that\u2019s Discover.'},
+  {id:2, text:'Writing a one-line brief: "Design a boss fight that ramps in difficulty over 3 phases, 2-week budget"', stage:'define', reason:'A focused brief with scope and constraints is the Define stage.'},
+  {id:3, text:'Sketching five different level layouts on paper', stage:'develop', reason:'Generating multiple ideas is ideation, part of Develop.'},
+  {id:4, text:'Showing two prototype levels to playtesters and collecting feedback', stage:'develop', reason:'Testing prototypes and gathering feedback is Develop.'},
+  {id:5, text:'Releasing the finished level in the next game update', stage:'deliver', reason:'Producing and launching the finished content is Deliver.'},
+  {id:6, text:'Checking player retention data after launch to see if targets were met', stage:'deliver', reason:'Evaluating against success criteria happens in Deliver.'},
+  {id:7, text:'Playing rival games to see how they handle onboarding and tutorials', stage:'discover', reason:'Competitor research is Discover.'},
+  {id:8, text:'Building a rough grey-box mock-up of a new dungeon layout', stage:'develop', reason:'A rough prototype is Develop.'},
+  {id:9, text:'Deciding the exact problem: "New players don\u2019t understand how the crafting system works"', stage:'define', reason:'Pinning down the precise problem is Define.'},
+  {id:10, text:'Testing the new UI with a closed beta group before full release', stage:'develop', reason:'Testing before the real launch is still Develop.'},
+  {id:11, text:'Interviewing players about what causes them to quit a game early', stage:'discover', reason:'Interviews to gather insight are Discover.'},
+  {id:12, text:'Launching a new seasonal event and reviewing player feedback a month later', stage:'deliver', reason:'Launching and reviewing results is Deliver.'}
+];
+
+let placements = {}; // cardId -> stageId
+let pickedCardId = null;
+let checked = false;
+
+const poolEl = document.getElementById('pool');
+const pipelineEl = document.getElementById('pipeline');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const checkBtn = document.getElementById('checkBtn');
+const resetBtn = document.getElementById('resetBtn');
+const resultsEl = document.getElementById('results');
+const resultsHeading = document.getElementById('resultsHeading');
+const resultsScore = document.getElementById('resultsScore');
+const resultsHint = document.getElementById('resultsHint');
+const liveRegion = document.getElementById('liveRegion');
+const timerValueEl = document.getElementById('timerValue');
+const timerChip = document.getElementById('timerChip');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalScore = document.getElementById('modalScore');
+const modalTryAgain = document.getElementById('modalTryAgain');
+const modalReview = document.getElementById('modalReview');
+
+const TIME_LIMIT = 300; // 5 minutes
+let remainingTime = TIME_LIMIT;
+let timerInterval = null;
+
+function formatTime(sec){
+  const m = Math.floor(sec/60);
+  const s = sec%60;
+  return m + ':' + String(s).padStart(2,'0');
+}
+
+function updateTimerDisplay(){
+  timerValueEl.textContent = formatTime(Math.max(remainingTime,0));
+  timerChip.classList.toggle('urgent', remainingTime <= 30 && remainingTime > 0);
+}
+
+function startTimer(){
+  stopTimer();
+  remainingTime = TIME_LIMIT;
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    remainingTime--;
+    updateTimerDisplay();
+    if(remainingTime <= 0){
+      stopTimer();
+      onTimeUp();
+    }
+  }, 1000);
+}
+
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+}
+
+function onTimeUp(){
+  checked = true;
+  pickedCardId = null;
+  render();
+  const correct = CARDS.filter(c=>placements[c.id]===c.stage).length;
+  const placedCount = Object.keys(placements).length;
+  modalScore.innerHTML = `You had <strong>${placedCount} / 12</strong> cards placed, and <strong>${correct} / 12</strong> correct overall. Close this to see which cards were right or wrong.`;
+  modalOverlay.classList.add('show');
+  liveRegion.textContent = "Time's up. Game over.";
+  checkBtn.disabled = true;
+  modalTryAgain.focus();
+}
+
+modalTryAgain.addEventListener('click', ()=>{
+  modalOverlay.classList.remove('show');
+  reset();
+});
+modalReview.addEventListener('click', ()=>{
+  modalOverlay.classList.remove('show');
+});
+
+function shuffledOrder(){
+  const arr = CARDS.map(c=>c.id);
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+let order = shuffledOrder();
+
+function buildPipeline(){
+  pipelineEl.innerHTML = '';
+  STAGES.forEach(st=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'stage';
+    wrap.style.setProperty('--stage-color', st.color);
+    wrap.dataset.stage = st.id;
+    wrap.innerHTML = `
+      <div class="stage-bar"></div>
+      <div class="stage-head">
+        <span class="stage-num">${st.num}</span>
+        <span class="stage-name">${st.name}</span>
+      </div>
+      <p class="stage-desc">${st.desc}</p>
+      <div class="stage-drop" data-stage="${st.id}" aria-label="${st.name} drop zone"></div>
+    `;
+    pipelineEl.appendChild(wrap);
+
+    const dz = wrap.querySelector('.stage-drop');
+    dz.addEventListener('click', ()=>{
+      if(!checked && pickedCardId !== null){
+        placeCard(pickedCardId, st.id);
+      }
+    });
+    dz.tabIndex = 0;
+    dz.setAttribute('role','button');
+    dz.addEventListener('keydown', e=>{
+      if((e.key==='Enter'||e.key===' ') && !checked && pickedCardId!==null){
+        e.preventDefault();
+        placeCard(pickedCardId, st.id);
+      }
+    });
+  });
+}
+
+function cardData(id){ return CARDS.find(c=>c.id===id); }
+
+function makeCardEl(card, placed){
+  const el = document.createElement('div');
+  el.className = 'card' + (placed ? ' placed' : '');
+  el.dataset.id = card.id;
+  el.tabIndex = 0;
+  el.setAttribute('role','button');
+  el.innerHTML = `<span>${card.text}</span>`;
+
+  if(checked){
+    const stageId = placements[card.id];
+    const isCorrect = stageId === card.stage;
+    el.classList.add(isCorrect ? 'correct' : 'incorrect');
+    const verdict = document.createElement('span');
+    verdict.className = 'verdict';
+    verdict.textContent = isCorrect ? '\u2713 Correct' : '\u2717 Not quite';
+    el.appendChild(verdict);
+    const reason = document.createElement('span');
+    reason.className = 'reason';
+    const correctStageName = STAGES.find(s=>s.id===card.stage).name;
+    reason.textContent = isCorrect ? card.reason : `Belongs in ${correctStageName}. ${card.reason}`;
+    el.appendChild(reason);
+  } else {
+    el.addEventListener('pointerdown', onCardPointerDown);
+    el.addEventListener('keydown', e=>{
+      if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        handleCardActivate(card.id);
+      }
+    });
+  }
+
+  if(pickedCardId === card.id) el.classList.add('picked');
+  return el;
+}
+
+function handleCardActivate(cardId){
+  if(checked) return;
+  if(pickedCardId === cardId){
+    pickedCardId = null;
+    render();
+    return;
+  }
+  pickedCardId = cardId;
+  render();
+  liveRegion.textContent = `${cardData(cardId).text} picked up. Now choose a stage.`;
+}
+
+function placeCard(cardId, stageId){
+  placements[cardId] = stageId;
+  pickedCardId = null;
+  render();
+  liveRegion.textContent = `Card moved to ${STAGES.find(s=>s.id===stageId).name}.`;
+}
+
+function unplaceCard(cardId){
+  delete placements[cardId];
+  pickedCardId = null;
+  render();
+  liveRegion.textContent = `Card returned to the pool.`;
+}
+
+/* ---- Pointer-based drag (replaces native HTML5 drag/drop to avoid
+   browser text-selection / drag-ghost glitches across multiple cards) ---- */
+let dragState = null;
+let ghostEl = null;
+
+function onCardPointerDown(e){
+  if(checked) return;
+  if(e.button !== undefined && e.button !== 0) return; // left click / primary touch only
+  const el = e.currentTarget;
+  e.preventDefault();
+  dragState = {
+    cardId: Number(el.dataset.id),
+    startX: e.clientX,
+    startY: e.clientY,
+    moved: false,
+    sourceEl: el
+  };
+  try{ el.setPointerCapture(e.pointerId); }catch(err){}
+  el.addEventListener('pointermove', onCardPointerMove);
+  el.addEventListener('pointerup', onCardPointerUp);
+  el.addEventListener('pointercancel', onCardPointerUp);
+}
+
+function onCardPointerMove(e){
+  if(!dragState) return;
+  const dx = e.clientX - dragState.startX;
+  const dy = e.clientY - dragState.startY;
+
+  if(!dragState.moved && Math.hypot(dx,dy) > 6){
+    dragState.moved = true;
+    startGhost(dragState.cardId, e.clientX, e.clientY);
+    dragState.sourceEl.classList.add('source-dragging');
+    document.body.style.cursor = 'grabbing';
+  }
+
+  if(dragState.moved){
+    moveGhost(e.clientX, e.clientY);
+    highlightZoneUnder(e.clientX, e.clientY);
+  }
+}
+
+function onCardPointerUp(e){
+  if(!dragState) return;
+  const el = dragState.sourceEl;
+  el.removeEventListener('pointermove', onCardPointerMove);
+  el.removeEventListener('pointerup', onCardPointerUp);
+  el.removeEventListener('pointercancel', onCardPointerUp);
+  try{ el.releasePointerCapture(e.pointerId); }catch(err){}
+
+  document.body.style.cursor = '';
+  el.classList.remove('source-dragging');
+
+  if(dragState.moved){
+    endGhost();
+    clearZoneHighlights();
+    const target = dropTargetAt(e.clientX, e.clientY);
+    const cardId = dragState.cardId;
+    dragState = null;
+    if(target === 'pool'){
+      unplaceCard(cardId);
+    } else if(target){
+      placeCard(cardId, target);
+    }
+    // if target is null, nothing changes - card stays put, no re-render needed
+  } else {
+    const cardId = dragState.cardId;
+    dragState = null;
+    handleCardActivate(cardId);
+  }
+}
+
+function startGhost(cardId, x, y){
+  const card = cardData(cardId);
+  ghostEl = document.createElement('div');
+  ghostEl.className = 'card ghost';
+  ghostEl.style.maxWidth = '230px';
+  ghostEl.innerHTML = `<span>${card.text}</span>`;
+  document.body.appendChild(ghostEl);
+  moveGhost(x, y);
+}
+
+function moveGhost(x, y){
+  if(!ghostEl) return;
+  ghostEl.style.left = x + 'px';
+  ghostEl.style.top = y + 'px';
+}
+
+function endGhost(){
+  if(ghostEl){ ghostEl.remove(); ghostEl = null; }
+}
+
+function highlightZoneUnder(x, y){
+  clearZoneHighlights();
+  const under = document.elementFromPoint(x, y);
+  if(!under) return;
+  const stageWrap = under.closest('.stage');
+  if(stageWrap) stageWrap.classList.add('dragover');
+}
+
+function clearZoneHighlights(){
+  document.querySelectorAll('.stage.dragover').forEach(s=>s.classList.remove('dragover'));
+}
+
+function dropTargetAt(x, y){
+  const el = document.elementFromPoint(x, y);
+  if(!el) return null;
+  const dz = el.closest('.stage-drop');
+  if(dz) return dz.dataset.stage;
+  const pool = el.closest('#pool');
+  if(pool) return 'pool';
+  return null;
+}
+
+function render(){
+  // pool
+  poolEl.innerHTML = '';
+  order.forEach(id=>{
+    if(!placements[id]){
+      poolEl.appendChild(makeCardEl(cardData(id), false));
+    }
+  });
+
+  // zones
+  document.querySelectorAll('.stage-drop').forEach(dz=>{
+    dz.innerHTML = '';
+    const stageId = dz.dataset.stage;
+    order.forEach(id=>{
+      if(placements[id] === stageId){
+        dz.appendChild(makeCardEl(cardData(id), true));
+      }
+    });
+  });
+
+  const placedCount = Object.keys(placements).length;
+  progressFill.style.width = (placedCount/12*100) + '%';
+  progressLabel.innerHTML = `<strong>${placedCount}</strong> / 12 placed`;
+  checkBtn.disabled = placedCount < 12 || checked;
+}
+
+function checkAnswers(){
+  stopTimer();
+  checked = true;
+  pickedCardId = null;
+  let correct = 0;
+  CARDS.forEach(c=>{ if(placements[c.id] === c.stage) correct++; });
+  render();
+
+  resultsEl.classList.add('show');
+  resultsHeading.textContent = correct === 12 ? 'Perfect score!' : 'Here\u2019s how you did';
+  resultsScore.innerHTML = `You got <strong>${correct} / 12</strong> correct.`;
+  resultsHint.textContent = correct === 12
+    ? 'You\u2019ve nailed the four stages. Scroll up to see the reasoning on each card.'
+    : 'Cards below are marked correct or not quite \u2014 scroll up to see which stage each one actually belongs to and why.';
+  resultsEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+  checkBtn.disabled = true;
+}
+
+function reset(){
+  placements = {};
+  pickedCardId = null;
+  checked = false;
+  order = shuffledOrder();
+  resultsEl.classList.remove('show');
+  modalOverlay.classList.remove('show');
+  render();
+  startTimer();
+}
+
+checkBtn.addEventListener('click', checkAnswers);
+resetBtn.addEventListener('click', reset);
+
+buildPipeline();
+render();
+startTimer();
+</script>
+</body>
+</html>

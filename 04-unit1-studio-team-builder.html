@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indie Studio Team Builder</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .budget-tracker {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .budget-bar-container {
+            width: 100%;
+            height: 12px;
+            background-color: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .budget-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-color);
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .game-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select, button, textarea, input {
+            background: #0f172a;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        button {
+            cursor: pointer;
+            background: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(0,0,0,0.3);
+            color: var(--accent-color);
+        }
+
+        .form-section {
+            background: rgba(0,0,0,0.15);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .discussion-box {
+            background: rgba(56, 189, 248, 0.05);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .discussion-box ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+
+        .discussion-box li {
+            margin-bottom: 8px;
+        }
+
+        .warning-text {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .container {
+                box-shadow: none;
+                background: white;
+                color: black;
+            }
+            button, select, input {
+                border: 1px solid #ccc;
+            }
+            .no-print {
+                display: none;
+            }
+            th {
+                color: black;
+                background: #eee;
+            }
+            h1, h2, h3 {
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎮 Indie Studio Team Builder</h1>
+    <p>Manage your budget, hire your dev team, and build a studio that can actually ship a game!</p>
+
+    <!-- Top Status Bar -->
+    <div class="header-bar">
+        <div class="game-selector">
+            <label for="project-type"><strong>Project Type:</strong></label>
+            <select id="project-type" onchange="updateRequirements()">
+                <option value="4">Small Mobile / Puzzle Game (Min. 4 Core Dev Hires)</option>
+                <option value="6" selected>Narrative Adventure / RPG / Multiplayer (Min. 6 Core Dev Hires)</option>
+            </select>
+        </div>
+
+        <div style="flex-grow: 1; max-width: 400px; margin: 0 20px;">
+            <div class="budget-tracker">
+                Budget Spent: <span id="spent-amount">£0</span> / £250,000
+            </div>
+            <div class="budget-bar-container">
+                <div id="budget-bar" class="budget-bar"></div>
+            </div>
+            <div id="budget-warning" class="warning-text"></div>
+        </div>
+
+        <div>
+            <button class="no-print" onclick="window.print()">🖨️ Print / Export PDF</button>
+        </div>
+    </div>
+
+    <!-- Hire Control Panel -->
+    <div class="form-section no-print">
+        <h3>Add New Hire</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <select id="role-select" onchange="updateTierOptions()">
+                <!-- Populated via JS -->
+            </select>
+            
+            <select id="tier-select">
+                <option value="Junior">Junior</option>
+                <option value="Mid">Mid</option>
+                <option value="Senior">Senior</option>
+            </select>
+
+            <button onclick="addHire()">+ Add to Team</button>
+        </div>
+        <p id="role-description" style="font-size: 0.85rem; color: #94a3b8; margin-top: 8px; margin-bottom: 0;"></p>
+    </div>
+
+    <!-- Roster Table -->
+    <h2>Current Team & Expenses</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Tier</th>
+                <th>Cost (£)</th>
+                <th class="no-print">Action</th>
+            </tr>
+        </thead>
+        <tbody id="roster-table-body">
+            <!-- Dynamic rows -->
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="2">Total Spent:</th>
+                <th id="total-cost-cell">£0</th>
+                <th class="no-print"></th>
+            </tr>
+            <tr>
+                <th colspan="2">Remaining Budget:</th>
+                <th id="remaining-budget-cell">£250,000</th>
+                <th class="no-print"></th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div id="roster-validation-msg" class="warning-text" style="font-size: 1rem; margin-bottom: 20px;"></div>
+
+    <!-- Reflection Worksheet -->
+    <h2>Strategy Worksheet</h2>
+    
+    <div class="form-group">
+        <label for="why-roster">1. Why did you choose this specific team? (2-3 sentences)</label>
+        <textarea id="why-roster" placeholder="Explain your vision: Are you focusing on a fast prototype, a polished narrative experience, or a live-service game that needs ongoing support?"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="role-synergy">2. Pick TWO roles in your team and explain how they must work together for the game to succeed:</label>
+        <textarea id="role-synergy" placeholder="Example: The Game Designer and Programmer work together to translate a paper mechanic into something that actually feels good to play..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="plus-50k">3. If you were given an EXTRA £50,000, what roles/tiers would you add or upgrade, and why?</label>
+        <textarea id="plus-50k" placeholder="Which weak area would you reinforce first?"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="minus-30k">4. If you had to CUT £30,000 from your budget, what would you downgrade or remove, and why?</label>
+        <textarea id="minus-30k" placeholder="What role is least essential to your core vision?"></textarea>
+    </div>
+
+    <!-- Class Debrief Prompts -->
+    <div class="discussion-box">
+        <h3>🗣️ Class Discussion Prompts</h3>
+        <ul>
+            <li>Which roles did every group hire? Which roles were commonly skipped, and why?</li>
+            <li>Did any group go all-in on top-tier programmers or artists while skipping QA or sound design? What is the risk of doing that?</li>
+            <li>Which roles surprised you with their cost relative to their value?</li>
+            <li>How does this exercise prove that making a game takes more than just good code or good art?</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const MAX_BUDGET = 250000;
+
+    const roleData = {
+        "Game Designer": { Junior: 18000, Mid: 32000, Senior: 55000, desc: "Designs gameplay systems, mechanics, levels, and player progression." },
+        "Programmer": { Junior: 20000, Mid: 38000, Senior: 65000, desc: "Builds and maintains the game's code, systems, and tools." },
+        "Technical Artist": { Junior: 18000, Mid: 30000, Senior: 48000, desc: "Bridges art and code — shaders, rigs, and the art-to-engine pipeline." },
+        "2D/3D Artist": { Junior: 16000, Mid: 28000, Senior: 45000, desc: "Creates characters, environments, props, and visual style." },
+        "Animator": { Junior: 15000, Mid: 26000, Senior: 42000, desc: "Brings characters and objects to life through movement and feel." },
+        "UI/UX Designer": { Junior: 16000, Mid: 27000, Senior: 44000, desc: "Designs menus, HUDs, and how players actually interact with the game." },
+        "Sound Designer / Composer": { Junior: 15000, Mid: 25000, Senior: 40000, desc: "Creates music, sound effects, and handles audio mixing." },
+        "Narrative Designer / Writer": { Junior: 16000, Mid: 28000, Senior: 45000, desc: "Writes dialogue, story beats, and world-building text." },
+        "QA Tester": { Junior: 14000, Mid: 22000, Senior: 35000, desc: "Finds bugs, tests builds, and verifies fixes before release." },
+        "Producer": { Junior: 20000, Mid: 35000, Senior: 58000, desc: "Manages schedules, budget, scope, and keeps the team on track." },
+        "Community Manager": { Junior: 15000, Mid: 24000, Senior: 38000, desc: "Engages players, runs social channels, and gathers player feedback." },
+        "Marketing Manager": { Junior: 18000, Mid: 30000, Senior: 48000, desc: "Plans the launch campaign, trailers, and store page strategy." }
+    };
+
+    const coreDevRoles = ["Game Designer", "Programmer", "Technical Artist", "2D/3D Artist", "Animator", "UI/UX Designer", "Sound Designer / Composer", "Narrative Designer / Writer", "QA Tester"];
+
+    let roster = [];
+
+    // Initialize dropdowns
+    function init() {
+        const roleSelect = document.getElementById('role-select');
+        for (let role in roleData) {
+            let opt = document.createElement('option');
+            opt.value = role;
+            opt.innerText = role;
+            roleSelect.appendChild(opt);
+        }
+        updateTierOptions();
+        renderRoster();
+    }
+
+    function updateTierOptions() {
+        const role = document.getElementById('role-select').value;
+        const desc = roleData[role].desc;
+        document.getElementById('role-description').innerText = desc;
+    }
+
+    function addHire() {
+        const role = document.getElementById('role-select').value;
+        const tier = document.getElementById('tier-select').value;
+        const cost = roleData[role][tier];
+
+        roster.push({ id: Date.now(), role, tier, cost });
+        renderRoster();
+    }
+
+    function removeHire(id) {
+        roster = roster.filter(item => item.id !== id);
+        renderRoster();
+    }
+
+    function renderRoster() {
+        const tbody = document.getElementById('roster-table-body');
+        tbody.innerHTML = '';
+
+        let totalSpent = 0;
+
+        roster.forEach(item => {
+            totalSpent += item.cost;
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.role}</strong></td>
+                <td>${item.tier}</td>
+                <td>£${item.cost.toLocaleString()}</td>
+                <td class="no-print">
+                    <button class="btn-danger" onclick="removeHire(${item.id})">X</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Update calculations
+        const remaining = MAX_BUDGET - totalSpent;
+        document.getElementById('spent-amount').innerText = `£${totalSpent.toLocaleString()}`;
+        document.getElementById('total-cost-cell').innerText = `£${totalSpent.toLocaleString()}`;
+        document.getElementById('remaining-budget-cell').innerText = `£${remaining.toLocaleString()}`;
+
+        // Update Progress Bar
+        const percent = Math.min((totalSpent / MAX_BUDGET) * 100, 100);
+        const progressBar = document.getElementById('budget-bar');
+        progressBar.style.width = percent + '%';
+
+        const warningElem = document.getElementById('budget-warning');
+        if (totalSpent > MAX_BUDGET) {
+            progressBar.style.backgroundColor = 'var(--danger-color)';
+            warningElem.innerText = `⚠️ OVER BUDGET BY £${(totalSpent - MAX_BUDGET).toLocaleString()}!`;
+        } else {
+            progressBar.style.backgroundColor = 'var(--success-color)';
+            warningElem.innerText = '';
+        }
+
+        updateRequirements();
+    }
+
+    function updateRequirements() {
+        const minCore = parseInt(document.getElementById('project-type').value);
+        const coreCount = roster.filter(i => coreDevRoles.includes(i.role)).length;
+        const supportCount = roster.filter(i => !coreDevRoles.includes(i.role)).length;
+
+        const valElem = document.getElementById('roster-validation-msg');
+        let errors = [];
+
+        if (coreCount < minCore) {
+            errors.push(`Need at least ${minCore} core dev hires for this project type (Currently: ${coreCount}).`);
+        }
+        if (supportCount < 1) {
+            errors.push(`Need at least 1 production/business role (Producer, Community Manager, or Marketing Manager) (Currently: ${supportCount}).`);
+        }
+
+        if (errors.length > 0) {
+            valElem.innerHTML = "⚠️ <strong>Team Incomplete:</strong> " + errors.join(' ');
+        } else {
+            valElem.innerHTML = "✅ <strong>Team Meets Basic Requirements!</strong>";
+            valElem.style.color = "var(--success-color)";
+        }
+    }
+
+    // Run setup on load
+    window.onload = init;
+</script>
+
+</body>
+</html>
