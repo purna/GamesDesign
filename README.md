@@ -4,7 +4,7 @@
 
 [Who said what](https://purna.github.io/GamesDesign/WhoSaidWhat.html)
 
-[Last Man Standing](https://purna.github.io/GamesDesign/last-man-standing.html)
+[Last Man Standing](https://purna.github.io/GamesDesign/last-man-standing/)
 
 
 ## Induction
