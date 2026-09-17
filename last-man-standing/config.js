@@ -138,10 +138,29 @@ export const GAME_TICK_INTERVAL_MS = 200;
 export const DAMAGE_TICK_INTERVAL_MS = 1000;
 export const COUNTDOWN_INTERVAL_MS = 250;
 
+// Trystero connects to every relay in this list in parallel and treats them
+// as redundant signaling paths, not a priority-ordered fallback chain — so
+// adding more relays here directly improves resilience against any single
+// one being down or rate-limiting us (a common failure mode for heavily used
+// public relays like relay.damus.io). If matchmaking keeps failing even with
+// several relays listed, swap the transport itself (see the comment on
+// RECONNECT_COOLDOWN_MS below) rather than continuing to add more.
 export const RELAY_URLS = Object.freeze([
   'wss://relay.damus.io',
-  'wss://nos.lol'
+  'wss://nos.lol',
+  'wss://relay.nostr.band',
+  'wss://nostr.mom',
+  'wss://relay.snort.social',
+  'wss://relay.primal.net'
 ]);
+
+// Floor on how often our own code is allowed to tear down and rejoin the
+// network room automatically (arena rotation, empty-lobby timeout, podium ->
+// lobby). Rejoining opens a fresh WebSocket to every relay above, so without
+// this a long idle solo session reconnecting once a minute for an hour is 60+
+// fresh connections per relay — exactly the pattern public relays rate-limit.
+// User-initiated joins (the Enter Arena button) are not subject to this.
+export const RECONNECT_COOLDOWN_MS = 4000;
 
 export const LMS_PALETTE = Object.freeze({
   floor_light: '#e9c46a',

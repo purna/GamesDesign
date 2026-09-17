@@ -283,5 +283,42 @@ check('controls overlap the canvas by a viewport-dependent amount', () => {
   assert(css.includes('margin-top: calc(-1 * var(--control-overlap))'), 'controls do not use it');
 });
 
+const { RELAY_URLS, RECONNECT_COOLDOWN_MS } = await import('./config.js');
+const htmlSource = readFileSync(join(root, 'index.html'), 'utf8');
+
+console.log('\nNetwork resilience');
+check('more than two relays are configured', () => assert(RELAY_URLS.length > 2, `only ${RELAY_URLS.length}`));
+check('relay list has no duplicates', () => assert(new Set(RELAY_URLS).size === RELAY_URLS.length));
+check('a reconnect cooldown constant exists', () => assert(RECONNECT_COOLDOWN_MS > 0));
+check('automatic reconnects are throttled through one gate', () => {
+  assert(gameSource.includes('function requestAutoReconnect'), 'no throttle helper');
+  const rawCalls = (gameSource.match(/\broomConnector\(currentBucket/g) || []).length;
+  assert(rawCalls === 0, 'a call site bypasses the throttle helper');
+  const gatedCalls = (gameSource.match(/\brequestAutoReconnect\(currentBucket/g) || []).length;
+  assert(gatedCalls === 3, `expected 3 gated call sites, found ${gatedCalls}`);
+});
+check('the throttle only blocks same-bucket churn, not a real rotation', () => {
+  assert(gameSource.includes('bucket === state.activeBucket && now - lastAutoReconnectAt'));
+});
+
+console.log('\nHeading font');
+check('Google Fonts is preconnected before the stylesheet request', () => {
+  const preIdx = htmlSource.indexOf('fonts.gstatic.com');
+  const cssIdx = htmlSource.indexOf('fonts.googleapis.com/css2');
+  assert(preIdx > -1 && cssIdx > -1 && preIdx < cssIdx, 'preconnect missing or out of order');
+});
+check('Black Ops One is requested', () => assert(htmlSource.includes('family=Black+Ops+One')));
+check('the utility class is defined', () => assert(css.includes('.black-ops-one-regular')));
+check('every h1 and h2 carries the heading font class', () => {
+  const headings = [...htmlSource.matchAll(/<h[12][^>]*>/g)].map(match => match[0]);
+  assert(headings.length > 0, 'no headings found');
+  const missing = headings.filter(tag => !tag.includes('black-ops-one-regular'));
+  assert(missing.length === 0, `missing the class: ${missing.join(', ')}`);
+});
+check('the lobby heading is 40px', () => {
+  const body = css.slice(css.indexOf('#screen-lobby h1'));
+  assert(/font-size:\s*40px/.test(body.slice(0, 120)), 'not 40px');
+});
+
 console.log(`\n${checks - failures}/${checks} checks passed.`);
 process.exit(failures === 0 ? 0 : 1);

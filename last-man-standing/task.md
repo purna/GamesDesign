@@ -52,3 +52,11 @@
 - [x] Late arrivals spectate instead of joining a live match
 - [x] Duplicate hosts resolved deterministically; rotation via nomination, then election
 - [x] Map overlay cleared on death, spectating, round start and round end
+
+## Network resilience and heading font
+
+- [x] Expanded RELAY_URLS to 6 public Nostr relays (Trystero uses all of them in parallel, so one being rate-limited/banned no longer stalls matchmaking)
+- [x] Added `requestAutoReconnect()` cooldown gate in game.js; every automatic reconnect site (arena rotation, empty-lobby timeout, podium -> lobby) now routes through it, so a stuck same-bucket condition can no longer reopen fresh relay connections faster than RECONNECT_COOLDOWN_MS
+- [x] User-initiated join (Enter Arena) is untouched — only the app's own automatic reconnects are throttled
+- [x] Black Ops One heading font wired in (preconnect + stylesheet link), applied to every h1/h2
+- [x] #screen-lobby h1 increased to 40px

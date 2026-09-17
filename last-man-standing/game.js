@@ -22,6 +22,7 @@ import {
   ENEMY_SPAWN_MAX_COUNT,
   MAX_ENEMIES,
   MAP_DURATION_MS,
+  RECONNECT_COOLDOWN_MS,
   ROOM_CLOSURE_ORDER,
   FULL_DASH_ARRAY,
   BUCKET_MS,
@@ -43,9 +44,28 @@ import { currentBucket, generateDynamicCode } from './time.js';
 import { nextHostAfter } from './host.js';
 
 let roomConnector = null;
+let lastAutoReconnectAt = 0;
 
 export function setRoomConnector(connector) {
   roomConnector = connector;
+}
+
+/**
+ * Gate for every *automatic* reconnect (arena rotation, empty-lobby timeout,
+ * podium -> lobby). Each call opens fresh relay connections, and the
+ * countdown tick that drives these call sites runs 4x/second, so without a
+ * cooldown a stuck condition (e.g. staying solo through several bucket
+ * rollovers) reconnects far more often than the arena rotation it's meant to
+ * represent, and public relays start rate-limiting the resulting connection
+ * churn. The user-initiated join from the "Enter Arena" button bypasses this
+ * and always goes straight to connectToRoom().
+ */
+function requestAutoReconnect(bucket) {
+  if (!roomConnector) return;
+  const now = Date.now();
+  if (bucket === state.activeBucket && now - lastAutoReconnectAt < RECONNECT_COOLDOWN_MS) return;
+  lastAutoReconnectAt = now;
+  roomConnector(bucket);
 }
 
 export function setMyName(name) {
@@ -577,7 +597,7 @@ export function restartToLobby() {
   state.winnerAnnouncedAt = null;
   state.forcedWinner = null;
   state.pendingRejoin = false;
-  if (roomConnector) roomConnector(currentBucket());
+  requestAutoReconnect(currentBucket());
   showLobbyScreen();
 }
 
@@ -650,7 +670,7 @@ export function updateCountdownAndRotate() {
       } else {
         // Not enough players left in this arena — roll into the next bucket.
         state.gameState = GAME_STATE.WAITING;
-        if (roomConnector) roomConnector(currentBucket());
+        requestAutoReconnect(currentBucket());
       }
       return;
     }
@@ -676,7 +696,7 @@ export function updateCountdownAndRotate() {
       return;
     }
     if (secondsLeft <= 0) {
-      if (roomConnector) roomConnector(currentBucket());
+      requestAutoReconnect(currentBucket());
       return;
     }
     updateLobbyRosterUI();
