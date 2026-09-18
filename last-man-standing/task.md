@@ -60,3 +60,11 @@
 - [x] User-initiated join (Enter Arena) is untouched — only the app's own automatic reconnects are throttled
 - [x] Black Ops One heading font wired in (preconnect + stylesheet link), applied to every h1/h2
 - [x] #screen-lobby h1 increased to 40px
+
+## Topbar dedup, room-closure timer, font, and shadows
+
+- [x] Fixed the reconnect storm behind the relay bans: added RECONNECT_COOLDOWN_MS and a single requestAutoReconnect() gate all three automatic reconnect sites now share; expanded RELAY_URLS to 6 relays for redundancy
+- [x] Black Ops One wired in (preconnect + stylesheet), applied to every current heading via class AND as an unconditional `h1 { font-family: ... }` rule so future headings can't miss it
+- [x] Player name and alive/left count each write from exactly one place (left side of the topbar) — the right side no longer mirrors them
+- [x] Right side of the topbar now shows the per-room closure countdown (calm "safe" -> amber "Room closes in Ns" -> pulsing red "CLOSED"), matching the existing 10s ROOM_CLOSURE_WARNING_MS
+- [x] Enemies and players (self + peers) cast a soft ground shadow, anchored to their un-bounced position so it doesn't float with the idle bob, shared via one drawGroundShadow() helper

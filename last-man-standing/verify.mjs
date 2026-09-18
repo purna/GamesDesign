@@ -180,6 +180,7 @@ check('startGame enforces the minimum itself', () => {
 const { electRoundHost, resolveHostConflict, nextHostAfter } = await import('./host.js');
 const { ROOM_THEMES, FX } = await import('./config.js');
 const networkSource = readFileSync(join(root, 'network.js'), 'utf8');
+const renderSource = readFileSync(join(root, 'render.js'), 'utf8');
 const gameSource = readFileSync(join(root, 'game.js'), 'utf8');
 const tilesSource = readFileSync(join(root, 'lms-tiles.js'), 'utf8');
 const css = readFileSync(join(root, 'styles.css'), 'utf8');
@@ -318,6 +319,65 @@ check('every h1 and h2 carries the heading font class', () => {
 check('the lobby heading is 40px', () => {
   const body = css.slice(css.indexOf('#screen-lobby h1'));
   assert(/font-size:\s*40px/.test(body.slice(0, 120)), 'not 40px');
+});
+
+console.log('\nTopbar has exactly one name and one alive-count display');
+check('name is written from a single place', () => {
+  const writes = (renderSource.match(/player-name-display'\)/g) || []).length;
+  assert(writes === 1, `player-name-display is written from ${writes} places`);
+});
+check('alive count is written from a single place', () => {
+  const writes = (renderSource.match(/alive-count'\)/g) || []).length;
+  assert(writes === 1, `alive-count is written from ${writes} places`);
+});
+check('the right-side topbar slot no longer mirrors the name or alive count', () => {
+  assert(!renderSource.includes("arenaLabel.textContent = state.myName"), 'name still mirrored on the right');
+  assert(!/arenaCode\.textContent = `Players left/.test(renderSource), 'alive count still mirrored on the right');
+});
+check('index.html has exactly one #player-name-display and one #alive-count', () => {
+  assert((htmlSource.match(/id="player-name-display"/g) || []).length === 1);
+  assert((htmlSource.match(/id="alive-count"/g) || []).length === 1);
+});
+
+console.log('\nRoom-closure countdown');
+check('the right topbar slot is driven by getRoomClosureWarning', () => {
+  const start = renderSource.indexOf('function updateRoomClosureAlert');
+  assert(start > -1, 'no dedicated updater');
+  const end = renderSource.indexOf('\nfunction ', start + 1);
+  const body = renderSource.slice(start, end > -1 ? end : undefined);
+  assert(body.includes('getRoomClosureWarning(state.me.roomRow, state.me.roomCol)'), 'updater does not call it');
+});
+check('three escalation states exist: calm, warn, bad', () => {
+  for (const cls of ['calm', 'warn', 'bad']) assert(css.includes(`#room-closure-alert.${cls}`), `missing .${cls} styling`);
+});
+check('the closed state pulses', () => assert(css.includes('roomClosurePulse')));
+check('the alert is hidden for spectators and the dead', () => {
+  assert(/const active = state\.gameState === GAME_STATE\.IN_GAME && state\.me\.alive && !state\.isSpectator/.test(renderSource));
+});
+check('a room gives exactly 10 seconds notice before closing', async () => {
+  const { ROOM_CLOSURE_WARNING_MS } = await import('./config.js');
+  assert(ROOM_CLOSURE_WARNING_MS === 10000, `got ${ROOM_CLOSURE_WARNING_MS}`);
+});
+
+console.log('\nHeading font is guaranteed at the tag level');
+check('a bare h1 selector sets the display font (not just the opt-in class)', () => {
+  const body = css.slice(css.indexOf('\n  h1 {'));
+  assert(/\n  h1 \{[^}]*font-family:\s*"Black Ops One"/.test(body.slice(0, 200)), 'no unconditional h1 rule');
+});
+
+console.log('\nGround shadows');
+check('a shared ground-shadow helper exists', () => assert(renderSource.includes('function drawGroundShadow')));
+check('players get a ground shadow', () => {
+  const body = renderSource.slice(renderSource.indexOf('function drawHumanoid'));
+  assert(body.slice(0, 400).includes('drawGroundShadow('), 'drawHumanoid does not cast one');
+});
+check('enemies get a ground shadow', () => {
+  const body = renderSource.slice(renderSource.indexOf('function drawEnemySprite'));
+  assert(body.slice(0, 200).includes('drawGroundShadow('), 'drawEnemySprite does not cast one');
+});
+check('the shadow is anchored to the un-bounced position, not the lifted one', () => {
+  const body = renderSource.slice(renderSource.indexOf('function drawGroundShadow'), renderSource.indexOf('function drawHumanoid'));
+  assert(!body.includes('startY - bounce'), 'shadow position uses the bounced y');
 });
 
 console.log(`\n${checks - failures}/${checks} checks passed.`);

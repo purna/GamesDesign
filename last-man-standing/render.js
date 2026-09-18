@@ -307,6 +307,47 @@ function updateMinimap() {
 
 /* --------------------------------------------------------------- overlays */
 
+const ROOM_ALERT_BAD_THRESHOLD_S = 3;
+
+/**
+ * Drives the room-closure countdown shown top-right. This is the ONLY thing
+ * that slot shows — it used to also (incorrectly) mirror the player's name
+ * and alive count, which already live on the left.
+ */
+function updateRoomClosureAlert() {
+  const alertBox = document.getElementById('room-closure-alert');
+  const label = document.getElementById('arena-label');
+  const value = document.getElementById('arena-code');
+  if (!alertBox || !label || !value) return;
+
+  const active = state.gameState === GAME_STATE.IN_GAME && state.me.alive && !state.isSpectator;
+  if (!active) {
+    alertBox.className = 'calm';
+    label.textContent = 'Room';
+    value.textContent = '—';
+    return;
+  }
+
+  const warning = getRoomClosureWarning(state.me.roomRow, state.me.roomCol);
+  if (warning.closing) {
+    alertBox.className = 'bad';
+    label.textContent = 'Room';
+    value.textContent = 'CLOSED';
+    return;
+  }
+  if (warning.warning) {
+    const secondsLeft = Math.max(0, Math.ceil(warning.msLeft / 1000));
+    alertBox.className = secondsLeft <= ROOM_ALERT_BAD_THRESHOLD_S ? 'bad' : 'warn';
+    label.textContent = 'Room closes in';
+    value.textContent = `${secondsLeft}s`;
+    return;
+  }
+
+  alertBox.className = 'calm';
+  label.textContent = 'Room';
+  value.textContent = 'safe';
+}
+
 function updateDoorOverlay() {
   doorLayer.clear();
   const neighbors = roomNeighbors(state.me.roomRow, state.me.roomCol);
@@ -356,11 +397,35 @@ function getLabel(id) {
   return nameLabels[id];
 }
 
+/**
+ * Soft ground-anchored ellipse under a sprite's feet. Drawn from the
+ * un-bounced position so it stays put on the floor while the sprite bobs
+ * above it — the shrink/fade with `bounce` is what sells the lift. Shared by
+ * players and enemies so both read as standing on the same ground.
+ */
+function drawGroundShadow(graphics, x, y, size, bounce, opacity = 1) {
+  const lift = Math.max(0.55, 1 - bounce / 10);
+  const width = size * 0.44 * lift;
+  const height = width * 0.42;
+  const centerX = x + size / 2;
+  const centerY = y + size - 4;
+  // Two passes — a soft wide skirt plus a denser core — read as a shadow
+  // against both bright floor and the near-black edge of the torchlight,
+  // where a single flat-alpha fill all but disappears.
+  graphics
+    .ellipse(centerX, centerY, width, height)
+    .fill({ color: '#1a0f08', alpha: 0.28 * lift * opacity });
+  graphics
+    .ellipse(centerX, centerY, width * 0.62, height * 0.62)
+    .fill({ color: '#000000', alpha: 0.4 * lift * opacity });
+}
+
 function drawHumanoid(graphics, startX, startY, size, bounce, facing, bodyColor, accentColor, alive, spectator) {
   const quarter = size / 4;
+  const alpha = spectator ? 0.35 : alive ? 1 : 0.25;
+  drawGroundShadow(graphics, startX, startY, size, bounce, alpha);
   const x = startX;
   const y = startY - bounce;
-  const alpha = spectator ? 0.35 : alive ? 1 : 0.25;
   for (let index = 0; index < 4; index++) {
     const color = index === 1 ? accentColor || '#5c4033' : bodyColor || '#e9c46a';
     graphics.rect(x, y + index * quarter, size, quarter).fill({ color, alpha });
@@ -383,6 +448,7 @@ function drawHumanoid(graphics, startX, startY, size, bounce, facing, bodyColor,
 
 function drawEnemySprite(graphics, startX, startY, size, bounce) {
   const quarter = size / 4;
+  drawGroundShadow(graphics, startX, startY, size, bounce);
   const x = startX;
   const y = startY - bounce;
   graphics.rect(x + 4, y + quarter * 3, size - 8, quarter).fill('#991b1b');
@@ -503,12 +569,16 @@ function render(ticker) {
   const roster = aliveRoster();
   const aliveCount = roster.filter(player => player.alive && !player.spectator).length;
   const totalCount = roster.filter(player => !player.spectator).length;
+  // Name and alive/left count each have exactly one on-screen home — the left
+  // side of the topbar — so they are written here only, nowhere else.
   const playerName = document.getElementById('player-name-display');
   if (playerName) playerName.textContent = state.myName || '—';
-  const arenaLabel = document.getElementById('arena-label');
-  if (arenaLabel) arenaLabel.textContent = state.myName || 'Player';
-  const arenaCode = document.getElementById('arena-code');
-  if (arenaCode && state.gameState === GAME_STATE.IN_GAME) arenaCode.textContent = `Players left: ${aliveCount}/${totalCount}`;
+
+  // The right side of the topbar is the per-room closure countdown: "once a
+  // room is selected to close, the player has ROOM_CLOSURE_WARNING_MS to
+  // leave." Quiet ("safe") outside that window, escalating to a pulsing
+  // "CLOSED" once time runs out.
+  updateRoomClosureAlert();
 
   const healthPercent = Math.max(0, Math.min(1, state.me.health / MAX_HEALTH));
   const healthFill = document.getElementById('health-bar-fill');

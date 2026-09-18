@@ -624,9 +624,10 @@ export function updateCountdownAndRotate() {
   if (state.isSpectator && !state.hasJoined) return;
   if (!state.hasJoined || state.activeBucket === null) return;
 
+  // arena-code is the room-closure countdown now (render.js owns it
+  // exclusively while IN_GAME); it has no other job, so this no longer writes
+  // the join code into it.
   const myCode = generateDynamicCode(state.activeBucket);
-  const myArenaElement = document.getElementById('arena-code');
-  if (myArenaElement && state.gameState !== GAME_STATE.IN_GAME) myArenaElement.textContent = myCode;
 
   if (state.gameState === GAME_STATE.PODIUM) {
     if (state.gameEndAt === 0) state.gameEndAt = now + (PODIUM_SECONDS * 1000);
