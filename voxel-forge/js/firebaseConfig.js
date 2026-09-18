@@ -10,10 +10,11 @@
  * (Project settings > General > Your apps > SDK setup and configuration).
  */
 window.APP_FIREBASE_CONFIG = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT',
-  storageBucket: 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID'
+  apiKey: "AIzaSyC3xTwyR4z8pGyE9GSsysV2fdR7HkfpM04",
+  authDomain: "voxel-forge-32287.firebaseapp.com",
+  projectId: "voxel-forge-32287",
+  storageBucket: "voxel-forge-32287.firebasestorage.app",
+  messagingSenderId: "914933229601",
+  appId: "1:914933229601:web:2d092546a5551ae7f81b60",
+  measurementId: "G-3F3RWEHNRJ"
 };
