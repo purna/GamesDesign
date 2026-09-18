@@ -4,7 +4,12 @@
 
 [Who said what](https://purna.github.io/GamesDesign/WhoSaidWhat.html)
 
-[Last Man Standing](https://purna.github.io/GamesDesign/last-man-standing/)
+[Last Man Standing](https://www.github.com/purna/last-man-standing/)
+
+[Project Console: last-man-standing-71958] (https://console.firebase.google.com/project/last-man-standing-71958/overview)
+
+[Hosting URL: ast-man-standing-71958.web.app] (https://last-man-standing-71958.web.app)
+
 
 [voxel-forge](https://purna.github.io/GamesDesign/voxel-forge/)
 
