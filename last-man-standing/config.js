@@ -136,7 +136,15 @@ export const HOST_ASSIGNMENT_DELAY_MS = 800;
 
 export const GAME_TICK_INTERVAL_MS = 200;
 export const DAMAGE_TICK_INTERVAL_MS = 1000;
+export const ENEMY_HIT_COOLDOWN_MS = 600;
 export const COUNTDOWN_INTERVAL_MS = 250;
+export const FLASH_DURATION_MS = 200;
+export const ENEMY_MAX_HEALTH = 3;
+export const DEATH_ANIMATION_MS = 500;
+export const SHIELD_RADIUS = TILE * 0.55;
+export const SHIELD_ALPHA = 0.18;
+export const SHIELD_PULSE_SPEED = 0.004;
+export const SHIELD_COLOR = '#5ec8ff';
 
 // Trystero connects to every relay in this list in parallel and treats them
 // as redundant signaling paths, not a priority-ordered fallback chain — so
@@ -152,6 +160,17 @@ export const RELAY_URLS = Object.freeze([
   'wss://nostr.mom',
   'wss://relay.snort.social',
   'wss://relay.primal.net'
+]);
+
+// TURN servers for WebRTC peer-to-peer fallback. Symmetric NATs and strict
+// firewalls can't establish a direct P2P channel even when signaling works, so
+// a couple of free public TURN relays let the data channel fall back to
+// relayed transport instead of silently failing. Trystero passes these
+// through to the underlying RTCPeerConnection.
+export const TURN_SERVERS = Object.freeze([
+  { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:3478', username: 'openrelayproject', credential: 'openrelayproject' }
 ]);
 
 // Floor on how often our own code is allowed to tear down and rejoin the

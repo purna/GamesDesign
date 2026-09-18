@@ -4,7 +4,8 @@ import {
   DEFAULT_ITEMS,
   DEFAULT_ENEMIES,
   SPAWN_ROOMS,
-  DRAW_RESULT
+  DRAW_RESULT,
+  ENEMY_MAX_HEALTH
 } from './config.js';
 import { getRoomMap } from './room.js';
 
@@ -21,7 +22,11 @@ export function freshEnemies() {
   return DEFAULT_ENEMIES.map(enemy => ({
     ...enemy,
     renderX: enemy.x * TILE,
-    renderY: enemy.y * TILE
+    renderY: enemy.y * TILE,
+    health: ENEMY_MAX_HEALTH,
+    maxHealth: ENEMY_MAX_HEALTH,
+    diedAt: 0,
+    lastHitAt: 0
   }));
 }
 
@@ -51,7 +56,14 @@ export const state = {
   nextHostHint: null,
   failoverSeq: 0,
   joinedRoomAt: 0,
+  lastPeerSeenAt: 0,
   roundId: 0,
+  // Per-target cooldown bookkeeping for player→enemy hits (Task 21/27).
+  lastEnemyHitAt: {},
+  // Per-player death-transition timestamps (Task 26). Set when `alive` flips
+  // true→false so the death animation plays exactly once, not on every
+  // rebroadcast of an already-dead state.
+  diedAt: {},
   hasJoined: false,
   manualStartTriggered: false,
   gameStartedAt: 0,
@@ -77,7 +89,10 @@ export const state = {
     shieldCount: 0,
     shieldActiveUntil: 0,
     isAttacking: false,
-    lastMove: 0
+    lastMove: 0,
+    lastHitAt: 0,
+    lastEnemyHitAt: 0,
+    diedAt: 0
   },
   currentRoomMap: getRoomMap(SPAWN_ROOMS[0].row, SPAWN_ROOMS[0].col),
   closedRooms: new Set(),

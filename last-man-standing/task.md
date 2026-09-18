@@ -32,6 +32,15 @@
   - [x] 16.1. limit length of username to 10 characters. (letters a-z plus -)
   - [x] 17 replace trophy with an SVG cup icon
   - [x] 18 Disable "Start Now" until at least 2 players have joined the lobby
+- [x] 20 Fix users on different networks not joining the same lobby
+- [x] 21 Allow player to attack all enemies; enemies have 3 HP shown as progressively darker red shades before turning black and dying
+- [x] 22 Add visual flash feedback when player or enemies are attacked
+- [x] 23 Both player and enemies lose health on contact (if attack mode is enabled)
+- [x] 24 Add room countdown allowing players to leave a room
+- [x] 25 Add overall game countdown timer
+- [x] 26 Add player death animation (explosion)
+- [x] 27 Review and refactor the attack system
+- [x] 28 Add a opaque shield effect around a player when they have their shield turned on
 
 ## Cross-cutting stabilization
 
@@ -52,6 +61,7 @@
 - [x] Late arrivals spectate instead of joining a live match
 - [x] Duplicate hosts resolved deterministically; rotation via nomination, then election
 - [x] Map overlay cleared on death, spectating, round start and round end
+- [x] Make room closing message more visually prominent — display in a pillbox with a contrasting color against the game background while staying within the game's color palette
 
 ## Network resilience and heading font
 
@@ -68,3 +78,5 @@
 - [x] Player name and alive/left count each write from exactly one place (left side of the topbar) — the right side no longer mirrors them
 - [x] Right side of the topbar now shows the per-room closure countdown (calm "safe" -> amber "Room closes in Ns" -> pulsing red "CLOSED"), matching the existing 10s ROOM_CLOSURE_WARNING_MS
 - [x] Enemies and players (self + peers) cast a soft ground shadow, anchored to their un-bounced position so it doesn't float with the idle bob, shared via one drawGroundShadow() helper
+
+

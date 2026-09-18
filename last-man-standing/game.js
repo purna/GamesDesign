@@ -26,7 +26,11 @@ import {
   ROOM_CLOSURE_ORDER,
   FULL_DASH_ARRAY,
   BUCKET_MS,
-  DRAW_RESULT
+  DRAW_RESULT,
+  FLASH_DURATION_MS,
+  ENEMY_MAX_HEALTH,
+  ENEMY_HIT_COOLDOWN_MS,
+  DEATH_ANIMATION_MS
 } from './config.js';
 import { getRoomMap, roomNeighbors, roomTypeLabel, isSolidTile, ENEMY_ROOM_MAP } from './room.js';
 import { state, playersInRoom, aliveRoster, checkWinner } from './state.js';
@@ -89,10 +93,13 @@ export function resetLocalRoundState(spawnIndex) {
   state.me.weaponCount = 0;
   state.me.weaponActiveUntil = 0;
   state.me.shieldCount = 0;
-  state.me.shieldActiveUntil = 0;
+state.me.shieldActiveUntil = 0;
   state.me.isAttacking = false;
+  state.me.lastHitAt = 0;
+  state.me.lastEnemyHitAt = 0;
+  state.me.diedAt = 0;
   state.me.facing = 'down';
-  state.mapActiveUntil = 0;
+  state.me.mapActiveUntil = 0;
   state.appliedClaims = {};
   state.closedRooms = new Set();
   state.roomClosureStartedAt = 0;
@@ -135,6 +142,8 @@ export function myStatePayload() {
     shieldActiveUntil: state.me.shieldActiveUntil,
     isAttacking: state.me.isAttacking,
     facing: state.me.facing,
+    lastHitAt: state.me.lastHitAt,
+    diedAt: state.me.diedAt,
     spectator: state.isSpectator
   };
 }
@@ -383,7 +392,11 @@ export function maybeSpawnEnemies(now) {
       x: tile.x,
       y: tile.y,
       renderX: tile.x * 40,
-      renderY: tile.y * 40
+      renderY: tile.y * 40,
+      health: ENEMY_MAX_HEALTH,
+      maxHealth: ENEMY_MAX_HEALTH,
+      lastHitAt: 0,
+      diedAt: 0
     });
   }
 }
@@ -421,18 +434,62 @@ export function hostTick() {
         roomRow: enemy.roomRow,
         roomCol: enemy.roomCol,
         x: enemy.x,
-        y: enemy.y
+        y: enemy.y,
+        health: enemy.health,
+        maxHealth: enemy.maxHealth,
+        lastHitAt: enemy.lastHitAt,
+        diedAt: enemy.diedAt
       }))
     });
   }
 }
 
+/**
+ * One shared definition of "how attacking works", written down so the
+ * player→player, player→enemy and enemy→player paths all use the same rule:
+ *
+ *   - A weapon pickup grants a stackable charge. Pressing Attack consumes one
+ *     charge and opens a WEAPON_DURATION window.
+ *     isAttacking is a separate boolean toggled by holding the button.
+ *   - Damage to another target only fires while the attacker has an active
+ *     weapon window AND isAttacking is true AND the target is within
+ *     Chebyshev distance 1.
+ *   - One weapon activation means ONE hit per target: a per-hit cooldown
+ *     (ENEMY_HIT_COOLDOWN_MS) prevents a held attack from chipping a
+ *     stationary target for the whole 10-second window.
+ *   - Enemies have no shield and no attack toggle of their own; contact with
+ *     an enemy only hurts the player while the player is actively attacking.
+ *   - Shield still blocks all incoming damage exactly as before.
+ */
 export function damageTick() {
   if (state.isSpectator || !state.me.alive) return;
   const now = Date.now();
+
+  // Player-vs-enemy: the local player's attack lands on an adjacent enemy.
+  if (state.me.isAttacking && state.me.weaponActiveUntil > now) {
+    if (now - state.me.lastEnemyHitAt > ENEMY_HIT_COOLDOWN_MS) {
+      const target = state.enemies.find(enemy =>
+        enemy.roomRow === state.me.roomRow &&
+        enemy.roomCol === state.me.roomCol &&
+        Math.max(Math.abs(enemy.x - state.me.x), Math.abs(enemy.y - state.me.y)) <= 1
+      );
+      if (target) {
+        if (isHost()) {
+          applyEnemyDamage(target.id, 1);
+        } else if (state.sendEnemyHit) {
+          state.sendEnemyHit({ enemyId: target.id });
+        }
+      }
+    }
+  }
+
+  // Enemy-vs-player: contact only hurts while the player is actively attacking.
   let underAttack = false;
   state.enemies.forEach(enemy => {
-    if (enemy.roomRow === state.me.roomRow && enemy.roomCol === state.me.roomCol && enemy.x === state.me.x && enemy.y === state.me.y) underAttack = true;
+    if (enemy.roomRow === state.me.roomRow && enemy.roomCol === state.me.roomCol &&
+        Math.max(Math.abs(enemy.x - state.me.x), Math.abs(enemy.y - state.me.y)) <= 1) {
+      underAttack = true;
+    }
   });
   Object.keys(state.peers).forEach(id => {
     const peer = state.peers[id];
@@ -444,16 +501,52 @@ export function damageTick() {
 
   const shielded = state.me.shieldActiveUntil > now;
   if (state.me.isAttacking && state.me.weaponActiveUntil <= now) setAttacking(false);
-  if (underAttack && !shielded) {
+  const contactDamageActive = state.me.isAttacking;
+  if (underAttack && !shielded && contactDamageActive) {
     state.me.health -= 1;
+    state.me.lastHitAt = Date.now();
     if (state.me.health <= 0) {
       state.me.health = 0;
       state.me.alive = false;
+      state.me.diedAt = Date.now();
       state.mapActiveUntil = 0;
       setAttacking(false);
     }
   }
   broadcastMe();
+}
+
+/**
+ * Host-side resolution of a player hitting an enemy. Mirrors processPickup:
+ * a non-host client reports the attempt, the host applies it authoritatively
+ * and rebroadcasts world state so every client sees the same health.
+ */
+export function applyEnemyDamage(enemyId, amount) {
+  if (!isHost()) return;
+  const enemy = state.enemies.find(candidate => candidate.id === enemyId);
+  if (!enemy) return;
+  enemy.health = Math.max(0, (enemy.health ?? ENEMY_MAX_HEALTH) - amount);
+  enemy.lastHitAt = Date.now();
+  if (enemy.health <= 0) {
+    enemy.diedAt = Date.now();
+    state.enemies = state.enemies.filter(candidate => candidate.id !== enemyId);
+  }
+  if (state.sendWorldState) {
+    state.sendWorldState({
+      items: state.items,
+      enemies: state.enemies.map(enemy => ({
+        id: enemy.id,
+        roomRow: enemy.roomRow,
+        roomCol: enemy.roomCol,
+        x: enemy.x,
+        y: enemy.y,
+        health: enemy.health,
+        maxHealth: enemy.maxHealth,
+        lastHitAt: enemy.lastHitAt,
+        diedAt: enemy.diedAt
+      }))
+    });
+  }
 }
 
 export function checkRoomClosureElimination() {
@@ -467,6 +560,7 @@ export function checkRoomClosureElimination() {
       if (state.me.roomRow === room.row && state.me.roomCol === room.col && state.me.alive) {
         state.me.alive = false;
         state.me.health = 0;
+        state.me.diedAt = Date.now();
         state.mapActiveUntil = 0;
         setAttacking(false);
         showRoomToast(`💀 Room (${room.row + 1},${room.col + 1}) closed — eliminated!`);
@@ -476,6 +570,7 @@ export function checkRoomClosureElimination() {
         if (peer && peer.alive && peer.roomRow === room.row && peer.roomCol === room.col) {
           peer.alive = false;
           peer.health = 0;
+          peer.diedAt = Date.now();
         }
       });
     }
@@ -953,6 +1048,9 @@ export function resetGame() {
   state.me.shieldCount = 0;
   state.me.shieldActiveUntil = 0;
   state.me.isAttacking = false;
+  state.me.lastHitAt = 0;
+  state.me.lastEnemyHitAt = 0;
+  state.me.diedAt = 0;
   state.me.facing = 'down';
   state.me.x = 6;
   state.me.y = 6;

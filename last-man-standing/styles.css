@@ -205,6 +205,16 @@
     margin: 8px 0;
   }
 
+  .lobby-network-status {
+    font-size: 11px;
+    color: #e9c46a;
+    margin: 6px 0 10px;
+    padding: 6px 10px;
+    border: 1px dashed #554438;
+    border-radius: 6px;
+    background: rgba(44, 34, 25, .5);
+  }
+
   #lobby-player-list {
     margin: 10px 0;
     max-height: 180px;
@@ -370,29 +380,39 @@
   #room-closure-alert {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    transition: color .2s;
+    align-items: center;
+    gap: 1px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    background: rgba(138, 122, 104, 0.25);
+    border: 1px solid rgba(138, 122, 104, 0.4);
+    transition: background .2s, border-color .2s;
+    margin-top: -2px;
   }
 
   #arena-label {
-    font-size: 11px;
-    text-align: right;
+    font-size: 10px;
+    text-align: center;
     font-weight: bold;
     letter-spacing: .3px;
+    color: #e9dcc8;
   }
 
   #arena-code {
     font-size: 13px;
     font-weight: bold;
-    text-align: right;
+    text-align: center;
+    color: #e9dcc8;
   }
 
-  #room-closure-alert.calm #arena-label {
-    color: #8a7a68;
+  #room-closure-alert.calm {
+    background: rgba(138, 122, 104, 0.25);
+    border-color: rgba(138, 122, 104, 0.4);
   }
 
-  #room-closure-alert.calm #arena-code {
-    color: #7fd88f;
+  #room-closure-alert.warn {
+    background: rgba(233, 196, 106, 0.22);
+    border-color: rgba(233, 196, 106, 0.55);
   }
 
   #room-closure-alert.warn #arena-label,
@@ -400,18 +420,21 @@
     color: #e9c46a;
   }
 
+  #room-closure-alert.bad {
+    background: rgba(248, 113, 113, 0.25);
+    border-color: rgba(248, 113, 113, 0.65);
+    animation: roomClosurePulse .5s ease-in-out infinite;
+  }
+
   #room-closure-alert.bad #arena-label,
   #room-closure-alert.bad #arena-code {
     color: #f87171;
   }
 
-  #room-closure-alert.bad {
-    animation: roomClosurePulse .5s ease-in-out infinite;
-  }
-
   @keyframes roomClosurePulse {
     50% {
       transform: scale(1.08);
+      background: rgba(248, 113, 113, 0.38);
     }
   }
 

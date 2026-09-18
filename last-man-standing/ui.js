@@ -1,6 +1,9 @@
 import { GAME_STATE, MAX_PLAYERS, MIN_PLAYERS_TO_START, FULL_DASH_ARRAY, WARNING_THRESHOLD, ALERT_THRESHOLD } from './config.js';
 import { state } from './state.js';
 
+/** How long a fresh joiner waits before the lobby says "nobody here yet". */
+const NO_PEERS_WARN_MS = 12000;
+
 export function showRoomToast(text) {
   const element = document.getElementById('room-toast');
   element.textContent = text;
@@ -46,6 +49,29 @@ export function updateLobbyRosterUI() {
     : rows.length < MIN_PLAYERS_TO_START
       ? `Waiting for ${MIN_PLAYERS_TO_START - rows.length} more player${MIN_PLAYERS_TO_START - rows.length === 1 ? '' : 's'}…`
       : 'Start Now';
+
+  // Network diagnostics: surface a silent empty lobby instead of looking like
+  // a normal room with no one in it. A fresh joiner with no peer seen yet
+  // gets a hint after a short grace period; a longer wait suggests the
+  // signaling path (relays) or the P2P channel is the bottleneck.
+  const networkStatus = document.getElementById('lobby-network-status');
+  if (networkStatus) {
+    const hasPeers = rows.length > 1;
+    const joinedAt = state.joinedRoomAt || 0;
+    const elapsed = joinedAt ? Date.now() - joinedAt : 0;
+    if (hasPeers) {
+      networkStatus.classList.add('hidden');
+      networkStatus.textContent = '';
+    } else if (elapsed > NO_PEERS_WARN_MS) {
+      networkStatus.classList.remove('hidden');
+      networkStatus.textContent = elapsed > NO_PEERS_WARN_MS * 2
+        ? 'No other players in this arena yet — relays may be slow. You can wait or rejoin.'
+        : 'No other players have arrived yet — keep waiting or rejoin to try again.';
+    } else {
+      networkStatus.classList.add('hidden');
+      networkStatus.textContent = '';
+    }
+  }
 }
 
 export function updateSpectatorBanner() {

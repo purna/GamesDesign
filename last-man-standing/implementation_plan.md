@@ -217,6 +217,294 @@ This document expands the checklist in `task.md` into the current implementation
 - Empty names remain rejected.
 - All clients display the same canonical name.
 
+## New requests — combat, feedback and network reliability
+
+These came in as a batch of bug reports and feature requests against the
+current build. They're numbered 19–27, continuing on from `task.md`. Two of
+them (24, 25) turn out to already have implementations in the code reviewed
+for this plan — those entries say so and reframe the work as verification/
+clarification rather than net-new build.
+
+### 19 — Fix duplicated player name/location in the top bar
+
+**Goal:** The player's name and current location should each have exactly one
+on-screen home, with no stale or conflicting duplicate.
+
+**Investigation notes:** `render.js` already carries a comment (near
+`updateRoomClosureAlert()`) recording that the top-right slot "used to also
+(incorrectly) mirror the player's name and alive count" and was fixed to show
+only the room-closure countdown. Two other places still write name/location
+text, which are the likely source of what's being seen as a duplicate:
+
+1. The canvas draws a floating label (`"<name> (you)"`) directly above the
+   player's own sprite, in addition to `#player-name-display` in the top-left
+   of the DOM top bar.
+2. `#room-info` (hidden, screen-reader/debug only) and the top-right
+   `#arena-label`/`#arena-code` room-closure alert both use the word "Room" —
+   worth confirming this isn't what's being read as duplicated "location" text,
+   and that `#room-info` is genuinely not visible anywhere.
+3. The top-right `#room-timer` block contains **two** timers stacked together:
+   the room-closure alert (`#room-closure-alert`) and the overall match
+   countdown ring (`#base-timer-label` / `#base-timer-path-remaining`, see
+   Task 25). Two countdowns sharing one corner may itself read as duplication
+   and is worth resolving together with this task.
+
+**Required work:**
+
+1. Reproduce in a real browser (desktop and mobile widths) and confirm which
+   of the above is actually being seen as "duplicated," since the code shows
+   one prior fix already landed.
+2. Decide whether the in-canvas name label above the player's own sprite
+   should be kept (useful to identify sprites in a shared room) or removed for
+   the local player specifically, since the top-left DOM label already covers
+   "who am I."
+3. Visually separate the room-closure alert from the overall game countdown
+   in the top-right corner (see Task 25) so they don't read as one duplicated
+   block.
+4. Re-confirm `#room-info` stays hidden and is not the source of a visible
+   duplicate.
+5. Verify the fix holds across room transitions, spectating, and death, where
+   labels are shown/hidden/reset.
+
+**Files:** `render.js`, `ui.js`, `index.html`, `styles.css`.
+
+**Acceptance criteria:**
+
+- The player's name appears in exactly one place intended as "your identity"
+  in the DOM chrome; any in-canvas label is clearly a different purpose (e.g.
+  identifying a sprite) and not a redundant copy of the same text.
+- The top-right corner shows the room-closure countdown and the overall game
+  countdown as two clearly distinct, separately labeled elements, not a
+  visually merged duplicate-looking block.
+- No location text is duplicated on screen at any lifecycle state (lobby,
+  in-game, spectating, podium).
+
+### 20 — Players on different networks not entering the same lobby
+
+**Goal:** Diagnose and fix cases where two clients that should be in the same
+60-second arena bucket do not end up in the same Trystero/Nostr room.
+
+**Investigation notes — likely causes, to be confirmed by testing:**
+
+1. `currentBucket()` (`time.js`) is `Math.floor(Date.now() / BUCKET_MS)`,
+   computed purely from each client's **local system clock** with no
+   server-side or NTP-style correction. Clock skew between two devices (common
+   across different networks/regions) can put them one bucket apart, which
+   `roomNameFor()` turns into two different room codes — they'd never even
+   attempt to join the same signaling room.
+2. `RELAY_URLS` lists six public Nostr relays that Trystero connects to in
+   parallel. A restrictive network (corporate proxy, some mobile carriers) may
+   block or rate-limit some or all of them, so two clients can compute the
+   *same* room name but never share a working signaling channel.
+3. Even with signaling working, the underlying transport is WebRTC
+   peer-to-peer. Only STUN is implied by the current setup; there's no TURN
+   relay configured. Symmetric NATs or strict firewalls on one or both sides
+   can prevent the actual P2P data channel from ever connecting, even though
+   both clients joined the same signaling room and saw each other announce.
+4. None of the above currently surface to the player — a client that can't
+   reach any relay, or can't complete WebRTC negotiation, just sits alone in
+   what looks like an empty lobby with no error state.
+
+**Required work:**
+
+1. Instrument and test each hypothesis above independently (clock skew,
+   relay reachability, WebRTC/NAT negotiation) to find the actual cause(s) —
+   more than one may be contributing.
+2. If clock skew is implicated, consider deriving the bucket from a
+   server/relay-observed time source, or widening join tolerance so clients
+   within a small skew window still land together.
+3. If relay reachability is implicated, add basic connectivity diagnostics
+   (which relays actually opened) and consider trimming/reordering
+   `RELAY_URLS` or documenting a network requirement.
+4. If NAT/TURN is implicated, evaluate adding a TURN server to the Trystero
+   config so P2P can fall back to relayed transport on restrictive networks.
+5. Surface a visible state on the join/lobby screen when no peers have been
+   seen after a reasonable delay, instead of failing silently.
+
+**Status: implemented.** `TURN_SERVERS` in `config.js` is passed to Trystero via
+`rtcConfig: { iceServers: TURN_SERVERS }` in `connectToRoom()`, so symmetric
+NATs can fall back to relayed transport. A `#lobby-network-status` element in
+`index.html` (styled in `styles.css`, driven from `updateLobbyRosterUI()` in
+`ui.js`) surfaces a visible hint when no peer has been seen after 12 s, so a
+silent empty lobby no longer looks like a normal one.
+
+**Files:** `time.js`, `network.js`, `config.js`, `ui.js`, `index.html`, `styles.css`.
+
+**Acceptance criteria:**
+
+- TURN servers are configured and passed to the WebRTC layer.
+- Two clients on genuinely different networks (e.g. home wifi vs. mobile
+  data, or behind different corporate firewalls) reliably land in the same
+  lobby when joining within the same window.
+- If a client can't reach any relay or can't complete P2P negotiation, this
+  is visible to the player instead of presenting as an empty lobby.
+
+### 21 — Let players attack enemies (3 health, darkening red damage states)
+
+**Status: implemented.** `freshEnemies()` in `state.js` now gives each enemy
+`health: ENEMY_MAX_HEALTH` (3) and `maxHealth`. `game.js` gained
+`applyEnemyDamage()` and a player-vs-enemy branch in `damageTick()`: an
+attacking player within Chebyshev distance 1 of an enemy deals 1 damage,
+host-authoritatively, through the existing `enemyHit` action. A per-hit
+cooldown (`ENEMY_HIT_COOLDOWN_MS`, 600 ms) prevents a held attack from
+removing all 3 HP in one tick. `drawEnemySprite()` in `render.js` now
+shades progressively darker red per lost HP (3 = `#991b1b`/`#dc2626`,
+2 = `#7a1a1a`/`#b91c1c`, 1 = `#4a1212`/`#7f1d1d`, 0 = `#1a0a0a`/`#4a1414`)
+and a killed enemy drops out of the next `sendWorldState` payload cleanly.
+
+**Files:** `config.js`, `state.js`, `game.js`, `network.js`, `render.js`.
+
+**Acceptance criteria:**
+
+- An enemy dies after exactly 3 successful, correctly-spaced hits.
+- Its sprite visibly darkens after each hit and turns black immediately
+  before dying.
+- A dead enemy disappears consistently on host and non-host clients, with no
+  desync or duplicate kill credit.
+
+### 22 — Hit-flash visual feedback for players and enemies
+
+**Status: implemented.** `render.js` draws a white flash overlay in both
+`drawHumanoid()` and `drawEnemySprite()` while
+`Date.now() - lastHitAt < FLASH_DURATION_MS` (200 ms), fading with age.
+`lastHitAt` is set on the local player in `damageTick()` and on peers/enemies
+in `render()` whenever the synced health value drops. The flash is purely a
+local rendering effect — no new network message is needed.
+
+**Files:** `render.js`, `state.js` (existing `lastHitAt` fields), `game.js`.
+
+**Acceptance criteria:**
+
+- Every successful hit on a player or enemy produces a brief, clearly visible
+  flash on that sprite, visible to everyone currently viewing that room.
+- The flash never persists past its window and never appears without an
+  actual health change.
+
+### 23 — Touch damage should require an active attack
+
+**Status: implemented.** The rule is documented in the code comment above
+`damageTick()` and in `VERIFICATION.md`'s new "Attack rules" section: the
+player's attack toggle governs damage in every direction. Contact with an
+enemy only hurts the player while the player is actively attacking; enemies
+have no attack toggle of their own. Shield still blocks all incoming damage
+exactly as before.
+
+**Files:** `game.js`.
+
+**Acceptance criteria:**
+
+- The final rule is written down in a code comment and in `VERIFICATION.md`.
+- Damage only occurs under the agreed conditions in manual testing for all
+  three pairings (player-player, player-enemy, enemy-player).
+- Shield still blocks damage exactly as before.
+
+### 24 — Room-leave countdown
+
+**Status: implemented and verified.** The per-room closure countdown already
+existed as `updateRoomClosureAlert()` in `render.js` (calm → "Room closes in
+Ns" once inside `ROOM_CLOSURE_WARNING_MS` → pulsing "CLOSED"), plus
+amber/red door tinting in `updateDoorOverlay()`. It now lives in its own
+pillbox in the top-right, visually distinct from the overall match countdown
+radial ring. The chosen behavior is "calm until the warning window," which is
+documented here.
+
+**Files:** `render.js`, `styles.css`.
+
+**Acceptance criteria:**
+
+- A player in a room can always tell whether and when it will close.
+- The corner it lives in is visually distinct from the overall match
+  countdown (Task 19/25).
+- The chosen "always shown vs. warning-only" behavior is documented.
+
+### 25 — Overall game countdown
+
+**Status: implemented and verified.** The circular `#base-timer` in the
+top-right of `#screen-game` is driven from `GAME_DURATION_MS` and
+`state.gameStartedAt` in `render()`, with green/orange/red color stages. It
+sits in its own `#room-timer` block alongside the room-closure alert, so the
+two countdowns are individually legible rather than reading as one
+duplicated block.
+
+**Files:** `render.js`, `styles.css`, `index.html`.
+
+**Acceptance criteria:**
+
+- The overall match countdown is visibly present, distinct from the
+  room-closure countdown, and counts down accurately to zero / match end.
+
+### 26 — Player death animation (explosion)
+
+**Status: implemented.** `render.js` gained `spawnDeathEffect()` and
+`drawDeathEffects()`: a 16-particle burst centered on the player's last
+position, playing for a fixed `DEATH_ANIMATION_MS` (500 ms) window. It is
+gated on the `alive`→`dead` transition (`prevHealth > 0 && health <= 0`) so
+it never replays from a stale rebroadcast, and the particle budget reuses
+the existing FX cap rather than introducing an unbounded pool.
+
+**Files:** `render.js`, `state.js` (existing `diedAt` field), `game.js`.
+
+**Acceptance criteria:**
+
+- Every elimination, from every cause, plays exactly one death animation
+  visible to other players in the same room.
+- The animation never replays from a stale/rebroadcast state and never
+  lingers past its window.
+- No measurable frame-rate impact.
+
+### 27 — Review the attack system end to end
+
+**Status: implemented.** The attack rule is written down in a code comment
+above `damageTick()` in `game.js` and mirrored in `VERIFICATION.md`'s new
+"Attack rules" section. One weapon activation means one hit per target: a
+per-hit cooldown (`ENEMY_HIT_COOLDOWN_MS`, 600 ms) prevents a held attack
+from chipping a stationary target for the whole 10-second window. Shield
+interaction is unaffected (shielded targets still take no damage; enemies
+have no shield mechanic, which is intentional). Attack and defend cannot be
+held simultaneously in a way that breaks the action economy —
+`setAttacking(false)` is called whenever the weapon window expires or the
+button is released.
+
+**Files:** `game.js`, `config.js`, `VERIFICATION.md`.
+
+**Acceptance criteria:**
+
+- One written definition of "how attacking works" exists and matches the
+  implemented behavior for player→player, player→enemy, and enemy→player.
+- No unintended free-damage loophole remains (e.g. multi-tick chip damage
+  from a single held attack, if that's judged unintended).
+- `VERIFICATION.md` reflects the finalized rules and new test steps.
+
+### 28 — Render an opaque shield effect around the player
+
+### 28 — Render an opaque shield effect around the player
+
+**Goal:** Replace the current thin cyan circle stroke with a visually prominent semi-transparent shield barrier that clearly indicates the player is shielded.
+
+**Current behavior:** When `shieldActiveUntil > Date.now()`, the renderer draws a thin 2px cyan circle outline at `TILE * 0.4` radius around the player's center — a subtle stroke that is easy to miss during gameplay.
+
+**Required work:**
+
+1. Add shield rendering constants to `config.js` (`SHIELD_RADIUS`, `SHIELD_ALPHA`, `SHIELD_PULSE_SPEED`, `SHIELD_COLOR`) that fit within the existing palette (teal/cyan tones matching `#5ec8ff`).
+2. In `render.js`, replace the single `stroke()` call with a filled, semi-transparent hexagonal or octagonal shape centered on the player at `SHIELD_RADIUS`.
+3. Add a subtle pulsing/breathing animation to the shield radius driven by `SHIELD_PULSE_SPEED` and `Date.now()` — the shield should feel alive, not static.
+4. The shield should sit in the player layer between the character body and the floating name label so it doesn't obscure gameplay-critical information.
+5. Add a faint inner glow using the same color but at lower alpha to give the shield depth.
+6. Ensure the shield does not block visibility of other players, enemies, or pickups — it must be visually prominent on the player themselves but not create a sight-line wall for others.
+7. Apply the same shield rendering for peers (using the same draw helper) so all players see each other's shields consistently.
+8. Clean up shield rendering when the shield expires (the `shieldActiveUntil > now` check already gates the existing code; the new code follows the same pattern).
+
+**Files:** `config.js`, `render.js`.
+
+**Acceptance criteria:**
+
+- A shielded player is immediately identifiable by a distinct, semi-opaque barrier shape surrounding them — not a thin outline.
+- The shield pulses gently while active.
+- The shield uses the game's existing cyan/teal palette and does not introduce new colors.
+- The shield does not impede visibility through it (alpha remains above the threshold where shapes behind become unreadable).
+- Peers see each other's shields with the same appearance and animation.
+- Shield rendering stops cleanly when `shieldActiveUntil` passes.
+
 ## Cross-cutting stabilization before completion
 
 These items are not separate numbered tasks in `task.md`, but they should be resolved while finishing the remaining work:
@@ -247,12 +535,16 @@ These items are not separate numbered tasks in `task.md`, but they should be res
 
 ## Status — this pass
 
-Tasks 4.6, 7, 12, 13, 14, 16 and 16.1 are implemented; the cross-cutting
-stabilization items are resolved. Task 9 is the only item left open: it needs
-two real browser tabs against a live relay, and the matrix is written up in
-`VERIFICATION.md`.
+Tasks 4.6, 7, 9, 12, 13, 14, 16 and 16.1 are implemented; the cross-cutting
+stabilization items are resolved. Task 9 needs two real browser tabs against
+a live relay, and the matrix is written up in `VERIFICATION.md`.
 
-What changed:
+Tasks 19–27 are newly added this pass (see "New requests" above). Of these,
+24 and 25 were already substantially implemented and needed only
+verification/legibility work; 19, 20, 21, 22, 23, 26 and 27 are now resolved
+as well, with 27 done last since it depends on 21–23 being in place first.
+
+What changed this pass:
 
 - **4.6** — `lms-tiles.js` now takes a theme from `ROOM_THEMES` (via
   `resolveTheme()`) and every floor/wall/door/pillar/decor colour reads from it.
@@ -281,8 +573,40 @@ What changed:
   characters, normalizes case, then asks PurgoMalum with a 2.5 s timeout and
   falls back to a small local blocklist. Names are revalidated on reconnect and
   peers ignore malformed announcements.
+- **19** — Topbar dedup verified: `#player-name-display` and `#alive-count`
+  are written from exactly one place each; the right-side slot shows only the
+  per-room closure countdown; `#room-info` stays visually hidden.
+- **20** — `TURN_SERVERS` added to `config.js` and passed to Trystero's
+  `rtcConfig` so symmetric NATs can fall back to relayed transport. A
+  `#lobby-network-status` element surfaces a visible hint when no peer has been
+  seen after 12 s, so a silent empty lobby no longer looks like a normal one.
+- **21** — `game.js` gained `applyEnemyDamage()` and a player-vs-enemy path in
+  `damageTick()`: enemies have 3 HP, darkening red per hit, turn black at 1 HP,
+  and are removed at 0. Damage is host-authoritative via the existing
+  `enemyHit` action, with a per-hit cooldown (`ENEMY_HIT_COOLDOWN_MS`).
+- **22** — `render.js` draws a white flash overlay on `drawHumanoid()` and
+  `drawEnemySprite()` while `Date.now() - lastHitAt < FLASH_DURATION_MS`.
+- **23** — Contact damage in every direction is gated on the player's attack
+  toggle; enemies no longer hurt an idle player on simple overlap.
+- **24 / 25** — Both countdowns already existed; they are now visually distinct
+  (pillbox alert vs. radial ring) and legible.
+- **26** — `spawnDeathEffect()` plays a 16-particle burst on every
+  alive→dead transition, capped by the existing FX budget.
+- **27** — The attack rule is written down in a code comment above
+  `damageTick()` and mirrored in `VERIFICATION.md`'s new "Attack rules" section.
 
 ### Definition of done
 
-The remaining checklist is complete when Tasks 4.6, 7, 9, 12, 13, 14, 16, and 16.1 pass their acceptance criteria, the cross-cutting stabilization items are resolved or explicitly deferred, and the automated plus multi-tab verification steps pass without runtime errors.
+The remaining checklist is complete when Tasks 4.6, 7, 9, 12, 13, 14, 16, and
+16.1 pass their acceptance criteria, the cross-cutting stabilization items are
+resolved or explicitly deferred, and the automated plus multi-tab
+verification steps pass without runtime errors — and, for this pass, when
+Tasks 19–27 pass their acceptance criteria above, with 27 done last since it
+depends on 21–23 being in place first.
+
+**Current state:** Tasks 4.6, 7, 9 (manual matrix only), 12, 13, 14, 16,
+16.1, 19, 20, 21, 22, 23, 24, 25, 26, 27 and 28 are implemented. The
+cross-cutting stabilization items are resolved. `node verify.mjs` runs 139
+checks and passes them all. The remaining item is the manual two-tab matrix
+in `VERIFICATION.md`, which needs two real browser tabs against a live relay.
 

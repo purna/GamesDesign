@@ -59,6 +59,23 @@ stored as `nigel`), `nigel99` (rejected), `-nigel` / `nigel-` / `a--b`
 blocklist still catches the obvious cases and everything else fails open with no
 lockout.
 
+## Attack rules (finalized, Tasks 21–23, 27)
+
+One shared definition lives in `game.js` above `damageTick()`. The rule is:
+
+- A weapon pickup grants a stackable charge. Pressing Attack consumes one charge and opens a `WEAPON_DURATION` window.
+- `isAttacking` is a separate boolean toggled by holding the button.
+- Damage to another target only fires while the attacker has an active weapon window **and** `isAttacking` is true **and** the target is within Chebyshev distance 1.
+- One weapon activation means **one hit per target**: a per-hit cooldown (`ENEMY_HIT_COOLDOWN_MS`, 600 ms) prevents a held attack from chipping a stationary target for the whole 10-second window.
+- Enemies have no shield and no attack toggle of their own; contact with an enemy only hurts the player while the player is actively attacking.
+- Shield still blocks all incoming damage exactly as before.
+
+| Pairing | Rule |
+|---|---|
+| Player → player | Attacker must have active weapon window + `isAttacking` + Chebyshev ≤ 1; target's shield blocks. |
+| Player → enemy | Same gate; enemy has 3 HP, darkens per hit, turns black at 1 HP, dies at 0. |
+| Enemy → player | Contact only hurts while the player is actively attacking (no enemy attack toggle). |
+
 ## Host handover, in order of precedence
 
 1. **Nomination.** The outgoing host names the next one in the podium message

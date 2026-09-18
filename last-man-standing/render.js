@@ -10,10 +10,15 @@ import {
   GAME_DURATION_MS,
   FULL_DASH_ARRAY,
   MAX_HEALTH,
+  ENEMY_MAX_HEALTH,
   DRAW_RESULT,
   DECOR,
   FX,
-  MAP_DURATION_MS
+  MAP_DURATION_MS,
+  SHIELD_RADIUS,
+  SHIELD_ALPHA,
+  SHIELD_PULSE_SPEED,
+  SHIELD_COLOR
 } from './config.js';
 import { state, aliveRoster, playersInRoom, checkWinner } from './state.js';
 import { roomNeighbors, roomTypeLabel } from './room.js';
@@ -34,12 +39,16 @@ let vignetteSprite = null;
 let torchLightSprite = null;
 const nameLabels = {};
 
+const peerPrevHealth = new Map();
+const enemyPrevHealth = new Map();
+
 let torchPlacements = [];
 let embers = [];
 let ambientParticles = [];
 let flickerPhase = 0;
 let minimapCells = null;
 let currentTheme = resolveTheme('spawn');
+let deathEffects = [];
 
 export async function setupRender() {
   app = new PIXI.Application();
@@ -134,6 +143,7 @@ function resetRoomFx() {
   torchPlacements = getTorchPlacements(state.currentRoomMap);
   embers = [];
   ambientParticles = [];
+  deathEffects = [];
   const ambientTarget = Math.min(
     FX.MAX_AMBIENT,
     Math.round(COLS * ROWS * DECOR.AMBIENT_PARTICLE_DENSITY * 10)
@@ -152,6 +162,46 @@ function spawnAmbient(startY) {
     size: Math.random() > 0.7 ? 2 : 1,
     alpha: 0.12 + Math.random() * 0.22
   };
+}
+
+function spawnDeathEffect(x, y) {
+  const now = performance.now();
+  for (let i = 0; i < 16; i++) {
+    const angle = (Math.PI * 2 / 16) * i + Math.random() * 0.3;
+    const speed = 1.5 + Math.random() * 2.5;
+    deathEffects.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      born: now,
+      life: DEATH_ANIMATION_MS * (0.6 + Math.random() * 0.4),
+      size: 3 + Math.random() * 4,
+      color: Math.random() > 0.5 ? '#f87171' : '#ffd166'
+    });
+  }
+}
+
+function updateDeathEffects(deltaMs) {
+  const now = performance.now();
+  deathEffects = deathEffects.filter(e => now - e.born < e.life);
+  deathEffects.forEach(e => {
+    e.x += e.vx;
+    e.y += e.vy;
+    e.vx *= 0.97;
+    e.vy *= 0.97;
+  });
+}
+
+function drawDeathEffects() {
+  const now = performance.now();
+  deathEffects.forEach(e => {
+    const age = (now - e.born) / e.life;
+    const alpha = Math.max(0, 1 - age) * 0.9;
+    const size = e.size * (1 + age * 1.5);
+    fxLayer
+      .rect(e.x - size / 2, e.y - size / 2, size, size)
+      .fill({ color: e.color, alpha });
+  });
 }
 
 function updateParticles(deltaMs) {
@@ -420,7 +470,7 @@ function drawGroundShadow(graphics, x, y, size, bounce, opacity = 1) {
     .fill({ color: '#000000', alpha: 0.4 * lift * opacity });
 }
 
-function drawHumanoid(graphics, startX, startY, size, bounce, facing, bodyColor, accentColor, alive, spectator) {
+function drawHumanoid(graphics, startX, startY, size, bounce, facing, bodyColor, accentColor, alive, spectator, lastHitAt = 0) {
   const quarter = size / 4;
   const alpha = spectator ? 0.35 : alive ? 1 : 0.25;
   drawGroundShadow(graphics, startX, startY, size, bounce, alpha);
@@ -444,20 +494,34 @@ function drawHumanoid(graphics, startX, startY, size, bounce, facing, bodyColor,
   if (facing === 'left') { firstPupilX -= 1; secondPupilX -= 1; }
   graphics.rect(firstPupilX, eyeY + 1, 2, 2).fill({ color: '#000000', alpha });
   graphics.rect(secondPupilX, eyeY + 1, 2, 2).fill({ color: '#000000', alpha });
+
+  if (lastHitAt && Date.now() - lastHitAt < FLASH_DURATION_MS) {
+    const flashAlpha = 0.6 * (1 - (Date.now() - lastHitAt) / FLASH_DURATION_MS);
+    graphics.rect(x, y - bounce, size, size).fill({ color: '#ffffff', alpha: flashAlpha });
+  }
 }
 
-function drawEnemySprite(graphics, startX, startY, size, bounce) {
+function drawEnemySprite(graphics, startX, startY, size, bounce, lastHitAt = 0, health = ENEMY_MAX_HEALTH) {
   const quarter = size / 4;
   drawGroundShadow(graphics, startX, startY, size, bounce);
   const x = startX;
   const y = startY - bounce;
-  graphics.rect(x + 4, y + quarter * 3, size - 8, quarter).fill('#991b1b');
-  graphics.rect(x + 2, y + quarter * 2, size - 4, quarter).fill('#dc2626');
+  // 3 HP → three progressively darker reds: full red, dark red, near-black-red.
+  const hp = Math.max(0, Math.min(ENEMY_MAX_HEALTH, health || ENEMY_MAX_HEALTH));
+  const bodyColor = hp === 3 ? '#991b1b' : hp === 2 ? '#7a1a1a' : hp === 1 ? '#4a1212' : '#1a0a0a';
+  const helmetColor = hp === 3 ? '#dc2626' : hp === 2 ? '#b91c1c' : hp === 1 ? '#7f1d1d' : '#4a1414';
+  graphics.rect(x + 4, y + quarter * 3, size - 8, quarter).fill(bodyColor);
+  graphics.rect(x + 2, y + quarter * 2, size - 4, quarter).fill(helmetColor);
   graphics.rect(x + 4, y + quarter, size - 8, quarter).fill('#7f8c8d');
   graphics.rect(x + size / 2 - 2, y - 2, 4, 5).fill('#f87171');
   graphics.rect(x + size - 10, y + quarter * 2 + 2, 6, quarter).fill('#95a5a6');
   graphics.rect(x + 6, y + quarter + 2, 3, 3).fill('#ffffff');
   graphics.rect(x + size - 10, y + quarter + 2, 3, 3).fill('#ffffff');
+
+  if (lastHitAt && Date.now() - lastHitAt < FLASH_DURATION_MS) {
+    const flashAlpha = 0.6 * (1 - (Date.now() - lastHitAt) / FLASH_DURATION_MS);
+    graphics.rect(x, y - bounce, size, size).fill({ color: '#ffffff', alpha: flashAlpha });
+  }
 }
 
 function healthBarColor(percent) {
@@ -472,6 +536,30 @@ function drawHealthBar(graphics, px, py, health) {
   const percent = Math.max(0, Math.min(1, health / MAX_HEALTH));
   graphics.rect(x, y, width, height).fill({ color: '#2c2219' });
   if (percent > 0) graphics.rect(x, y, width * percent, height).fill({ color: healthBarColor(percent) });
+}
+
+function drawShield(graphics, px, py, time) {
+  const pulse = 1 + Math.sin(time * SHIELD_PULSE_SPEED) * 0.06;
+  const radius = SHIELD_RADIUS * pulse;
+  const segments = 6;
+  const centerX = px + TILE / 2;
+  const centerY = py + TILE / 2;
+
+  // Outer semi-transparent hexagon
+  graphics
+    .polygon(Array.from({ length: segments }, (_, i) => {
+      const angle = (Math.PI * 2 / segments) * i - Math.PI / 2;
+      return { x: centerX + Math.cos(angle) * radius, y: centerY + Math.sin(angle) * radius };
+    }))
+    .fill({ color: SHIELD_COLOR, alpha: SHIELD_ALPHA });
+
+  // Inner glow ring
+  graphics
+    .polygon(Array.from({ length: segments }, (_, i) => {
+      const angle = (Math.PI * 2 / segments) * i - Math.PI / 2;
+      return { x: centerX + Math.cos(angle) * radius * 0.85, y: centerY + Math.sin(angle) * radius * 0.85 };
+    }))
+    .stroke({ width: 1, color: SHIELD_COLOR, alpha: SHIELD_ALPHA * 2 });
 }
 
 function gameScreenVisible() {
@@ -500,7 +588,9 @@ function render(ticker) {
 
   if (screenActive) {
     updateParticles(deltaMs);
+    updateDeathEffects(deltaMs);
     drawParticles();
+    drawDeathEffects();
     updateLighting();
     updateMinimap();
   } else {
@@ -527,8 +617,12 @@ function render(ticker) {
   enemyLayer.clear();
   state.enemies.forEach(enemy => {
     if (enemy.roomRow !== state.me.roomRow || enemy.roomCol !== state.me.roomCol) return;
+    const prevHealth = enemyPrevHealth.get(enemy) ?? enemy.health;
+    if (enemy.health < prevHealth) enemy.lastHitAt = Date.now();
+    enemyPrevHealth.set(enemy, enemy.health);
+    if (prevHealth > 0 && enemy.health <= 0) spawnDeathEffect(enemy.renderX + TILE / 2, enemy.renderY + TILE / 2);
     const bounce = Math.abs(Math.sin((Date.now() / 150) + enemy.x)) * 3;
-    drawEnemySprite(enemyLayer, enemy.renderX, enemy.renderY, TILE, bounce);
+    drawEnemySprite(enemyLayer, enemy.renderX, enemy.renderY, TILE, bounce, enemy.lastHitAt, enemy.health);
   });
 
   playerLayer.clear();
@@ -544,12 +638,16 @@ function render(ticker) {
     const label = getLabel(id);
     label.visible = !!inRoom;
     if (!inRoom) return;
+    const prevHealth = peerPrevHealth.get(peer) ?? peer.health;
+    if (peer.health < prevHealth) peer.lastHitAt = Date.now();
+    peerPrevHealth.set(peer, peer.health);
+    if (prevHealth > 0 && peer.health <= 0) spawnDeathEffect(peer.x * TILE + TILE / 2, peer.y * TILE + TILE / 2);
     const x = peer.x * TILE;
     const y = peer.y * TILE;
     const bounce = Math.abs(Math.sin((Date.now() / 200) + id.length)) * 4;
-    drawHumanoid(playerLayer, x, y, TILE, bounce, peer.facing || 'down', colorForId(id), '#5c4033', peer.alive, peer.spectator);
+    drawHumanoid(playerLayer, x, y, TILE, bounce, peer.facing || 'down', colorForId(id), '#5c4033', peer.alive, peer.spectator, peer.lastHitAt);
     drawHealthBar(playerLayer, x, y, peer.health);
-    if (peer.shieldActiveUntil > Date.now()) playerLayer.circle(x + TILE / 2, y + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
+    if (peer.shieldActiveUntil > Date.now()) drawShield(playerLayer, x, y, Date.now());
     if (peer.weaponActiveUntil > Date.now()) playerLayer.circle(x + TILE / 2, y + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
     label.text = `${peer.name}${peer.spectator ? ' (spec)' : ''}`;
     label.position.set(x + TILE / 2, y - 10);
@@ -557,9 +655,13 @@ function render(ticker) {
 
   const now = Date.now();
   const myBounce = Math.abs(Math.sin(now / 200)) * 4;
-  drawHumanoid(playerLayer, state.me.renderX, state.me.renderY, TILE, myBounce, state.me.facing, colorForId(state.selfId), '#5c4033', state.me.alive, state.isSpectator);
+  const prevMyHealth = peerPrevHealth.get('self') ?? state.me.health;
+  if (state.me.health < prevMyHealth) state.me.lastHitAt = Date.now();
+  peerPrevHealth.set('self', state.me.health);
+  if (prevMyHealth > 0 && state.me.health <= 0) spawnDeathEffect(state.me.renderX + TILE / 2, state.me.renderY + TILE / 2);
+  drawHumanoid(playerLayer, state.me.renderX, state.me.renderY, TILE, myBounce, state.me.facing, colorForId(state.selfId), '#5c4033', state.me.alive, state.isSpectator, state.me.lastHitAt);
   drawHealthBar(playerLayer, state.me.renderX, state.me.renderY, state.me.health);
-  if (state.me.shieldActiveUntil > now) playerLayer.circle(state.me.renderX + TILE / 2, state.me.renderY + TILE / 2, TILE * 0.4).stroke({ width: 2, color: '#5ec8ff' });
+  if (state.me.shieldActiveUntil > now) drawShield(playerLayer, state.me.renderX, state.me.renderY, now);
   if (state.me.weaponActiveUntil > now) playerLayer.circle(state.me.renderX + TILE / 2, state.me.renderY + TILE / 2, TILE * 0.44).stroke({ width: 2, color: '#f87171' });
   const myLabel = getLabel(state.selfId);
   myLabel.visible = true;

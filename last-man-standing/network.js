@@ -2,6 +2,7 @@ import { joinRoom, selfId } from 'https://esm.sh/trystero@0.22.0/nostr';
 import {
   APP_ID,
   RELAY_URLS,
+  TURN_SERVERS,
   MAX_PLAYERS,
   GAME_STATE,
   GAME_OVER_DELAY_MS,
@@ -25,13 +26,28 @@ import {
   showPodiumScreen,
   refreshSpectatorBanner,
   updateLobby,
-  setSpectator
+  setSpectator,
+  applyEnemyDamage
 } from './game.js';
 
 const JOIN_GRACE_MS = 1500;
+const NO_PEERS_WARN_MS = 12000;
 
 function isLateArrival(startedAt) {
   return !!startedAt && !!state.joinedRoomAt && startedAt < state.joinedRoomAt - JOIN_GRACE_MS;
+}
+
+/**
+ * Tracks whether any peer has been seen since the last (re)connect, so the
+ * lobby can surface a "nobody here yet" state instead of looking like an
+ * empty room with no explanation. Reset on every connectToRoom call.
+ */
+export function notePeerSeen() {
+  state.lastPeerSeenAt = Date.now();
+}
+
+export function noPeersSeenForMs() {
+  return state.lastPeerSeenAt ? Date.now() - state.lastPeerSeenAt : Date.now() - state.joinedRoomAt;
 }
 
 function markLateArrival() {
@@ -105,13 +121,14 @@ export function connectToRoom(bucket) {
   state.pendingRejoin = false;
   state.joinedRoomAt = Date.now();
 
-  const room = joinRoom({ appId: APP_ID, relayUrls: RELAY_URLS }, roomNameFor(bucket));
+  const room = joinRoom({ appId: APP_ID, relayUrls: RELAY_URLS, rtcConfig: { iceServers: TURN_SERVERS } }, roomNameFor(bucket));
   state.room = room;
 
   const [sendAnnounce, getAnnounce] = room.makeAction('announce');
   const [sendPlayerState, getPlayerState] = room.makeAction('pstate');
   const [sendWorldState, getWorldState] = room.makeAction('wstate');
   const [sendPickup, getPickup] = room.makeAction('pickup');
+  const [sendEnemyHit, getEnemyHit] = room.makeAction('enemyHit');
   const [sendReject, getReject] = room.makeAction('reject');
   const [sendStartGame, getStartGame] = room.makeAction('start');
   const [sendAssign, getAssign] = room.makeAction('assign');
@@ -121,6 +138,7 @@ export function connectToRoom(bucket) {
   state.sendPlayerState = sendPlayerState;
   state.sendWorldState = sendWorldState;
   state.sendPickup = sendPickup;
+  state.sendEnemyHit = sendEnemyHit;
   state.sendStartGame = sendStartGame;
   state.sendAssign = sendAssign;
   state.sendGameState = sendGameState;
@@ -164,6 +182,7 @@ export function connectToRoom(bucket) {
   getAnnounce((data, peerId) => {
     // Peers police each other: a malformed or rejected name is simply ignored.
     if (!data || !validateNameFormat(data.name).ok) return;
+    notePeerSeen();
     state.peers[peerId] = state.peers[peerId] || {};
     if (state.peers[peerId].joinIndex === undefined) {
       state.peers[peerId].joinIndex = Object.keys(state.peers).filter(id => state.peers[id].joinIndex !== undefined).length;
@@ -206,11 +225,19 @@ export function connectToRoom(bucket) {
         return {
           ...enemy,
           _roomKey: roomKey,
+          health: enemy.health,
+          maxHealth: enemy.maxHealth,
+          lastHitAt: enemy.lastHitAt,
+          diedAt: enemy.diedAt,
           renderX: sameRoom ? previous.renderX : enemy.x * TILE,
           renderY: sameRoom ? previous.renderY : enemy.y * TILE
         };
       });
     }
+  });
+
+  getEnemyHit((data, peerId) => {
+    if (state.isHostFlag && data && data.enemyId) applyEnemyDamage(data.enemyId, 1);
   });
 
   getPickup((data, peerId) => {
