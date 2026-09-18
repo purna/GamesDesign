@@ -1,0 +1,92 @@
+/* Voxel Forge — custom styling layered on top of Tailwind utility classes.
+   Kept here rather than inline so rarity colors and effects can be reused
+   consistently by every screen (mining stage, inventory, marketplace, ledger). */
+
+::selection { background: #4FD1C5; color: #12131A; }
+
+body { background-image: radial-gradient(circle at 20% -10%, #1c2b33 0%, #12131A 45%); background-attachment: fixed; }
+
+/* ---- Logo mark: three stacked voxel faces, drawn in pure CSS ---- */
+.voxel-mark {
+  --s: 22px;
+  width: calc(var(--s) * 1.6);
+  height: calc(var(--s) * 1.6);
+  position: relative;
+  display: inline-block;
+}
+.voxel-mark--sm { --s: 16px; }
+.voxel-mark::before,
+.voxel-mark::after {
+  content: "";
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 3px;
+}
+.voxel-mark::before {
+  top: 0; left: 6px;
+  background: linear-gradient(135deg, #E8B84B, #C98F2A);
+  transform: skew(-6deg, -6deg);
+}
+.voxel-mark::after {
+  bottom: 0; left: 0;
+  background: linear-gradient(135deg, #4FD1C5, #2FA79B);
+  transform: skew(-6deg, -6deg);
+}
+
+/* ---- Rarity badges ---- */
+.rarity-badge {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  letter-spacing: 0.02em;
+}
+.rarity-common    { color: #8B9AA8; }
+.rarity-uncommon  { color: #4FD17A; }
+.rarity-rare      { color: #4FA8E8; }
+.rarity-epic      { color: #B07CE8; }
+.rarity-legendary { color: #E8B84B; }
+
+/* ---- Mining stage ---- */
+.stage-glow { box-shadow: inset 0 0 60px -20px var(--stage-glow-color, transparent); transition: box-shadow .3s; }
+#mined-flash.flash { animation: minedFlash 420ms ease-out; }
+@keyframes minedFlash {
+  0%   { background: radial-gradient(circle, rgba(232,184,75,0.55), transparent 70%); }
+  100% { background: transparent; }
+}
+
+/* ---- Tabs ---- */
+.tab-btn { color: #7C8194; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+.tab-btn:hover { color: #C9CCD6; }
+.tab-btn.active-tab { color: #EDEEF3; border-bottom-color: #4FD1C5; }
+
+/* ---- Inventory tiles ---- */
+.item-tile {
+  background: #12131A;
+  border: 1px solid #2E3142;
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  transition: border-color .15s, transform .1s;
+  text-align: center;
+}
+.item-tile:hover { border-color: #4FD1C5aa; transform: translateY(-1px); }
+.item-tile img { width: 100%; aspect-ratio: 1; image-rendering: pixelated; }
+.item-tile .count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7C8194; }
+
+.listing-tile.selected { border-color: #E8B84B; box-shadow: 0 0 0 1px #E8B84B inset; }
+
+/* ---- Ledger rows ---- */
+.ledger-row { display: grid; grid-template-columns: 28px 90px 1fr auto; gap: 10px; align-items: center; padding: 6px 8px; border-radius: 6px; }
+.ledger-row:nth-child(odd) { background: #ffffff05; }
+.ledger-row.tampered { background: rgba(244, 63, 94, 0.12); outline: 1px solid rgba(244,63,94,.4); }
+
+/* ---- Scrollbars ---- */
+* { scrollbar-width: thin; scrollbar-color: #2E3142 transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #2E3142; border-radius: 8px; }
+
+/* ---- Misc ---- */
+.hidden-important { display: none !important; }

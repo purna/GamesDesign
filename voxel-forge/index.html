@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voxel Forge — Blockchain Mining Classroom</title>
+
+<!-- Tailwind (layout utility classes) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#12131A',
+          surface: '#1B1D29',
+          surface2: '#23263380',
+          edge: '#2E3142',
+          gold: '#E8B84B',
+          teal: '#4FD1C5'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<!-- Type -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<!-- Firebase (optional — Google / GitHub login). See js/firebaseConfig.js -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-display bg-ink text-slate-100 min-h-screen">
+
+<!-- ============ LOGIN ============ -->
+<section id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-3 mb-3">
+        <span class="voxel-mark" aria-hidden="true"></span>
+        <h1 class="text-3xl font-semibold tracking-tight">Voxel Forge</h1>
+      </div>
+      <p class="text-slate-400 text-sm leading-relaxed">Mine voxel items, trade them with classmates,<br>and watch every step land on your own blockchain.</p>
+    </div>
+
+    <div class="bg-surface border border-edge rounded-2xl p-6 space-y-3">
+      <button id="btn-google" class="w-full flex items-center justify-center gap-3 bg-white text-ink font-medium py-2.5 rounded-lg hover:bg-slate-200 transition">
+        <i class="fa-brands fa-google"></i> Continue with Google
+      </button>
+      <button id="btn-github" class="w-full flex items-center justify-center gap-3 bg-[#24292F] text-white font-medium py-2.5 rounded-lg hover:bg-[#33383f] transition">
+        <i class="fa-brands fa-github"></i> Continue with GitHub
+      </button>
+      <div class="flex items-center gap-3 py-1 text-xs text-slate-500">
+        <span class="flex-1 h-px bg-edge"></span> or <span class="flex-1 h-px bg-edge"></span>
+      </div>
+      <div class="flex gap-2">
+        <input id="guest-name" type="text" maxlength="24" placeholder="Pick a name to play as guest"
+               class="flex-1 bg-ink border border-edge rounded-lg px-3 py-2.5 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal/60">
+        <button id="btn-guest" class="bg-teal/90 hover:bg-teal text-ink font-semibold px-4 rounded-lg transition">Play</button>
+      </div>
+      <p id="login-error" class="text-xs text-rose-400 hidden"></p>
+    </div>
+    <p class="text-center text-xs text-slate-600 mt-4">Guest data is saved to this browser. Google / GitHub only work once a teacher adds Firebase keys — see <span class="font-mono">js/firebaseConfig.js</span>.</p>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-edge bg-surface/70 backdrop-blur px-4 md:px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-2.5">
+      <span class="voxel-mark voxel-mark--sm" aria-hidden="true"></span>
+      <span class="font-semibold tracking-tight">Voxel Forge</span>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center bg-ink border border-edge rounded-lg overflow-hidden">
+        <input id="classroom-code" type="text" maxlength="12" placeholder="classroom code"
+               class="bg-transparent px-3 py-1.5 text-sm w-32 placeholder-slate-500 focus:outline-none font-mono uppercase">
+        <button id="btn-join-classroom" class="px-3 py-1.5 text-sm bg-edge hover:bg-edge/70 transition">Join</button>
+      </div>
+      <span id="peer-status" class="text-xs text-slate-500 flex items-center gap-1.5">
+        <i class="fa-solid fa-circle text-[6px] text-slate-600"></i> not connected
+      </span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="btn-how" title="How this works" class="w-8 h-8 rounded-full border border-edge text-slate-400 hover:text-teal hover:border-teal transition flex items-center justify-center">
+        <i class="fa-solid fa-question text-xs"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span id="user-avatar" class="w-8 h-8 rounded-full bg-edge flex items-center justify-center text-xs overflow-hidden"></span>
+        <span id="user-name" class="text-sm font-medium hidden sm:block"></span>
+      </div>
+      <button id="btn-signout" title="Sign out" class="text-slate-500 hover:text-rose-400 transition">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-4 md:gap-6 p-4 md:p-6 max-w-7xl mx-auto w-full">
+
+    <!-- Mining stage -->
+    <section class="bg-surface border border-edge rounded-2xl p-5 flex flex-col gap-4 h-fit">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold text-sm text-slate-300 uppercase tracking-wide">Mining stage</h2>
+        <span id="stage-rarity-badge" class="rarity-badge"></span>
+      </div>
+
+      <div class="relative aspect-square rounded-xl bg-ink border border-edge overflow-hidden flex items-center justify-center stage-glow">
+        <canvas id="mining-canvas" width="480" height="480" class="w-full h-full cursor-pointer active:scale-[0.98] transition-transform"></canvas>
+        <div id="mined-flash" class="absolute inset-0 pointer-events-none"></div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between text-sm mb-1.5">
+          <span id="stage-item-name" class="font-medium">—</span>
+          <span id="stage-clicks" class="text-slate-500 font-mono text-xs">0 / 0</span>
+        </div>
+        <div class="h-2.5 rounded-full bg-ink border border-edge overflow-hidden">
+          <div id="stage-progress" class="h-full bg-teal transition-[width] duration-150" style="width:0%"></div>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-500 leading-relaxed">Click the block to chip away at it. Rarer blocks take more clicks — finish one and it's mined straight onto your chain.</p>
+
+      <div class="flex gap-2">
+        <button id="btn-reroll" class="flex-1 bg-ink border border-edge hover:border-teal/60 rounded-lg py-2 text-sm transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-shuffle text-xs"></i> Random block
+        </button>
+        <select id="item-picker" class="flex-1 bg-ink border border-edge rounded-lg px-2 text-sm focus:outline-none"></select>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+        <div class="bg-ink border border-edge rounded-lg py-2">
+          <div id="stat-mined" class="font-mono text-lg font-semibold">0</div>
+          <div class="text-[10px] text-slate-500 uppercase tracking-wide">Mined</div>
+        </div>
+        <div class="bg-ink border border-edge rounded-lg py-2">
+          <div id="stat-traded" class="font-mono text-lg font-semibold">0</div>
+          <div class="text-[10px] text-slate-500 uppercase tracking-wide">Traded</div>
+        </div>
+        <div class="bg-ink border border-edge rounded-lg py-2">
+          <div id="stat-blocks" class="font-mono text-lg font-semibold">0</div>
+          <div class="text-[10px] text-slate-500 uppercase tracking-wide">Chain length</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <section class="bg-surface border border-edge rounded-2xl flex flex-col min-h-[560px] overflow-hidden">
+      <nav class="flex border-b border-edge text-sm">
+        <button data-tab="inventory" class="tab-btn active-tab flex-1 py-3 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-boxes-stacked text-xs"></i> Inventory
+        </button>
+        <button data-tab="marketplace" class="tab-btn flex-1 py-3 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-left text-xs"></i> Marketplace
+        </button>
+        <button data-tab="ledger" class="tab-btn flex-1 py-3 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-link text-xs"></i> Ledger
+        </button>
+      </nav>
+
+      <!-- Inventory -->
+      <div id="tab-inventory" class="tab-pane p-5 overflow-y-auto flex-1">
+        <div id="inventory-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
+        <p id="inventory-empty" class="text-sm text-slate-500 text-center py-10 hidden">Nothing mined yet — click the block on the left to start.</p>
+      </div>
+
+      <!-- Marketplace -->
+      <div id="tab-marketplace" class="tab-pane p-5 overflow-y-auto flex-1 hidden space-y-6">
+        <div id="marketplace-disconnected" class="text-sm text-slate-500 text-center py-10">
+          Join a classroom code above to see who else is online and trade with them.
+        </div>
+        <div id="marketplace-connected" class="hidden space-y-6">
+
+          <div>
+            <h3 class="text-sm font-semibold text-slate-300 mb-2">List items for sale</h3>
+            <div id="listing-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold text-slate-300 mb-2">Incoming offers</h3>
+            <div id="incoming-offers" class="space-y-2">
+              <p class="text-xs text-slate-500">No offers yet.</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold text-slate-300 mb-2">Classmates online</h3>
+            <div id="peers-list" class="space-y-2">
+              <p class="text-xs text-slate-500">Nobody else is here yet — share the classroom code.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ledger -->
+      <div id="tab-ledger" class="tab-pane p-5 overflow-y-auto flex-1 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-slate-300">Your blockchain</h3>
+          <div class="flex gap-2">
+            <button id="btn-tamper-demo" class="text-xs px-3 py-1.5 rounded-lg border border-edge hover:border-rose-400/60 hover:text-rose-400 transition">
+              <i class="fa-solid fa-bug"></i> Simulate tampering
+            </button>
+            <button id="btn-verify" class="text-xs px-3 py-1.5 rounded-lg border border-edge hover:border-teal/60 hover:text-teal transition">
+              <i class="fa-solid fa-shield-halved"></i> Verify chain
+            </button>
+          </div>
+        </div>
+        <p id="verify-result" class="text-xs mb-3 hidden rounded-lg px-3 py-2"></p>
+        <div id="ledger-list" class="space-y-1.5 font-mono text-xs"></div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- Item detail modal -->
+<div id="item-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-40">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-xs text-center">
+    <canvas id="modal-canvas" width="360" height="360" class="w-full aspect-square rounded-xl bg-ink border border-edge mb-4"></canvas>
+    <h3 id="modal-item-name" class="font-semibold mb-1"></h3>
+    <span id="modal-item-rarity" class="rarity-badge inline-block mb-3"></span>
+    <p id="modal-item-count" class="text-sm text-slate-400 mb-4"></p>
+    <button id="modal-close" class="w-full bg-ink border border-edge rounded-lg py-2 text-sm hover:border-teal/60 transition">Close</button>
+  </div>
+</div>
+
+<!-- Trade offer modal -->
+<div id="trade-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-40">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
+    <h3 class="font-semibold mb-4">Propose a trade</h3>
+    <label class="text-xs text-slate-400 block mb-1">You give</label>
+    <select id="trade-give" class="w-full bg-ink border border-edge rounded-lg px-3 py-2 text-sm mb-3"></select>
+    <label class="text-xs text-slate-400 block mb-1">You want from them</label>
+    <select id="trade-want" class="w-full bg-ink border border-edge rounded-lg px-3 py-2 text-sm mb-5"></select>
+    <div class="flex gap-2">
+      <button id="trade-cancel" class="flex-1 bg-ink border border-edge rounded-lg py-2 text-sm">Cancel</button>
+      <button id="trade-send" class="flex-1 bg-teal text-ink font-semibold rounded-lg py-2 text-sm">Send offer</button>
+    </div>
+  </div>
+</div>
+
+<!-- How it works modal -->
+<div id="how-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-40">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto">
+    <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-link text-teal"></i> How this maps to a real blockchain</h3>
+    <dl class="space-y-4 text-sm text-slate-300">
+      <div><dt class="font-medium text-slate-100">Mining</dt><dd class="text-slate-400">Clicking the block is "proof of work" — real miners search for a lucky number (a nonce) that makes their block's hash start with some pattern. Yours does that automatically once you finish clicking; the clicking is the work.</dd></div>
+      <div><dt class="font-medium text-slate-100">The ledger</dt><dd class="text-slate-400">Every block you mine or trade is stored on your Ledger tab, each one linked to the one before it by its hash. Change any old block and the chain after it stops matching — try the "Simulate tampering" button to see it get caught.</dd></div>
+      <div><dt class="font-medium text-slate-100">Trading</dt><dd class="text-slate-400">A trade is peer-to-peer: your browser talks directly to a classmate's browser over the classroom code, no server in the middle. Each of you only ever writes to your own chain.</dd></div>
+      <div><dt class="font-medium text-slate-100">What's simplified</dt><dd class="text-slate-400">A real blockchain is shared and agreed on by everyone (consensus); here each student keeps their own chain, which is enough to teach hashing, linking, and tamper-evidence without needing a live server.</dd></div>
+    </dl>
+    <button id="how-close" class="w-full bg-ink border border-edge rounded-lg py-2 text-sm mt-5 hover:border-teal/60 transition">Got it</button>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
