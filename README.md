@@ -13,6 +13,10 @@
 
 [voxel-forge](https://purna.github.io/GamesDesign/voxel-forge/)
 
+Copyright & Ethics
+
+[copy-clash](https://purna.github.io/GamesDesign/copy-clash.html)
+
 
 ## Induction
 
