@@ -1014,3 +1014,5 @@ html[data-theme="light"] {
   color: var(--ink);
 }
 .preview-rolefit.key b { color: var(--gold); }
+
+.card.invalid-card { opacity: 0.35; border-style: dashed; }

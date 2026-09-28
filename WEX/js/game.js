@@ -215,6 +215,10 @@ function setupResumeButton() {
   resumeBtn.textContent = `Continue race for ${saved.job.title} \u2192`;
   resumeBtn.addEventListener('click', () => {
     state = saved;
+    state.deck = cleanPile(state.deck);
+    state.discard = cleanPile(state.discard);
+    state.market = cleanPile(state.market);
+    [state.player, ...(state.rivals || [])].forEach((agent) => { agent.hand = cleanPile(agent.hand); });
     state.player.returnsThisRound = state.player.returnsThisRound || 0;
     state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
     state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
@@ -354,8 +358,25 @@ function buildDeck() {
   return shuffle(pool).map(instantiate);
 }
 
+function isValidCard(card) {
+  return !!(card && typeof card === 'object'
+    && typeof card.id === 'string' && typeof card.name === 'string'
+    && typeof card.category === 'string' && typeof card.set === 'string');
+}
+
 function instantiate(tmpl) {
   return Object.assign({}, tmpl, { uid: 'c' + uidCounter++ });
+}
+
+// Strips malformed entries out of a pile of cards. A bare `{uid}` (no id/name/
+// category/set) otherwise renders as an "undefined" card and throws when previewed.
+function cleanPile(pile) {
+  if (!Array.isArray(pile)) return [];
+  return pile.filter((card) => {
+    if (isValidCard(card)) return true;
+    addLog('A malformed card was removed from the pile.');
+    return false;
+  });
 }
 
 function draw(n) {
@@ -372,7 +393,8 @@ function draw(n) {
         addLog('A fresh supply of opportunity cards has arrived.');
       }
     }
-    out.push(state.deck.pop());
+    const next = state.deck.pop();
+    if (isValidCard(next)) out.push(next);
   }
   return out;
 }
@@ -402,8 +424,8 @@ function refillMarket() {
 function refreshMarketForRound() {
   const rotatedOut = state.market.splice(0, Math.min(MARKET_REFRESH_PER_ROUND, state.market.length));
   const freshCards = draw(rotatedOut.length);
-  state.market.push(...freshCards);
-  state.discard.push(...rotatedOut);
+  state.market.push(...freshCards.filter(isValidCard));
+  state.discard.push(...rotatedOut.filter(isValidCard));
   refillMarket();
   addLog(`The community market refreshed with ${freshCards.length} new card(s).`);
 }
@@ -1287,7 +1309,8 @@ function isRequiredSkillCard(card) {
 }
 
 function cardSetClass(card) {
-  if (!card || !card.set) return 'wildcard-card';
+  if (!isValidCard(card)) return 'invalid-card';
+  if (!card.set) return 'wildcard-card';
   if (card.category === 'Wildcard') {
     if (card.set === 'any') return 'wildcard-card';
     const id = DATA.sets.some((set) => set.id === card.set) ? card.set : 'unassigned';
@@ -1300,6 +1323,14 @@ function cardSetClass(card) {
 
 function cardEl(c, opts) {
   opts = opts || {};
+  if (!isValidCard(c)) {
+    // Return a real element: callers attach listeners to whatever cardEl returns.
+    const broken = document.createElement('div');
+    broken.className = 'card invalid-card';
+    broken.innerHTML = '<div class="card-art">\u2753</div><div class="card-name">Damaged card</div>'
+      + '<div class="card-type">removed from play</div>';
+    return broken;
+  }
   const div = document.createElement('div');
   div.className = 'card cat-' + CAT_COLOR[c.category] + ' ' + cardSetClass(c) + (isRequiredSkillCard(c) ? ' card-key-skill' : '');
   if (opts.selected) div.classList.add('selected');
@@ -1328,6 +1359,7 @@ function cardEl(c, opts) {
 
 function openPreview(where, card) {
   if (!el.cardPreview) return;
+  if (!isValidCard(card)) return toast('That card is damaged and cannot be opened.');
   previewState = { where, card };
   const cat = card.category;
   const colorClass = cardSetClass(card);
