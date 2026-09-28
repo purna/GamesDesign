@@ -1,0 +1,13 @@
+{
+  "id": "action-check-player-wellbeing",
+  "name": "Check Player Wellbeing",
+  "type": "Action",
+  "category": "Action",
+  "description": "Check in on rest, workload and mood before a big event.",
+  "flavor": "Burnt-out players don't perform.",
+  "rarity": "Uncommon",
+  "art": "🌤️",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Teamwork"
+}

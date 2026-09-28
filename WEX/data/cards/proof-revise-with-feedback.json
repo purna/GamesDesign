@@ -1,0 +1,13 @@
+{
+  "id": "proof-revise-with-feedback",
+  "name": "Revise With Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Use the partner's feedback to improve your work before it goes in your portfolio.",
+  "flavor": "The revision is where the real learning happens.",
+  "rarity": "Common",
+  "art": "🔁",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Analysis"
+}

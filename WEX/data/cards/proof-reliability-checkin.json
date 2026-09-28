@@ -1,0 +1,13 @@
+{
+  "id": "proof-reliability-checkin",
+  "name": "Reliability Check-In",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Explain how you'll confirm your shift and contact the organiser if plans change.",
+  "flavor": "Reliability is a skill, not a personality trait.",
+  "rarity": "Common",
+  "art": "✅",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Reliability"
+}

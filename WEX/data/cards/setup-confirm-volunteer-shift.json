@@ -1,0 +1,12 @@
+{
+  "id": "setup-confirm-volunteer-shift",
+  "name": "Confirm Volunteer Shift",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Confirm the organiser, event date, location, responsibilities, start/finish times and who supervises you.",
+  "flavor": "A shift no one confirmed is a shift that falls through.",
+  "rarity": "Common",
+  "art": "📅",
+  "set": "volunteering",
+  "value": 1
+}

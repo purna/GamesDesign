@@ -1,0 +1,13 @@
+{
+  "id": "proof-showcase-partner-work",
+  "name": "Showcase Partner Work",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Document the deliverables produced during the partnership, highlighting your specific contribution and the skills applied.",
+  "flavor": "The best partnerships leave a paper trail of success.",
+  "rarity": "Common",
+  "art": "📊",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Documentation"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "wild-careers-team",
+  "name": "Wild Card: Careers Team",
+  "type": "Wildcard",
+  "category": "Wildcard",
+  "description": "The Careers & Employability team steps in. Use this card in place of any Setup, Action or Proof card for a Block Placement.",
+  "flavor": "They've seen every version of this problem before.",
+  "rarity": "Rare",
+  "art": "🧭",
+  "set": "placement",
+  "value": 1
+}

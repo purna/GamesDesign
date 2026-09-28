@@ -1,0 +1,25 @@
+{
+  "id": "junior-qa-tester",
+  "title": "Junior QA Tester",
+  "category": "Game industry",
+  "description": "Find bugs and help make sure a game works the way it should.",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Problem solving"
+  },
+  "recommendedSets": [
+    "placement",
+    "brief"
+  ],
+  "flavor": "Every shipped game was once full of bugs someone found first.",
+  "art": "🐛",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 3,
+    "technicalSkill": 8,
+    "creativity": 3,
+    "reliability": 7
+  }
+}

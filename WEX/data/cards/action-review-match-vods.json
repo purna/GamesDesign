@@ -1,0 +1,13 @@
+{
+  "id": "action-review-match-vods",
+  "name": "Review Match VODs",
+  "type": "Action",
+  "category": "Action",
+  "description": "Watch back recent matches and note patterns worth acting on.",
+  "flavor": "The replay never lies.",
+  "rarity": "Uncommon",
+  "art": "📼",
+  "set": "placement",
+  "value": 1,
+  "skill": "Analysis"
+}

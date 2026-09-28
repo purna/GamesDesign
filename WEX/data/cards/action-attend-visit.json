@@ -1,0 +1,12 @@
+{
+  "id": "action-attend-visit",
+  "name": "Attend Employer Visit",
+  "type": "Action",
+  "category": "Action",
+  "description": "Ask prepared questions, observe workflows and note one thing you learned.",
+  "flavor": "You're not a tourist. You're scouting your future.",
+  "rarity": "Common",
+  "art": "👀",
+  "set": "visit",
+  "value": 1
+}

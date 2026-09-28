@@ -1,0 +1,12 @@
+{
+  "id": "wild-card-evidence-boost",
+  "name": "Wild Card: Evidence Boost",
+  "type": "Wildcard",
+  "category": "Wildcard",
+  "description": "A second pair of eyes strengthens your evidence. Use this card in place of a Proof card for a Block Placement.",
+  "flavor": "Evidence worth keeping is evidence worth boosting.",
+  "rarity": "Uncommon",
+  "art": "⭐",
+  "set": "placement",
+  "value": 2
+}

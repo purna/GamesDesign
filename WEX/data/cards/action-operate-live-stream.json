@@ -1,0 +1,13 @@
+{
+  "id": "action-operate-live-stream",
+  "name": "Operate the Live Stream",
+  "type": "Action",
+  "category": "Action",
+  "description": "Run camera, graphics or audio during a live broadcast.",
+  "flavor": "The stream is the show — and the show must go on.",
+  "rarity": "Uncommon",
+  "art": "📡",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

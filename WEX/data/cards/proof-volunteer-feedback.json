@@ -1,0 +1,13 @@
+{
+  "id": "proof-volunteer-feedback",
+  "name": "Volunteer Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Collect and record feedback from the event organiser or fellow volunteers about your contribution.",
+  "flavor": "A thank-you note is worth more than a certificate.",
+  "rarity": "Common",
+  "art": "💬",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Teamwork"
+}

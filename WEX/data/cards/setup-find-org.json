@@ -1,0 +1,12 @@
+{
+  "id": "setup-find-org",
+  "name": "Find an Organisation",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Identify a studio, team, publisher or community that matches your career goal.",
+  "flavor": "Every journey starts with a destination in mind.",
+  "rarity": "Common",
+  "art": "🔍",
+  "set": "any",
+  "value": 1
+}

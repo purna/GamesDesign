@@ -1,0 +1,12 @@
+{
+  "id": "action-finish-assignment",
+  "name": "Finish Skills Assignment",
+  "type": "Action",
+  "category": "Action",
+  "description": "Complete a course assignment that demonstrates subject knowledge relevant to your role.",
+  "flavor": "Grades open doors. Skills keep them open.",
+  "rarity": "Common",
+  "art": "📚",
+  "set": "any",
+  "value": 1
+}

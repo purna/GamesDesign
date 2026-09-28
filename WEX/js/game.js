@@ -1,0 +1,1399 @@
+/**
+ * game.js — Race to the Role: Gaming Careers Card Game
+ * A set-collection card game: draw, return, and bank Setup+Action+Proof
+ * card sets into completed opportunities, race three AI rivals to be the
+ * first eligible candidate to apply for the target job.
+ */
+
+/* ===== Base app namespace (shared with settings.js, accessibility.js) ===== */
+if (!window.app) {
+  window.app = { state: {}, el: {}, config: {} };
+}
+app.state.soundEnabled = true;
+app.state.animationsEnabled = true;
+app.state.autoDrawEnabled = true;
+
+/* ===== RTTR: localStorage save system ===== */
+window.RTTR = {
+  KEY: 'rttr-game-save',
+  SETTINGS_KEY: 'rttr-settings',
+  saveGame(s) { try { localStorage.setItem(this.KEY, JSON.stringify(s)); } catch (e) {} },
+  loadGame() { try { const v = localStorage.getItem(this.KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  clearGame() { try { localStorage.removeItem(this.KEY); } catch (e) {} },
+  getSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem(this.SETTINGS_KEY) || '{}');
+      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true };
+    } catch (e) { return { sound: true, animations: true, autoDraw: true }; }
+  },
+  saveSettings(s) { try { localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(s)); } catch (e) {} },
+  resetAll() { try { localStorage.removeItem(this.KEY); localStorage.removeItem(this.SETTINGS_KEY); } catch (e) {} },
+};
+
+const $ = (id) => document.getElementById(id);
+
+const el = {
+  jobSelect: $('jobSelect'), startBtn: $('startBtn'),
+  helpBtn: $('helpBtn'),
+  setup: $('setup'),
+  learnScreen: $('learnScreen'), learnStepNum: $('learnStepNum'), learnContent: $('learnContent'),
+  learnPrevBtn: $('learnPrevBtn'), learnNextBtn: $('learnNextBtn'),
+  game: $('game'),
+  jobTitle: $('jobTitle'), jobDesc: $('jobDesc'), jobNeeds: $('jobNeeds'),
+  guide: $('guide'),
+  turnText: $('turnText'), actionInfo: $('actionInfo'),
+  rivals: $('rivals'),
+  market: $('market'),
+  hand: $('hand'), handCount: $('handCount'),
+  setBuilderStatus: $('setBuilderStatus'),
+  returnBtn: $('returnBtn'), returnZone: $('returnZone'), bankBtn: $('bankBtn'),
+  applyBtn: $('applyBtn'), endBtn: $('endBtn'),
+  sets: $('sets'),
+  bankedSets: $('bankedSets'), bankedSetProgress: $('bankedSetProgress'),
+  playerName: $('playerName'), cvStats: $('cvStats'), log: $('log'),
+  toast: $('toast'),
+  modalBack: $('modal'), modalBody: $('modalBody'),
+  timerDisplay: $('timerDisplay'), timer: $('timer'),
+  signInBtn: $('signInBtn'), signOutBtn: $('signOutBtn'),
+  cardPreview: $('cardPreview'),
+};
+
+app.el = el;
+app.el.helpBtn = el.helpBtn;
+app.el.settingsBtn = $('settingsBtn');
+app.el.settingsModal = $('settingsModal');
+app.el.closeSettings = $('closeSettings');
+app.el.cancelSettings = $('cancelSettings');
+app.el.saveSettings = $('saveSettings');
+app.el.resetSettings = $('resetSettings');
+app.el.soundEnabled = $('soundEnabled');
+app.el.animationsEnabled = $('animationsEnabled');
+app.el.autoDrawEnabled = $('autoDrawEnabled');
+app.el.a11yBtn = $('a11yBtn');
+app.el.themeToggle = $('themeToggle');
+
+const CATS = ['Setup', 'Action', 'Proof', 'Impact'];
+const CAT_COLOR = { Setup: 'cyan', Action: 'pink', Proof: 'gold', Impact: 'orange', Wildcard: 'lime' };
+const MARKET_SIZE = 6;
+const MARKET_REFRESH_PER_ROUND = 2;
+const START_HAND = 4;
+const PLAYER_START_HAND = 6;
+const REQUIRED_SET_VARIETY = 2;
+const START_ENERGY = 3;
+const ACTIONS_PER_TURN = 2;
+const HAND_CAP = 6;
+const MAX_MARKET_PICKS_PER_ROUND = 2;
+const MAX_RETURNS_PER_ROUND = 2;
+const TURN_SECONDS = 300;
+
+const RIVAL_SEEDS = [
+  { name: 'PixelPilot', strategy: 'brief', blurb: 'Portfolio builder', plan: 'Targets live briefs and portfolio proof.' },
+  { name: 'GG_Grinder', strategy: 'placement', blurb: 'Placement chaser', plan: 'Prioritises placements and practical experience.' },
+  { name: 'Questline', strategy: 'balanced', blurb: 'All-rounder', plan: 'Builds a mix of experience, skills and evidence.' },
+];
+
+let DATA = null;      // { roles, cards, sets }
+let state = null;     // live game state
+let uidCounter = 1;
+let selectedHandUids = new Set();
+let turnTimerHandle = null;
+let previewState = null; // { where: 'market'|'hand', card, uid }
+
+/* ============================== Data load ============================== */
+
+async function loadData() {
+  const res = await fetch('data/game-data.json');
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+/* ============================== Helpers ================================ */
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function setName(id) {
+  const s = DATA.sets.find((x) => x.id === id);
+  return s ? s.name : id;
+}
+
+function setMeta(id) {
+  return DATA.sets.find((x) => x.id === id);
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function toast(msg) {
+  if (!el.toast) return;
+  el.toast.textContent = msg;
+  el.toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.toast.classList.remove('show'), 2600);
+}
+
+function addLog(msg) {
+  state.log.unshift(msg);
+  if (state.log.length > 60) state.log.length = 60;
+  renderLog();
+}
+
+function persist() {
+  if (window.RTTR && state) window.RTTR.saveGame(state);
+}
+
+/* ============================== Deck ==================================== */
+
+function buildDeck() {
+  const pool = [];
+  const BASE_COPIES = 4;
+  // Several routes have multiple flavour cards for the same category (e.g. 4 different
+  // Action cards for "volunteering" vs only 1 Setup and 1 Proof card). Giving every
+  // template a flat 4 copies would flood the deck with that category and make the other
+  // required categories very rare draws. Instead, split BASE_COPIES evenly across all
+  // templates that share the same (route, category), so each route's total supply of
+  // Setup/Action/Proof/Impact cards stays roughly balanced regardless of how many
+  // distinct card names exist for that category.
+  const groupCounts = {};
+  DATA.cards.forEach((tmpl) => {
+    if (tmpl.category === 'Wildcard') return;
+    const key = tmpl.set + '|' + tmpl.category;
+    groupCounts[key] = (groupCounts[key] || 0) + 1;
+  });
+  DATA.cards.forEach((tmpl) => {
+    let copies;
+    if (tmpl.category === 'Wildcard') {
+      copies = 2;
+    } else {
+      const key = tmpl.set + '|' + tmpl.category;
+      copies = Math.max(1, Math.round(BASE_COPIES / groupCounts[key]));
+    }
+    for (let i = 0; i < copies; i++) pool.push(tmpl);
+  });
+  return shuffle(pool).map(instantiate);
+}
+
+function instantiate(tmpl) {
+  return Object.assign({}, tmpl, { uid: 'c' + uidCounter++ });
+}
+
+function draw(n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    if (state.deck.length === 0) {
+      if (state.discard.length > 0) {
+        state.deck = shuffle(state.discard);
+        state.discard = [];
+        addLog('The deck reshuffled from the discard pile.');
+      } else {
+        state.deck = buildDeck();
+        if (state.deck.length === 0) break;
+        addLog('A fresh supply of opportunity cards has arrived.');
+      }
+    }
+    out.push(state.deck.pop());
+  }
+  return out;
+}
+
+function refillMarket() {
+  while (state.market.length < MARKET_SIZE) {
+    const [c] = draw(1);
+    if (!c) break;
+    state.market.push(c);
+  }
+}
+
+function refreshMarketForRound() {
+  const rotatedOut = state.market.splice(0, Math.min(MARKET_REFRESH_PER_ROUND, state.market.length));
+  const freshCards = draw(rotatedOut.length);
+  state.market.push(...freshCards);
+  state.discard.push(...rotatedOut);
+  refillMarket();
+  addLog(`The community market refreshed with ${freshCards.length} new card(s).`);
+}
+
+/* ============================== Agents ================================== */
+
+function newAgent(name, strategy) {
+  return {
+    name, strategy, isPlayer: strategy == null,
+    energy: START_ENERGY, hand: [], banked: [], skills: [],
+    evidence: 0, reliability: 0, references: 0, distinctions: 0,
+    applied: false, actionPenalty: 0,
+    marketPicksThisRound: 0, returnsThisRound: 0,
+  };
+}
+
+function agentCV(agent) {
+  return { experience: agent.banked.length, evidence: agent.evidence, skills: agent.skills };
+}
+
+function minimumExperienceForJob(job) {
+  return Math.max(REQUIRED_SET_VARIETY, Number(job.requirements.experience) || 1);
+}
+
+function requiredCategories(setId) {
+  const meta = setMeta(setId);
+  return meta && Array.isArray(meta.requiredCategories) ? meta.requiredCategories : ['Setup', 'Action', 'Proof'];
+}
+
+function selectedRoute(cards) {
+  const routes = new Set(cards.filter((card) => card.category !== 'Wildcard' && card.set !== 'any').map((card) => card.set));
+  return routes.size === 1 ? [...routes][0] : null;
+}
+
+function jobSetOptions(job) {
+  const recommended = ((job && job.recommendedSets) || []).map((id) => ({ volunteer: 'volunteering', partner: 'partnership' }[id] || id));
+  const available = recommended.filter((id) => DATA.sets.some((set) => set.id === id));
+  return new Set(available.length ? available : DATA.sets.map((set) => set.id));
+}
+
+function completedSetTypes(agent) {
+  return new Set(agent.banked.map((entry) => entry.set));
+}
+
+function completedJobSetTypes(agent, job) {
+  const relevant = jobSetOptions(job);
+  return new Set(agent.banked.map((entry) => entry.set).filter((id) => relevant.has(id)));
+}
+
+function eligible(agent, job) {
+  const cv = agentCV(agent);
+  return cv.experience >= minimumExperienceForJob(job)
+    && completedJobSetTypes(agent, job).size >= REQUIRED_SET_VARIETY
+    && cv.evidence >= job.requirements.evidence
+    && agent.skills.includes(job.requirements.skill);
+}
+
+/* ============================== New game ================================ */
+
+function populateJobs() {
+  const byCat = {};
+  DATA.roles.forEach((r) => {
+    (byCat[r.category] = byCat[r.category] || []).push(r);
+  });
+  el.jobSelect.innerHTML = '';
+  Object.keys(byCat).forEach((cat) => {
+    const group = document.createElement('optgroup');
+    group.label = cat;
+    byCat[cat].forEach((r) => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = `${r.art} ${r.title}`;
+      group.appendChild(opt);
+    });
+    el.jobSelect.appendChild(group);
+  });
+}
+
+function newGame(jobId) {
+  const job = DATA.roles.find((r) => r.id === jobId) || DATA.roles[0];
+  state = {
+    job,
+    round: 1,
+    actionsLeft: ACTIONS_PER_TURN,
+    winner: null,
+    log: [],
+    deck: [],
+    discard: [],
+    market: [],
+    player: newAgent('You', null),
+    rivals: RIVAL_SEEDS.map((r) => newAgent(r.name, r.strategy)),
+  };
+  state.deck = buildDeck();
+  refillMarket();
+  state.player.hand = draw(PLAYER_START_HAND);
+  state.rivals.forEach((r) => { r.hand = draw(START_HAND); });
+  selectedHandUids = new Set();
+  addLog(`You start your race for ${job.title}.`);
+  showGuide(`START HERE: choose one colour route and collect its listed card types. Employer Visit needs 2 cards; Volunteering and Live Project Brief need 3; Block Placement and Industry Partnership need 4. There are several examples to choose from. Select only one card of each required type, then bank the set to add CV experience, evidence and a skill.`);
+  el.setup.classList.add('hidden');
+  el.learnScreen.classList.add('hidden');
+  el.game.classList.remove('hidden');
+  startTurnTimer();
+  render();
+  persist();
+}
+
+/* ============================== Banking logic ============================ */
+
+function findBank(cards, forcedSet, allowSubset = false) {
+  // cards: array of card objects (with category/set/uid). Returns
+  // { ok, targetSet, used:[card,...] } or { ok:false, msg }
+  const nonWild = cards.filter((c) => c.category !== 'Wildcard');
+  const setIds = new Set(nonWild.map((c) => c.set).filter((setId) => setId !== 'any'));
+  if (forcedSet) setIds.add(forcedSet);
+  if (setIds.size > 1) return { ok: false, msg: "Those cards belong to different opportunities." };
+  const targetSet = setIds.size ? [...setIds][0] : null;
+  if (!targetSet) return { ok: false, msg: "Include at least one card from an experience route so I know which group you're banking." };
+  const meta = setMeta(targetSet);
+  const required = meta && Array.isArray(meta.requiredCategories) ? meta.requiredCategories : ['Setup', 'Action', 'Proof'];
+  if (cards.length < required.length || (!allowSubset && cards.length !== required.length)) return { ok: false, msg: `${setName(targetSet)} needs exactly ${required.length} cards: ${required.join(', ')}.` };
+  const groups = [];
+  function choose(start, chosen) {
+    if (chosen.length === required.length) { groups.push(chosen); return; }
+    for (let i = start; i < cards.length; i++) choose(i + 1, [...chosen, cards[i]]);
+  }
+  if (allowSubset && cards.length > required.length) choose(0, []);
+  else groups.push(cards);
+  let bestMissing = null;
+  for (const group of groups) {
+    const normal = group.filter((card) => card.category !== 'Wildcard');
+    const categories = normal.map((card) => card.category);
+    if (new Set(categories).size !== categories.length || new Set(group.map((card) => card.id)).size !== group.length) continue;
+    const used = [];
+    const remaining = group.slice();
+    const missing = [];
+    for (const cat of required) {
+      const idx = remaining.findIndex((c) => c.category === cat && (c.set === targetSet || c.set === 'any'));
+      const wildcardIdx = remaining.findIndex((c) => c.category === 'Wildcard' && (c.set === targetSet || c.set === 'any'));
+      const chosen = idx !== -1 ? idx : wildcardIdx;
+      if (chosen === -1) { missing.push(cat); continue; }
+      used.push(remaining[chosen]);
+      remaining.splice(chosen, 1);
+    }
+    if (!missing.length) return { ok: true, targetSet, used };
+    if (!bestMissing || missing.length < bestMissing.length) bestMissing = missing;
+  }
+  if (bestMissing && bestMissing.length) {
+    const haveText = nonWild.length ? nonWild.map((c) => c.category).join(', ') : 'no route cards yet';
+    const missingText = bestMissing.length === 1
+      ? `a ${bestMissing[0]} card`
+      : `${bestMissing.length} cards (${bestMissing.join(', ')})`;
+    return { ok: false, msg: `Missing ${missingText} for ${setName(targetSet)}. You have: ${haveText}.` };
+  }
+  return { ok: false, msg: `Missing a required card type for ${setName(targetSet)}. Use one each: ${required.join(', ')}.` };
+}
+
+function bankSet(agent, targetSet, used) {
+  const meta = setMeta(targetSet);
+  used.forEach((c) => {
+    agent.hand = agent.hand.filter((h) => h.uid !== c.uid);
+    state.discard.push(c);
+  });
+
+  let evidenceGain = meta.reward.evidenceValue;
+  let strong = true;
+  if (targetSet === 'brief') {
+    if (agent.energy > 0) agent.energy -= 1; else strong = false;
+  }
+  if (!strong) evidenceGain = Math.max(1, evidenceGain - 1);
+
+  agent.banked.push({ set: targetSet, round: state.round, strong });
+  agent.evidence += evidenceGain;
+
+  const skillCard = used.find((c) => c.skill);
+  const skillName = skillCard ? skillCard.skill : 'Adaptability';
+  if (!agent.skills.includes(skillName)) agent.skills.push(skillName);
+
+  if (meta.reward.reference) agent.references += 1;
+  if (targetSet === 'volunteering') agent.reliability += 1;
+
+  const settings = window.RTTR ? window.RTTR.getSettings() : { autoDraw: true };
+  if (settings.autoDraw) {
+    const fresh = draw(Math.max(0, START_HAND - agent.hand.length));
+    agent.hand.push(...fresh);
+  }
+
+  return { meta, evidenceGain, skillName, strong };
+}
+
+/* ============================== Player actions ============================ */
+
+function requireActions(n) {
+  if (state.winner) return false;
+  if (state.actionsLeft < n) {
+    toast(`You only have ${state.actionsLeft} action(s) left this turn.`);
+    return false;
+  }
+  return true;
+}
+
+function spendActions(n) {
+  state.actionsLeft -= n;
+}
+
+function onMarketCardClick(uid) {
+  if (state.winner) return;
+  if (!requireActions(1)) return;
+  if (state.player.marketPicksThisRound >= MAX_MARKET_PICKS_PER_ROUND) {
+    toast(`You can take up to ${MAX_MARKET_PICKS_PER_ROUND} community cards per round.`);
+    return;
+  }
+  const idx = state.market.findIndex((c) => c.uid === uid);
+  if (idx === -1) return;
+  const [card] = state.market.splice(idx, 1);
+  if (state.player.hand.length >= HAND_CAP) {
+    toast('Your hand is full — discard something first.');
+    state.market.splice(idx, 0, card);
+    return;
+  }
+  state.player.hand.push(card);
+  state.player.marketPicksThisRound += 1;
+  refillMarket();
+  spendActions(1);
+  addLog(`You took ${card.name} from the market.`);
+  afterPlayerAction();
+}
+
+function toggleHandSelect(uid) {
+  if (selectedHandUids.has(uid)) selectedHandUids.delete(uid);
+  else {
+    const cards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
+    const route = selectedRoute(cards);
+    const limit = route ? requiredCategories(route).length : Math.max(...DATA.sets.map((set) => requiredCategories(set.id).length));
+    if (selectedHandUids.size >= limit) {
+      toast(`This route uses exactly ${limit} cards. Remove one selected card before adding another.`);
+      return;
+    }
+    if (cards.some((card) => card.category !== 'Wildcard' && state.player.hand.find((candidate) => candidate.uid === uid)?.category === card.category)) {
+      toast('Choose different card types for a set; duplicate types cannot be used.');
+      return;
+    }
+    selectedHandUids.add(uid);
+  }
+  renderHand();
+  renderControls();
+}
+
+function returnCardsToDeck(uids) {
+  if (state.winner) return;
+  const uniqueUids = [...new Set(uids)];
+  if (!uniqueUids.length) return toast('Select at least one hand card to return.');
+  const remaining = MAX_RETURNS_PER_ROUND - state.player.returnsThisRound;
+  if (uniqueUids.length > remaining) return toast(`You can return ${remaining} more card(s) this round.`);
+  const returned = state.player.hand.filter((card) => uniqueUids.includes(card.uid));
+  if (!returned.length) return;
+  state.player.hand = state.player.hand.filter((card) => !uniqueUids.includes(card.uid));
+  state.deck = shuffle([...state.deck, ...returned]);
+  state.player.returnsThisRound += returned.length;
+  selectedHandUids = new Set();
+  addLog(`You returned ${returned.length} card(s) to the deck.`);
+  closePreview();
+  afterPlayerAction();
+}
+
+function doReturnSelected() {
+  returnCardsToDeck([...selectedHandUids]);
+}
+
+function doBank() {
+  if (!requireActions(1)) return;
+  const cards = state.player.hand.filter((c) => selectedHandUids.has(c.uid));
+  const route = selectedRoute(cards);
+  if (!route) {
+    toast('Include at least one card from an experience route. Wildcards can fill missing card types.');
+    return;
+  }
+  const required = requiredCategories(route);
+  if (cards.length !== required.length) {
+    toast(`${setName(route)} needs exactly ${required.length} cards: ${required.join(', ')}.`);
+    return;
+  }
+  const result = findBank(cards);
+  if (!result.ok) {
+    toast(result.msg);
+    showGuide(`${result.msg} Choose the different card types listed for this experience route. Wildcards can fill one missing type each.`);
+    return;
+  }
+  const { meta, evidenceGain, skillName, strong } = bankSet(state.player, result.targetSet, result.used);
+  spendActions(1);
+  selectedHandUids = new Set();
+  addLog(`You banked ${meta.name}! +${evidenceGain} evidence, gained the ${skillName} skill${strong ? '' : ' (basic evidence — low energy)'}.`);
+  showGuide(`You completed ${meta.name}. ${meta.why} This adds toward the "${state.job.requirements.skill}" and experience requirements for ${state.job.title}.`);
+  afterPlayerAction();
+  maybeApplyPrompt();
+}
+
+function maybeApplyPrompt() {
+  if (eligible(state.player, state.job) && !state.player.applied) {
+    toast(`You now meet the requirements for ${state.job.title} — press Apply!`);
+  }
+}
+
+function doApply() {
+  if (state.winner) return;
+  if (!requireActions(1)) return;
+  if (!eligible(state.player, state.job)) {
+    const need = missingRequirements(state.player, state.job);
+    toast(`Not ready yet — you still need: ${need.join(', ')}.`);
+    return;
+  }
+  spendActions(1);
+  state.player.applied = true;
+  addLog(`You submitted your application for ${state.job.title}!`);
+  endGame(state.player);
+}
+
+function missingRequirements(agent, job) {
+  const cv = agentCV(agent);
+  const out = [];
+  const experienceGoal = minimumExperienceForJob(job);
+  if (cv.experience < experienceGoal) out.push(`${experienceGoal - cv.experience} more completed experience set(s)`);
+  const setVariety = completedJobSetTypes(agent, job).size;
+  if (setVariety < REQUIRED_SET_VARIETY) out.push(`experience from ${REQUIRED_SET_VARIETY - setVariety} more job-relevant set type(s)`);
+  if (cv.evidence < job.requirements.evidence) out.push(`${job.requirements.evidence - cv.evidence} more evidence`);
+  if (!agent.skills.includes(job.requirements.skill)) out.push(`the ${job.requirements.skill} skill`);
+  return out;
+}
+
+function afterPlayerAction() {
+  checkHandLimit();
+  render();
+  persist();
+}
+
+function checkHandLimit() {
+  if (!state || state.winner) return;
+  if (state.player.hand.length <= HAND_CAP) return;
+  const excess = state.player.hand.length - HAND_CAP;
+  const toSelect = new Set();
+  openModal(`
+    <h2>Hand limit (${state.player.hand.length}/${HAND_CAP})</h2>
+    <p>Choose ${excess} card${excess > 1 ? 's' : ''} to discard to get back under the limit.</p>
+    <div class="discard-grid" id="discardGrid"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn primary-btn" id="confirmDiscard" disabled>Discard selected (${excess})</button>
+    </div>
+  `);
+  const grid = $('discardGrid');
+  state.player.hand.forEach((c, i) => {
+    const div = cardEl(c, {
+      selected: false,
+      onClick: () => {
+        if (toSelect.has(i)) toSelect.delete(i);
+        else if (toSelect.size < excess) toSelect.add(i);
+        else return;
+        renderDiscardGrid(toSelect, excess);
+      },
+    });
+    grid.appendChild(div);
+  });
+  function renderDiscardGrid(sel, count) {
+    grid.innerHTML = '';
+    state.player.hand.forEach((c, i) => {
+      const div = cardEl(c, {
+        selected: sel.has(i),
+        onClick: () => {
+          if (sel.has(i)) sel.delete(i);
+          else if (sel.size < count) sel.add(i);
+          else return;
+          renderDiscardGrid(sel, count);
+        },
+      });
+      grid.appendChild(div);
+    });
+    const btn = $('confirmDiscard');
+    if (btn) btn.disabled = sel.size !== count;
+  }
+  
+  const confirmBtn = $('confirmDiscard');
+  if (confirmBtn) {
+    confirmBtn.onclick = function () {
+      const sel = [...toSelect];
+      if (sel.length !== excess) return;
+      const discarded = sel.map((i) => state.player.hand[i]).filter(Boolean);
+      state.player.hand = state.player.hand.filter((_, i) => !toSelect.has(i));
+      state.discard.push(...discarded);
+      addLog(`You discarded ${discarded.length} card(s) to meet the hand limit.`);
+      closeModal();
+      render();
+      persist();
+    };
+  }
+}
+
+/* ============================== End turn / rivals ========================= */
+
+function endTurn() {
+  if (state.winner) return;
+  stopTurnTimer();
+  addLog(`— End of round ${state.round} for you —`);
+  state.rivalTurnSummaries = [];
+  state.rivalTurnIndex = 0;
+  state.rivals.forEach((r) => {
+    if (!state.winner) state.rivalTurnSummaries.push(runRivalTurn(r));
+  });
+  if (!state.rivalTurnSummaries.length) {
+    finishRivalPhase();
+    return;
+  }
+  showRivalTurnPopup();
+  persist();
+}
+
+function finishRivalPhase() {
+  closeModal();
+  if (state.winner) {
+    endGame(state.winner);
+    render();
+    persist();
+    return;
+  }
+  state.round += 1;
+  if (state.round % 3 === 0) triggerEvent();
+  state.player.energy = Math.min(START_ENERGY, state.player.energy + 1);
+  state.player.marketPicksThisRound = 0;
+  state.player.returnsThisRound = 0;
+  state.actionsLeft = ACTIONS_PER_TURN - (state.player.actionPenalty || 0);
+  state.player.actionPenalty = 0;
+  if (state.actionsLeft < 1) state.actionsLeft = 1;
+  refreshMarketForRound();
+  addLog(`Round ${state.round} begins.`);
+  startTurnTimer();
+  render();
+  persist();
+}
+
+function runRivalTurn(agent) {
+  const seed = RIVAL_SEEDS.find((r) => r.name === agent.name);
+  const summary = { name: agent.name, strategy: seed ? seed.blurb : 'Competitor', plan: seed ? seed.plan : '', actions: [], picked: [], returned: [], banked: [], applied: false };
+  addLog(`${agent.name}'s turn (${summary.strategy}): taking 2 actions.`);
+  agent.energy = Math.min(START_ENERGY, agent.energy + 1);
+  agent.marketPicksThisRound = 0;
+  agent.returnsThisRound = 0;
+  let actions = ACTIONS_PER_TURN;
+  agent.actionPenalty = 0;
+
+  while (actions > 0 && !state.winner) {
+    const bank = tryFindAnyBank(agent, state.job);
+    if (bank) {
+      const result = bankSet(agent, bank.targetSet, bank.used);
+      summary.actions.push({ type: 'bank', title: result.meta.name, cards: bank.used.map((c) => ({ name: c.name, category: c.category, art: c.art })), skill: result.skillName, evidence: result.evidenceGain });
+      summary.banked.push({ name: result.meta.name, skill: result.skillName, evidence: result.evidenceGain });
+      addLog(`${agent.name} action: banked ${result.meta.name}, gaining ${result.skillName} and CV evidence.`);
+      actions -= 1;
+      continue;
+    }
+
+    const pick = pickMarketCardFor(agent, state.job);
+    if (pick && agent.marketPicksThisRound < MAX_MARKET_PICKS_PER_ROUND && agent.hand.length >= HAND_CAP && agent.returnsThisRound < MAX_RETURNS_PER_ROUND) {
+      const leastUseful = leastUsefulCard(agent, state.job);
+      const returns = [leastUseful, ...agent.hand.filter((card) => card.uid !== leastUseful.uid)]
+        .slice(0, Math.min(2, MAX_RETURNS_PER_ROUND - agent.returnsThisRound));
+      agent.hand = agent.hand.filter((card) => !returns.some((item) => item.uid === card.uid));
+      agent.returnsThisRound += returns.length;
+      state.deck = shuffle([...state.deck, ...returns]);
+      summary.returned.push(...returns.map((card) => ({ name: card.name, category: card.category, art: card.art })));
+      summary.actions.push({ type: 'return', cards: returns.map((card) => ({ name: card.name, category: card.category, art: card.art })), reason: 'making room for useful cards' });
+      addLog(`${agent.name} returned ${returns.length} card(s) to the deck.`);
+      continue;
+    }
+
+    if (pick && agent.hand.length < HAND_CAP && agent.marketPicksThisRound < MAX_MARKET_PICKS_PER_ROUND) {
+      const idx = state.market.findIndex((c) => c.uid === pick.uid);
+      if (idx !== -1) {
+        state.market.splice(idx, 1);
+        agent.hand.push(pick);
+        agent.marketPicksThisRound += 1;
+        const meta = pick.set && setMeta(pick.set);
+        const reason = meta ? `towards ${meta.name}` : 'to support the target role';
+        summary.actions.push({ type: 'pick', card: { name: pick.name, category: pick.category, art: pick.art }, reason });
+        summary.picked.push({ name: pick.name, category: pick.category, art: pick.art, reason });
+        addLog(`${agent.name} action: picked ${pick.name} ${reason}.`);
+        refillMarket();
+        actions -= 1;
+        continue;
+      }
+    }
+
+    summary.actions.push({ type: 'wait', title: 'No available card' });
+    actions -= 1;
+  }
+
+  if (eligible(agent, state.job) && !state.winner) {
+    agent.applied = true;
+    summary.applied = true;
+    state.winner = agent;
+    addLog(`${agent.name} applied for ${state.job.title}!`);
+  }
+  return summary;
+}
+
+function rivalCardMarkup(card, label) {
+  if (!card) return '';
+  const cls = card.category === 'Wildcard' ? 'cat-lime' : card.category === 'Action' ? 'cat-pink' : card.category === 'Proof' ? 'cat-gold' : card.category === 'Impact' ? 'cat-orange' : 'cat-cyan';
+  return `<div class="rival-action-card ${cls} ${cardSetClass(card)}"><span class="rival-action-art">${escapeHtml(card.art || '🃏')}</span><span class="rival-action-label">${escapeHtml(label)}</span><strong>${escapeHtml(card.name)}</strong></div>`;
+}
+
+function showRivalTurnPopup() {
+  const summary = state.rivalTurnSummaries[state.rivalTurnIndex];
+  if (!summary) { finishRivalPhase(); return; }
+  const last = state.rivalTurnIndex === state.rivalTurnSummaries.length - 1;
+  const turnNo = state.rivalTurnIndex + 1;
+  const actionRows = summary.actions.map((action, i) => {
+    if (action.type === 'pick') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Picked from the market</b><p>${escapeHtml(action.reason)}</p></div>${rivalCardMarkup(action.card, 'Picked')}</div>`;
+    if (action.type === 'return') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Returned to the deck</b><p>${escapeHtml(action.reason)}</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Returned')).join('')}</div></div>`;
+    if (action.type === 'bank') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Completed ${escapeHtml(action.title)}</b><p>Added ${action.evidence} CV evidence and the ${escapeHtml(action.skill)} skill.</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Banked')).join('')}</div></div>`;
+    return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>${escapeHtml(action.title)}</b><p>No move available.</p></div></div>`;
+  }).join('');
+  const applied = summary.applied ? `<p class="rival-win-callout">${escapeHtml(summary.name)} now meets the role requirements and has applied!</p>` : '';
+  openModal(`<div class="rival-turn-modal"><div class="eyebrow">RIVAL TURN ${turnNo} OF ${state.rivalTurnSummaries.length} · ROUND ${state.round}</div><h2>${escapeHtml(summary.name)} is making a move</h2><p class="rival-modal-plan"><b>${escapeHtml(summary.strategy)}</b> · ${escapeHtml(summary.plan)}</p><div class="rival-turn-actions">${actionRows}</div>${applied}<div class="modal-actions"><button class="btn primary-btn" id="nextRivalBtn">${last ? (state.winner ? 'See result' : 'Start next round') : 'Next competitor'} →</button></div></div>`);
+  $('nextRivalBtn').addEventListener('click', () => {
+    state.rivalTurnIndex += 1;
+    if (state.rivalTurnIndex < state.rivalTurnSummaries.length) showRivalTurnPopup();
+    else finishRivalPhase();
+  });
+}
+
+function targetSetOrder(agent, job) {
+  const recommended = [...jobSetOptions(job)];
+  const strategy = agent && agent.strategy;
+  const completed = new Set((agent && agent.banked || []).map((entry) => entry.set));
+  const ids = [...recommended.filter((id) => !completed.has(id)), ...recommended.filter((id) => completed.has(id))];
+  if (strategy && !ids.includes(strategy)) ids.push(strategy);
+  DATA.sets.forEach((set) => { if (!ids.includes(set.id)) ids.push(set.id); });
+  return ids;
+}
+
+function tryFindAnyBank(agent, job) {
+  for (const setId of targetSetOrder(agent, job)) {
+    const candidates = agent.hand.filter((c) => (c.category === 'Wildcard' && (c.set === setId || c.set === 'any')) || c.set === setId || c.set === 'any');
+    const result = findBank(candidates, setId, true);
+    if (result.ok) return result;
+  }
+  return null;
+}
+
+
+function setProgress(agent, setId) {
+  const meta = setMeta(setId);
+  if (!meta) return 0;
+  const categories = new Set(agent.hand.filter((c) => (c.set === setId || c.set === 'any') && c.category !== 'Wildcard').map((c) => c.category));
+  return categories.size;
+}
+
+function pickMarketCardFor(agent, job) {
+  if (state.market.length === 0) return null;
+  const order = targetSetOrder(agent, job);
+  const recommended = jobSetOptions(job);
+  const scores = state.market.map((card, index) => {
+    let score = 0;
+    const flexible = card.set === 'any' && card.category !== 'Wildcard';
+    const set = setMeta(card.set);
+    const rank = order.indexOf(card.set);
+    if (rank >= 0) score += Math.max(2, 8 - rank * 1.2);
+    if (recommended.has(card.set)) score += 4;
+    if (agent.strategy && card.set === agent.strategy) score += 2;
+    if (card.category === 'Wildcard') {
+      score += 2;
+      if (card.set !== 'any' && order.includes(card.set)) score += 3;
+      else if (card.set !== 'any' && recommended.has(card.set)) score += 2;
+    }
+    if (flexible) {
+      const usefulRoute = order.find((setId) => !agent.hand.some((held) => held.category === card.category && (held.set === setId || held.set === 'any')));
+      if (usefulRoute) score += 5 + Math.max(0, 2 - order.indexOf(usefulRoute));
+      else score -= 2;
+    }
+    if (set && card.category !== 'Wildcard') {
+      const duplicate = agent.hand.some((held) => held.set === card.set && held.category === card.category);
+      if (!duplicate) score += 2.5 + setProgress(agent, card.set) * 0.8;
+      else score -= 2;
+    }
+    return { card, score, index };
+  });
+  scores.sort((a, b) => b.score - a.score || a.index - b.index);
+  return scores[0].card;
+}
+
+function leastUsefulCard(agent, job) {
+  const recommended = jobSetOptions(job);
+  const order = targetSetOrder(agent, job);
+  return agent.hand.map((card, index) => {
+    let score = 0;
+    const flexible = card.set === 'any' && card.category !== 'Wildcard';
+    const rank = order.indexOf(card.set);
+    if (rank >= 0) score += Math.max(1, 7 - rank);
+    if (flexible) score += order.some((setId) => !agent.hand.some((held) => held.uid !== card.uid && held.category === card.category && (held.set === setId || held.set === 'any'))) ? 4 : 0;
+    if (recommended.has(card.set)) score += 4;
+    if (agent.strategy && card.set === agent.strategy) score += 2;
+    if (card.category === 'Wildcard') {
+      score += 5;
+      if (card.set !== 'any' && !order.includes(card.set) && !recommended.has(card.set)) score -= 3;
+    }
+    if (agent.hand.filter((held) => held.set === card.set && held.category === card.category).length > 1) score -= 2;
+    return { card, score, index };
+  }).sort((a, b) => a.score - b.score || a.index - b.index)[0].card;
+}
+
+/* ============================== Events ==================================== */
+
+const EVENTS = [
+  {
+    title: 'Assignment Deadline',
+    body: 'You have an assignment due soon. What do you do?',
+    choices: [
+      { label: 'Complete it now', run: (a) => { if (!a.skills.includes('Problem solving')) a.skills.push('Problem solving'); addLog('You completed the assignment and gained the Problem solving skill.'); } },
+      { label: 'Ask for help (Feedback token)', run: (a) => { addLog('You asked for help — you\'ll finish it on a later turn.'); } },
+      { label: 'Ignore it', run: (a) => { a.energy = Math.max(0, a.energy - 1); a.actionPenalty = 1; addLog('You ignored it — you lose 1 Energy and 1 action next round.'); } },
+    ],
+  },
+  {
+    title: "You're Unwell on an Experience Day",
+    body: 'You need to take a day off. How do you handle it?',
+    choices: [
+      { label: 'Contact employer & tutor', run: (a) => { addLog('You contacted them and protected your Reliability.'); } },
+      { label: 'Take the day without telling anyone', run: (a) => { a.actionPenalty = 1; addLog('You lose 1 action next round while you reschedule.'); } },
+    ],
+  },
+  {
+    title: 'New Game Jam Announced',
+    body: 'A short game jam is open to students.',
+    choices: [
+      { label: 'Join it (spend 1 Energy)', run: (a) => { if (a.energy > 0) { a.energy -= 1; a.evidence += 1; if (!a.skills.includes('Digital Production')) a.skills.push('Digital Production'); addLog('You joined the jam — +1 evidence and the Digital Production skill.'); } else { addLog('Not enough Energy to join — you sit this one out.'); } } },
+      { label: 'Sit this one out', run: () => { addLog('You sit this one out and rest instead.'); } },
+    ],
+  },
+  {
+    title: 'Your First Choice Falls Through',
+    body: 'The placement or visit you were counting on is no longer available.',
+    choices: [
+      { label: 'Draw two new Opportunity cards', run: (a) => { const fresh = draw(Math.min(2, Math.max(0, HAND_CAP - a.hand.length))); a.hand.push(...fresh); addLog(`You drew ${fresh.length} new opportunity card(s).`); } },
+    ],
+  },
+];
+
+function triggerEvent() {
+  const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  openModal(`
+    <h2>${escapeHtml(ev.title)}</h2>
+    <p>${escapeHtml(ev.body)}</p>
+    <div class="modal-actions" id="eventChoices"></div>
+  `);
+  const wrap = $('eventChoices');
+  ev.choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = choice.label;
+    btn.addEventListener('click', () => {
+      choice.run(state.player);
+      closeModal();
+      render();
+      persist();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+/* ============================== Win / apply =============================== */
+
+function endGame(winnerAgent) {
+  state.winner = winnerAgent;
+  stopTurnTimer();
+  if (window.RTTR) window.RTTR.clearGame();
+  const you = winnerAgent === state.player;
+  openModal(`
+    <h2>${you ? 'You got the job! 🎉' : `${escapeHtml(winnerAgent.name)} got there first`}</h2>
+    <p>${you ? `Congratulations — you're the new <strong>${escapeHtml(state.job.title)}</strong>!` : `${escapeHtml(winnerAgent.name)} applied for <strong>${escapeHtml(state.job.title)}</strong> before you did.`}</p>
+    <p>Final CV: ${winnerAgent.banked.length} experience(s), ${winnerAgent.evidence} evidence, skills: ${winnerAgent.skills.join(', ') || 'none'}.</p>
+    <div class="modal-actions">
+      <button class="btn" id="playAgainBtn">Choose a new role</button>
+    </div>
+  `);
+  $('playAgainBtn').addEventListener('click', () => {
+    closeModal();
+    el.game.classList.add('hidden');
+    el.setup.classList.remove('hidden');
+  });
+}
+
+/* ============================== Modal / toast ============================= */
+
+function openModal(html) {
+  el.modalBody.innerHTML = html;
+  el.modalBack.classList.add('show');
+}
+function closeModal() {
+  el.modalBack.classList.remove('show');
+}
+if (el.modalBack) {
+  el.modalBack.addEventListener('click', (e) => { if (e.target === el.modalBack) closeModal(); });
+}
+
+if (el.cardPreview) {
+  el.cardPreview.addEventListener('click', (e) => { if (e.target === el.cardPreview) closePreview(); });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePreview();
+});
+
+/* ============================== Turn timer ================================ */
+
+function startTurnTimer() {
+  stopTurnTimer();
+  if (!el.timerDisplay) return;
+  let remaining = TURN_SECONDS;
+  el.timerDisplay.classList.remove('hidden');
+  renderTimer(remaining);
+  turnTimerHandle = setInterval(() => {
+    remaining -= 1;
+    renderTimer(remaining);
+    if (remaining <= 0) {
+      stopTurnTimer();
+      toast("Time's up — ending your turn.");
+      endTurn();
+    }
+  }, 1000);
+}
+function stopTurnTimer() {
+  if (turnTimerHandle) { clearInterval(turnTimerHandle); turnTimerHandle = null; }
+  if (el.timerDisplay) el.timerDisplay.classList.add('hidden');
+}
+function renderTimer(remaining) {
+  const m = Math.floor(remaining / 60), s = remaining % 60;
+  el.timer.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  el.timer.classList.toggle('low', remaining <= 30);
+}
+
+/* ============================== Rendering ================================= */
+
+function render() {
+  if (!state) return;
+  el.jobTitle.textContent = `${state.job.art} ${state.job.title}`;
+  el.jobDesc.textContent = state.job.description;
+  renderJobNeeds();
+  renderTurnBar();
+  renderRivals();
+  renderMarket();
+  renderHand();
+  renderSets();
+  renderBankedSets();
+  renderCV();
+  renderControls();
+  renderLog();
+}
+
+function renderJobNeeds() {
+  const req = state.job.requirements;
+  const cv = agentCV(state.player);
+  const line = (ok, text) => `<span class="need ${ok ? 'met' : ''}">${ok ? '✓' : '•'} ${text}</span>`;
+  el.jobNeeds.innerHTML = [
+    line(cv.experience >= minimumExperienceForJob(state.job), `${cv.experience}/${minimumExperienceForJob(state.job)} completed sets`),
+    line(completedJobSetTypes(state.player, state.job).size >= REQUIRED_SET_VARIETY, `${completedJobSetTypes(state.player, state.job).size}/${REQUIRED_SET_VARIETY} role-fit set types`),
+    line(cv.evidence >= req.evidence, `${req.evidence} evidence`),
+    line(state.player.skills.includes(req.skill), `Skill: ${req.skill}`),
+  ].join('');
+}
+
+function renderTurnBar() {
+  el.turnText.textContent = `Round ${state.round} — your turn`;
+  el.actionInfo.textContent = `Actions left: ${state.actionsLeft} · Energy: ${'⚡'.repeat(state.player.energy)}${'·'.repeat(Math.max(0, START_ENERGY - state.player.energy))}`;
+}
+
+function renderRivals() {
+  el.rivals.innerHTML = '';
+  state.rivals.forEach((r, i) => {
+    const seed = RIVAL_SEEDS[i];
+    const cv = agentCV(r);
+    const req = state.job.requirements;
+    const pct = Math.round(Math.min(1, ((cv.experience / minimumExperienceForJob(state.job)) + (completedJobSetTypes(r, state.job).size / REQUIRED_SET_VARIETY) + (cv.evidence / req.evidence) + (r.skills.includes(req.skill) ? 1 : 0)) / 4) * 100);
+    const card = document.createElement('div');
+    card.className = 'rival-card';
+    card.innerHTML = `
+      <div class="rival-head">
+        <strong>${escapeHtml(r.name)}</strong>
+        <span class="rival-strategy">${escapeHtml(seed.blurb)}</span>
+      </div>
+      <div class="rival-plan">${escapeHtml(seed.plan)}</div>
+      <div class="rival-bar"><div class="rival-bar-fill" style="width:${pct}%"></div></div>
+      <div class="rival-stats">Sets ${cv.experience} · ${completedJobSetTypes(r, state.job).size}/${REQUIRED_SET_VARIETY} role-fit types · Evidence ${cv.evidence}<br>Skills: ${r.skills.join(', ') || '—'}</div>
+    `;
+    el.rivals.appendChild(card);
+  });
+}
+
+function cardSetClass(card) {
+  if (!card || !card.set) return 'wildcard-card';
+  if (card.category === 'Wildcard') {
+    if (card.set === 'any') return 'wildcard-card';
+    const id = DATA.sets.some((set) => set.id === card.set) ? card.set : 'unassigned';
+    return `set-${id}`;
+  }
+  if (card.set === 'any') return 'route-flexible-card';
+  const id = DATA.sets.some((set) => set.id === card.set) ? card.set : 'unassigned';
+  return `set-${id}`;
+}
+
+function cardEl(c, opts) {
+  opts = opts || {};
+  const div = document.createElement('div');
+  div.className = 'card cat-' + CAT_COLOR[c.category] + ' ' + cardSetClass(c);
+  if (opts.selected) div.classList.add('selected');
+  div.dataset.uid = c.uid;
+  if (opts.dragSource) {
+    div.draggable = true;
+    div.addEventListener('dragstart', (event) => {
+      event.dataTransfer.setData('text/plain', JSON.stringify({ source: opts.dragSource, uid: c.uid }));
+      event.dataTransfer.effectAllowed = 'move';
+      div.classList.add('dragging-card');
+    });
+    div.addEventListener('dragend', () => div.classList.remove('dragging-card'));
+  }
+  div.title = c.description + (c.flavor ? '\n\n"' + c.flavor + '"' : '');
+  div.innerHTML = `
+    <div class="card-art">${c.art || '🃏'}</div>
+    <div class="card-name">${escapeHtml(c.name)}</div>
+    <div class="card-type">${c.category}${c.set === 'any' ? ' · Any route' : ' · ' + escapeHtml(setName(c.set))}</div>
+  `;
+  if (opts.onClick) div.addEventListener('click', opts.onClick);
+  return div;
+}
+
+/* ============================== Card Preview ============================= */
+
+function openPreview(where, card) {
+  if (!el.cardPreview) return;
+  previewState = { where, card };
+  const cat = card.category;
+  const colorClass = cardSetClass(card);
+  const catLabel = cat === 'Wildcard' ? 'Wildcard' : cat;
+  const catDesc = cat === 'Setup' ? 'Use this to arrange an opportunity before taking part.'
+    : cat === 'Action' ? 'Use this to complete the experience or task.'
+    : cat === 'Proof' ? 'Use this to record what you learned and add evidence to your CV.'
+    : cat === 'Impact' ? 'Show the outcome or impact of your experience.'
+    : cat === 'Wildcard' && card.set !== 'any' ? `Use this wildcard as a substitute for a missing card type in the ${setName(card.set)} route.`
+    : 'Use this as a substitute for a missing set card.';
+  const routeDesc = cat !== 'Wildcard' && card.set === 'any' ? 'This card can count as its printed type in any experience route.' : '';
+
+  const inHand = where === 'hand';
+  const isSelected = inHand && selectedHandUids.has(card.uid);
+
+  let actionHtml = '';
+  if (where === 'market') {
+    actionHtml = `
+      <button class="btn primary-btn" onclick="takePreviewCard()" ${state.actionsLeft < 1 || state.winner || state.player.hand.length >= HAND_CAP || state.player.marketPicksThisRound >= MAX_MARKET_PICKS_PER_ROUND ? 'disabled' : ''}>Take this card (1 action)</button>
+      <button class="btn btn-secondary" onclick="closePreview()">Done</button>
+    `;
+  } else {
+    actionHtml = `
+      <button class="btn ${isSelected ? 'btn-secondary' : 'primary-btn'}" onclick="togglePreviewSelect()">${isSelected ? 'Remove from set' : 'Add to set'}</button>
+      <button class="btn btn-secondary" onclick="returnPreviewCard()" ${state.winner || state.player.returnsThisRound >= MAX_RETURNS_PER_ROUND ? 'disabled' : ''}>Return to deck</button>
+      <button class="btn btn-secondary" onclick="closePreview()">Done</button>
+    `;
+  }
+
+  el.cardPreview.innerHTML = `
+    <div class="card-preview-wrap">
+      <button class="preview-close" aria-label="Close card preview" onclick="closePreview()">×</button>
+      <div class="card card-preview tone-${cat === 'Wildcard' ? 'wild' : cat.toLowerCase()} ${colorClass}">
+        <div class="card-art">${card.art || '🃏'}</div>
+        <div class="card-name">${escapeHtml(card.name)}</div>
+        <div class="card-description">${escapeHtml(card.description)}</div>
+        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}</div>
+        <div class="card-top">
+          <span>${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
+          <span>${cat === 'Wildcard' ? '★' : cat === 'Proof' ? '◆' : cat === 'Action' ? '●' : '◇'}</span>
+        </div>
+        <div class="preview-actions">${actionHtml}</div>
+      </div>
+    </div>
+  `;
+  el.cardPreview.classList.add('open');
+}
+
+function closePreview() {
+  if (!el.cardPreview) return;
+  el.cardPreview.classList.remove('open');
+  previewState = null;
+}
+
+function takePreviewCard() {
+  if (!previewState || previewState.where !== 'market' || state.actionsLeft <= 0 || state.winner) return;
+  if (state.player.marketPicksThisRound >= MAX_MARKET_PICKS_PER_ROUND) {
+    toast(`You can take up to ${MAX_MARKET_PICKS_PER_ROUND} community cards per round.`);
+    return;
+  }
+  const uid = previewState.card.uid;
+  const idx = state.market.findIndex((c) => c.uid === uid);
+  if (idx === -1) return;
+  const [card] = state.market.splice(idx, 1);
+  if (state.player.hand.length >= HAND_CAP) {
+    toast('Your hand is full — discard something first.');
+    state.market.splice(idx, 0, card);
+    closePreview();
+    return;
+  }
+  state.player.hand.push(card);
+  state.player.marketPicksThisRound += 1;
+  refillMarket();
+  spendActions(1);
+  addLog(`You took ${card.name} from the market.`);
+  closePreview();
+  afterPlayerAction();
+}
+
+function togglePreviewSelect() {
+  if (!previewState || previewState.where !== 'hand') return;
+  const uid = previewState.card.uid;
+  const existing = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
+  const nextCard = state.player.hand.find((card) => card.uid === uid);
+  const route = selectedRoute(existing);
+  const limit = route ? requiredCategories(route).length : Math.max(...DATA.sets.map((set) => requiredCategories(set.id).length));
+  if (!selectedHandUids.has(uid) && existing.length >= limit) return toast(`This route uses exactly ${limit} cards. Remove one selected card before adding another.`);
+  if (!selectedHandUids.has(uid) && nextCard.category !== 'Wildcard' && existing.some((card) => card.category === nextCard.category)) return toast('Choose different card types for a set; duplicate types cannot be used.');
+  if (selectedHandUids.has(uid)) selectedHandUids.delete(uid);
+  else selectedHandUids.add(uid);
+  renderHand();
+  renderControls();
+}
+
+function returnPreviewCard() {
+  if (!previewState || previewState.where !== 'hand') return;
+  returnCardsToDeck([previewState.card.uid]);
+}
+
+function renderMarket() {
+  el.market.innerHTML = '';
+  state.market.forEach((c) => {
+    const card = cardEl(c, {
+      onClick: () => openPreview('market', c),
+      dragSource: 'market',
+    });
+    el.market.appendChild(card);
+  });
+}
+
+function renderHand() {
+  el.hand.innerHTML = '';
+  state.player.hand.forEach((c) => {
+    const card = cardEl(c, {
+      selected: selectedHandUids.has(c.uid),
+      onClick: () => toggleHandSelect(c.uid),
+      dragSource: 'hand',
+    });
+    card.addEventListener('dblclick', () => openPreview('hand', c));
+    el.hand.appendChild(card);
+  });
+  el.handCount.textContent = `${state.player.hand.length}/${HAND_CAP} cards · returned ${state.player.returnsThisRound}/${MAX_RETURNS_PER_ROUND} · picked ${state.player.marketPicksThisRound}/${MAX_MARKET_PICKS_PER_ROUND} this round`;
+}
+
+function renderSets() {
+  el.sets.innerHTML = '';
+  DATA.sets.forEach((s) => {
+    const count = state.player.banked.filter((b) => b.set === s.id).length;
+    const required = requiredCategories(s.id);
+    const row = document.createElement('div');
+    row.className = `set-row set-${s.id}`;
+    row.title = `${required.length} cards: ${required.join(' + ')}. ${s.why}`;
+    row.innerHTML = `<span class="set-art">${s.art}</span><span class="set-name">${escapeHtml(s.name)}<small class="set-recipe">${required.length} cards · ${escapeHtml(required.join(' + '))}</small></span><span class="set-count">${count}</span>`;
+    el.sets.appendChild(row);
+  });
+}
+
+function renderBankedSets() {
+  if (!el.bankedSets) return;
+  const banked = state.player.banked;
+  const variety = completedJobSetTypes(state.player, state.job).size;
+  if (el.bankedSetProgress) el.bankedSetProgress.textContent = `${variety} / ${REQUIRED_SET_VARIETY} role-fit types`;
+  if (!banked.length) {
+    el.bankedSets.innerHTML = '<div class="storage-empty">Your completed sets will appear here.</div>';
+    return;
+  }
+  el.bankedSets.innerHTML = banked.map((entry) => {
+    const meta = setMeta(entry.set);
+    const color = cardSetClass({ set: entry.set, category: 'Setup' });
+    const repeat = banked.filter((other) => other.set === entry.set).length;
+    return `<div class="banked-set-tile ${color}"><span class="banked-set-art">${meta ? meta.art : '🎮'}</span><div><strong>${escapeHtml(meta ? meta.name : entry.set)}</strong><small>Round ${entry.round} · CV experience${entry.strong ? '' : ' · basic'}</small></div>${repeat > 1 ? '<span class="banked-set-repeat">×' + repeat + '</span>' : ''}</div>`;
+  }).join('');
+}
+
+function renderCV() {
+  const p = state.player;
+  el.cvStats.innerHTML = `
+    <div class="cv-row"><span>Experience</span><strong>${p.banked.length}</strong></div>
+    <div class="cv-row"><span>Evidence</span><strong>${p.evidence}</strong></div>
+    <div class="cv-row"><span>Skills</span><strong>${p.skills.join(', ') || '—'}</strong></div>
+    <div class="cv-row"><span>Reliability</span><strong>${'★'.repeat(p.reliability) || '—'}</strong></div>
+    <div class="cv-row"><span>References</span><strong>${p.references}</strong></div>
+  `;
+}
+
+function renderControls() {
+  const returnCount = selectedHandUids.size;
+  const returnsLeft = MAX_RETURNS_PER_ROUND - state.player.returnsThisRound;
+  el.returnBtn.disabled = !returnCount || returnCount > returnsLeft || !!state.winner;
+  el.returnBtn.textContent = returnCount
+    ? `↩ Return ${returnCount} to deck`
+    : `↩ Return selected to deck (${returnsLeft} left this round)`;
+  el.returnBtn.title = 'Select up to two cards in your hand and return them to the deck, or drag one to the return area. Returns are free, up to two each round.';
+  const selectedCards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
+  const route = selectedRoute(selectedCards);
+  const requiredCount = route ? requiredCategories(route).length : 0;
+  el.bankBtn.disabled = !requiredCount || selectedHandUids.size !== requiredCount || state.actionsLeft < 1 || !!state.winner;
+  el.bankBtn.textContent = route
+    ? `✦ Bank ${setName(route)} (${selectedHandUids.size}/${requiredCount})`
+    : `✦ Bank completed set (${selectedHandUids.size} selected)`;
+  renderSetBuilderStatus();
+  el.applyBtn.disabled = !!state.winner;
+  el.endBtn.disabled = !!state.winner;
+}
+
+function renderSetBuilderStatus() {
+  if (!el.setBuilderStatus || !state) return;
+  const cards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
+  const count = cards.length;
+  if (!count) {
+    el.setBuilderStatus.innerHTML = `<strong>Build an experience set</strong><span>Each route has several card examples. Click hand cards to select them — choose only one of each required type: Employer Visit needs 2 cards; Volunteering and Live Project Brief need 3; Block Placement and Industry Partnership need 4. Cards marked Any route fit any colour route. Wildcards belong to one route — check the card's opportunity before using it. Double-click any card to preview its details.</span>`;
+    return;
+  }
+  const selectedRoutes = new Set(cards.filter((card) => card.category !== 'Wildcard' && card.set !== 'any').map((card) => card.set));
+  const routeId = selectedRoute(cards);
+  const required = routeId ? requiredCategories(routeId) : [];
+  if (routeId && count === required.length) {
+    const result = findBank(cards);
+    if (result.ok && state.actionsLeft < 1) {
+      el.setBuilderStatus.innerHTML = `<strong>Set complete: ${escapeHtml(setName(result.targetSet))}</strong><span>You're out of actions this round, so <b>Bank completed set</b> is disabled. Press <b>End turn</b> — your selection is kept, and you can bank it as soon as your next turn starts.</span>`;
+    } else if (result.ok) {
+      el.setBuilderStatus.innerHTML = `<strong>✓ Ready to bank: ${escapeHtml(setName(result.targetSet))}</strong><span>Press <b>Bank completed set</b> to store this experience on your CV. You’ll gain evidence and a skill too.</span>`;
+    } else {
+      el.setBuilderStatus.innerHTML = `<strong>Not a complete set yet</strong><span>${escapeHtml(result.msg)} Remove a selected card or choose the missing type from the same route.</span>`;
+    }
+    return;
+  }
+  const max = routeId ? required.length : Math.max(...DATA.sets.map((set) => requiredCategories(set.id).length));
+  if (routeId && count > required.length) {
+    el.setBuilderStatus.innerHTML = `<strong>Too many cards for ${escapeHtml(setName(routeId))}</strong><span>This route uses exactly ${required.length} cards. Remove ${count - required.length} card(s) from the selection.</span>`;
+    return;
+  }
+  if (selectedRoutes.size > 1) {
+    el.setBuilderStatus.innerHTML = `<strong>Cards from different routes</strong><span>Choose cards with the same route colour. Wildcards can be used with one route.</span>`;
+    return;
+  }
+  const routeText = routeId ? ` · ${escapeHtml(setName(routeId))} route` : '';
+  const specific = new Set(cards.filter((card) => card.category !== 'Wildcard').map((card) => card.category));
+  const wildcards = cards.filter((card) => card.category === 'Wildcard').length;
+  const targetCategories = routeId ? required : CATS;
+  const remainingSlots = targetCategories.filter((cat) => !specific.has(cat)).slice(wildcards);
+  const next = remainingSlots.length ? ` Next choose: ${remainingSlots.join(', ')}.` : ' Select another unique card type.';
+  const routeSizeText = routeId ? `${required.length}` : `up to ${max}`;
+  el.setBuilderStatus.innerHTML = `<strong>${count}/${routeSizeText} cards selected${routeText}</strong><span>${escapeHtml(next)} Use different card types from the same route; wildcards substitute for missing types.</span>`;
+}
+
+function renderLog() {
+  el.log.innerHTML = state.log.map((l) => `<div class="log-line">${escapeHtml(l)}</div>`).join('');
+}
+
+function showGuide(text) {
+  el.guide.textContent = text;
+}
+
+/* ============================== Learn / how-to-play ======================= */
+
+const LEARN_STEPS = [
+  { title: 'Pick a target job', body: 'Choose the gaming-industry role you want. Each role needs a set number of completed experiences, evidence, and one specific skill.' },
+  { title: 'Take or return cards', body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the deck. Returns are free; taking each market card costs 1 action. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. You can also drag market cards into your hand and drag hand cards to the return area, or use the Return button.' },
+  { title: 'Bank a set', body: 'Each colour route needs a different group: Employer Visit needs Setup + Action (2 cards); Volunteering and Live Project Brief need Setup + Action + Proof (3); Block Placement and Industry Partnership need Setup + Action + Proof + Impact (4). You will see several examples for each type. Choose only one card per required type and bank it for CV experience, evidence and a skill. Any route cards work in every route; wildcards replace a missing type.' },
+  { title: 'Watch your rivals', body: 'Three AI candidates take two actions each after your turn, each with a different strategy. Keep an eye on their progress bars in the rivals panel.' },
+  { title: 'Apply for the job', body: "Once your CV meets the job's requirements, press Apply. The first eligible candidate — you or a rival — wins the race." },
+];
+let learnIndex = 0;
+let learnReturnTo = 'setup';
+
+function renderLearn() {
+  const step = LEARN_STEPS[learnIndex];
+  el.learnStepNum.textContent = String(learnIndex + 1);
+  el.learnContent.innerHTML = `<h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.body)}</p>`;
+  el.learnPrevBtn.disabled = learnIndex === 0;
+  el.learnNextBtn.textContent = learnIndex === LEARN_STEPS.length - 1 ? 'Got it →' : 'Next';
+}
+
+function openLearn(returnTo) {
+  learnReturnTo = returnTo;
+  learnIndex = 0;
+  el.setup.classList.add('hidden');
+  el.game.classList.add('hidden');
+  el.learnScreen.classList.remove('hidden');
+  renderLearn();
+}
+
+app.openLearn = openLearn;
+app.toast = toast;
+app.showGuide = showGuide;
+app.state = Object.assign(app.state || {}, { round: 0, actionsLeft: 0 });
+
+el.learnPrevBtn.addEventListener('click', () => { if (learnIndex > 0) { learnIndex--; renderLearn(); } });
+el.learnNextBtn.addEventListener('click', () => {
+  if (learnIndex < LEARN_STEPS.length - 1) { learnIndex++; renderLearn(); return; }
+  el.learnScreen.classList.add('hidden');
+  if (learnReturnTo === 'game' && state) el.game.classList.remove('hidden');
+  else el.setup.classList.remove('hidden');
+});
+
+function setupDragAndDrop() {
+  function attach(zone, acceptedSource, onDrop) {
+    if (!zone) return;
+    zone.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', (event) => {
+      if (!zone.contains(event.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', (event) => {
+      event.preventDefault();
+      zone.classList.remove('drag-over');
+      let payload;
+      try { payload = JSON.parse(event.dataTransfer.getData('text/plain')); } catch (_) { return; }
+      if (!payload || payload.source !== acceptedSource || !payload.uid) return;
+      onDrop(payload.uid);
+    });
+  }
+  attach(el.hand, 'market', onMarketCardClick);
+  attach(el.returnZone, 'hand', (uid) => returnCardsToDeck([uid]));
+}
+
+/* ============================== Wiring ==================================== */
+
+el.startBtn.addEventListener('click', () => newGame(el.jobSelect.value));
+el.returnBtn.addEventListener('click', doReturnSelected);
+setupDragAndDrop();
+el.bankBtn.addEventListener('click', doBank);
+el.applyBtn.addEventListener('click', doApply);
+el.endBtn.addEventListener('click', endTurn);
+
+if (el.signInBtn) {
+  el.signInBtn.addEventListener('click', () => toast('Sign-in requires a Firebase project. Your progress saves locally in this browser.'));
+}
+
+/* ============================== Boot ======================================= */
+
+(async function boot() {
+  try {
+    DATA = await loadData();
+  } catch (e) {
+    el.setup.innerHTML = `<div class="eyebrow">SETUP ERROR</div><h2>Couldn't load game data</h2><p>Race to the Role needs to be served over http(s) (its scripts are ES modules and its cards live in <code>data/game-data.json</code>). Run a local server, e.g. <code>python3 -m http.server</code>, then open the page through it rather than as a local file.</p>`;
+    console.error(e);
+    return;
+  }
+  populateJobs();
+
+  const saved = window.RTTR ? window.RTTR.loadGame() : null;
+  if (saved && saved.job && !saved.winner) {
+    const resumeBtn = document.createElement('button');
+    resumeBtn.className = 'btn btn-secondary';
+    resumeBtn.style.marginTop = '0.75rem';
+    resumeBtn.textContent = `Continue race for ${saved.job.title} →`;
+    resumeBtn.addEventListener('click', () => {
+      state = saved;
+      state.player.returnsThisRound = state.player.returnsThisRound || 0;
+      state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
+      state.rivals.forEach((r) => { r.returnsThisRound = r.returnsThisRound || 0; r.marketPicksThisRound = r.marketPicksThisRound || 0; });
+      el.setup.classList.add('hidden');
+      el.game.classList.remove('hidden');
+      startTurnTimer();
+      render();
+    });
+    el.startBtn.insertAdjacentElement('afterend', resumeBtn);
+  }
+})();

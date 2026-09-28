@@ -1,0 +1,13 @@
+{
+  "id": "action-plan-practice-session",
+  "name": "Plan a Practice Session",
+  "type": "Action",
+  "category": "Action",
+  "description": "Design a practice block with clear goals for a squad or player.",
+  "flavor": "A plan turns practice into progress.",
+  "rarity": "Uncommon",
+  "art": "🗓️",
+  "set": "placement",
+  "value": 1,
+  "skill": "Coaching"
+}

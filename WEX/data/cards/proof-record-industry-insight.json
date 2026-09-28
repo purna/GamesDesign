@@ -1,0 +1,13 @@
+{
+  "id": "proof-record-industry-insight",
+  "name": "Record Industry Insight",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Write up one thing you learned and how it changes your view of the job.",
+  "flavor": "Insight only counts once it's written down.",
+  "rarity": "Common",
+  "art": "💡",
+  "set": "visit",
+  "value": 1,
+  "skill": "Industry Knowledge"
+}

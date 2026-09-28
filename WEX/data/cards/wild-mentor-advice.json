@@ -1,0 +1,12 @@
+{
+  "id": "wild-mentor-advice",
+  "name": "Wild Card: Mentor Advice",
+  "type": "Wildcard",
+  "category": "Wildcard",
+  "description": "A mentor points you in the right direction. Use this card in place of any Setup, Action or Proof card for a Live Project Brief.",
+  "flavor": "Sometimes the fastest route is someone who's done it before.",
+  "rarity": "Rare",
+  "art": "🌟",
+  "set": "brief",
+  "value": 1
+}

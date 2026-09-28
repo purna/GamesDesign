@@ -1,0 +1,27 @@
+{
+  "id": "gaming-community-assistant",
+  "title": "Gaming Community Assistant",
+  "description": "Help players connect through thoughtful, welcoming communities.",
+  "category": "Community & Marketing",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "volunteering",
+    "visit",
+    "brief",
+    "partnership"
+  ],
+  "flavor": "The best games are the ones people play together. You build the spaces where that happens.",
+  "art": "💬",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 9,
+    "technicalSkill": 4,
+    "creativity": 7,
+    "reliability": 7
+  }
+}

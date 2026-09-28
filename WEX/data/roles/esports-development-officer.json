@@ -1,0 +1,25 @@
+{
+  "id": "esports-development-officer",
+  "title": "Esports Development Officer",
+  "category": "Management & operations",
+  "description": "Grow grassroots participation and pathways into competitive gaming.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Organisation"
+  },
+  "recommendedSets": [
+    "volunteering",
+    "partnership"
+  ],
+  "flavor": "Someone has to build the ladder before others can climb it.",
+  "art": "🌉",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 8,
+    "technicalSkill": 4,
+    "creativity": 5,
+    "reliability": 7
+  }
+}

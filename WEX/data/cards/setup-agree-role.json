@@ -1,0 +1,12 @@
+{
+  "id": "setup-agree-role",
+  "name": "Agree Your Role",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Clarify tasks, responsibilities, supervision and what you'll produce.",
+  "flavor": "Undefined work is unpaid work. Define it.",
+  "rarity": "Common",
+  "art": "📝",
+  "set": "any",
+  "value": 1
+}

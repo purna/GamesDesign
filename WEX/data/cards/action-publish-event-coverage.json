@@ -1,0 +1,13 @@
+{
+  "id": "action-publish-event-coverage",
+  "name": "Publish Event Coverage",
+  "type": "Action",
+  "category": "Action",
+  "description": "Write up or photograph an event for publication.",
+  "flavor": "If it isn't published, it didn't happen — as far as the internet's concerned.",
+  "rarity": "Uncommon",
+  "art": "🗞️",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

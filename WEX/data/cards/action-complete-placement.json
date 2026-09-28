@@ -1,0 +1,13 @@
+{
+  "id": "action-complete-placement",
+  "name": "Complete Placement Tasks",
+  "type": "Action",
+  "category": "Action",
+  "description": "Choose a focus — event operations, streaming support, social media, player support, or equipment setup — and do the work.",
+  "flavor": "This is where the CV entry actually gets written.",
+  "rarity": "Common",
+  "art": "🛠️",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

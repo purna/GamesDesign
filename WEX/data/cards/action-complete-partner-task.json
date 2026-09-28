@@ -1,0 +1,13 @@
+{
+  "id": "action-complete-partner-task",
+  "name": "Complete Partner Task",
+  "type": "Action",
+  "category": "Action",
+  "description": "Complete the agreed task and ask the partner for feedback.",
+  "flavor": "Professional feedback is worth more than a grade.",
+  "rarity": "Common",
+  "art": "📦",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Problem solving"
+}

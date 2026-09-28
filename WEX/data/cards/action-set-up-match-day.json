@@ -1,0 +1,13 @@
+{
+  "id": "action-set-up-match-day",
+  "name": "Set Up Match Day",
+  "type": "Action",
+  "category": "Action",
+  "description": "Prepare kit, seating, signage and schedules ahead of a live event.",
+  "flavor": "Match day starts hours before the first game.",
+  "rarity": "Uncommon",
+  "art": "🎮",
+  "set": "visit",
+  "value": 1,
+  "skill": "Technical Setup"
+}

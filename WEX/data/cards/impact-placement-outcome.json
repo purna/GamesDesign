@@ -1,0 +1,13 @@
+{
+  "id": "impact-placement-outcome",
+  "name": "Show Placement Impact",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Summarise the result of your placement work and how it helped the esports team or event.",
+  "flavor": "Show what changed because you were there.",
+  "rarity": "Common",
+  "art": "📊",
+  "set": "placement",
+  "value": 1,
+  "skill": "Communication"
+}

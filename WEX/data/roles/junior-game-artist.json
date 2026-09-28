@@ -1,0 +1,25 @@
+{
+  "id": "junior-game-artist",
+  "title": "Junior Game Artist",
+  "category": "Game industry",
+  "description": "Create characters, props and environments that bring a game to life.",
+  "requirements": {
+    "experience": 1,
+    "evidence": 2,
+    "skill": "Design"
+  },
+  "recommendedSets": [
+    "brief",
+    "partnership"
+  ],
+  "flavor": "Every asset on screen started as someone's sketch.",
+  "art": "🎨",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 5,
+    "networking": 3,
+    "technicalSkill": 6,
+    "creativity": 9,
+    "reliability": 5
+  }
+}

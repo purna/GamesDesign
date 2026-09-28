@@ -1,0 +1,27 @@
+{
+  "id": "esports-venue-ops-assistant",
+  "title": "Esports Venue Operations Assistant",
+  "description": "Help gaming venues, arenas and facilities run safely and smoothly.",
+  "category": "Operations",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Organisation"
+  },
+  "recommendedSets": [
+    "placement",
+    "volunteering",
+    "partnership",
+    "visit"
+  ],
+  "flavor": "A great event runs on invisible work. You make sure the stage, the seats, and the schedule all line up.",
+  "art": "🏟️",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 6,
+    "technicalSkill": 6,
+    "creativity": 4,
+    "reliability": 9
+  }
+}

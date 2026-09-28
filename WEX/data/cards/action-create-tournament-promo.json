@@ -1,0 +1,13 @@
+{
+  "id": "action-create-tournament-promo",
+  "name": "Create Tournament Promo",
+  "type": "Action",
+  "category": "Action",
+  "description": "Spend focused time producing a poster, short video, social post, or stream overlay.",
+  "flavor": "Making the thing is always the hardest part.",
+  "rarity": "Common",
+  "art": "🖌️",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

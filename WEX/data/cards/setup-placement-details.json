@@ -1,0 +1,12 @@
+{
+  "id": "setup-placement-details",
+  "name": "Confirm Placement Details",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree tasks, dates, days and hours with the employer; collect their contact details and address; confirm your tutor's name.",
+  "flavor": "No request goes anywhere without the details.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "placement",
+  "value": 1
+}

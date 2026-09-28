@@ -1,0 +1,12 @@
+{
+  "id": "setup-book-visit",
+  "name": "Book the Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Confirm your place, location, joining details and any security requirements.",
+  "flavor": "A booked visit is a foot in the door.",
+  "rarity": "Common",
+  "art": "🎫",
+  "set": "visit",
+  "value": 1
+}

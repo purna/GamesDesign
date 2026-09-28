@@ -1,0 +1,12 @@
+{
+  "id": "proof-save-portfolio",
+  "name": "Save Portfolio Evidence",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Keep a finished work sample and explain your role, tools used and outcome.",
+  "flavor": "Your portfolio is your proof. Make it undeniable.",
+  "rarity": "Uncommon",
+  "art": "🖼️",
+  "set": "any",
+  "value": 2
+}

@@ -1,0 +1,12 @@
+{
+  "id": "setup-agree-dates-times",
+  "name": "Agree Dates & Times",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Confirm the schedule and hours in writing. Must fit college hours (8:30am–5:30pm, max 8hr day).",
+  "flavor": "Verbal agreements evaporate. Written ones stick.",
+  "rarity": "Common",
+  "art": "📅",
+  "set": "any",
+  "value": 1
+}

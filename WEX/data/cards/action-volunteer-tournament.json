@@ -1,0 +1,13 @@
+{
+  "id": "action-volunteer-tournament",
+  "name": "Volunteer at Tournament",
+  "type": "Action",
+  "category": "Action",
+  "description": "Choose a role — registration, player support, setup, social posts, or match scheduling — and get stuck in.",
+  "flavor": "Tournaments run on volunteers like you.",
+  "rarity": "Common",
+  "art": "🙋",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Teamwork"
+}

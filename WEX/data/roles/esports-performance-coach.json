@@ -1,0 +1,25 @@
+{
+  "id": "esports-performance-coach",
+  "title": "Esports Performance Coach",
+  "category": "Coaching & performance",
+  "description": "Support players' mindset, routines and consistency under competitive pressure.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "volunteering",
+    "partnership"
+  ],
+  "flavor": "Peak performance starts long before the match.",
+  "art": "🧠",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 5,
+    "technicalSkill": 5,
+    "creativity": 5,
+    "reliability": 8
+  }
+}

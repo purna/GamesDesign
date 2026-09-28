@@ -1,0 +1,12 @@
+{
+  "id": "setup-book-studio-visit",
+  "name": "Book Studio Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Confirm the visit date, location, booking, and travel or access arrangements. Prepare two questions.",
+  "flavor": "Turning up unprepared wastes everyone's time.",
+  "rarity": "Common",
+  "art": "🗓️",
+  "set": "visit",
+  "value": 1
+}

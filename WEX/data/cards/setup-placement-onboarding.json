@@ -1,0 +1,12 @@
+{
+  "id": "setup-placement-onboarding",
+  "name": "Complete Placement Onboarding",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Submit required paperwork, set up your workspace access, and confirm your reporting line with your supervisor.",
+  "flavor": "Paperwork is boring. Getting started is not.",
+  "rarity": "Common",
+  "art": "📝",
+  "set": "placement",
+  "value": 1
+}

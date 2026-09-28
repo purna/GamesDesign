@@ -1,0 +1,13 @@
+{
+  "id": "action-track-player-metrics",
+  "name": "Track Player Metrics",
+  "type": "Action",
+  "category": "Action",
+  "description": "Log stats across sessions to spot trends in performance.",
+  "flavor": "If you can't measure it, you're guessing.",
+  "rarity": "Uncommon",
+  "art": "📐",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Analysis"
+}

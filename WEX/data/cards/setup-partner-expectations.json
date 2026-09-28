@@ -1,0 +1,12 @@
+{
+  "id": "setup-partner-expectations",
+  "name": "Partner Expectations",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Find out what the industry partner expects you to produce and how they'll support you.",
+  "flavor": "Partners don't want free labour. They want fresh perspective.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "partnership",
+  "value": 1
+}

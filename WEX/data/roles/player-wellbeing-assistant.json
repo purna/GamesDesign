@@ -1,0 +1,27 @@
+{
+  "id": "player-wellbeing-assistant",
+  "title": "Player Wellbeing & Recovery Assistant",
+  "description": "Help players build sustainable routines and find appropriate support.",
+  "category": "Wellbeing",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "visit",
+    "volunteering",
+    "partnership",
+    "brief"
+  ],
+  "flavor": "The game never stops, but players need to. You keep talent healthy, focused, and ready to perform.",
+  "art": "🩺",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 5,
+    "networking": 7,
+    "technicalSkill": 4,
+    "creativity": 5,
+    "reliability": 8
+  }
+}

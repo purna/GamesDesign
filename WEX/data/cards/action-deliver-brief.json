@@ -1,0 +1,12 @@
+{
+  "id": "action-deliver-brief",
+  "name": "Deliver the Live Brief",
+  "type": "Action",
+  "category": "Action",
+  "description": "Finish and present work to the brief. Respond to feedback and iterate.",
+  "flavor": "Done is better than perfect. Shipped is better than done.",
+  "rarity": "Uncommon",
+  "art": "🚀",
+  "set": "brief",
+  "value": 2
+}

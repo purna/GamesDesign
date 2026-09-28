@@ -1,0 +1,12 @@
+{
+  "id": "proof-ask-reference",
+  "name": "Ask for a Reference",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Request written feedback from someone who supervised your work.",
+  "flavor": "A reference is a vote of confidence in writing.",
+  "rarity": "Uncommon",
+  "art": "✍️",
+  "set": "any",
+  "value": 2
+}

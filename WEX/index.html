@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Race to the Role — Gaming Careers Card Game</title>
+  <meta name="theme-color" content="#101118">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="card-styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-top">
+        <p class="eyebrow">CAREER QUEST / SEASON 01</p>
+        <div class="header-actions">
+          <button class="icon-btn" id="helpBtn" aria-label="How it works" title="How it works"><i class="fa-solid fa-circle-question"></i></button>
+          <button class="icon-btn" id="settingsBtn" aria-label="Open settings" title="Settings"><i class="fa-solid fa-gear"></i></button>
+          <button class="icon-btn" id="a11yBtn" aria-label="Accessibility settings" title="Accessibility"><i class="fa-solid fa-universal-access"></i></button>
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle night mode" title="Toggle night mode"><i class="fa-solid fa-moon"></i></button>
+          <button class="icon-btn" id="signInBtn" aria-label="Sign in with Google" title="Sign in"><i class="fa-solid fa-right-to-bracket"></i></button>
+          <button class="icon-btn hidden" id="signOutBtn" aria-label="Sign out" title="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+      </div>
+      <div class="header-title-row">
+        <h1 class="quiz-title">
+          <img src="gfx/logo_black.png" alt="" class="logo logo-dark" aria-hidden="true">
+          <img src="gfx/logo_white.png" alt="" class="logo logo-light" aria-hidden="true">
+          <span>RACE TO THE ROLE</span>
+        </h1>
+      </div>
+      <div id="timerDisplay" class="timer-display hidden">
+        <span class="timer-dot"></span>
+        <span class="timer" id="timer">05:00</span>
+      </div>
+    </header>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-head">
+          <h2>Settings</h2>
+          <button class="btn-close" id="closeSettings" aria-label="Close settings"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>Game Options</h3>
+            <label class="settings-row" for="soundEnabled">
+              <span>Sound effects</span>
+              <input type="checkbox" id="soundEnabled" checked>
+            </label>
+            <label class="settings-row" for="animationsEnabled">
+              <span>Card animations</span>
+              <input type="checkbox" id="animationsEnabled" checked>
+            </label>
+            <label class="settings-row" for="autoDrawEnabled">
+              <span>Auto-draw replacement cards</span>
+              <input type="checkbox" id="autoDrawEnabled" checked>
+            </label>
+          </div>
+          <div class="settings-section">
+            <h3>Reset progress</h3>
+            <p class="settings-hint">Clear all saved game progress, CV data, and preferences from this browser. This cannot be undone.</p>
+            <button class="btn btn-danger" id="resetSettings">Reset all progress</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelSettings">Cancel</button>
+          <button class="btn" id="saveSettings">Save settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESET CONFIRM MODAL -->
+    <div id="resetConfirmModal" class="modal hidden">
+      <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-head">
+          <h2>Reset all progress?</h2>
+          <button class="btn-close" id="closeResetConfirm" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="margin: 0 0 1rem; line-height: 1.6;">This will permanently delete:</p>
+        <ul style="margin: 0 0 1rem; padding-left: 1.25rem; line-height: 1.8;">
+          <li>All game progress and CV data</li>
+          <li>Settings preferences</li>
+        </ul>
+        <p style="margin: 0 0 1.25rem; color: var(--bad); font-weight: 600;">This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancelReset">Cancel</button>
+          <button class="btn" id="confirmReset" style="background: var(--bad);">Yes, reset everything</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETUP / ROLE SELECTION -->
+    <section class="setup" id="setup">
+      <div class="eyebrow">BUILD YOUR CAREER / BEAT THE FIELD</div>
+      <h2>Every card gets you<br>closer to the credits.</h2>
+      <p>Collect the right cards to set up gaming-industry experiences, complete them, and turn your work into CV evidence. Race computer rivals for the job.</p>
+      
+      <label for="jobSelect">Choose the role you're chasing</label>
+      <select id="jobSelect"></select>
+      
+      <p class="rules-note">You start with 6 cards; each rival starts with 4. Hands can hold up to 6. Sets use 2, 3 or 4 different card types depending on the experience route. Banking adds CV experience and draws replacement cards.</p>
+      <button class="primary-btn" id="startBtn">Start career run →</button>
+    </section>
+
+    <!-- LEARN / HOW TO PLAY -->
+    <section class="learn-screen hidden" id="learnScreen">
+      <div class="learn-header">
+        <h2>How to Play</h2>
+        <p class="learn-progress"><span id="learnStepNum">1</span> / 5</p>
+      </div>
+      <div class="learn-content" id="learnContent"></div>
+      <div class="navigation">
+        <button class="btn btn-secondary" id="learnPrevBtn">Previous</button>
+        <button class="btn" id="learnNextBtn">Next</button>
+      </div>
+    </section>
+
+    <!-- MAIN GAME -->
+    <main class="game hidden" id="game">
+      <section class="jobbar">
+        <div>
+          <div class="eyebrow">TARGET ROLE</div>
+          <div class="job-title" id="jobTitle"></div>
+          <p class="job-desc" id="jobDesc"></p>
+        </div>
+        <div class="job-goal" id="jobNeeds"></div>
+      </section>
+
+      <section class="guide" id="guide"></section>
+
+      <div class="layout">
+        <section class="maincol">
+          <div class="turnbar">
+            <div class="turntext" id="turnText"></div>
+            <div class="actions-left" id="actionInfo"></div>
+          </div>
+
+          <section class="rival-board" aria-labelledby="rivalBoardTitle">
+            <div class="rival-board-head">
+              <div><h3 id="rivalBoardTitle">Your competitors</h3><p>After your turn, each rival gets 2 actions to bank experience, take cards, or return unwanted cards.</p></div>
+              <span class="rival-turn-order">YOU → 3 RIVALS</span>
+            </div>
+            <div class="rivals" id="rivals"></div>
+          </section>
+
+          <section class="table">
+            <div class="section-head">
+              <h3>Community card market</h3>
+              <small>2 NEW CARDS EACH ROUND · TAKE UP TO 2</small>
+            </div>
+            <div class="panel market" id="market"></div>
+          </section>
+
+          <section class="table">
+            <div class="section-head">
+              <h3>Your hand</h3>
+              <small id="handCount"></small>
+            </div>
+            <div class="panel hand" id="hand"></div>
+
+            <div class="card-movement-zones">
+              <div class="return-drop-zone" id="returnZone">
+                <span>Drag hand cards here to return them to the deck</span>
+                <small>Up to 2 per round — or use the Return button below</small>
+              </div>
+              <div class="take-drop-hint">
+                <span>Drag market cards into your hand to pick them up</span>
+                <small>Up to 2 per round — or click market cards to preview</small>
+              </div>
+            </div>
+
+            <div class="set-builder-status" id="setBuilderStatus" aria-live="polite"></div>
+
+            <div class="controls">
+              <div class="left-actions">
+                <button class="quiet-btn" id="returnBtn">↩ Return selected to deck</button>
+              <button class="quiet-btn" id="bankBtn">✦ Bank completed set</button>
+              </div>
+              <div class="right-actions">
+                <button class="primary-btn" id="applyBtn">Apply for the job</button>
+                <button class="primary-btn" id="endBtn">End turn →</button>
+              </div>
+            </div>
+
+            <div class="legend">
+              <span><i class="dot" style="background:var(--cyan)"></i>Setup</span>
+              <span><i class="dot" style="background:var(--pink)"></i>Do the work</span>
+              <span><i class="dot" style="background:var(--gold)"></i>Proof</span>
+              <span><i class="dot" style="background:var(--orange)"></i>Impact</span>
+              <span><i class="dot" style="background:var(--lime)"></i>Wildcard</span>
+              <span>Border colors show experience routes; wildcards can fill any set slot.</span>
+              <span>Each round: return up to 2 cards for free and take up to 2 cards (1 action each). Drag cards between the market, hand and return area, or use the card popup. Hand limit: 6.</span>
+            </div>
+          </section>
+        </section>
+
+        <aside class="sidebar">
+          <section class="sidebar-card banked-storage-card">
+            <div class="storage-heading"><h3>Stored experience sets</h3><span class="storage-count" id="bankedSetProgress">0 / 2 role-fit types</span></div>
+            <p class="storage-help">Bank a set to store it here as CV experience. Your target job needs completed experience from at least two recommended routes.</p>
+            <div class="banked-set-list" id="bankedSets"><div class="storage-empty">Your completed sets will appear here.</div></div>
+          </section>
+          <section class="sidebar-card">
+            <h3>Experience sets</h3>
+            <div class="set-list" id="sets"></div>
+          </section>
+
+          <section class="sidebar-card">
+            <h3>Your CV / <span id="playerName">PLAYER</span></h3>
+            <div class="cv-stats" id="cvStats"></div>
+          </section>
+
+          <section class="sidebar-card">
+            <h3>Career feed</h3>
+            <div class="log" id="log"></div>
+          </section>
+
+          <section class="sidebar-card">
+            <h3>Your next steps</h3>
+            <div class="help">Follow the green guide at the top. It tells you exactly what to collect and which button to press. Bank completed sets to store CV experience. Your target job needs at least two different recommended routes, plus its evidence and skill requirements. Wildcards can fill any missing card slot.</div>
+          </section>
+        </aside>
+      </div>
+    </main>
+
+    <!-- ACCESSIBILITY MODAL -->
+    <div id="a11yModal" class="modal hidden">
+      <div class="modal-content a11y-modal-content">
+        <div class="modal-head">
+          <h2>Accessibility</h2>
+          <button class="btn-close" id="closeA11y" aria-label="Close accessibility settings"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <p class="a11y-subtitle">Adjust for your needs</p>
+          <div class="a11y-section-title">Vision</div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-eye a11y-icon" aria-hidden="true"></i> High Contrast</div>
+              <div class="a11y-row-desc">Stronger borders, brighter text</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="high_contrast" aria-label="Toggle high contrast"></button>
+          </div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-text-height a11y-icon" aria-hidden="true"></i> Large Text</div>
+              <div class="a11y-row-desc">Increase text size throughout</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="large_text" aria-label="Toggle large text"></button>
+          </div>
+          <div class="a11y-section-title">Hearing / Speech</div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-volume-high a11y-icon" aria-hidden="true"></i> Read Aloud (TTS)</div>
+              <div class="a11y-row-desc">Speaks dialogue and results</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="tts" aria-label="Toggle text to speech"></button>
+          </div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-gauge-simple a11y-icon" aria-hidden="true"></i> Slow Speech</div>
+              <div class="a11y-row-desc">Slower reading speed</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="slow_speech" aria-label="Toggle slow speech"></button>
+          </div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-volume-up a11y-icon" aria-hidden="true"></i> Sound</div>
+              <div class="a11y-row-desc">Background ambience and effects</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="sound" aria-label="Toggle sound"></button>
+          </div>
+          <div class="a11y-section-title">Reading / Cognition</div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-book-open a11y-icon" aria-hidden="true"></i> Simple Language</div>
+              <div class="a11y-row-desc">Uses easier, shorter words</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="simple_mode" aria-label="Toggle simple language"></button>
+          </div>
+          <div class="a11y-row">
+            <div class="a11y-row-info">
+              <div class="a11y-row-label"><i class="fa-solid fa-pause a11y-icon" aria-hidden="true"></i> Reduce Motion</div>
+              <div class="a11y-row-desc">Removes animations</div>
+            </div>
+            <button class="toggle-btn" role="switch" aria-checked="false" data-feature="reduce_motion" aria-label="Toggle reduce motion"></button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="closeA11yFooter">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="card-preview-backdrop" id="cardPreview" aria-modal="true" role="dialog"></div>
+  <div class="modal-back" id="modal"><div class="modal-content" id="modalBody"></div></div>
+
+   <!-- Game Scripts -->
+   <script src="js/game.js" defer></script>
+   <script src="js/settings.js" defer></script>
+   <script src="js/accessibility.js" defer></script>
+</body>
+</html>

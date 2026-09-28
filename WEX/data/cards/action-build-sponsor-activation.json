@@ -1,0 +1,13 @@
+{
+  "id": "action-build-sponsor-activation",
+  "name": "Build a Sponsor Activation",
+  "type": "Action",
+  "category": "Action",
+  "description": "Design a small on-site or online activity for a sponsor's brand.",
+  "flavor": "Sponsors fund the scene — treat them well.",
+  "rarity": "Uncommon",
+  "art": "🏷️",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Design"
+}

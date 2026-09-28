@@ -1,0 +1,12 @@
+{
+  "id": "action-complete-partner",
+  "name": "Complete Partner Project",
+  "type": "Action",
+  "category": "Action",
+  "description": "Work with an industry partner, act on feedback and deliver agreed outcomes.",
+  "flavor": "Professional feedback is the fastest way to level up.",
+  "rarity": "Rare",
+  "art": "✨",
+  "set": "partnership",
+  "value": 2
+}

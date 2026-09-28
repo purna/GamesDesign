@@ -1,0 +1,12 @@
+{
+  "id": "impact-measure-contribution",
+  "name": "Measure Your Contribution",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Explain what changed because of your work, using a result, feedback or clear example.",
+  "flavor": "Show the difference your contribution made.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "any",
+  "value": 1
+}

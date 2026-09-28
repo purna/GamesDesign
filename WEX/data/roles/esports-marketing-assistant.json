@@ -1,0 +1,27 @@
+{
+  "id": "esports-marketing-assistant",
+  "title": "Esports Marketing & Partnerships Assistant",
+  "description": "Support sponsorships, campaigns, brand activity and fan engagement.",
+  "category": "Marketing",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "visit",
+    "volunteering",
+    "partnership",
+    "brief"
+  ],
+  "flavor": "Stories and sponsorships connect fans to the game. You craft the bridge between brands and communities.",
+  "art": "📢",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 8,
+    "technicalSkill": 5,
+    "creativity": 7,
+    "reliability": 6
+  }
+}

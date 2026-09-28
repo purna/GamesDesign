@@ -1,0 +1,12 @@
+{
+  "id": "wild-card-tutor-advice",
+  "name": "Wild Card: Tutor Advice",
+  "type": "Wildcard",
+  "category": "Wildcard",
+  "description": "A quick check-in with your tutor. Use this card in place of a Setup card for Volunteering.",
+  "flavor": "Sometimes the right words at the right time change everything.",
+  "rarity": "Uncommon",
+  "art": "🎓",
+  "set": "volunteering",
+  "value": 2
+}

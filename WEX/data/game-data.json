@@ -1,0 +1,1241 @@
+{
+  "roles": [
+    {
+      "id": "esports-coach",
+      "title": "Esports Coach",
+      "category": "Coaching & performance",
+      "description": "Guide a squad's strategy, practice plans and in-game decision making.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Coaching"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering"
+      ],
+      "flavor": "A great coach turns raw talent into a team.",
+      "art": "🎯",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 6,
+        "creativity": 5,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "esports-performance-coach",
+      "title": "Esports Performance Coach",
+      "category": "Coaching & performance",
+      "description": "Support players' mindset, routines and consistency under competitive pressure.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "volunteering",
+        "partnership"
+      ],
+      "flavor": "Peak performance starts long before the match.",
+      "art": "🧠",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 5,
+        "technicalSkill": 5,
+        "creativity": 5,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "esports-performance-analyst",
+      "title": "Esports Performance Analyst",
+      "category": "Coaching & performance",
+      "description": "Study match data and VODs to find patterns that improve a team's play.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Analysis"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "The story is always in the data.",
+      "art": "📊",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 8,
+        "creativity": 4,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "player-wellbeing-assistant",
+      "title": "Player Wellbeing & Recovery Assistant",
+      "category": "Coaching & performance",
+      "description": "Help players manage rest, routine and workload so performance stays sustainable.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 1,
+        "skill": "Teamwork"
+      },
+      "recommendedSets": [
+        "volunteering",
+        "visit",
+        "partnership",
+        "brief"
+      ],
+      "flavor": "A rested player is a sharper player.",
+      "art": "🌱",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 5,
+        "networking": 5,
+        "technicalSkill": 3,
+        "creativity": 4,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "esports-development-officer",
+      "title": "Esports Development Officer",
+      "category": "Management & operations",
+      "description": "Grow grassroots participation and pathways into competitive gaming.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Organisation"
+      },
+      "recommendedSets": [
+        "volunteering",
+        "partnership"
+      ],
+      "flavor": "Someone has to build the ladder before others can climb it.",
+      "art": "🌉",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 8,
+        "technicalSkill": 4,
+        "creativity": 5,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "esports-venue-ops-assistant",
+      "title": "Esports Venue Operations Assistant",
+      "category": "Management & operations",
+      "description": "Keep event days running: kit, seating, signage and schedules all in place.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 1,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering",
+        "partnership",
+        "visit"
+      ],
+      "flavor": "No one notices good operations — that's the point.",
+      "art": "🏟️",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 5,
+        "networking": 5,
+        "technicalSkill": 6,
+        "creativity": 3,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "team-operations-coordinator",
+      "title": "Team Operations Coordinator",
+      "category": "Management & operations",
+      "description": "Coordinate schedules, travel and logistics behind a competitive team.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Organisation"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Great teams run on great logistics.",
+      "art": "🗂️",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 6,
+        "technicalSkill": 5,
+        "creativity": 4,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "esports-marketing-assistant",
+      "title": "Esports Marketing & Partnerships Assistant",
+      "category": "Media & business",
+      "description": "Build campaigns and sponsor relationships that grow an esports brand.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "brief",
+        "partnership",
+        "visit",
+        "volunteering"
+      ],
+      "flavor": "Every great scene needs someone telling its story.",
+      "art": "📣",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 7,
+        "technicalSkill": 4,
+        "creativity": 7,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "esports-journalist-photographer",
+      "title": "Esports Journalist / Photographer",
+      "category": "Media & business",
+      "description": "Cover matches, players and stories for fans following the scene.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "visit",
+        "brief"
+      ],
+      "flavor": "Someone has to be there to tell people what happened.",
+      "art": "📷",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 6,
+        "technicalSkill": 4,
+        "creativity": 7,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "esports-data-analyst",
+      "title": "Esports Data Analyst",
+      "category": "Media & business",
+      "description": "Turn match and audience data into insight for teams and organisers.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Analysis"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Numbers don't lie, but they do need translating.",
+      "art": "📈",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 4,
+        "technicalSkill": 8,
+        "creativity": 4,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "broadcast-production-assistant",
+      "title": "Broadcast Production Assistant",
+      "category": "Media & business",
+      "description": "Help run the live stream: camera, graphics, audio and show flow.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 1,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering"
+      ],
+      "flavor": "The show only looks effortless because someone made it so.",
+      "art": "🎬",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 5,
+        "technicalSkill": 7,
+        "creativity": 6,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "esports-community-manager",
+      "title": "Esports Community Manager",
+      "category": "Media & business",
+      "description": "Keep a game or team's community active, welcoming and well moderated.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "volunteering",
+        "brief",
+        "visit",
+        "partnership"
+      ],
+      "flavor": "A healthy community is the best marketing there is.",
+      "art": "💬",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 5,
+        "networking": 7,
+        "technicalSkill": 4,
+        "creativity": 6,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "junior-qa-tester",
+      "title": "Junior QA Tester",
+      "category": "Game industry",
+      "description": "Find bugs and help make sure a game works the way it should.",
+      "requirements": {
+        "experience": 1,
+        "evidence": 1,
+        "skill": "Problem solving"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Every shipped game was once full of bugs someone found first.",
+      "art": "🐛",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 3,
+        "technicalSkill": 8,
+        "creativity": 3,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "junior-game-artist",
+      "title": "Junior Game Artist",
+      "category": "Game industry",
+      "description": "Create characters, props and environments that bring a game to life.",
+      "requirements": {
+        "experience": 1,
+        "evidence": 2,
+        "skill": "Design"
+      },
+      "recommendedSets": [
+        "brief",
+        "partnership"
+      ],
+      "flavor": "Every asset on screen started as someone's sketch.",
+      "art": "🎨",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 5,
+        "networking": 3,
+        "technicalSkill": 6,
+        "creativity": 9,
+        "reliability": 5
+      }
+    },
+    {
+      "id": "assistant-game-designer",
+      "title": "Assistant Game Designer",
+      "category": "Game industry",
+      "description": "Shape player experiences through ideas, systems and iteration.",
+      "requirements": {
+        "experience": 1,
+        "evidence": 1,
+        "skill": "Problem solving"
+      },
+      "recommendedSets": [
+        "brief",
+        "placement",
+        "partnership",
+        "visit"
+      ],
+      "flavor": "Mechanics are your medium. Systems are your story.",
+      "art": "⚙️",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 7,
+        "creativity": 8,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "junior-game-producer",
+      "title": "Junior Game Producer",
+      "category": "Game industry",
+      "description": "Keep a development team on track: schedules, communication and priorities.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Organisation"
+      },
+      "recommendedSets": [
+        "placement",
+        "partnership"
+      ],
+      "flavor": "Someone has to hold the whole picture in view.",
+      "art": "📋",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 6,
+        "technicalSkill": 5,
+        "creativity": 5,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "esports-event-assistant",
+      "title": "Esports Event Assistant",
+      "description": "Help tournaments, leagues and live gaming events run smoothly.",
+      "category": "Events & Production",
+      "requirements": {
+        "experience": 1,
+        "evidence": 1,
+        "skill": "Teamwork"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering",
+        "visit",
+        "brief"
+      ],
+      "flavor": "From LAN parties to arena shows — you make the magic happen behind the scenes.",
+      "art": "🎮",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 8,
+        "technicalSkill": 5,
+        "creativity": 4,
+        "reliability": 9
+      }
+    }
+  ],
+  "cards": [
+    {
+      "id": "setup-placement-details",
+      "name": "Confirm Placement Details",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Agree tasks, dates, days and hours with the employer; collect their contact details and address; confirm your tutor's name.",
+      "flavor": "No request goes anywhere without the details.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "setup-placement-onboarding",
+      "name": "Complete Placement Onboarding",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Submit required paperwork, set up your workspace access, and confirm your reporting line with your supervisor.",
+      "flavor": "Paperwork is boring. Getting started is not.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "action-complete-placement",
+      "name": "Complete Placement Tasks",
+      "type": "Action",
+      "category": "Action",
+      "description": "Choose a focus — event operations, streaming support, social media, player support, or equipment setup — and do the work.",
+      "flavor": "This is where the CV entry actually gets written.",
+      "rarity": "Common",
+      "art": "🛠️",
+      "set": "placement",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "proof-log-placement-hours",
+      "name": "Log Placement Hours & Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record your hours and write what you did, what you learned, and how it connects to your target job.",
+      "flavor": "Evidence is what turns a placement into a reference.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "placement",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "proof-placement-reflection",
+      "name": "Placement Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write a mid-point or final reflection on your placement tasks, challenges overcome, and skills developed.",
+      "flavor": "Reflection turns experience into evidence.",
+      "rarity": "Common",
+      "art": "🤔",
+      "set": "placement",
+      "value": 1,
+      "skill": "Reflection"
+    },
+    {
+      "id": "impact-placement-outcome",
+      "name": "Show Placement Impact",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Summarise the result of your placement work and how it helped the esports team or event.",
+      "flavor": "Show what changed because you were there.",
+      "rarity": "Common",
+      "art": "📊",
+      "set": "placement",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-placement-showcase",
+      "name": "Showcase Placement Result",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Present the final outcome of your placement work — a demo, report, or deliverable — and explain its impact.",
+      "flavor": "The best placements end with a story worth telling.",
+      "rarity": "Common",
+      "art": "🎤",
+      "set": "placement",
+      "value": 1,
+      "skill": "Presentation"
+    },
+    {
+      "id": "setup-book-studio-visit",
+      "name": "Book Studio Visit",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Confirm the visit date, location, booking, and travel or access arrangements. Prepare two questions.",
+      "flavor": "Turning up unprepared wastes everyone's time.",
+      "rarity": "Common",
+      "art": "🗓️",
+      "set": "visit",
+      "value": 1
+    },
+    {
+      "id": "action-attend-visit",
+      "name": "Attend Employer Visit",
+      "type": "Action",
+      "category": "Action",
+      "description": "Ask prepared questions, observe workflows and note one thing you learned.",
+      "flavor": "You're not a tourist. You're scouting your future.",
+      "rarity": "Common",
+      "art": "👀",
+      "set": "visit",
+      "value": 1
+    },
+    {
+      "id": "proof-record-industry-insight",
+      "name": "Record Industry Insight",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write up one thing you learned and how it changes your view of the job.",
+      "flavor": "Insight only counts once it's written down.",
+      "rarity": "Common",
+      "art": "💡",
+      "set": "visit",
+      "value": 1,
+      "skill": "Industry Knowledge"
+    },
+    {
+      "id": "setup-confirm-volunteer-shift",
+      "name": "Confirm Volunteer Shift",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Confirm the organiser, event date, location, responsibilities, start/finish times and who supervises you.",
+      "flavor": "A shift no one confirmed is a shift that falls through.",
+      "rarity": "Common",
+      "art": "📅",
+      "set": "volunteering",
+      "value": 1
+    },
+    {
+      "id": "action-volunteer-tournament",
+      "name": "Volunteer at Tournament",
+      "type": "Action",
+      "category": "Action",
+      "description": "Choose a role — registration, player support, setup, social posts, or match scheduling — and get stuck in.",
+      "flavor": "Tournaments run on volunteers like you.",
+      "rarity": "Common",
+      "art": "🙋",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "proof-reliability-checkin",
+      "name": "Reliability Check-In",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Explain how you'll confirm your shift and contact the organiser if plans change.",
+      "flavor": "Reliability is a skill, not a personality trait.",
+      "rarity": "Common",
+      "art": "✅",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "proof-volunteer-feedback",
+      "name": "Volunteer Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Collect and record feedback from the event organiser or fellow volunteers about your contribution.",
+      "flavor": "A thank-you note is worth more than a certificate.",
+      "rarity": "Common",
+      "art": "💬",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "setup-review-brief",
+      "name": "Review the Brief",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Read the brief, identify the audience, check the deadline, and decide what you'll make.",
+      "flavor": "A clear brief saves three drafts later.",
+      "rarity": "Common",
+      "art": "📄",
+      "set": "brief",
+      "value": 1
+    },
+    {
+      "id": "action-create-tournament-promo",
+      "name": "Create Tournament Promo",
+      "type": "Action",
+      "category": "Action",
+      "description": "Spend focused time producing a poster, short video, social post, or stream overlay.",
+      "flavor": "Making the thing is always the hardest part.",
+      "rarity": "Common",
+      "art": "🖌️",
+      "set": "brief",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "proof-present-feedback",
+      "name": "Present & Reflect on Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Present your work, note the feedback, and save the final version for your portfolio.",
+      "flavor": "Feedback is free improvement if you actually listen.",
+      "rarity": "Common",
+      "art": "🎤",
+      "set": "brief",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-document-brief-learnings",
+      "name": "Document Brief Learnings",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write up what the brief taught you about your role, the client's needs, and your design decisions.",
+      "flavor": "A written record is the bridge between doing and reflecting.",
+      "rarity": "Common",
+      "art": "📓",
+      "set": "brief",
+      "value": 1,
+      "skill": "Reflection"
+    },
+    {
+      "id": "setup-confirm-partner-project",
+      "name": "Confirm Partner Project",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Find out who the industry partner is, what the project involves, when sessions happen, and what they expect you to produce.",
+      "flavor": "Partnerships work best with clear expectations on both sides.",
+      "rarity": "Common",
+      "art": "🤝",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "action-complete-partner-task",
+      "name": "Complete Partner Task",
+      "type": "Action",
+      "category": "Action",
+      "description": "Complete the agreed task and ask the partner for feedback.",
+      "flavor": "Professional feedback is worth more than a grade.",
+      "rarity": "Common",
+      "art": "📦",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Problem solving"
+    },
+    {
+      "id": "proof-revise-with-feedback",
+      "name": "Revise With Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Use the partner's feedback to improve your work before it goes in your portfolio.",
+      "flavor": "The revision is where the real learning happens.",
+      "rarity": "Common",
+      "art": "🔁",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "proof-showcase-partner-work",
+      "name": "Showcase Partner Work",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document the deliverables produced during the partnership, highlighting your specific contribution and the skills applied.",
+      "flavor": "The best partnerships leave a paper trail of success.",
+      "rarity": "Common",
+      "art": "📊",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "impact-partnership-outcome",
+      "name": "Share Partner Outcome",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Present the finished result to the partner and explain how you used their feedback.",
+      "flavor": "A strong partnership leaves both sides with something useful.",
+      "rarity": "Common",
+      "art": "🤝",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-partner-feedback",
+      "name": "Share Partner Feedback",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Record the partner's response to your completed work and how it met their objectives.",
+      "flavor": "External validation is the gold standard of achievement.",
+      "rarity": "Common",
+      "art": "🗣️",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "action-review-match-vods",
+      "name": "Review Match VODs",
+      "type": "Action",
+      "category": "Action",
+      "description": "Watch back recent matches and note patterns worth acting on.",
+      "flavor": "The replay never lies.",
+      "rarity": "Uncommon",
+      "art": "📼",
+      "set": "placement",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "action-plan-practice-session",
+      "name": "Plan a Practice Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Design a practice block with clear goals for a squad or player.",
+      "flavor": "A plan turns practice into progress.",
+      "rarity": "Uncommon",
+      "art": "🗓️",
+      "set": "placement",
+      "value": 1,
+      "skill": "Coaching"
+    },
+    {
+      "id": "action-track-player-metrics",
+      "name": "Track Player Metrics",
+      "type": "Action",
+      "category": "Action",
+      "description": "Log stats across sessions to spot trends in performance.",
+      "flavor": "If you can't measure it, you're guessing.",
+      "rarity": "Uncommon",
+      "art": "📐",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "action-check-player-wellbeing",
+      "name": "Check Player Wellbeing",
+      "type": "Action",
+      "category": "Action",
+      "description": "Check in on rest, workload and mood before a big event.",
+      "flavor": "Burnt-out players don't perform.",
+      "rarity": "Uncommon",
+      "art": "🌤️",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "action-run-community-session",
+      "name": "Run a Community Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Host a Q&A, watch party or community event for fans or players.",
+      "flavor": "Communities grow around people who show up.",
+      "rarity": "Uncommon",
+      "art": "🎙️",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "action-set-up-match-day",
+      "name": "Set Up Match Day",
+      "type": "Action",
+      "category": "Action",
+      "description": "Prepare kit, seating, signage and schedules ahead of a live event.",
+      "flavor": "Match day starts hours before the first game.",
+      "rarity": "Uncommon",
+      "art": "🎮",
+      "set": "visit",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "action-build-sponsor-activation",
+      "name": "Build a Sponsor Activation",
+      "type": "Action",
+      "category": "Action",
+      "description": "Design a small on-site or online activity for a sponsor's brand.",
+      "flavor": "Sponsors fund the scene — treat them well.",
+      "rarity": "Uncommon",
+      "art": "🏷️",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-publish-event-coverage",
+      "name": "Publish Event Coverage",
+      "type": "Action",
+      "category": "Action",
+      "description": "Write up or photograph an event for publication.",
+      "flavor": "If it isn't published, it didn't happen — as far as the internet's concerned.",
+      "rarity": "Uncommon",
+      "art": "🗞️",
+      "set": "brief",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "action-operate-live-stream",
+      "name": "Operate the Live Stream",
+      "type": "Action",
+      "category": "Action",
+      "description": "Run camera, graphics or audio during a live broadcast.",
+      "flavor": "The stream is the show — and the show must go on.",
+      "rarity": "Uncommon",
+      "art": "📡",
+      "set": "placement",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "wild-mentor-advice",
+      "name": "Wild Card: Mentor Advice",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A mentor points you in the right direction. Use this card in place of any Setup, Action or Proof card for a Live Project Brief.",
+      "flavor": "Sometimes the fastest route is someone who's done it before.",
+      "rarity": "Rare",
+      "art": "🌟",
+      "set": "brief",
+      "value": 1
+    },
+    {
+      "id": "wild-careers-team",
+      "name": "Wild Card: Careers Team",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "The Careers & Employability team steps in. Use this card in place of any Setup, Action or Proof card for a Block Placement.",
+      "flavor": "They've seen every version of this problem before.",
+      "rarity": "Rare",
+      "art": "🧭",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "wild-card-evidence-boost",
+      "name": "Wild Card: Evidence Boost",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A second pair of eyes strengthens your evidence. Use this card in place of a Proof card for a Block Placement.",
+      "flavor": "Evidence worth keeping is evidence worth boosting.",
+      "rarity": "Uncommon",
+      "art": "⭐",
+      "set": "placement",
+      "value": 2
+    },
+    {
+      "id": "wild-card-extra-time",
+      "name": "Wild Card: Extra Time",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A brief extension to get the work right. Use this card in place of an Action card for a Live Project Brief.",
+      "flavor": "Time is the one resource you can never get back.",
+      "rarity": "Uncommon",
+      "art": "⏳",
+      "set": "brief",
+      "value": 2
+    },
+    {
+      "id": "wild-card-tutor-advice",
+      "name": "Wild Card: Tutor Advice",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A quick check-in with your tutor. Use this card in place of a Setup card for Volunteering.",
+      "flavor": "Sometimes the right words at the right time change everything.",
+      "rarity": "Uncommon",
+      "art": "🎓",
+      "set": "volunteering",
+      "value": 2
+    },
+    {
+      "id": "action-complete-partner",
+      "name": "Complete Partner Project",
+      "type": "Action",
+      "category": "Action",
+      "description": "Work with an industry partner, act on feedback and deliver agreed outcomes.",
+      "flavor": "Professional feedback is the fastest way to level up.",
+      "rarity": "Rare",
+      "art": "✨",
+      "set": "partnership",
+      "value": 2
+    },
+    {
+      "id": "action-deliver-brief",
+      "name": "Deliver the Live Brief",
+      "type": "Action",
+      "category": "Action",
+      "description": "Finish and present work to the brief. Respond to feedback and iterate.",
+      "flavor": "Done is better than perfect. Shipped is better than done.",
+      "rarity": "Uncommon",
+      "art": "🚀",
+      "set": "brief",
+      "value": 2
+    },
+    {
+      "id": "action-finish-assignment",
+      "name": "Finish Skills Assignment",
+      "type": "Action",
+      "category": "Action",
+      "description": "Complete a course assignment that demonstrates subject knowledge relevant to your role.",
+      "flavor": "Grades open doors. Skills keep them open.",
+      "rarity": "Common",
+      "art": "📚",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "action-revise-feedback",
+      "name": "Revise After Feedback",
+      "type": "Action",
+      "category": "Action",
+      "description": "Improve work using specific feedback. Shows growth mindset and resilience.",
+      "flavor": "First draft is for you. Second draft is for them.",
+      "rarity": "Uncommon",
+      "art": "🔄",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "proof-ask-reference",
+      "name": "Ask for a Reference",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Request written feedback from someone who supervised your work.",
+      "flavor": "A reference is a vote of confidence in writing.",
+      "rarity": "Uncommon",
+      "art": "✍️",
+      "set": "any",
+      "value": 2
+    },
+    {
+      "id": "proof-cv-achievement",
+      "name": "Write a CV Achievement",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Describe your contribution, the skill you used and the measurable outcome.",
+      "flavor": "Don't list duties. List impact.",
+      "rarity": "Uncommon",
+      "art": "📄",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "proof-daily-log",
+      "name": "Daily Log & Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record what you did, what you learned and how it connects to your target role.",
+      "flavor": "Experience unrecorded is experience forgotten.",
+      "rarity": "Common",
+      "art": "📓",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "proof-distinction-earned",
+      "name": "Distinction Earned",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Bonus evidence: subject excellence.",
+      "flavor": "Excellence isn't an accident. It's the result of intention.",
+      "rarity": "Uncommon",
+      "art": "🏆",
+      "set": "any",
+      "value": 2
+    },
+    {
+      "id": "proof-save-portfolio",
+      "name": "Save Portfolio Evidence",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Keep a finished work sample and explain your role, tools used and outcome.",
+      "flavor": "Your portfolio is your proof. Make it undeniable.",
+      "rarity": "Uncommon",
+      "art": "🖼️",
+      "set": "any",
+      "value": 2
+    },
+    {
+      "id": "setup-agree-dates-times",
+      "name": "Agree Dates & Times",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Confirm the schedule and hours in writing. Must fit college hours (8:30am–5:30pm, max 8hr day).",
+      "flavor": "Verbal agreements evaporate. Written ones stick.",
+      "rarity": "Common",
+      "art": "📅",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-agree-role",
+      "name": "Agree Your Role",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Clarify tasks, responsibilities, supervision and what you'll produce.",
+      "flavor": "Undefined work is unpaid work. Define it.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-book-visit",
+      "name": "Book the Visit",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Confirm your place, location, joining details and any security requirements.",
+      "flavor": "A booked visit is a foot in the door.",
+      "rarity": "Common",
+      "art": "🎫",
+      "set": "visit",
+      "value": 1
+    },
+    {
+      "id": "setup-employer-contact",
+      "name": "Employer Contact",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Get a named contact and a way to reach them — email, phone, LinkedIn.",
+      "flavor": "A name on a spreadsheet becomes a mentor in real life.",
+      "rarity": "Common",
+      "art": "📇",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-find-org",
+      "name": "Find an Organisation",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Identify a studio, team, publisher or community that matches your career goal.",
+      "flavor": "Every journey starts with a destination in mind.",
+      "rarity": "Common",
+      "art": "🔍",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-find-volunteer",
+      "name": "Find a Volunteer Shift",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Choose an event with a clear role, organiser and genuine need for help.",
+      "flavor": "The best volunteers show up where they're needed most.",
+      "rarity": "Common",
+      "art": "🤝",
+      "set": "volunteering",
+      "value": 1
+    },
+    {
+      "id": "setup-partner-expectations",
+      "name": "Partner Expectations",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Find out what the industry partner expects you to produce and how they'll support you.",
+      "flavor": "Partners don't want free labour. They want fresh perspective.",
+      "rarity": "Common",
+      "art": "🤝",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "setup-travel-access",
+      "name": "Travel & Access Plan",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Check location, travel, equipment needs and any access requirements.",
+      "flavor": "The best plan fails if you can't get through the door.",
+      "rarity": "Common",
+      "art": "🗺️",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-understand-brief",
+      "name": "Understand the Brief",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Clarify the audience, deliverable, deadline and success criteria with the client.",
+      "flavor": "A brief misunderstood is a project doomed.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "brief",
+      "value": 1
+    },
+    {
+      "id": "impact-measure-contribution",
+      "name": "Measure Your Contribution",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Explain what changed because of your work, using a result, feedback or clear example.",
+      "flavor": "Show the difference your contribution made.",
+      "rarity": "Uncommon",
+      "art": "📈",
+      "set": "any",
+      "value": 1
+    }
+  ],
+  "sets": [
+    {
+      "id": "placement",
+      "name": "Block Placement",
+      "art": "🏢",
+      "groupSize": 4,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof",
+        "Impact"
+      ],
+      "reward": {
+        "experience": "Gaming Industry Placement",
+        "evidenceValue": 2,
+        "reference": true
+      },
+      "why": "A placement gives practical experience and, if it goes well, an employer reference."
+    },
+    {
+      "id": "visit",
+      "name": "Employer Visit",
+      "art": "🏭",
+      "groupSize": 2,
+      "requiredCategories": [
+        "Setup",
+        "Action"
+      ],
+      "reward": {
+        "experience": "Industry Insight Visit",
+        "evidenceValue": 1,
+        "reference": false
+      },
+      "why": "A visit builds industry understanding and useful contacts."
+    },
+    {
+      "id": "volunteering",
+      "name": "Volunteering",
+      "art": "🙌",
+      "groupSize": 3,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof"
+      ],
+      "reward": {
+        "experience": "Tournament Volunteer",
+        "evidenceValue": 1,
+        "reference": false
+      },
+      "why": "Volunteering shows reliability, initiative and teamwork."
+    },
+    {
+      "id": "brief",
+      "name": "Live Project Brief",
+      "art": "🎨",
+      "groupSize": 3,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof"
+      ],
+      "reward": {
+        "experience": "Tournament Promo Project",
+        "evidenceValue": 2,
+        "reference": false
+      },
+      "why": "A finished brief creates a portfolio piece that shows you can respond to a client's needs."
+    },
+    {
+      "id": "partnership",
+      "name": "Industry Partnership",
+      "art": "🎓",
+      "groupSize": 4,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof",
+        "Impact"
+      ],
+      "reward": {
+        "experience": "Industry Collaboration",
+        "evidenceValue": 2,
+        "reference": false
+      },
+      "why": "A partnership gives you specialist feedback and experience working with professionals."
+    }
+  ]
+}

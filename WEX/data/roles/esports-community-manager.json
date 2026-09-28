@@ -1,0 +1,25 @@
+{
+  "id": "esports-community-manager",
+  "title": "Esports Community Manager",
+  "category": "Media & business",
+  "description": "Keep a game or team's community active, welcoming and well moderated.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "volunteering",
+    "brief"
+  ],
+  "flavor": "A healthy community is the best marketing there is.",
+  "art": "💬",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 5,
+    "networking": 7,
+    "technicalSkill": 4,
+    "creativity": 6,
+    "reliability": 6
+  }
+}

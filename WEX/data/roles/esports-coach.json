@@ -1,0 +1,25 @@
+{
+  "id": "esports-coach",
+  "title": "Esports Coach",
+  "category": "Coaching & performance",
+  "description": "Guide a squad's strategy, practice plans and in-game decision making.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Coaching"
+  },
+  "recommendedSets": [
+    "placement",
+    "volunteering"
+  ],
+  "flavor": "A great coach turns raw talent into a team.",
+  "art": "🎯",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 5,
+    "technicalSkill": 6,
+    "creativity": 5,
+    "reliability": 8
+  }
+}

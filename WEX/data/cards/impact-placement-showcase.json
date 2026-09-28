@@ -1,0 +1,13 @@
+{
+  "id": "impact-placement-showcase",
+  "name": "Showcase Placement Result",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Present the final outcome of your placement work — a demo, report, or deliverable — and explain its impact.",
+  "flavor": "The best placements end with a story worth telling.",
+  "rarity": "Common",
+  "art": "🎤",
+  "set": "placement",
+  "value": 1,
+  "skill": "Presentation"
+}

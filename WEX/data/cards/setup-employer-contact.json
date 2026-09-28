@@ -1,0 +1,12 @@
+{
+  "id": "setup-employer-contact",
+  "name": "Employer Contact",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Get a named contact and a way to reach them — email, phone, LinkedIn.",
+  "flavor": "A name on a spreadsheet becomes a mentor in real life.",
+  "rarity": "Common",
+  "art": "📇",
+  "set": "any",
+  "value": 1
+}

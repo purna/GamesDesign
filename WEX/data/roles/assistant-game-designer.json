@@ -1,0 +1,27 @@
+{
+  "id": "assistant-game-designer",
+  "title": "Assistant Game Designer",
+  "category": "Game industry",
+  "description": "Shape player experiences through ideas, systems and iteration.",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Problem solving"
+  },
+  "recommendedSets": [
+    "brief",
+    "placement",
+    "partnership",
+    "visit"
+  ],
+  "flavor": "Mechanics are your medium. Systems are your story.",
+  "art": "⚙️",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 5,
+    "technicalSkill": 7,
+    "creativity": 8,
+    "reliability": 6
+  }
+}

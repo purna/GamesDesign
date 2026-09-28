@@ -1,0 +1,27 @@
+{
+  "id": "esports-event-assistant",
+  "title": "Esports Event Assistant",
+  "description": "Help tournaments, leagues and live gaming events run smoothly.",
+  "category": "Events & Production",
+  "requirements": {
+    "experience": 1,
+    "evidence": 1,
+    "skill": "Teamwork"
+  },
+  "recommendedSets": [
+    "placement",
+    "volunteering",
+    "visit",
+    "brief"
+  ],
+  "flavor": "From LAN parties to arena shows — you make the magic happen behind the scenes.",
+  "art": "🎮",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 8,
+    "technicalSkill": 5,
+    "creativity": 4,
+    "reliability": 9
+  }
+}

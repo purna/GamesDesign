@@ -1,0 +1,13 @@
+{
+  "id": "proof-present-feedback",
+  "name": "Present & Reflect on Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present your work, note the feedback, and save the final version for your portfolio.",
+  "flavor": "Feedback is free improvement if you actually listen.",
+  "rarity": "Common",
+  "art": "🎤",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

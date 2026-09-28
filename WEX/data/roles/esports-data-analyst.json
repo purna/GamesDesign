@@ -1,0 +1,25 @@
+{
+  "id": "esports-data-analyst",
+  "title": "Esports Data Analyst",
+  "category": "Media & business",
+  "description": "Turn match and audience data into insight for teams and organisers.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Analysis"
+  },
+  "recommendedSets": [
+    "placement",
+    "brief"
+  ],
+  "flavor": "Numbers don't lie, but they do need translating.",
+  "art": "📈",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 4,
+    "reliability": 6
+  }
+}

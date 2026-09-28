@@ -1,0 +1,12 @@
+{
+  "id": "setup-travel-access",
+  "name": "Travel & Access Plan",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Check location, travel, equipment needs and any access requirements.",
+  "flavor": "The best plan fails if you can't get through the door.",
+  "rarity": "Common",
+  "art": "🗺️",
+  "set": "any",
+  "value": 1
+}

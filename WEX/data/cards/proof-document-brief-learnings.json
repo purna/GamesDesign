@@ -1,0 +1,13 @@
+{
+  "id": "proof-document-brief-learnings",
+  "name": "Document Brief Learnings",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Write up what the brief taught you about your role, the client's needs, and your design decisions.",
+  "flavor": "A written record is the bridge between doing and reflecting.",
+  "rarity": "Common",
+  "art": "📓",
+  "set": "brief",
+  "value": 1,
+  "skill": "Reflection"
+}

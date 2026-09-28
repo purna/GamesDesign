@@ -1,0 +1,25 @@
+{
+  "id": "esports-journalist-photographer",
+  "title": "Esports Journalist / Photographer",
+  "category": "Media & business",
+  "description": "Cover matches, players and stories for fans following the scene.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "visit",
+    "brief"
+  ],
+  "flavor": "Someone has to be there to tell people what happened.",
+  "art": "📷",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 6,
+    "technicalSkill": 4,
+    "creativity": 7,
+    "reliability": 6
+  }
+}

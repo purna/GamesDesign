@@ -1,0 +1,25 @@
+{
+  "id": "team-operations-coordinator",
+  "title": "Team Operations Coordinator",
+  "category": "Management & operations",
+  "description": "Coordinate schedules, travel and logistics behind a competitive team.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Organisation"
+  },
+  "recommendedSets": [
+    "placement",
+    "brief"
+  ],
+  "flavor": "Great teams run on great logistics.",
+  "art": "🗂️",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 6,
+    "technicalSkill": 5,
+    "creativity": 4,
+    "reliability": 8
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "wild-card-extra-time",
+  "name": "Wild Card: Extra Time",
+  "type": "Wildcard",
+  "category": "Wildcard",
+  "description": "A brief extension to get the work right. Use this card in place of an Action card for a Live Project Brief.",
+  "flavor": "Time is the one resource you can never get back.",
+  "rarity": "Uncommon",
+  "art": "⏳",
+  "set": "brief",
+  "value": 2
+}

@@ -1,0 +1,25 @@
+{
+  "id": "junior-game-producer",
+  "title": "Junior Game Producer",
+  "category": "Game industry",
+  "description": "Keep a development team on track: schedules, communication and priorities.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Organisation"
+  },
+  "recommendedSets": [
+    "placement",
+    "partnership"
+  ],
+  "flavor": "Someone has to hold the whole picture in view.",
+  "art": "📋",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 6,
+    "technicalSkill": 5,
+    "creativity": 5,
+    "reliability": 8
+  }
+}

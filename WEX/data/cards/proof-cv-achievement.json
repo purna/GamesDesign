@@ -1,0 +1,12 @@
+{
+  "id": "proof-cv-achievement",
+  "name": "Write a CV Achievement",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Describe your contribution, the skill you used and the measurable outcome.",
+  "flavor": "Don't list duties. List impact.",
+  "rarity": "Uncommon",
+  "art": "📄",
+  "set": "any",
+  "value": 1
+}

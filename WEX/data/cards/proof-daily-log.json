@@ -1,0 +1,12 @@
+{
+  "id": "proof-daily-log",
+  "name": "Daily Log & Reflection",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Record what you did, what you learned and how it connects to your target role.",
+  "flavor": "Experience unrecorded is experience forgotten.",
+  "rarity": "Common",
+  "art": "📓",
+  "set": "any",
+  "value": 1
+}

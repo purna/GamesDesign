@@ -1,0 +1,12 @@
+{
+  "id": "setup-review-brief",
+  "name": "Review the Brief",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Read the brief, identify the audience, check the deadline, and decide what you'll make.",
+  "flavor": "A clear brief saves three drafts later.",
+  "rarity": "Common",
+  "art": "📄",
+  "set": "brief",
+  "value": 1
+}

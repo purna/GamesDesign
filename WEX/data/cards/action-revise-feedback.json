@@ -1,0 +1,12 @@
+{
+  "id": "action-revise-feedback",
+  "name": "Revise After Feedback",
+  "type": "Action",
+  "category": "Action",
+  "description": "Improve work using specific feedback. Shows growth mindset and resilience.",
+  "flavor": "First draft is for you. Second draft is for them.",
+  "rarity": "Uncommon",
+  "art": "🔄",
+  "set": "any",
+  "value": 1
+}

@@ -1,0 +1,25 @@
+{
+  "id": "broadcast-production-assistant",
+  "title": "Broadcast Production Assistant",
+  "category": "Media & business",
+  "description": "Help run the live stream: camera, graphics, audio and show flow.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 1,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": [
+    "placement",
+    "volunteering"
+  ],
+  "flavor": "The show only looks effortless because someone made it so.",
+  "art": "🎬",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 5,
+    "technicalSkill": 7,
+    "creativity": 6,
+    "reliability": 7
+  }
+}

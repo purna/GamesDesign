@@ -1,0 +1,12 @@
+{
+  "id": "setup-confirm-partner-project",
+  "name": "Confirm Partner Project",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Find out who the industry partner is, what the project involves, when sessions happen, and what they expect you to produce.",
+  "flavor": "Partnerships work best with clear expectations on both sides.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "partnership",
+  "value": 1
+}
