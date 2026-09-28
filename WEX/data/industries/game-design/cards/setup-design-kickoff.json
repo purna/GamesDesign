@@ -1,0 +1,13 @@
+{
+  "id": "setup-design-kickoff",
+  "name": "Design Kickoff Meeting",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Lead the initial design meeting to align the team on vision, scope, and constraints.",
+  "flavor": "Every great game starts with a conversation.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa8",
+  "set": "placement",
+  "value": 1,
+  "skill": "Design"
+}

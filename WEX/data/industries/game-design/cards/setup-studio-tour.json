@@ -1,0 +1,12 @@
+{
+  "id": "setup-studio-tour",
+  "name": "Studio Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Tour another development studio and observe their design process.",
+  "flavor": "Not all studios work the same way.",
+  "rarity": "Common",
+  "art": "\ud83c\udfe2",
+  "set": "visit",
+  "value": 1
+}

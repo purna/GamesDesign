@@ -1,0 +1,25 @@
+{
+  "id": "commercial-illustrator",
+  "title": "Commercial Illustrator",
+  "category": "Illustration",
+  "description": "Create illustrations for advertising, marketing, and brand campaigns.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "brief",
+    "partnership"
+  ],
+  "flavor": "Sell with pictures.",
+  "art": "\ud83d\udce2",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 7,
+    "technicalSkill": 6,
+    "creativity": 8,
+    "reliability": 6
+  }
+}

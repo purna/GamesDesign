@@ -1,0 +1,13 @@
+{
+  "id": "proof-team-meeting",
+  "name": "Post-Match Team Meeting",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Lead a post-match analysis session with the team.",
+  "flavor": "Great teams reflect.",
+  "rarity": "Common",
+  "art": "\ud83d\udc65",
+  "set": "placement",
+  "value": 1,
+  "skill": "Analysis"
+}

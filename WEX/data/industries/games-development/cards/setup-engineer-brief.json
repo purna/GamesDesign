@@ -1,0 +1,13 @@
+{
+  "id": "setup-engineer-brief",
+  "name": "Engineer Briefing",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Meet with the design team to understand technical requirements.",
+  "flavor": "Good questions prevent bad code.",
+  "rarity": "Common",
+  "art": "\ud83d\udccb",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

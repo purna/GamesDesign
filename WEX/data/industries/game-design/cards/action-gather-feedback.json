@@ -1,0 +1,13 @@
+{
+  "id": "action-gather-feedback",
+  "name": "Gather Stakeholder Feedback",
+  "type": "Action",
+  "category": "Action",
+  "description": "Collect design feedback from stakeholders and other teams.",
+  "flavor": "Everyone has an opinion on your design.",
+  "rarity": "Common",
+  "art": "\ud83d\udcac",
+  "set": "visit",
+  "value": 1,
+  "skill": "Communication"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "action-run-training",
+  "name": "Run Training Session",
+  "type": "Action",
+  "category": "Action",
+  "description": "Run a training session for aspiring players.",
+  "flavor": "Coach the next generation.",
+  "rarity": "Common",
+  "art": "\ud83c\udfcb\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Coaching"
+}

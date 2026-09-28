@@ -1,0 +1,13 @@
+{
+  "id": "proof-design-doc-final",
+  "name": "Final Design Document",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Write the completed design document with all specifications.",
+  "flavor": "The blueprint for implementation.",
+  "rarity": "Common",
+  "art": "\ud83d\udcda",
+  "set": "placement",
+  "value": 1,
+  "skill": "Documentation"
+}

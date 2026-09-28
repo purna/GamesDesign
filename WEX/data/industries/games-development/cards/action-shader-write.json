@@ -1,0 +1,13 @@
+{
+  "id": "action-shader-write",
+  "name": "Write Shader",
+  "type": "Action",
+  "category": "Action",
+  "description": "Implement a custom shader for visual effects.",
+  "flavor": "Shaders are magic.",
+  "rarity": "Common",
+  "art": "\ud83d\udd2e",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

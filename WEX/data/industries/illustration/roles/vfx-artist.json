@@ -1,0 +1,22 @@
+{
+  "id": "vfx-artist",
+  "title": "VFX Artist",
+  "category": "Illustration",
+  "description": "Create real-time visual effects: explosions, magic, weather, and atmosphere.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Particles are pixels with physics.",
+  "art": "✨",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 9,
+    "reliability": 6
+  }
+}

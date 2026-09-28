@@ -1,0 +1,13 @@
+{
+  "id": "setup-render-farm",
+  "name": "Render Farm Setup",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Configure render settings and farm allocation for shared project.",
+  "flavor": "Rendering costs money.",
+  "rarity": "Common",
+  "art": "\ud83d\udda5\ufe0f",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

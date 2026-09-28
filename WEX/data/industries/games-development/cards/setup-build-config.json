@@ -1,0 +1,13 @@
+{
+  "id": "setup-build-config",
+  "name": "Build Configuration",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Configure build settings for different platforms and environments.",
+  "flavor": "Configuration is king.",
+  "rarity": "Common",
+  "art": "\u2699\ufe0f",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

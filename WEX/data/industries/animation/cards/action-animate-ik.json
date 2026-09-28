@@ -1,0 +1,13 @@
+{
+  "id": "action-animate-ik",
+  "name": "IK/FK Setup",
+  "type": "Action",
+  "category": "Action",
+  "description": "Set up IK/FK switching for animation flexibility.",
+  "flavor": "Controls are king.",
+  "rarity": "Common",
+  "art": "\u2699\ufe0f",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

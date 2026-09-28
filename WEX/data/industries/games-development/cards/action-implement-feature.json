@@ -1,0 +1,13 @@
+{
+  "id": "action-implement-feature",
+  "name": "Implement Feature",
+  "type": "Action",
+  "category": "Action",
+  "description": "Implement a gameplay feature from the design specification.",
+  "flavor": "From design to code.",
+  "rarity": "Common",
+  "art": "\u2699\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Problem solving"
+}

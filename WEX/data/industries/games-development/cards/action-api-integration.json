@@ -1,0 +1,13 @@
+{
+  "id": "action-api-integration",
+  "name": "API Integration",
+  "type": "Action",
+  "category": "Action",
+  "description": "Integrate an external API into the game client.",
+  "flavor": "The internet is an API.",
+  "rarity": "Common",
+  "art": "\ud83d\udd17",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Problem solving"
+}

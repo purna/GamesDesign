@@ -1,0 +1,13 @@
+{
+  "id": "proof-polish-pass",
+  "name": "Polish Pass",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Apply final polish pass to animation curves and timing.",
+  "flavor": "Polish makes it shine.",
+  "rarity": "Common",
+  "art": "\u2728",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

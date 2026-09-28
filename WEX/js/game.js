@@ -49,7 +49,9 @@ window.RTTR = {
 const $ = (id) => document.getElementById(id);
 
 const el = {
-  jobSelect: $('jobSelect'), startBtn: $('startBtn'),
+  industrySelect: $('industrySelect'), industryGrid: $('industryGrid'),
+  jobSelect: $('jobSelect'), startBtn: $('startBtn'), backToIndustryBtn: $('backToIndustryBtn'),
+  industryBreadcrumb: $('industryBreadcrumb'),
   completedRoles: $('completedRoles'),
   helpBtn: $('helpBtn'),
   setup: $('setup'),
@@ -106,12 +108,21 @@ const MAX_RETURNS_PER_ROUND = 2;
 const MAX_MARKET_SWAPS_PER_ROUND = 2;
 const TURN_SECONDS = 300;
 
+const INDUSTRIES = [
+  { id: 'esports', name: 'Esports', icon: '🎮', desc: 'Competitive gaming, events, coaching, and production' },
+  { id: 'game-design', name: 'Game Design', icon: '🎮', desc: 'Gameplay, systems, narrative, and level design' },
+  { id: 'games-development', name: 'Games Development', icon: '💻', desc: 'Programming, engineering, and technical art' },
+  { id: 'animation', name: 'Animation', icon: '🎭', desc: 'Character, cinematic, and technical animation' },
+  { id: 'illustration', name: 'Illustration', icon: '🎨', desc: 'Concept art, 3D modeling, environments, and VFX' },
+];
+
 const RIVAL_SEEDS = [
   { name: 'PixelPilot', strategy: 'brief', blurb: 'Portfolio builder', plan: 'Targets live briefs and portfolio proof.' },
   { name: 'GG_Grinder', strategy: 'placement', blurb: 'Placement chaser', plan: 'Prioritises placements and practical experience.' },
   { name: 'Questline', strategy: 'balanced', blurb: 'All-rounder', plan: 'Builds a mix of experience, skills and evidence.' },
 ];
 
+let currentIndustry = null;
 let DATA = null;      // { roles, cards, sets }
 let state = null;     // live game state
 let uidCounter = 1;
@@ -121,10 +132,56 @@ let previewState = null; // { where: 'market'|'hand', card, uid }
 
 /* ============================== Data load ============================== */
 
-async function loadData() {
-  const res = await fetch('data/game-data.json');
+async function loadData(industryId) {
+  const res = await fetch(`data/industries/${industryId}/game-data.json`);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
+}
+
+function renderIndustryGrid() {
+  el.industryGrid.innerHTML = '';
+  INDUSTRIES.forEach((ind) => {
+    const btn = document.createElement('button');
+    btn.className = 'industry-card';
+    btn.dataset.industry = ind.id;
+    btn.innerHTML = `
+      <span class="industry-icon">${ind.icon}</span>
+      <h3>${ind.name}</h3>
+      <p>${ind.desc}</p>
+    `;
+    btn.addEventListener('click', () => selectIndustry(ind.id));
+    el.industryGrid.appendChild(btn);
+  });
+}
+
+function selectIndustry(industryId) {
+  currentIndustry = industryId;
+  const ind = INDUSTRIES.find(i => i.id === industryId);
+  el.industrySelect.classList.add('hidden');
+  el.setup.classList.remove('hidden');
+  el.industryBreadcrumb.innerHTML = `
+    <button class="breadcrumb-link" id="backToIndustryLink">
+      <i class="fa-solid fa-chevron-left"></i> ${ind.icon} ${ind.name}
+    </button>
+  `;
+  document.getElementById('backToIndustryLink').addEventListener('click', () => {
+    el.setup.classList.add('hidden');
+    el.industrySelect.classList.remove('hidden');
+  });
+  loadIndustryData();
+}
+
+async function loadIndustryData() {
+  try {
+    DATA = await loadData(currentIndustry);
+  } catch (e) {
+    el.setup.innerHTML = `<div class="eyebrow">SETUP ERROR</div><h2>Couldn't load game data for ${currentIndustry}</h2><p>Run a local server, e.g. <code>python3 -m http.server</code>, then open the page through it.</p>`;
+    console.error(e);
+    return;
+  }
+  populateJobs();
+  renderCompletedRoles();
+  setupResumeButton();
 }
 
 /* ============================== Helpers ================================ */
@@ -844,7 +901,8 @@ function endGame(winnerAgent) {
       overlay.innerHTML = '';
       el.game.classList.remove('game-over');
       el.game.classList.add('hidden');
-      el.setup.classList.remove('hidden');
+      el.industrySelect.classList.remove('hidden');
+      el.setup.classList.add('hidden');
       closeHallOfFame();
     });
     $('closeGameOver').addEventListener('click', () => {
@@ -861,8 +919,11 @@ function openModal(html) {
   el.modalBody.innerHTML = html;
   el.modalBack.classList.add('show');
 }
-function closeModal() {
-  el.modalBack.classList.remove('show');
+function closeHallOfFame() {
+  el.hallOfFame.classList.add('hidden');
+  el.industrySelect.classList.remove('hidden');
+  el.setup.classList.add('hidden');
+  el.game.classList.add('hidden');
 }
 if (el.modalBack) {
   el.modalBack.addEventListener('click', (e) => { if (e.target === el.modalBack) closeModal(); });
@@ -874,6 +935,18 @@ if (el.cardPreview) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePreview();
+});
+
+/* Auto-save on page hide / unload / refresh so progress survives crashes */
+function autoSave() {
+  if (state && !state.winner && window.RTTR) window.RTTR.saveGame(state);
+}
+window.addEventListener('beforeunload', (e) => {
+  autoSave();
+  if (turnTimerHandle) e.preventDefault();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) autoSave();
 });
 
 /* ============================== Turn timer ================================ */
@@ -911,6 +984,7 @@ function render() {
   el.jobTitle.textContent = `${state.job.art} ${state.job.title}`;
   el.jobDesc.textContent = state.job.description;
   renderJobNeeds();
+  renderSkills();
   renderTurnBar();
   renderRivals();
   renderMarket();
@@ -940,6 +1014,21 @@ function renderCompletedRoles() {
       </div>
     `).join('')
   }`;
+}
+
+function renderSkills() {
+  if (!el.skillsRequired || !state) return;
+  const req = state.job.requirements;
+  const neededSkills = [req.skill];
+  const playerSkills = state.player.skills || [];
+  el.skillsRequired.innerHTML = neededSkills.map((skill) => {
+    const has = playerSkills.includes(skill);
+    return `<span class="skill-item ${has ? 'owned' : 'needed'}">
+      <span class="skill-check">${has ? '✓' : '○'}</span>
+      <span class="skill-name">${escapeHtml(skill)}</span>
+    </span>`;
+  }).join('');
+  el.skillsRequired.innerHTML += `<div class="all-skills"><small>Your skills: ${escapeHtml(playerSkills.join(', ') || 'none')}</small></div>`;
 }
 
 function renderJobNeeds() {
@@ -1384,12 +1473,16 @@ function setupDragAndDrop() {
 /* ============================== Wiring ==================================== */
 
 el.startBtn.addEventListener('click', () => newGame(el.jobSelect.value));
-  el.returnBtn.addEventListener('click', doReturnSelected);
-  el.swapMarketBtn.addEventListener('click', doMarketSwap);
-  setupDragAndDrop();
-  el.bankBtn.addEventListener('click', doBank);
-  el.applyBtn.addEventListener('click', doApply);
-  el.endBtn.addEventListener('click', endTurn);
+el.backToIndustryBtn.addEventListener('click', () => {
+  el.setup.classList.add('hidden');
+  el.industrySelect.classList.remove('hidden');
+});
+el.returnBtn.addEventListener('click', doReturnSelected);
+el.swapMarketBtn.addEventListener('click', doMarketSwap);
+setupDragAndDrop();
+el.bankBtn.addEventListener('click', doBank);
+el.applyBtn.addEventListener('click', doApply);
+el.endBtn.addEventListener('click', endTurn);
 
 if (el.signInBtn) {
   el.signInBtn.addEventListener('click', () => toast('Sign-in requires a Firebase project. Your progress saves locally in this browser.'));
@@ -1398,14 +1491,8 @@ if (el.signInBtn) {
 /* ============================== Boot ======================================= */
 
 (async function boot() {
-  try {
-    DATA = await loadData();
-  } catch (e) {
-    el.setup.innerHTML = `<div class="eyebrow">SETUP ERROR</div><h2>Couldn't load game data</h2><p>Race to the Role needs to be served over http(s) (its scripts are ES modules and its cards live in <code>data/game-data.json</code>). Run a local server, e.g. <code>python3 -m http.server</code>, then open the page through it rather than as a local file.</p>`;
-    console.error(e);
-    return;
-  }
-  populateJobs();
+  renderIndustryGrid();
+  el.industrySelect.classList.remove('hidden');
   renderCompletedRoles();
   if (el.hofBackBtn) el.hofBackBtn.addEventListener('click', closeHallOfFame);
   if (el.hofClearBtn) el.hofClearBtn.addEventListener('click', () => {
@@ -1429,6 +1516,7 @@ if (el.signInBtn) {
       state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
       state.rivals.forEach((r) => { r.returnsThisRound = r.returnsThisRound || 0; r.marketPicksThisRound = r.marketPicksThisRound || 0; r.marketSwapsThisRound = r.marketSwapsThisRound || 0; });
       el.setup.classList.add('hidden');
+      el.industrySelect.classList.add('hidden');
       el.game.classList.remove('hidden');
       startTurnTimer();
       render();

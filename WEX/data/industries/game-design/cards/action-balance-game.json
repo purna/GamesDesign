@@ -1,0 +1,13 @@
+{
+  "id": "action-balance-game",
+  "name": "Balance Game Systems",
+  "type": "Action",
+  "category": "Action",
+  "description": "Tune difficulty curves, rewards, and economic systems.",
+  "flavor": "The hardest part of design.",
+  "rarity": "Common",
+  "art": "\u2696\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Analysis"
+}

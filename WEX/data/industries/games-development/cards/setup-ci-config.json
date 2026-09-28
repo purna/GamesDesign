@@ -1,0 +1,13 @@
+{
+  "id": "setup-ci-config",
+  "name": "Configure CI/CD Pipeline",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up automated build and test pipelines for the project.",
+  "flavor": "Automation saves time.",
+  "rarity": "Common",
+  "art": "\ud83d\udd01",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

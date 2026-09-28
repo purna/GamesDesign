@@ -1,0 +1,25 @@
+{
+  "id": "storyboard-artist",
+  "title": "Storyboard Artist",
+  "category": "Animation",
+  "description": "Visualise the sequence of events before animation begins.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 1,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "brief",
+    "volunteering"
+  ],
+  "flavor": "Every great film starts here.",
+  "art": "\ud83d\udcda",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 5,
+    "networking": 5,
+    "technicalSkill": 5,
+    "creativity": 8,
+    "reliability": 6
+  }
+}

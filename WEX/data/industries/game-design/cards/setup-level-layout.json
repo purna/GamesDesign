@@ -1,0 +1,13 @@
+{
+  "id": "setup-level-layout",
+  "name": "Level Layout Planning",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Map out the overall level structure and player flow.",
+  "flavor": "A good flow keeps players engaged.",
+  "rarity": "Common",
+  "art": "\ud83d\uddfa\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Design"
+}

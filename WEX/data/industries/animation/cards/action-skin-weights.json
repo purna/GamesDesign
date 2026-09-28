@@ -1,0 +1,13 @@
+{
+  "id": "action-skin-weights",
+  "name": "Skin Weight Painting",
+  "type": "Action",
+  "category": "Action",
+  "description": "Paint skin weights for smooth character deformation.",
+  "flavor": "Weight painting is an art.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa8",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

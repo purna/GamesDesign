@@ -1,0 +1,13 @@
+{
+  "id": "proof-code-review",
+  "name": "Code Review",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Review peer code for bugs, performance, and maintainability.",
+  "flavor": "Four eyes see more than two.",
+  "rarity": "Common",
+  "art": "\ud83d\udc41\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Documentation"
+}

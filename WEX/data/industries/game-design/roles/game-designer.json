@@ -1,0 +1,22 @@
+{
+  "id": "game-designer",
+  "title": "Game Designer",
+  "category": "Game Design",
+  "description": "Design core gameplay mechanics, systems, and player progression.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Design"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Fun is engineered, not accidental.",
+  "art": "🎮",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 8,
+    "networking": 4,
+    "technicalSkill": 6,
+    "creativity": 9,
+    "reliability": 6
+  }
+}

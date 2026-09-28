@@ -1,0 +1,22 @@
+{
+  "id": "gameplay-programmer",
+  "title": "Gameplay Programmer",
+  "category": "Games Development",
+  "description": "Implement player controls, mechanics, and interactions in code.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Code is the clay; gameplay is the sculpture.",
+  "art": "💻",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 3,
+    "technicalSkill": 9,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

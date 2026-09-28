@@ -1,0 +1,13 @@
+{
+  "id": "setup-client-art-brief",
+  "name": "Client Art Brief",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Meet with client to define art requirements and deliverables.",
+  "flavor": "The brief shapes the vision.",
+  "rarity": "Common",
+  "art": "\ud83d\udcc4",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

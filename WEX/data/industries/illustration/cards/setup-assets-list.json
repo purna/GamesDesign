@@ -1,0 +1,13 @@
+{
+  "id": "setup-assets-list",
+  "name": "Assets Handoff List",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Create a comprehensive asset handoff for external partners.",
+  "flavor": "Clear handoff prevents confusion.",
+  "rarity": "Common",
+  "art": "\ud83d\udccb",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

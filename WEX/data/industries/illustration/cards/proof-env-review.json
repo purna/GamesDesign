@@ -1,0 +1,13 @@
+{
+  "id": "proof-env-review",
+  "name": "Environment Art Review",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Review environment assets for performance and quality.",
+  "flavor": "Not all detail is worth performance.",
+  "rarity": "Common",
+  "art": "\ud83d\udc41\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Communication"
+}

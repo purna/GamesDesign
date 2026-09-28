@@ -1,0 +1,13 @@
+{
+  "id": "proof-final-concepts",
+  "name": "Deliver Final Concepts",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Refine and deliver final approved concept art.",
+  "flavor": "The chosen path.",
+  "rarity": "Common",
+  "art": "\ud83c\udfaf",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

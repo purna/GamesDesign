@@ -1,0 +1,22 @@
+{
+  "id": "technical-animator",
+  "title": "Technical Animator",
+  "category": "Animation",
+  "description": "Build animation pipelines, state machines, and procedural animation systems.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Animation that reacts is animation that feels alive.",
+  "art": "⚙️",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

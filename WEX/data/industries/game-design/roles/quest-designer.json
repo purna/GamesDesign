@@ -1,0 +1,25 @@
+{
+  "id": "quest-designer",
+  "title": "Quest Designer",
+  "category": "Game Design",
+  "description": "Design missions, side quests, and narrative progression.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "brief",
+    "volunteering"
+  ],
+  "flavor": "Every quest has a purpose.",
+  "art": "\ud83d\udcdc",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 5,
+    "technicalSkill": 6,
+    "creativity": 8,
+    "reliability": 6
+  }
+}

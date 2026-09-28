@@ -1,0 +1,13 @@
+{
+  "id": "setup-style-align",
+  "name": "Style Alignment",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Work with external partners to align on art style and quality.",
+  "flavor": "Two styles, one vision.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa8",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

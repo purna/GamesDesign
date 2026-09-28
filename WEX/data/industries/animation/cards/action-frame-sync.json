@@ -1,0 +1,13 @@
+{
+  "id": "action-frame-sync",
+  "name": "Frame Synchronization",
+  "type": "Action",
+  "category": "Action",
+  "description": "Ensure frame timing matches between partner studio sequences.",
+  "flavor": "Sync or sink.",
+  "rarity": "Common",
+  "art": "\ud83c\udfac",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

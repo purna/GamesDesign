@@ -1,0 +1,22 @@
+{
+  "id": "ui-ux-designer",
+  "title": "UI/UX Designer",
+  "category": "Game Design",
+  "description": "Design intuitive interfaces, menus, and player feedback systems.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Design"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Good UI is invisible. Bad UI is the game.",
+  "art": "📱",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 6,
+    "creativity": 8,
+    "reliability": 7
+  }
+}

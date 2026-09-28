@@ -1,0 +1,25 @@
+{
+  "id": "medical-illustrator",
+  "title": "Medical Illustrator",
+  "category": "Illustration",
+  "description": "Create detailed illustrations of medical and biological subjects.",
+  "requirements": {
+    "experience": 3,
+    "evidence": 2,
+    "skill": "Documentation"
+  },
+  "recommendedSets": [
+    "placement",
+    "partnership"
+  ],
+  "flavor": "Science meets art.",
+  "art": "\ud83e\ude7a",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 8,
+    "networking": 4,
+    "technicalSkill": 7,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

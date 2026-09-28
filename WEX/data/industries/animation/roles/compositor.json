@@ -1,0 +1,25 @@
+{
+  "id": "compositor",
+  "title": "Compositor",
+  "category": "Animation",
+  "description": "Composite rendered layers and VFX into final shots.",
+  "requirements": {
+    "experience": 3,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": [
+    "placement",
+    "partnership"
+  ],
+  "flavor": "The final pixel matters.",
+  "art": "\ud83d\udd17",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 9,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

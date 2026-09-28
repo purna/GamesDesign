@@ -1,0 +1,13 @@
+{
+  "id": "action-debug-crash",
+  "name": "Debug Crash Report",
+  "type": "Action",
+  "category": "Action",
+  "description": "Investigate and fix a crash reported by players.",
+  "flavor": "Not all bugs are equal.",
+  "rarity": "Common",
+  "art": "\ud83d\udc1b",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Problem solving"
+}

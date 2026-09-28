@@ -1,0 +1,22 @@
+{
+  "id": "animator",
+  "title": "Animator",
+  "category": "Animation",
+  "description": "Create character and creature animation for games and cinematics.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Movement tells the story words can't.",
+  "art": "🎭",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 7,
+    "creativity": 9,
+    "reliability": 7
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "impact-ship-art",
+  "name": "Ship Final Art Assets",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Deliver all final art assets for production build.",
+  "flavor": "Done is better than perfect.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\udce6",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

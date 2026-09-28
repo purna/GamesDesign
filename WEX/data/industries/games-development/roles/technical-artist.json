@@ -1,0 +1,22 @@
+{
+  "id": "technical-artist",
+  "title": "Technical Artist",
+  "category": "Games Development",
+  "description": "Bridge art and engineering: shaders, rigging, pipelines, and optimisation.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Art that runs at 60fps is art that ships.",
+  "art": "🎨",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 5,
+    "technicalSkill": 8,
+    "creativity": 7,
+    "reliability": 7
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "proof-static-analysis",
+  "name": "Static Analysis Pass",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Run static analysis tools and fix warnings.",
+  "flavor": "Clean code is happy code.",
+  "rarity": "Common",
+  "art": "\ud83d\udd0d",
+  "set": "placement",
+  "value": 1,
+  "skill": "Documentation"
+}

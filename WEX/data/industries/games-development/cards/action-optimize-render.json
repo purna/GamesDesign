@@ -1,0 +1,13 @@
+{
+  "id": "action-optimize-render",
+  "name": "Optimize Rendering",
+  "type": "Action",
+  "category": "Action",
+  "description": "Profile and optimize rendering performance for the game.",
+  "flavor": "60 FPS or bust.",
+  "rarity": "Common",
+  "art": "\u26a1",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Problem solving"
+}

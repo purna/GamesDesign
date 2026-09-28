@@ -1,0 +1,25 @@
+{
+  "id": "motion-designer",
+  "title": "Motion Graphics Designer",
+  "category": "Animation",
+  "description": "Create animated graphics for titles, UI, and promotional content.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 1,
+    "skill": "Design"
+  },
+  "recommendedSets": [
+    "brief",
+    "partnership"
+  ],
+  "flavor": "Animation meets design.",
+  "art": "\ud83d\udcfd\ufe0f",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 5,
+    "networking": 6,
+    "technicalSkill": 6,
+    "creativity": 7,
+    "reliability": 5
+  }
+}

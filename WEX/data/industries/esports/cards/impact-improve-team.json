@@ -1,0 +1,13 @@
+{
+  "id": "impact-improve-team",
+  "name": "Help Team Rank Up",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your coaching strategies significantly improve team performance.",
+  "flavor": "Measurable impact.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\udcc8",
+  "set": "placement",
+  "value": 1,
+  "skill": "Coaching"
+}

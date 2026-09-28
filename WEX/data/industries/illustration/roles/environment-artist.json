@@ -1,0 +1,22 @@
+{
+  "id": "environment-artist",
+  "title": "Environment Artist",
+  "category": "Illustration",
+  "description": "Build immersive 3D worlds, landscapes, and architectural spaces.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "The world is the first character the player meets.",
+  "art": "🏞️",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 8,
+    "reliability": 7
+  }
+}

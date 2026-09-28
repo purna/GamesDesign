@@ -1,0 +1,12 @@
+{
+  "id": "setup-art-studio",
+  "name": "Art Studio Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Visit an art studio to observe professional workflows.",
+  "flavor": "Studios vary widely.",
+  "rarity": "Common",
+  "art": "\ud83c\udfe2",
+  "set": "visit",
+  "value": 1
+}

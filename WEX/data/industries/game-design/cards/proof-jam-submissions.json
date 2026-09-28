@@ -1,0 +1,13 @@
+{
+  "id": "proof-jam-submissions",
+  "name": "Review Jam Submissions",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Play and review entries, provide written feedback to participants.",
+  "flavor": "Every submission teaches you something.",
+  "rarity": "Common",
+  "art": "\ud83d\udccb",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

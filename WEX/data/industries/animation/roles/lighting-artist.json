@@ -1,0 +1,25 @@
+{
+  "id": "lighting-artist",
+  "title": "Lighting Artist",
+  "category": "Animation",
+  "description": "Craft lighting and atmosphere for cinematic sequences.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "placement",
+    "volunteering"
+  ],
+  "flavor": "Light is emotion.",
+  "art": "\ud83d\udca1",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 5,
+    "technicalSkill": 7,
+    "creativity": 8,
+    "reliability": 6
+  }
+}

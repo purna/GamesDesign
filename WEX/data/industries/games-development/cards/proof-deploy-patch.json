@@ -1,0 +1,13 @@
+{
+  "id": "proof-deploy-patch",
+  "name": "Deploy Hotfix",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Build and deploy an emergency hotfix with partner coordination.",
+  "flavor": "Speed and accuracy.",
+  "rarity": "Common",
+  "art": "\ud83d\ude91",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Documentation"
+}

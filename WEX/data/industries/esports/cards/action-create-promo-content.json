@@ -1,0 +1,13 @@
+{
+  "id": "action-create-promo-content",
+  "name": "Create Promo Content",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create social media and promotional content for an event or product.",
+  "flavor": "Content drives engagement.",
+  "rarity": "Common",
+  "art": "\ud83d\udcf1",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

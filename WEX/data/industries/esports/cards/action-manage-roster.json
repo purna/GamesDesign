@@ -1,0 +1,13 @@
+{
+  "id": "action-manage-roster",
+  "name": "Manage Player Roster",
+  "type": "Action",
+  "category": "Action",
+  "description": "Handle player contracts, substitutions, and team composition.",
+  "flavor": "The business of esports.",
+  "rarity": "Common",
+  "art": "\ud83d\udccb",
+  "set": "placement",
+  "value": 1,
+  "skill": "Organisation"
+}

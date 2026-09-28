@@ -1,0 +1,13 @@
+{
+  "id": "action-character-illustration",
+  "name": "Character Illustration",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create detailed character illustrations from concepts.",
+  "flavor": "Every hero needs a face.",
+  "rarity": "Common",
+  "art": "\ud83d\udc64",
+  "set": "placement",
+  "value": 1,
+  "skill": "Design"
+}

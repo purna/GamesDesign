@@ -1,0 +1,22 @@
+{
+  "id": "cinematic-animator",
+  "title": "Cinematic Animator",
+  "category": "Animation",
+  "description": "Animate story-driven cutscenes and scripted sequences.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "A cutscene is a promise the gameplay keeps.",
+  "art": "🎬",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 5,
+    "technicalSkill": 7,
+    "creativity": 8,
+    "reliability": 7
+  }
+}

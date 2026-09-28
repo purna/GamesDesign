@@ -1,0 +1,13 @@
+{
+  "id": "proof-art-critique",
+  "name": "Participate in Art Critique",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present work in a group critique and give/receive feedback.",
+  "flavor": "Feedback makes you better.",
+  "rarity": "Common",
+  "art": "\ud83d\udcac",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "proof-narrative-review",
+  "name": "Narrative Review Pass",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Review all narrative content for consistency and quality.",
+  "flavor": "Stories need editing too.",
+  "rarity": "Common",
+  "art": "\ud83d\udd0d",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Documentation"
+}

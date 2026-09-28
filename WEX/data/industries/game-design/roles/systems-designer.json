@@ -1,0 +1,22 @@
+{
+  "id": "systems-designer",
+  "title": "Systems Designer",
+  "category": "Game Design",
+  "description": "Design and balance interconnected game systems: economy, progression, combat formulas.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Analysis"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "A spreadsheet today prevents a broken economy tomorrow.",
+  "art": "⚙️",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 8,
+    "networking": 3,
+    "technicalSkill": 8,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

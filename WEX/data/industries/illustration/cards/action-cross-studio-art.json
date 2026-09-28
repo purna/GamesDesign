@@ -1,0 +1,13 @@
+{
+  "id": "action-cross-studio-art",
+  "name": "Cross-Studio Art Pass",
+  "type": "Action",
+  "category": "Action",
+  "description": "Complete art handoffs between studios and integrate assets.",
+  "flavor": "Asset pipelines matter.",
+  "rarity": "Common",
+  "art": "\ud83d\udd04",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

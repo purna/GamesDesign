@@ -1,0 +1,13 @@
+{
+  "id": "proof-debug-session",
+  "name": "Debug Multiplayer Session",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Investigate and resolve network desync issues.",
+  "flavor": "The hardest bugs in gamedev.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\udc1b",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Analysis"
+}

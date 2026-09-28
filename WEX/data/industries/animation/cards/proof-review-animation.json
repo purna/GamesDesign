@@ -1,0 +1,13 @@
+{
+  "id": "proof-review-animation",
+  "name": "Review Animation Reel",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Review and provide feedback on animation reels.",
+  "flavor": "Reels are how animators are judged.",
+  "rarity": "Common",
+  "art": "\ud83c\udf9e\ufe0f",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

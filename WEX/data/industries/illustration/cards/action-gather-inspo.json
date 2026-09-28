@@ -1,0 +1,13 @@
+{
+  "id": "action-gather-inspo",
+  "name": "Gather Visual References",
+  "type": "Action",
+  "category": "Action",
+  "description": "Collect reference material and inspiration for upcoming art pieces.",
+  "flavor": "Good art comes from good references.",
+  "rarity": "Common",
+  "art": "\ud83d\udcf8",
+  "set": "visit",
+  "value": 1,
+  "skill": "Design"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "action-animate-shot",
+  "name": "Animate Key Sequence",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create keyframes and inbetweens for a key animation sequence.",
+  "flavor": "The soul of animation.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa5",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

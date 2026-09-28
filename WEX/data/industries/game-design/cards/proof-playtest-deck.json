@@ -1,0 +1,13 @@
+{
+  "id": "proof-playtest-deck",
+  "name": "Run Playtest Sessions",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Organise and run structured playtests, collect feedback from players.",
+  "flavor": "Players will break anything you build.",
+  "rarity": "Common",
+  "art": "\ud83c\udccf",
+  "set": "placement",
+  "value": 1,
+  "skill": "Communication"
+}

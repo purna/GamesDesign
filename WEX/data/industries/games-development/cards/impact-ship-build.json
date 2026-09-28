@@ -1,0 +1,13 @@
+{
+  "id": "impact-ship-build",
+  "name": "Ship Production Build",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Ship a stable production build of the game.",
+  "flavor": "The real test of any game.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\udea2",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

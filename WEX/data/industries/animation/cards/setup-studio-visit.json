@@ -1,0 +1,12 @@
+{
+  "id": "setup-studio-visit",
+  "name": "Animation Studio Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Visit a professional animation studio to learn their pipeline.",
+  "flavor": "Studios have secrets.",
+  "rarity": "Common",
+  "art": "\ud83c\udfe2",
+  "set": "visit",
+  "value": 1
+}

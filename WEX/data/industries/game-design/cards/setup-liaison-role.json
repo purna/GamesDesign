@@ -1,0 +1,13 @@
+{
+  "id": "setup-liaison-role",
+  "name": "Act as Liaison",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Coordinate between two teams working on a co-development project.",
+  "flavor": "Communication is the biggest challenge.",
+  "rarity": "Common",
+  "art": "\ud83e\udd1d",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

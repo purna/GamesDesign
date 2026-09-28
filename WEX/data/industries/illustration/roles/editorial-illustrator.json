@@ -1,0 +1,25 @@
+{
+  "id": "editorial-illustrator",
+  "title": "Editorial Illustrator",
+  "category": "Illustration",
+  "description": "Create illustrations for magazines, newspapers, and online publications.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 1,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "brief",
+    "partnership"
+  ],
+  "flavor": "Illustrate the news.",
+  "art": "\ud83d\udcf0",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 7,
+    "technicalSkill": 5,
+    "creativity": 7,
+    "reliability": 5
+  }
+}

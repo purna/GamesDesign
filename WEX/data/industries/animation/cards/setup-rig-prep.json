@@ -1,0 +1,13 @@
+{
+  "id": "setup-rig-prep",
+  "name": "Rig Preparation",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up rig controls and constraints for animation.",
+  "flavor": "Good rigs enable great animation.",
+  "rarity": "Common",
+  "art": "\ud83e\uddb4",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

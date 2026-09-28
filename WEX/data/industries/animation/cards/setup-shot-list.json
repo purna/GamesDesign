@@ -1,0 +1,13 @@
+{
+  "id": "setup-shot-list",
+  "name": "Shot List Definition",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Create a detailed shot list and storyboard for the sequence.",
+  "flavor": "Every shot must count.",
+  "rarity": "Common",
+  "art": "\ud83d\udccb",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

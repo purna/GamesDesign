@@ -1,0 +1,13 @@
+{
+  "id": "action-create-tutorial",
+  "name": "Create Art Tutorial",
+  "type": "Action",
+  "category": "Action",
+  "description": "Produce a step-by-step art tutorial for beginners.",
+  "flavor": "Share what you know.",
+  "rarity": "Common",
+  "art": "\ud83d\udd8c\ufe0f",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

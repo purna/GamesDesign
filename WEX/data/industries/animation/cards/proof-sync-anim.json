@@ -1,0 +1,13 @@
+{
+  "id": "proof-sync-anim",
+  "name": "Sync Animation Timelines",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Ensure animation timelines match across studio deliverables.",
+  "flavor": "Timelines drift.",
+  "rarity": "Common",
+  "art": "\u23f1\ufe0f",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

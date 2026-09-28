@@ -1,0 +1,13 @@
+{
+  "id": "proof-portfolio-review",
+  "name": "Portfolio Review Session",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Review and provide feedback on student art portfolios.",
+  "flavor": "Critique is a gift.",
+  "rarity": "Common",
+  "art": "\ud83d\udcc2",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

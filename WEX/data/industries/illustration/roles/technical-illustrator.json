@@ -1,0 +1,25 @@
+{
+  "id": "technical-illustrator",
+  "title": "Technical Illustrator",
+  "category": "Illustration",
+  "description": "Create precise diagrams and instructions for technical documents.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Documentation"
+  },
+  "recommendedSets": [
+    "placement",
+    "brief"
+  ],
+  "flavor": "Precision is key.",
+  "art": "\ud83d\udcd0",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 5,
+    "reliability": 7
+  }
+}

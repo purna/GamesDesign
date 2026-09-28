@@ -1,0 +1,13 @@
+{
+  "id": "action-negotiate-deal",
+  "name": "Negotiate Sponsorship Deal",
+  "type": "Action",
+  "category": "Action",
+  "description": "Negotiate a sponsorship deal with a brand partner.",
+  "flavor": "Words matter.",
+  "rarity": "Common",
+  "art": " handshake",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

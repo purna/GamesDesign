@@ -1,0 +1,13 @@
+{
+  "id": "action-facilitate-workshop",
+  "name": "Facilitate Design Workshop",
+  "type": "Action",
+  "category": "Action",
+  "description": "Run a game design workshop for newcomers or students.",
+  "flavor": "Teaching solidifies your own understanding.",
+  "rarity": "Common",
+  "art": "\ud83d\udc65",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Coaching"
+}

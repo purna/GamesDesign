@@ -1,0 +1,13 @@
+{
+  "id": "setup-motion-capture",
+  "name": "Motion Capture Session",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up mocap equipment and prepare sessions.",
+  "flavor": "Mocap is data.",
+  "rarity": "Common",
+  "art": "\ud83d\udd79\ufe0f",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Technical Setup"
+}

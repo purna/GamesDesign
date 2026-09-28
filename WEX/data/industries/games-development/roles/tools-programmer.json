@@ -1,0 +1,22 @@
+{
+  "id": "tools-programmer",
+  "title": "Tools Programmer",
+  "category": "Games Development",
+  "description": "Build editors, pipelines, and automation that empower designers and artists.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Good tools make great games possible.",
+  "art": "🔧",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 9,
+    "creativity": 5,
+    "reliability": 8
+  }
+}

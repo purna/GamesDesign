@@ -1,0 +1,13 @@
+{
+  "id": "action-share-assets",
+  "name": "Share Animation Assets",
+  "type": "Action",
+  "category": "Action",
+  "description": "Package and share animation assets between studios.",
+  "flavor": "Assets need to travel.",
+  "rarity": "Common",
+  "art": "\ud83d\udd17",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

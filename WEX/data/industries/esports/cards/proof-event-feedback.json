@@ -1,0 +1,13 @@
+{
+  "id": "proof-event-feedback",
+  "name": "Collect Event Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Gather feedback from attendees about the tournament or event.",
+  "flavor": "Listen to your audience.",
+  "rarity": "Common",
+  "art": "\ud83d\udcdd",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

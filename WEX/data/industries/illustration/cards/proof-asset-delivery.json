@@ -1,0 +1,13 @@
+{
+  "id": "proof-asset-delivery",
+  "name": "Deliver Asset Package",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Package and deliver final art assets to partners.",
+  "flavor": "Clean packages save time.",
+  "rarity": "Common",
+  "art": "\ud83d\udce6",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

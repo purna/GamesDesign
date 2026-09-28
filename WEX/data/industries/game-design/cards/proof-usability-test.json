@@ -1,0 +1,13 @@
+{
+  "id": "proof-usability-test",
+  "name": "Run Usability Testing",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Test UI with users and iterate on feedback.",
+  "flavor": "Assumptions are dangerous.",
+  "rarity": "Common",
+  "art": "\ud83e\uddea",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

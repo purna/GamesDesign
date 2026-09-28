@@ -1,0 +1,13 @@
+{
+  "id": "impact-final-render",
+  "name": "Final Render Delivery",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Deliver final rendered animation sequences.",
+  "flavor": "The final cut.",
+  "rarity": "Uncommon",
+  "art": "\ud83c\udf9e\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "setup-tutoring-prep",
+  "name": "Art Tutorial Prep",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Prepare materials and structure for an art tutorial session.",
+  "flavor": "Teaching improves your own skills.",
+  "rarity": "Common",
+  "art": "\ud83d\udcda",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

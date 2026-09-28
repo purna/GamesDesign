@@ -1,0 +1,13 @@
+{
+  "id": "proof-unit-tests",
+  "name": "Write Unit Tests",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Add unit tests to validate core game systems.",
+  "flavor": "Trust but verify.",
+  "rarity": "Common",
+  "art": "\u2705",
+  "set": "brief",
+  "value": 1,
+  "skill": "Documentation"
+}

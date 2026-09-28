@@ -1,0 +1,13 @@
+{
+  "id": "action-write-dialogue",
+  "name": "Write Character Dialogue",
+  "type": "Action",
+  "category": "Action",
+  "description": "Craft dialogue for characters that brings them to life.",
+  "flavor": "Every line should serve the story.",
+  "rarity": "Common",
+  "art": "\u270d\ufe0f",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

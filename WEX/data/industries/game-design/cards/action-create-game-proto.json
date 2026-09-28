@@ -1,0 +1,13 @@
+{
+  "id": "action-create-game-proto",
+  "name": "Create Game Prototype",
+  "type": "Action",
+  "category": "Action",
+  "description": "Build a playable prototype to test core mechanics with players.",
+  "flavor": "Fail fast, iterate faster.",
+  "rarity": "Common",
+  "art": "\ud83c\udfae",
+  "set": "placement",
+  "value": 1,
+  "skill": "Problem solving"
+}

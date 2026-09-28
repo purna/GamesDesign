@@ -1,0 +1,22 @@
+{
+  "id": "narrative-designer",
+  "title": "Narrative Designer",
+  "category": "Game Design",
+  "description": "Write quests, dialogue, and world lore that integrate with gameplay systems.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": ["brief", "volunteering"],
+  "flavor": "The best stories are the ones the player tells themselves.",
+  "art": "📖",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 5,
+    "technicalSkill": 5,
+    "creativity": 9,
+    "reliability": 6
+  }
+}

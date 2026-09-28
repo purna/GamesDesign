@@ -1,0 +1,13 @@
+{
+  "id": "action-refactor-design",
+  "name": "Refactor Shared Design",
+  "type": "Action",
+  "category": "Action",
+  "description": "Refactor and improve shared design systems based on partner feedback.",
+  "flavor": "Iteration is the lifeblood ",
+  "rarity": "Common",
+  "art": "\ud83d\udd27",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Design"
+}

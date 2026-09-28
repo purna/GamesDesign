@@ -1,0 +1,13 @@
+{
+  "id": "setup-coord-shots",
+  "name": "Coordination Meeting",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Coordinate animation needs between multiple studios.",
+  "flavor": "Alignment is critical.",
+  "rarity": "Common",
+  "art": "\ud83e\udd1d",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

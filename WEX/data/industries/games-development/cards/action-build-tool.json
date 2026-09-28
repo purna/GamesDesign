@@ -1,0 +1,13 @@
+{
+  "id": "action-build-tool",
+  "name": "Build Dev Tool",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create a productivity tool for designers or artists.",
+  "flavor": "Empower your teammates.",
+  "rarity": "Common",
+  "art": "\ud83d\udd28",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

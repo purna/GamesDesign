@@ -1,0 +1,13 @@
+{
+  "id": "proof-ui-integration",
+  "name": "UI Art Integration",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Hand off UI art assets to developers for integration.",
+  "flavor": "Art meets code.",
+  "rarity": "Common",
+  "art": "\ud83d\udcd0",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

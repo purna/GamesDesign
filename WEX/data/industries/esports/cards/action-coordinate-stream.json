@@ -1,0 +1,13 @@
+{
+  "id": "action-coordinate-stream",
+  "name": "Coordinate Partner Stream",
+  "type": "Action",
+  "category": "Action",
+  "description": "Coordinate a co-stream event with a partner content creator.",
+  "flavor": "Collaboration amplifies reach.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa5",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

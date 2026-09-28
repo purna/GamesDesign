@@ -1,0 +1,13 @@
+{
+  "id": "action-textures-create",
+  "name": "Create Texture Atlas",
+  "type": "Action",
+  "category": "Action",
+  "description": "Produce optimized texture atlases for shared project.",
+  "flavor": "Textures are expensive.",
+  "rarity": "Common",
+  "art": "\ud83d\udd32",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

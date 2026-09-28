@@ -1,0 +1,13 @@
+{
+  "id": "action-clean-mocap",
+  "name": "Clean Motion Capture",
+  "type": "Action",
+  "category": "Action",
+  "description": "Clean and retarget mocap data onto animation rigs.",
+  "flavor": "Raw data is messy.",
+  "rarity": "Common",
+  "art": "\ud83e\uddf9",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Technical Setup"
+}

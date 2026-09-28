@@ -1,0 +1,13 @@
+{
+  "id": "setup-narrative-beat",
+  "name": "Narrative Beat Workshop",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Plan key story moments and player journey beats.",
+  "flavor": "Story drives engagement.",
+  "rarity": "Common",
+  "art": "\ud83d\udcd6",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "impact-cross-platform",
+  "name": "Ship Cross-Platform Build",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Deliver a build that works across all partner platforms.",
+  "flavor": "Write once, debug everywhere.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\udcf1",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

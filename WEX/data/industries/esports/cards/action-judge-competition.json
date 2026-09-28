@@ -1,0 +1,13 @@
+{
+  "id": "action-judge-competition",
+  "name": "Judge Community Tournament",
+  "type": "Action",
+  "category": "Action",
+  "description": "Judge matches in a community tournament and provide feedback.",
+  "flavor": "Every judge shapes the future.",
+  "rarity": "Common",
+  "art": "\u2696\ufe0f",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

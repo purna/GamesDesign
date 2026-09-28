@@ -1,0 +1,13 @@
+{
+  "id": "setup-codebase-intro",
+  "name": "Codebase Introduction",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Understand the existing game codebase, its architecture and conventions.",
+  "flavor": "Every codebase tells a story.",
+  "rarity": "Common",
+  "art": "\ud83d\udcbb",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

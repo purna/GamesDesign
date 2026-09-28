@@ -1,0 +1,13 @@
+{
+  "id": "proof-align-milestones",
+  "name": "Align Development Milestones",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Document and align on shared development milestones and deliverables.",
+  "flavor": "Trust, but verify.",
+  "rarity": "Common",
+  "art": "\ud83d\udcc5",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Documentation"
+}

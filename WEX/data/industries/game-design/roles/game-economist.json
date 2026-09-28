@@ -1,0 +1,25 @@
+{
+  "id": "game-economist",
+  "title": "Game Economist",
+  "category": "Game Design",
+  "description": "Design and balance in-game economies, currencies, and progression loops.",
+  "requirements": {
+    "experience": 3,
+    "evidence": 2,
+    "skill": "Analysis"
+  },
+  "recommendedSets": [
+    "placement",
+    "partnership"
+  ],
+  "flavor": "Numbers drive engagement.",
+  "art": "\ud83d\udcb0",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 6,
+    "creativity": 6,
+    "reliability": 6
+  }
+}

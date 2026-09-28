@@ -2804,3 +2804,38 @@ body.simple-mode .settings-hint {
   padding-top: 1rem;
   border-top: 1px solid var(--border);
 }
+
+.skills-track-card .skills-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.skills-track-card .skills-heading h3 { margin: 0; font-size: 0.85rem; }
+.skills-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.skill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--ink-soft);
+}
+.skill-item.needed {
+  border: 1px solid color-mix(in srgb, var(--gold), transparent 40%);
+  background: color-mix(in srgb, var(--gold), transparent 85%);
+}
+.skill-item.owned {
+  border: 1px solid color-mix(in srgb, var(--good), transparent 40%);
+  background: color-mix(in srgb, var(--good), transparent 85%);
+  color: var(--good);
+  font-weight: 600;
+}
+.skill-check {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.skill-name { font-weight: 600; }
+.all-skills { margin-top: 0.4rem; border-top: 1px solid var(--border); padding-top: 0.3rem; }
+.all-skills small { color: var(--ink-soft); font-size: 0.6rem; line-height: 1.4; }

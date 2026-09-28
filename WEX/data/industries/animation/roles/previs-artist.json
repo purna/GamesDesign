@@ -1,0 +1,25 @@
+{
+  "id": "previs-artist",
+  "title": "Previsualization Artist",
+  "category": "Animation",
+  "description": "Create rough animated previews to plan complex sequences.",
+  "requirements": {
+    "experience": 3,
+    "evidence": 2,
+    "skill": "Analysis"
+  },
+  "recommendedSets": [
+    "placement",
+    "partnership"
+  ],
+  "flavor": "Plan before you animate.",
+  "art": "\ud83c\udfac",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 7,
+    "creativity": 7,
+    "reliability": 7
+  }
+}

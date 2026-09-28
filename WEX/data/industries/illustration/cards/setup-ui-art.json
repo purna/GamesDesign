@@ -1,0 +1,13 @@
+{
+  "id": "setup-ui-art",
+  "name": "UI Art Specifications",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Define UI art requirements and create asset specifications.",
+  "flavor": "UI is part of the experience.",
+  "rarity": "Common",
+  "art": "\ud83d\udcf1",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

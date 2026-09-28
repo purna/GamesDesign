@@ -1,0 +1,13 @@
+{
+  "id": "proof-deliver-prototype",
+  "name": "Deliver Design Prototype",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present a working prototype that validates your design approach.",
+  "flavor": "Show don't tell.",
+  "rarity": "Common",
+  "art": "\ud83d\udce6",
+  "set": "brief",
+  "value": 1,
+  "skill": "Documentation"
+}

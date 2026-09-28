@@ -1,0 +1,13 @@
+{
+  "id": "action-illustration-piece",
+  "name": "Finish Illustration Piece",
+  "type": "Action",
+  "category": "Action",
+  "description": "Complete a full illustration from sketch to final polish.",
+  "flavor": "The full pipeline.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa8",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Design"
+}

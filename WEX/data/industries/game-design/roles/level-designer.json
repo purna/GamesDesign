@@ -1,0 +1,22 @@
+{
+  "id": "level-designer",
+  "title": "Level Designer",
+  "category": "Game Design",
+  "description": "Build engaging spaces, encounters, and player flow through game worlds.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "volunteering"],
+  "flavor": "Every corridor teaches the player something.",
+  "art": "🗺️",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 7,
+    "reliability": 7
+  }
+}

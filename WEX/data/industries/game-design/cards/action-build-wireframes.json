@@ -1,0 +1,13 @@
+{
+  "id": "action-build-wireframes",
+  "name": "Build UI Wireframes",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create detailed wireframes for all screens and interactions.",
+  "flavor": "Structure before style.",
+  "rarity": "Common",
+  "art": "\ud83d\udcd0",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "impact-final-art",
+  "name": "Deliver Final Art",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Deliver completed illustrations ready for production.",
+  "flavor": "Pixels to perfection.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\uddbc\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

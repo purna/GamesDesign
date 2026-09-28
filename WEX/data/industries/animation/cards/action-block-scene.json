@@ -1,0 +1,13 @@
+{
+  "id": "action-block-scene",
+  "name": "Block Out Scene",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create rough blocking and timing for the animation scene.",
+  "flavor": "Blocking is the foundation.",
+  "rarity": "Common",
+  "art": "\ud83c\udfac",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

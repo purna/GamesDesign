@@ -1,0 +1,22 @@
+{
+  "id": "rigging-artist",
+  "title": "Rigging Artist",
+  "category": "Animation",
+  "description": "Build character rigs, deformation systems, and animation tools.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "A good rig makes the animator look good.",
+  "art": "🦴",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 8,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

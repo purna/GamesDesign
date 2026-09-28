@@ -1,0 +1,13 @@
+{
+  "id": "action-wireframe-systems",
+  "name": "Wireframe Game Systems",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create preliminary designs for core systems: progression, combat, economy.",
+  "flavor": "Good wireframes save weeks of rework.",
+  "rarity": "Common",
+  "art": "\u270f\ufe0f",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

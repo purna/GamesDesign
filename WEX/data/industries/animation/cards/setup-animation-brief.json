@@ -1,0 +1,13 @@
+{
+  "id": "setup-animation-brief",
+  "name": "Animation Brief",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Define animation requirements and shot list with the director.",
+  "flavor": "Every frame starts with a plan.",
+  "rarity": "Common",
+  "art": "\ud83c\udfac",
+  "set": "placement",
+  "value": 1,
+  "skill": "Communication"
+}

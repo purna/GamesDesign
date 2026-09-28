@@ -1,0 +1,13 @@
+{
+  "id": "setup-cam-anim",
+  "name": "Camera Animation Planning",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Plan camera moves and animation timing for the sequence.",
+  "flavor": "Cameras frame the action.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa5",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "setup-ui-discovery",
+  "name": "UI Discovery Workshop",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Research and document UI/UX requirements for the project.",
+  "flavor": "Good UI is invisible.",
+  "rarity": "Common",
+  "art": "\ud83d\udda5\ufe0f",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

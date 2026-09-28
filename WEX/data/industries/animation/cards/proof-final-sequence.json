@@ -1,0 +1,13 @@
+{
+  "id": "proof-final-sequence",
+  "name": "Deliver Final Sequence",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Deliver a polished, final animation sequence.",
+  "flavor": "The final frame matters.",
+  "rarity": "Common",
+  "art": "\ud83c\udfaf",
+  "set": "brief",
+  "value": 1,
+  "skill": "Technical Setup"
+}

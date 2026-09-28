@@ -1,0 +1,25 @@
+{
+  "id": "mechanics-designer",
+  "title": "Mechanics Designer",
+  "category": "Game Design",
+  "description": "Design core gameplay mechanics and player interaction systems.",
+  "requirements": {
+    "experience": 3,
+    "evidence": 2,
+    "skill": "Problem solving"
+  },
+  "recommendedSets": [
+    "placement",
+    "partnership"
+  ],
+  "flavor": "Mechanics are the rules.",
+  "art": "\ud83c\udfae",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 4,
+    "technicalSkill": 7,
+    "creativity": 7,
+    "reliability": 7
+  }
+}

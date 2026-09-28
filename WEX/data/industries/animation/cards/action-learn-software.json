@@ -1,0 +1,13 @@
+{
+  "id": "action-learn-software",
+  "name": "Learn New Software",
+  "type": "Action",
+  "category": "Action",
+  "description": "Learn production software used by the studio.",
+  "flavor": "Tool agnostic is power.",
+  "rarity": "Common",
+  "art": "\ud83d\udee0\ufe0f",
+  "set": "visit",
+  "value": 1,
+  "skill": "Technical Setup"
+}

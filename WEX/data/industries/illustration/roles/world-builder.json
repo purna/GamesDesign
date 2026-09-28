@@ -1,0 +1,25 @@
+{
+  "id": "world-builder",
+  "title": "World Builder",
+  "category": "Game Design",
+  "description": "Create the lore, geography, and narrative context for game worlds.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Communication"
+  },
+  "recommendedSets": [
+    "brief",
+    "volunteering"
+  ],
+  "flavor": "Build worlds, not just games.",
+  "art": "\ud83c\udf0d",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 5,
+    "technicalSkill": 5,
+    "creativity": 9,
+    "reliability": 5
+  }
+}

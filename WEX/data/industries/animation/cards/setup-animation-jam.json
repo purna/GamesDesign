@@ -1,0 +1,13 @@
+{
+  "id": "setup-animation-jam",
+  "name": "Animation Jam Setup",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up rigs and scenes for a 48-hour animation jam.",
+  "flavor": "Jams need infrastructure.",
+  "rarity": "Common",
+  "art": "\u26a1",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Technical Setup"
+}

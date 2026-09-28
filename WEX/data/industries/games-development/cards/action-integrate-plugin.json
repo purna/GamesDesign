@@ -1,0 +1,13 @@
+{
+  "id": "action-integrate-plugin",
+  "name": "Integrate Third-Party Plugin",
+  "type": "Action",
+  "category": "Action",
+  "description": "Integrate and configure a third-party plugin into the project.",
+  "flavor": "Don't reinvent the wheel.",
+  "rarity": "Common",
+  "art": "\ud83d\udd0c",
+  "set": "visit",
+  "value": 1,
+  "skill": "Technical Setup"
+}

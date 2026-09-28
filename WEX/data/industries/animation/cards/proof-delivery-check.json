@@ -1,0 +1,13 @@
+{
+  "id": "proof-delivery-check",
+  "name": "Delivery Checklist",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Run final delivery checklist for animation assets.",
+  "flavor": "Checklists prevent mistakes.",
+  "rarity": "Common",
+  "art": "\u2705",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Documentation"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "character-animator",
+  "title": "Character Animator",
+  "category": "Animation",
+  "description": "Specialise in character-driven animation and performance.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Technical Setup"
+  },
+  "recommendedSets": [
+    "placement",
+    "volunteering"
+  ],
+  "flavor": "Every twitch tells a story.",
+  "art": "\ud83d\udc64",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 5,
+    "technicalSkill": 8,
+    "creativity": 8,
+    "reliability": 6
+  }
+}

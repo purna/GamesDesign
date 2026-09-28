@@ -1,0 +1,25 @@
+{
+  "id": "combat-designer",
+  "title": "Combat Designer",
+  "category": "Game Design",
+  "description": "Design and balance combat systems, weapons, and enemy interactions.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Problem solving"
+  },
+  "recommendedSets": [
+    "placement",
+    "brief"
+  ],
+  "flavor": "Make it fun to fight.",
+  "art": "\u2694\ufe0f",
+  "rarity": "Uncommon",
+  "stats": {
+    "industryKnowledge": 6,
+    "networking": 4,
+    "technicalSkill": 7,
+    "creativity": 7,
+    "reliability": 5
+  }
+}

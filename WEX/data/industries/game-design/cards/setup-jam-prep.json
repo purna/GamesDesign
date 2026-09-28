@@ -1,0 +1,13 @@
+{
+  "id": "setup-jam-prep",
+  "name": "Prepare for Game Jam",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Help organise a game jam \u2014 theme selection, rules, judging criteria.",
+  "flavor": "Jams are how many designers got their start.",
+  "rarity": "Common",
+  "art": "\u26a1",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Organisation"
+}

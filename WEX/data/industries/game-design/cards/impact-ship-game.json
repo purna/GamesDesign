@@ -1,0 +1,13 @@
+{
+  "id": "impact-ship-game",
+  "name": "Ship Final Game",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Take the game from prototype to polished release.",
+  "flavor": "The moment players see your work live.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\ude80",
+  "set": "placement",
+  "value": 1,
+  "skill": "Documentation"
+}

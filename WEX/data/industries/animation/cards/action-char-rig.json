@@ -1,0 +1,13 @@
+{
+  "id": "action-char-rig",
+  "name": "Character Rigging",
+  "type": "Action",
+  "category": "Action",
+  "description": "Build a rig for an animated character.",
+  "flavor": "Rigs make animation possible.",
+  "rarity": "Common",
+  "art": "\ud83e\uddb4",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Technical Setup"
+}

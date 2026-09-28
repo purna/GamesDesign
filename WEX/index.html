@@ -96,17 +96,32 @@
       </div>
     </div>
 
+    <!-- INDUSTRY SELECTION -->
+    <section class="industry-select hidden" id="industrySelect">
+      <div class="eyebrow">CHOOSE YOUR INDUSTRY / SEASON 01</div>
+      <h2>Where do you want<br>to build your career?</h2>
+      <p>Each industry has unique roles, cards, and opportunities. Pick one to begin.</p>
+      
+      <div class="industry-grid" id="industryGrid"></div>
+      
+      <p class="rules-note">You'll choose a specific role after selecting your industry.</p>
+    </section>
+
     <!-- SETUP / ROLE SELECTION -->
-    <section class="setup" id="setup">
+    <section class="setup hidden" id="setup">
       <div class="eyebrow">BUILD YOUR CAREER / BEAT THE FIELD</div>
       <h2>Every card gets you<br>closer to the credits.</h2>
       <p>Collect the right cards to set up gaming-industry experiences, complete them, and turn your work into CV evidence. Race computer rivals for the job.</p>
       
+      <div class="industry-breadcrumb" id="industryBreadcrumb"></div>
+      
       <label for="jobSelect">Choose the role you're chasing</label>
       <select id="jobSelect"></select>
       
-      <p class="rules-note">You start with 6 cards; each rival starts with 4. Hands can hold up to 6. Sets use 2, 3 or 4 different card types depending on the experience route. Banking adds CV experience and draws replacement cards.</p>
-      <button class="primary-btn" id="startBtn">Start career run →</button>
+      <div class="setup-actions">
+        <button class="btn btn-secondary" id="backToIndustryBtn">← Change industry</button>
+        <button class="primary-btn" id="startBtn">Start career run →</button>
+      </div>
     </section>
 
     <!-- COMPLETED ROLES HISTORY -->
@@ -226,6 +241,10 @@
             <div class="storage-heading"><h3>Stored experience sets</h3><span class="storage-count" id="bankedSetProgress">0 / 2 role-fit types</span></div>
             <p class="storage-help">Bank a set to store it here as CV experience. Your target job needs completed experience from at least two recommended routes.</p>
             <div class="banked-set-list" id="bankedSets"><div class="storage-empty">Your completed sets will appear here.</div></div>
+          </section>
+          <section class="sidebar-card skills-track-card">
+            <div class="skills-heading"><h3>Skills for the role</h3></div>
+            <div id="skillsRequired" class="skills-list"></div>
           </section>
           <section class="sidebar-card">
             <h3>Experience sets</h3>

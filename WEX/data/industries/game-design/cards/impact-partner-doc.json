@@ -1,0 +1,13 @@
+{
+  "id": "impact-partner-doc",
+  "name": "Deliver Partner Design Docs",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Deliver comprehensive design documentation to partners.",
+  "flavor": "Documentation is a love letter to future you.",
+  "rarity": "Uncommon",
+  "art": "\ud83d\udcd1",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Documentation"
+}

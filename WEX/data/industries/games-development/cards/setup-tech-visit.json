@@ -1,0 +1,12 @@
+{
+  "id": "setup-tech-visit",
+  "name": "Tech Stack Evaluation",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Visit a tech studio to evaluate their engine and toolchain choices.",
+  "flavor": "Engines matter.",
+  "rarity": "Common",
+  "art": "\ud83d\udd0d",
+  "set": "visit",
+  "value": 1
+}

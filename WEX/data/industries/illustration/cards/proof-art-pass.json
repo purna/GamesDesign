@@ -1,0 +1,13 @@
+{
+  "id": "proof-art-pass",
+  "name": "Art Review Pass",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Review and refine artwork for quality and style consistency.",
+  "flavor": "Polish makes perfect.",
+  "rarity": "Common",
+  "art": "\ud83d\udc41\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Communication"
+}

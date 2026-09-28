@@ -1,0 +1,25 @@
+{
+  "id": "fashion-illustrator",
+  "title": "Fashion Illustrator",
+  "category": "Illustration",
+  "description": "Create fashion illustrations for clothing brands and publications.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 1,
+    "skill": "Design"
+  },
+  "recommendedSets": [
+    "brief",
+    "volunteering"
+  ],
+  "flavor": "Style is self-expression.",
+  "art": "\ud83d\udc57",
+  "rarity": "Common",
+  "stats": {
+    "industryKnowledge": 5,
+    "networking": 6,
+    "technicalSkill": 5,
+    "creativity": 8,
+    "reliability": 4
+  }
+}

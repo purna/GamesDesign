@@ -1,0 +1,13 @@
+{
+  "id": "impact-release-partnered",
+  "name": "Ship Joint Project",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Successfully release a co-developed project with partners.",
+  "flavor": "Better together.",
+  "rarity": "Uncommon",
+  "art": "\ud83c\udf0d",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

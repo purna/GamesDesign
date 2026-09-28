@@ -1,0 +1,13 @@
+{
+  "id": "setup-system-scope",
+  "name": "System Scope Definition",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Define the scope and boundaries of shared systems with external teams.",
+  "flavor": "Clear scope prevents endless feature creep.",
+  "rarity": "Common",
+  "art": "\ud83d\udcca",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Documentation"
+}

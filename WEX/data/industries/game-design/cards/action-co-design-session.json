@@ -1,0 +1,13 @@
+{
+  "id": "action-co-design-session",
+  "name": "Co-Design Session",
+  "type": "Action",
+  "category": "Action",
+  "description": "Run a joint design session with external partners to build features together.",
+  "flavor": "Two studios, one vision.",
+  "rarity": "Common",
+  "art": "\ud83e\udd1d",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Design"
+}

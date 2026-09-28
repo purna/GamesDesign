@@ -1,0 +1,13 @@
+{
+  "id": "impact-sponsor-success",
+  "name": "Achieve Sponsor Goals",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Successfully execute partnership deliverables that meet sponsor KPIs.",
+  "flavor": "Partnerships drive growth.",
+  "rarity": "Uncommon",
+  "art": "\ud83e\udd1d",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

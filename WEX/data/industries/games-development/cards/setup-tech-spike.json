@@ -1,0 +1,13 @@
+{
+  "id": "setup-tech-spike",
+  "name": "Tech Spike",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Build a small prototype to test a technical approach.",
+  "flavor": "Proof before commitment.",
+  "rarity": "Common",
+  "art": "\ud83d\udd2c",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Analysis"
+}

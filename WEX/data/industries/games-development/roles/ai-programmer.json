@@ -1,0 +1,22 @@
+{
+  "id": "ai-programmer",
+  "title": "AI Programmer",
+  "category": "Games Development",
+  "description": "Implement NPC behaviour, decision trees, and machine learning for games.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Analysis"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Smart enemies make memorable fights.",
+  "art": "🤖",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 3,
+    "technicalSkill": 9,
+    "creativity": 6,
+    "reliability": 8
+  }
+}

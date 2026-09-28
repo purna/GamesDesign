@@ -1,0 +1,22 @@
+{
+  "id": "concept-artist",
+  "title": "Concept Artist",
+  "category": "Illustration",
+  "description": "Visualise characters, environments, and props to define a game's look.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Design"
+  },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "The first image sells the world.",
+  "art": "🎨",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 7,
+    "networking": 5,
+    "technicalSkill": 6,
+    "creativity": 9,
+    "reliability": 6
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "setup-env-layout",
+  "name": "Environment Layout",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Block out environments with rough layout and composition.",
+  "flavor": "Composition first.",
+  "rarity": "Common",
+  "art": "\ud83c\udfde\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Design"
+}

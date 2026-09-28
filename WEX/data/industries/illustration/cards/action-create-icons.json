@@ -1,0 +1,13 @@
+{
+  "id": "action-create-icons",
+  "name": "Create UI Icons",
+  "type": "Action",
+  "category": "Action",
+  "description": "Design and produce UI icons for the interface.",
+  "flavor": "Small details matter.",
+  "rarity": "Common",
+  "art": "\ud83d\uddbc\ufe0f",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

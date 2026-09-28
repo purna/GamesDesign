@@ -1,0 +1,13 @@
+{
+  "id": "setup-version-control",
+  "name": "Version Control Setup",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up version control for a shared project with external partners.",
+  "flavor": "Don't break the build.",
+  "rarity": "Common",
+  "art": "\ud83d\udce6",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

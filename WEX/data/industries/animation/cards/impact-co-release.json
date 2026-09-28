@@ -1,0 +1,13 @@
+{
+  "id": "impact-co-release",
+  "name": "Co-Released Animation",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Successfully ship a co-developed animation project.",
+  "flavor": "Teamwork makes the dream work.",
+  "rarity": "Uncommon",
+  "art": "\ud83c\udf0d",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

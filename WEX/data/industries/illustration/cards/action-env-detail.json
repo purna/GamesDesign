@@ -1,0 +1,13 @@
+{
+  "id": "action-env-detail",
+  "name": "Detail Environment Art",
+  "type": "Action",
+  "category": "Action",
+  "description": "Add props, lighting, and details to environment scenes.",
+  "flavor": "Details bring worlds to life.",
+  "rarity": "Common",
+  "art": "\ud83c\udf33",
+  "set": "placement",
+  "value": 1,
+  "skill": "Design"
+}

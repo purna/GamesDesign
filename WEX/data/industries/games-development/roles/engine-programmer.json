@@ -1,0 +1,22 @@
+{
+  "id": "engine-programmer",
+  "title": "Engine Programmer",
+  "category": "Games Development",
+  "description": "Optimise rendering, memory, and performance at the engine level.",
+  "requirements": {
+    "experience": 2,
+    "evidence": 2,
+    "skill": "Analysis"
+  },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Every millisecond saved is a feature earned.",
+  "art": "⚡",
+  "rarity": "Rare",
+  "stats": {
+    "industryKnowledge": 8,
+    "networking": 3,
+    "technicalSkill": 9,
+    "creativity": 4,
+    "reliability": 9
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "action-merge-branch",
+  "name": "Merge Partner Branch",
+  "type": "Action",
+  "category": "Action",
+  "description": "Integrate partner code changes and resolve conflicts.",
+  "flavor": "Collaboration requires patience.",
+  "rarity": "Common",
+  "art": "\ud83d\udd00",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

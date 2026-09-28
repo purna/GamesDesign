@@ -1,0 +1,1356 @@
+{
+  "roles": [
+    {
+      "id": "combat-designer",
+      "title": "Combat Designer",
+      "category": "Game Design",
+      "description": "Design and balance combat systems, weapons, and enemy interactions.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Problem solving"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Make it fun to fight.",
+      "art": "\u2694\ufe0f",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 4,
+        "technicalSkill": 7,
+        "creativity": 7,
+        "reliability": 5
+      }
+    },
+    {
+      "id": "concept-artist",
+      "title": "Concept Artist",
+      "category": "Game Design",
+      "description": "Visualise characters, environments, and props to define a game's look.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Design"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "The first image sells the world.",
+      "art": "\ud83c\udfa8",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 6,
+        "creativity": 9,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "game-designer",
+      "title": "Game Designer",
+      "category": "Game Design",
+      "description": "Design core gameplay mechanics, systems, and player progression.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Design"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Fun is engineered, not accidental.",
+      "art": "\ud83c\udfae",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 8,
+        "networking": 4,
+        "technicalSkill": 6,
+        "creativity": 9,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "game-economist",
+      "title": "Game Economist",
+      "category": "Game Design",
+      "description": "Design and balance in-game economies, currencies, and progression loops.",
+      "requirements": {
+        "experience": 3,
+        "evidence": 2,
+        "skill": "Analysis"
+      },
+      "recommendedSets": [
+        "placement",
+        "partnership"
+      ],
+      "flavor": "Numbers drive engagement.",
+      "art": "\ud83d\udcb0",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 6,
+        "creativity": 6,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "level-designer",
+      "title": "Level Designer",
+      "category": "Game Design",
+      "description": "Build engaging spaces, encounters, and player flow through game worlds.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering"
+      ],
+      "flavor": "Every corridor teaches the player something.",
+      "art": "\ud83d\uddfa\ufe0f",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 8,
+        "creativity": 7,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "mechanics-designer",
+      "title": "Mechanics Designer",
+      "category": "Game Design",
+      "description": "Design core gameplay mechanics and player interaction systems.",
+      "requirements": {
+        "experience": 3,
+        "evidence": 2,
+        "skill": "Problem solving"
+      },
+      "recommendedSets": [
+        "placement",
+        "partnership"
+      ],
+      "flavor": "Mechanics are the rules.",
+      "art": "\ud83c\udfae",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 7,
+        "creativity": 7,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "motion-designer",
+      "title": "Motion Graphics Designer",
+      "category": "Animation",
+      "description": "Create animated graphics for titles, UI, and promotional content.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 1,
+        "skill": "Design"
+      },
+      "recommendedSets": [
+        "brief",
+        "partnership"
+      ],
+      "flavor": "Animation meets design.",
+      "art": "\ud83d\udcfd\ufe0f",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 5,
+        "networking": 6,
+        "technicalSkill": 6,
+        "creativity": 7,
+        "reliability": 5
+      }
+    },
+    {
+      "id": "narrative-designer",
+      "title": "Narrative Designer",
+      "category": "Game Design",
+      "description": "Write quests, dialogue, and world lore that integrate with gameplay systems.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "brief",
+        "volunteering"
+      ],
+      "flavor": "The best stories are the ones the player tells themselves.",
+      "art": "\ud83d\udcd6",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 5,
+        "creativity": 9,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "narrative-illustrator",
+      "title": "Narrative Illustrator",
+      "category": "Game Design",
+      "description": "Create sequential art and illustrations for game narratives and dialogue.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 1,
+        "skill": "Design"
+      },
+      "recommendedSets": [
+        "brief",
+        "volunteering"
+      ],
+      "flavor": "Pictures tell stories without words.",
+      "art": "\ud83d\udcd6",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 5,
+        "networking": 6,
+        "technicalSkill": 6,
+        "creativity": 9,
+        "reliability": 5
+      }
+    },
+    {
+      "id": "quest-designer",
+      "title": "Quest Designer",
+      "category": "Game Design",
+      "description": "Design missions, side quests, and narrative progression.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "brief",
+        "volunteering"
+      ],
+      "flavor": "Every quest has a purpose.",
+      "art": "\ud83d\udcdc",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 5,
+        "technicalSkill": 6,
+        "creativity": 8,
+        "reliability": 6
+      }
+    },
+    {
+      "id": "systems-designer",
+      "title": "Systems Designer",
+      "category": "Game Design",
+      "description": "Design and balance interconnected game systems: economy, progression, combat formulas.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Analysis"
+      },
+      "recommendedSets": [
+        "placement",
+        "partnership"
+      ],
+      "flavor": "A spreadsheet today prevents a broken economy tomorrow.",
+      "art": "\u2699\ufe0f",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 8,
+        "networking": 3,
+        "technicalSkill": 8,
+        "creativity": 6,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "ui-ux-designer",
+      "title": "UI/UX Designer",
+      "category": "Game Design",
+      "description": "Design intuitive interfaces, menus, and player feedback systems.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Design"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Good UI is invisible. Bad UI is the game.",
+      "art": "\ud83d\udcf1",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 6,
+        "creativity": 8,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "world-builder",
+      "title": "World Builder",
+      "category": "Game Design",
+      "description": "Create the lore, geography, and narrative context for game worlds.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Communication"
+      },
+      "recommendedSets": [
+        "brief",
+        "volunteering"
+      ],
+      "flavor": "Build worlds, not just games.",
+      "art": "\ud83c\udf0d",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 5,
+        "technicalSkill": 5,
+        "creativity": 9,
+        "reliability": 5
+      }
+    }
+  ],
+  "cards": [
+    {
+      "id": "action-balance-game",
+      "name": "Balance Game Systems",
+      "type": "Action",
+      "category": "Action",
+      "description": "Tune difficulty curves, rewards, and economic systems.",
+      "flavor": "The hardest part of design.",
+      "rarity": "Common",
+      "art": "\u2696\ufe0f",
+      "set": "placement",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "action-build-wireframes",
+      "name": "Build UI Wireframes",
+      "type": "Action",
+      "category": "Action",
+      "description": "Create detailed wireframes for all screens and interactions.",
+      "flavor": "Structure before style.",
+      "rarity": "Common",
+      "art": "\ud83d\udcd0",
+      "set": "brief",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-co-design-session",
+      "name": "Co-Design Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Run a joint design session with external partners to build features together.",
+      "flavor": "Two studios, one vision.",
+      "rarity": "Common",
+      "art": "\ud83e\udd1d",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-create-game-proto",
+      "name": "Create Game Prototype",
+      "type": "Action",
+      "category": "Action",
+      "description": "Build a playable prototype to test core mechanics with players.",
+      "flavor": "Fail fast, iterate faster.",
+      "rarity": "Common",
+      "art": "\ud83c\udfae",
+      "set": "placement",
+      "value": 1,
+      "skill": "Problem solving"
+    },
+    {
+      "id": "action-facilitate-workshop",
+      "name": "Facilitate Design Workshop",
+      "type": "Action",
+      "category": "Action",
+      "description": "Run a game design workshop for newcomers or students.",
+      "flavor": "Teaching solidifies your own understanding.",
+      "rarity": "Common",
+      "art": "\ud83d\udc65",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Coaching"
+    },
+    {
+      "id": "action-gather-feedback",
+      "name": "Gather Stakeholder Feedback",
+      "type": "Action",
+      "category": "Action",
+      "description": "Collect design feedback from stakeholders and other teams.",
+      "flavor": "Everyone has an opinion on your design.",
+      "rarity": "Common",
+      "art": "\ud83d\udcac",
+      "set": "visit",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "action-refactor-design",
+      "name": "Refactor Shared Design",
+      "type": "Action",
+      "category": "Action",
+      "description": "Refactor and improve shared design systems based on partner feedback.",
+      "flavor": "Iteration is the lifeblood ",
+      "rarity": "Common",
+      "art": "\ud83d\udd27",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-wireframe-systems",
+      "name": "Wireframe Game Systems",
+      "type": "Action",
+      "category": "Action",
+      "description": "Create preliminary designs for core systems: progression, combat, economy.",
+      "flavor": "Good wireframes save weeks of rework.",
+      "rarity": "Common",
+      "art": "\u270f\ufe0f",
+      "set": "brief",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-write-dialogue",
+      "name": "Write Character Dialogue",
+      "type": "Action",
+      "category": "Action",
+      "description": "Craft dialogue for characters that brings them to life.",
+      "flavor": "Every line should serve the story.",
+      "rarity": "Common",
+      "art": "\u270d\ufe0f",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-partner-doc",
+      "name": "Deliver Partner Design Docs",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Deliver comprehensive design documentation to partners.",
+      "flavor": "Documentation is a love letter to future you.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\udcd1",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "impact-release-partnered",
+      "name": "Ship Joint Project",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Successfully release a co-developed project with partners.",
+      "flavor": "Better together.",
+      "rarity": "Uncommon",
+      "art": "\ud83c\udf0d",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-ship-game",
+      "name": "Ship Final Game",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Take the game from prototype to polished release.",
+      "flavor": "The moment players see your work live.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\ude80",
+      "set": "placement",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "proof-align-milestones",
+      "name": "Align Development Milestones",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document and align on shared development milestones and deliverables.",
+      "flavor": "Trust, but verify.",
+      "rarity": "Common",
+      "art": "\ud83d\udcc5",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "proof-deliver-prototype",
+      "name": "Deliver Design Prototype",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Present a working prototype that validates your design approach.",
+      "flavor": "Show don't tell.",
+      "rarity": "Common",
+      "art": "\ud83d\udce6",
+      "set": "brief",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "proof-design-doc-final",
+      "name": "Final Design Document",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write the completed design document with all specifications.",
+      "flavor": "The blueprint for implementation.",
+      "rarity": "Common",
+      "art": "\ud83d\udcda",
+      "set": "placement",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "proof-jam-submissions",
+      "name": "Review Jam Submissions",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Play and review entries, provide written feedback to participants.",
+      "flavor": "Every submission teaches you something.",
+      "rarity": "Common",
+      "art": "\ud83d\udccb",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-narrative-review",
+      "name": "Narrative Review Pass",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Review all narrative content for consistency and quality.",
+      "flavor": "Stories need editing too.",
+      "rarity": "Common",
+      "art": "\ud83d\udd0d",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "proof-playtest-deck",
+      "name": "Run Playtest Sessions",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Organise and run structured playtests, collect feedback from players.",
+      "flavor": "Players will break anything you build.",
+      "rarity": "Common",
+      "art": "\ud83c\udccf",
+      "set": "placement",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-usability-test",
+      "name": "Run Usability Testing",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Test UI with users and iterate on feedback.",
+      "flavor": "Assumptions are dangerous.",
+      "rarity": "Common",
+      "art": "\ud83e\uddea",
+      "set": "brief",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "setup-client-brief",
+      "name": "Client Brief Meeting",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Meet with a client to understand their game design requirements.",
+      "flavor": "The brief shapes everything that follows.",
+      "rarity": "Common",
+      "art": "\ud83d\udcc4",
+      "set": "brief",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "setup-design-kickoff",
+      "name": "Design Kickoff Meeting",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Lead the initial design meeting to align the team on vision, scope, and constraints.",
+      "flavor": "Every great game starts with a conversation.",
+      "rarity": "Common",
+      "art": "\ud83c\udfa8",
+      "set": "placement",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "setup-jam-prep",
+      "name": "Prepare for Game Jam",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Help organise a game jam \u2014 theme selection, rules, judging criteria.",
+      "flavor": "Jams are how many designers got their start.",
+      "rarity": "Common",
+      "art": "\u26a1",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Organisation"
+    },
+    {
+      "id": "setup-level-layout",
+      "name": "Level Layout Planning",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Map out the overall level structure and player flow.",
+      "flavor": "A good flow keeps players engaged.",
+      "rarity": "Common",
+      "art": "\ud83d\uddfa\ufe0f",
+      "set": "placement",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "setup-liaison-role",
+      "name": "Act as Liaison",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Coordinate between two teams working on a co-development project.",
+      "flavor": "Communication is the biggest challenge.",
+      "rarity": "Common",
+      "art": "\ud83e\udd1d",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "setup-narrative-beat",
+      "name": "Narrative Beat Workshop",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Plan key story moments and player journey beats.",
+      "flavor": "Story drives engagement.",
+      "rarity": "Common",
+      "art": "\ud83d\udcd6",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "setup-studio-tour",
+      "name": "Studio Visit",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Tour another development studio and observe their design process.",
+      "flavor": "Not all studios work the same way.",
+      "rarity": "Common",
+      "art": "\ud83c\udfe2",
+      "set": "visit",
+      "value": 1
+    },
+    {
+      "id": "setup-system-scope",
+      "name": "System Scope Definition",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Define the scope and boundaries of shared systems with external teams.",
+      "flavor": "Clear scope prevents endless feature creep.",
+      "rarity": "Common",
+      "art": "\ud83d\udcca",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "setup-ui-discovery",
+      "name": "UI Discovery Workshop",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Research and document UI/UX requirements for the project.",
+      "flavor": "Good UI is invisible.",
+      "rarity": "Common",
+      "art": "\ud83d\udda5\ufe0f",
+      "set": "brief",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-build-sponsor-activation",
+      "name": "Build a Sponsor Activation",
+      "type": "Action",
+      "category": "Action",
+      "description": "Design a small on-site or online activity for a sponsor's brand.",
+      "flavor": "Sponsors fund the scene \u2014 treat them well.",
+      "rarity": "Uncommon",
+      "art": "\ud83c\udff7\ufe0f",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "action-co-ordinate-volunteers",
+      "name": "Coordinate Volunteer Roles",
+      "type": "Action",
+      "category": "Action",
+      "description": "Assign shifts, brief volunteers on their roles, and set up a communication channel for the day.",
+      "flavor": "Herd management, esports edition.",
+      "rarity": "Common",
+      "art": "\ud83d\udcf1",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Organisation"
+    },
+    {
+      "id": "action-complete-partner-task",
+      "name": "Complete Partner Task",
+      "type": "Action",
+      "category": "Action",
+      "description": "Complete the agreed task and ask the partner for feedback.",
+      "flavor": "Professional feedback is worth more than a grade.",
+      "rarity": "Common",
+      "art": "\ud83d\udce6",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Problem solving"
+    },
+    {
+      "id": "action-complete-partner",
+      "name": "Complete Partner Project",
+      "type": "Action",
+      "category": "Action",
+      "description": "Work with an industry partner, act on feedback and deliver agreed outcomes.",
+      "flavor": "Professional feedback is the fastest way to level up.",
+      "rarity": "Rare",
+      "art": "\u2728",
+      "set": "partnership",
+      "value": 2
+    },
+    {
+      "id": "action-complete-placement",
+      "name": "Complete Placement Tasks",
+      "type": "Action",
+      "category": "Action",
+      "description": "Choose a focus \u2014 event operations, streaming support, social media, player support, or equipment setup \u2014 and do the work.",
+      "flavor": "This is where the CV entry actually gets written.",
+      "rarity": "Common",
+      "art": "\ud83d\udee0\ufe0f",
+      "set": "placement",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "action-deliver-brief",
+      "name": "Deliver the Live Brief",
+      "type": "Action",
+      "category": "Action",
+      "description": "Finish and present work to the brief. Respond to feedback and iterate.",
+      "flavor": "Done is better than perfect. Shipped is better than done.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\ude80",
+      "set": "brief",
+      "value": 2
+    },
+    {
+      "id": "action-finish-assignment",
+      "name": "Finish Skills Assignment",
+      "type": "Action",
+      "category": "Action",
+      "description": "Complete a course assignment that demonstrates subject knowledge relevant to your role.",
+      "flavor": "Grades open doors. Skills keep them open.",
+      "rarity": "Common",
+      "art": "\ud83d\udcda",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "action-revise-feedback",
+      "name": "Revise After Feedback",
+      "type": "Action",
+      "category": "Action",
+      "description": "Improve work using specific feedback. Shows growth mindset and resilience.",
+      "flavor": "First draft is for you. Second draft is for them.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\udd04",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "action-run-coaching-session",
+      "name": "Run a Coaching Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Deliver a one-to-one or small-group coaching moment focused on a specific skill.",
+      "flavor": "The best coaches listen more than they speak.",
+      "rarity": "Common",
+      "art": "\ud83c\udfaf",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Coaching"
+    },
+    {
+      "id": "impact-measure-contribution",
+      "name": "Measure Your Contribution",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Explain what changed because of your work, using a result, feedback or clear example.",
+      "flavor": "Show the difference your contribution made.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\udcc8",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "impact-partner-feedback",
+      "name": "Share Partner Feedback",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Record the partner's response to your completed work and how it met their objectives.",
+      "flavor": "External validation is the gold standard of achievement.",
+      "rarity": "Common",
+      "art": "\ud83d\udde3\ufe0f",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-partnership-outcome",
+      "name": "Share Partner Outcome",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Present the finished result to the partner and explain how you used their feedback.",
+      "flavor": "A strong partnership leaves both sides with something useful.",
+      "rarity": "Common",
+      "art": "\ud83e\udd1d",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-placement-outcome",
+      "name": "Show Placement Impact",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Summarise the result of your placement work and how it helped the esports team or event.",
+      "flavor": "Show what changed because you were there.",
+      "rarity": "Common",
+      "art": "\ud83d\udcca",
+      "set": "placement",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "impact-placement-showcase",
+      "name": "Showcase Placement Result",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Present the final outcome of your placement work \u2014 a demo, report, or deliverable \u2014 and explain its impact.",
+      "flavor": "The best placements end with a story worth telling.",
+      "rarity": "Common",
+      "art": "\ud83c\udfa4",
+      "set": "placement",
+      "value": 1,
+      "skill": "Presentation"
+    },
+    {
+      "id": "proof-ask-reference",
+      "name": "Ask for a Reference",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Request written feedback from someone who supervised your work.",
+      "flavor": "A reference is a vote of confidence in writing.",
+      "rarity": "Uncommon",
+      "art": "\u270d\ufe0f",
+      "set": "any",
+      "value": 2
+    },
+    {
+      "id": "proof-cv-achievement",
+      "name": "Write a CV Achievement",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Describe your contribution, the skill you used and the measurable outcome.",
+      "flavor": "Don't list duties. List impact.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\udcc4",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "proof-daily-log",
+      "name": "Daily Log & Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record what you did, what you learned and how it connects to your target role.",
+      "flavor": "Experience unrecorded is experience forgotten.",
+      "rarity": "Common",
+      "art": "\ud83d\udcd3",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "proof-debug-learning-log",
+      "name": "Debug & Learning Log",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document a bug or unexpected issue you hit, the steps you took to diagnose it, and what you learned.",
+      "flavor": "Every bug is a lesson in disguise.",
+      "rarity": "Common",
+      "art": "\ud83d\udc1b",
+      "set": "brief",
+      "value": 1,
+      "skill": "Problem solving"
+    },
+    {
+      "id": "proof-distinction-earned",
+      "name": "Distinction Earned",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Bonus evidence: subject excellence.",
+      "flavor": "Excellence isn't an accident. It's the result of intention.",
+      "rarity": "Uncommon",
+      "art": "\ud83c\udfc6",
+      "set": "any",
+      "value": 2
+    },
+    {
+      "id": "proof-document-brief-learnings",
+      "name": "Document Brief Learnings",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write up what the brief taught you about your role, the client's needs, and your design decisions.",
+      "flavor": "A written record is the bridge between doing and reflecting.",
+      "rarity": "Common",
+      "art": "\ud83d\udcd3",
+      "set": "brief",
+      "value": 1,
+      "skill": "Reflection"
+    },
+    {
+      "id": "proof-give-coaching-feedback",
+      "name": "Reflect on Coaching Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document how coaching conversations helped a player improve their performance or mindset.",
+      "flavor": "Coaching lives in the follow-through.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\udcad",
+      "set": "brief",
+      "value": 1,
+      "skill": "Coaching"
+    },
+    {
+      "id": "proof-log-placement-hours",
+      "name": "Log Placement Hours & Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record your hours and write what you did, what you learned, and how it connects to your target job.",
+      "flavor": "Evidence is what turns a placement into a reference.",
+      "rarity": "Common",
+      "art": "\ud83d\udcdd",
+      "set": "placement",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "proof-placement-reflection",
+      "name": "Placement Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write a mid-point or final reflection on your placement tasks, challenges overcome, and skills developed.",
+      "flavor": "Reflection turns experience into evidence.",
+      "rarity": "Common",
+      "art": "\ud83e\udd14",
+      "set": "placement",
+      "value": 1,
+      "skill": "Reflection"
+    },
+    {
+      "id": "proof-present-feedback",
+      "name": "Present & Reflect on Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Present your work, note the feedback, and save the final version for your portfolio.",
+      "flavor": "Feedback is free improvement if you actually listen.",
+      "rarity": "Common",
+      "art": "\ud83c\udfa4",
+      "set": "brief",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-record-industry-insight",
+      "name": "Record Industry Insight",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write up one thing you learned and how it changes your view of the job.",
+      "flavor": "Insight only counts once it's written down.",
+      "rarity": "Common",
+      "art": "\ud83d\udca1",
+      "set": "visit",
+      "value": 1,
+      "skill": "Industry Knowledge"
+    },
+    {
+      "id": "proof-reliability-checkin",
+      "name": "Reliability Check-In",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Explain how you'll confirm your shift and contact the organiser if plans change.",
+      "flavor": "Reliability is a skill, not a personality trait.",
+      "rarity": "Common",
+      "art": "\u2705",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "proof-revise-with-feedback",
+      "name": "Revise With Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Use the partner's feedback to improve your work before it goes in your portfolio.",
+      "flavor": "The revision is where the real learning happens.",
+      "rarity": "Common",
+      "art": "\ud83d\udd01",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "proof-save-portfolio",
+      "name": "Save Portfolio Evidence",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Keep a finished work sample and explain your role, tools used and outcome.",
+      "flavor": "Your portfolio is your proof. Make it undeniable.",
+      "rarity": "Uncommon",
+      "art": "\ud83d\uddbc\ufe0f",
+      "set": "any",
+      "value": 2
+    },
+    {
+      "id": "proof-showcase-partner-work",
+      "name": "Showcase Partner Work",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document the deliverables produced during the partnership, highlighting your specific contribution and the skills applied.",
+      "flavor": "The best partnerships leave a paper trail of success.",
+      "rarity": "Common",
+      "art": "\ud83d\udcca",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Documentation"
+    },
+    {
+      "id": "proof-volunteer-feedback",
+      "name": "Volunteer Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Collect and record feedback from the event organiser or fellow volunteers about your contribution.",
+      "flavor": "A thank-you note is worth more than a certificate.",
+      "rarity": "Common",
+      "art": "\ud83d\udcac",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "setup-agree-dates-times",
+      "name": "Agree Dates & Times",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Confirm the schedule and hours in writing. Must fit college hours (8:30am\u20135:30pm, max 8hr day).",
+      "flavor": "Verbal agreements evaporate. Written ones stick.",
+      "rarity": "Common",
+      "art": "\ud83d\udcc5",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-agree-role",
+      "name": "Agree Your Role",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Clarify tasks, responsibilities, supervision and what you'll produce.",
+      "flavor": "Undefined work is unpaid work. Define it.",
+      "rarity": "Common",
+      "art": "\ud83d\udcdd",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-confirm-partner-project",
+      "name": "Confirm Partner Project",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Find out who the industry partner is, what the project involves, when sessions happen, and what they expect you to produce.",
+      "flavor": "Partnerships work best with clear expectations on both sides.",
+      "rarity": "Common",
+      "art": "\ud83e\udd1d",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "setup-confirm-venue-logistics",
+      "name": "Confirm Venue Logistics",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Book the venue, confirm access, arrange equipment, and create a run sheet for the event.",
+      "flavor": "The devil is in the details, and the angels love a well-run event.",
+      "rarity": "Common",
+      "art": "\ud83c\udfe2",
+      "set": "visit",
+      "value": 1,
+      "skill": "Organisation"
+    },
+    {
+      "id": "setup-employer-contact",
+      "name": "Employer Contact",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Get a named contact and a way to reach them \u2014 email, phone, LinkedIn.",
+      "flavor": "A name on a spreadsheet becomes a mentor in real life.",
+      "rarity": "Common",
+      "art": "\ud83d\udcc7",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-find-org",
+      "name": "Find an Organisation",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Identify a studio, team, publisher or community that matches your career goal.",
+      "flavor": "Every journey starts with a destination in mind.",
+      "rarity": "Common",
+      "art": "\ud83d\udd0d",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-partner-expectations",
+      "name": "Partner Expectations",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Find out what the industry partner expects you to produce and how they'll support you.",
+      "flavor": "Partners don't want free labour. They want fresh perspective.",
+      "rarity": "Common",
+      "art": "\ud83e\udd1d",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "setup-review-brief",
+      "name": "Review the Brief",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Read the brief, identify the audience, check the deadline, and decide what you'll make.",
+      "flavor": "A clear brief saves three drafts later.",
+      "rarity": "Common",
+      "art": "\ud83d\udcc4",
+      "set": "brief",
+      "value": 1
+    },
+    {
+      "id": "setup-stage-run-sheet",
+      "name": "Stage the Run Sheet",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Create a detailed run sheet with roles, timings, contacts and contingency plans for the event.",
+      "flavor": "A good run sheet saves the day before anyone knows there was a problem.",
+      "rarity": "Common",
+      "art": "\ud83d\udccb",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Organisation"
+    },
+    {
+      "id": "setup-travel-access",
+      "name": "Travel & Access Plan",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Check location, travel, equipment needs and any access requirements.",
+      "flavor": "The best plan fails if you can't get through the door.",
+      "rarity": "Common",
+      "art": "\ud83d\uddfa\ufe0f",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "setup-understand-brief",
+      "name": "Understand the Brief",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Clarify the audience, deliverable, deadline and success criteria with the client.",
+      "flavor": "A brief misunderstood is a project doomed.",
+      "rarity": "Common",
+      "art": "\ud83d\udccb",
+      "set": "brief",
+      "value": 1
+    },
+    {
+      "id": "wild-card-evidence-boost",
+      "name": "Wild Card: Evidence Boost",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A second pair of eyes strengthens your evidence. Use this card in place of a Proof card for a Block Placement.",
+      "flavor": "Evidence worth keeping is evidence worth boosting.",
+      "rarity": "Uncommon",
+      "art": "\u2b50",
+      "set": "placement",
+      "value": 2
+    },
+    {
+      "id": "wild-card-extra-time",
+      "name": "Wild Card: Extra Time",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A brief extension to get the work right. Use this card in place of an Action card for a Live Project Brief.",
+      "flavor": "Time is the one resource you can never get back.",
+      "rarity": "Uncommon",
+      "art": "\u23f3",
+      "set": "brief",
+      "value": 2
+    },
+    {
+      "id": "wild-card-tutor-advice",
+      "name": "Wild Card: Tutor Advice",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A quick check-in with your tutor. Use this card in place of a Setup card for Volunteering.",
+      "flavor": "Sometimes the right words at the right time change everything.",
+      "rarity": "Uncommon",
+      "art": "\ud83c\udf93",
+      "set": "volunteering",
+      "value": 2
+    },
+    {
+      "id": "wild-careers-team",
+      "name": "Wild Card: Careers Team",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "The Careers & Employability team steps in. Use this card in place of any Setup, Action or Proof card for a Block Placement.",
+      "flavor": "They've seen every version of this problem before.",
+      "rarity": "Rare",
+      "art": "\ud83e\udded",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "wild-mentor-advice",
+      "name": "Wild Card: Mentor Advice",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A mentor points you in the right direction. Use this card in place of any Setup, Action or Proof card for a Live Project Brief.",
+      "flavor": "Sometimes the fastest route is someone who's done it before.",
+      "rarity": "Rare",
+      "art": "\ud83c\udf1f",
+      "set": "brief",
+      "value": 1
+    }
+  ],
+  "sets": [
+    {
+      "id": "placement",
+      "name": "Block Placement",
+      "art": "\ud83c\udfe2",
+      "groupSize": 4,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof",
+        "Impact"
+      ],
+      "reward": {
+        "experience": "Industry Placement",
+        "evidenceValue": 2,
+        "reference": true
+      },
+      "why": "A placement gives practical experience and, if it goes well, an employer reference."
+    },
+    {
+      "id": "visit",
+      "name": "Employer Visit",
+      "art": "\ud83c\udfed",
+      "groupSize": 2,
+      "requiredCategories": [
+        "Setup",
+        "Action"
+      ],
+      "reward": {
+        "experience": "Industry Insight Visit",
+        "evidenceValue": 1,
+        "reference": false
+      },
+      "why": "A visit builds industry understanding and useful contacts."
+    },
+    {
+      "id": "volunteering",
+      "name": "Volunteering",
+      "art": "\ud83d\ude4c",
+      "groupSize": 3,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof"
+      ],
+      "reward": {
+        "experience": "Volunteer Experience",
+        "evidenceValue": 1,
+        "reference": false
+      },
+      "why": "Volunteering shows reliability, initiative and teamwork."
+    },
+    {
+      "id": "brief",
+      "name": "Live Project Brief",
+      "art": "\ud83c\udfa8",
+      "groupSize": 3,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof"
+      ],
+      "reward": {
+        "experience": "Client Project",
+        "evidenceValue": 2,
+        "reference": false
+      },
+      "why": "A finished brief creates a portfolio piece that shows you can respond to a client's needs."
+    },
+    {
+      "id": "partnership",
+      "name": "Industry Partnership",
+      "art": "\ud83c\udf93",
+      "groupSize": 4,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof",
+        "Impact"
+      ],
+      "reward": {
+        "experience": "Industry Collaboration",
+        "evidenceValue": 2,
+        "reference": false
+      },
+      "why": "A partnership gives you specialist feedback and experience working with professionals."
+    }
+  ]
+}

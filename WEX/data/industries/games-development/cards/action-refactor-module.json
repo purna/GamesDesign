@@ -1,0 +1,13 @@
+{
+  "id": "action-refactor-module",
+  "name": "Refactor Game Module",
+  "type": "Action",
+  "category": "Action",
+  "description": "Refactor a legacy game module for better maintainability.",
+  "flavor": "Leave the code better than you found it.",
+  "rarity": "Common",
+  "art": "\u267b\ufe0f",
+  "set": "placement",
+  "value": 1,
+  "skill": "Problem solving"
+}

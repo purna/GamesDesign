@@ -1,0 +1,13 @@
+{
+  "id": "action-attend-expo",
+  "name": "Attend Esports Expo",
+  "type": "Action",
+  "category": "Action",
+  "description": "Visit an esports expo and network with industry professionals.",
+  "flavor": "Networking is key.",
+  "rarity": "Common",
+  "art": "\ud83c\udfaa",
+  "set": "visit",
+  "value": 1,
+  "skill": "Communication"
+}

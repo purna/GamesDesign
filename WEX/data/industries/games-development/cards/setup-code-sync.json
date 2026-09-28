@@ -1,0 +1,13 @@
+{
+  "id": "setup-code-sync",
+  "name": "Codebase Sync",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Synchronise code with external partner on a shared project.",
+  "flavor": "Merge conflicts happen.",
+  "rarity": "Common",
+  "art": "\ud83d\udd17",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Technical Setup"
+}

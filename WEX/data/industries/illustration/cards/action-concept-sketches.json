@@ -1,0 +1,13 @@
+{
+  "id": "action-concept-sketches",
+  "name": "Concept Sketches",
+  "type": "Action",
+  "category": "Action",
+  "description": "Produce multiple concept sketches exploring different directions.",
+  "flavor": "Quantity leads to quality.",
+  "rarity": "Common",
+  "art": "\u270f\ufe0f",
+  "set": "brief",
+  "value": 1,
+  "skill": "Design"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "proof-code-freeze",
+  "name": "Code Freeze & QA Pass",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Freeze features and address critical bugs before release.",
+  "flavor": "Quality over quantity.",
+  "rarity": "Common",
+  "art": "\ud83e\uddca",
+  "set": "brief",
+  "value": 1,
+  "skill": "Documentation"
+}

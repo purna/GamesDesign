@@ -1,0 +1,13 @@
+{
+  "id": "setup-color-scripts",
+  "name": "Color Scripts",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Create color scripts to establish the visual narrative arc.",
+  "flavor": "Color tells the story.",
+  "rarity": "Common",
+  "art": "\ud83c\udfa8",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Design"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "setup-game-jam-tech",
+  "name": "Game Jam Tech Support",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up engines, tools, and version control for a game jam.",
+  "flavor": "Jams need infrastructure.",
+  "rarity": "Common",
+  "art": "\u26a1",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Technical Setup"
+}
