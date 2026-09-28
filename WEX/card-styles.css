@@ -661,14 +661,14 @@
 }
 
 /* ===== Cards ===== */
-/* Two separate colour channels, because they answer different questions:
-     --card-cat   the fill, which shows the card TYPE (Setup/Action/Proof/Impact)
-     --card-route the border, which shows the experience ROUTE it belongs to
-   A card used to share one variable for both, so the route colour overwrote the
-   type colour and the border and the fill disagreed with what each should say. */
+/* One colour per card, driven by the card TYPE (Setup / Action / Proof / Impact /
+   Wildcard). Both the border and the fill read from it, so they always agree.
+   The experience ROUTE a card belongs to is not encoded in colour: it is named in
+   the card's text line ("Setup · Block Placement") and explained in the Routes tab
+   and the card tooltip. The route list items in the rail do keep their own route
+   colours, since there each row is a single route. */
 .card {
   --card-cat: var(--cyan);
-  --card-route: var(--card-cat);
   --card-glow: var(--card-cat);
   width: 182px;
   min-height: 178px;
@@ -676,7 +676,7 @@
   isolation: isolate;
   overflow: hidden;
   border-radius: 14px;
-  border: 2px solid color-mix(in srgb, var(--border), var(--card-route) 65%);
+  border: 2px solid color-mix(in srgb, var(--border), var(--card-cat) 65%);
   background: linear-gradient(180deg, color-mix(in srgb, var(--card-cat), var(--surface) 90%) 0%, var(--surface) 35%, color-mix(in srgb, var(--surface), var(--bg) 20%) 100%);
   color: var(--ink);
   padding: 0.65rem;
@@ -687,7 +687,7 @@
   text-align: center;
   gap: 0.3rem;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-  box-shadow: var(--shadow-md), inset 0 0 0 1px color-mix(in srgb, var(--card-route), var(--surface) 70%);
+  box-shadow: var(--shadow-md), inset 0 0 0 1px color-mix(in srgb, var(--card-cat), var(--surface) 70%);
 }
 
 .card::before,
@@ -755,72 +755,59 @@
 
 .card.cat-cyan,
 .card.tone-setup {
-  --card-glow: var(--cyan);
+  --card-cat: var(--cyan);
 }
 
 .card.cat-pink,
 .card.tone-action {
-  --card-glow: var(--pink);
+  --card-cat: var(--pink);
 }
 
 .card.cat-gold,
 .card.tone-proof {
-  --card-glow: var(--gold);
+  --card-cat: var(--gold);
 }
 
 .card.cat-orange,
 .card.tone-impact {
-  --card-glow: var(--orange);
+  --card-cat: var(--orange);
 }
 
 .card.cat-lime,
 .card.tone-wild {
-  --card-glow: var(--lime);
+  --card-cat: var(--lime);
 }
 
 /* Match card borders and stored-set tiles by opportunity route. */
-.card.set-placement {
-  --card-route: #4fa6ef;
-}
 .set-row.set-placement,
 .banked-set-tile.set-placement {
   --card-glow: #4fa6ef;
 }
 
-.card.set-visit {
-  --card-route: #b184ea;
-}
 .set-row.set-visit,
 .banked-set-tile.set-visit {
   --card-glow: #b184ea;
 }
 
-.card.set-volunteering {
-  --card-route: #40b99a;
-}
 .set-row.set-volunteering,
 .banked-set-tile.set-volunteering {
   --card-glow: #40b99a;
 }
 
-.card.set-brief {
-  --card-route: #ed9c4d;
-}
 .set-row.set-brief,
 .banked-set-tile.set-brief {
   --card-glow: #ed9c4d;
 }
 
-.card.set-partnership {
-  --card-route: #e66b98;
-}
 .set-row.set-partnership,
 .banked-set-tile.set-partnership {
   --card-glow: #e66b98;
 }
 
+/* Route classes exist so the card can be identified in the DOM, but they carry no
+   colour of their own. */
 .card[class*="set-"] {
-  border-color: color-mix(in srgb, var(--border), var(--card-route) 65%);
+  border-color: color-mix(in srgb, var(--border), var(--card-cat) 65%);
 }
 
 .set-row[class*="set-"] {
@@ -829,11 +816,11 @@
   background: color-mix(in srgb, var(--surface), var(--card-glow) 8%);
 }
 
+/* Wildcards are lime like every other type, so the card keeps one colour. The
+   "fills any slot" fact is carried by the card's text and its tooltip rather than
+   by a rainbow border, which was a second, competing colour signal. */
 .card.wildcard-card {
-  --card-route: var(--accent);
-  border: 2px solid transparent;
-  background: linear-gradient(var(--surface), var(--surface)) padding-box,
-    conic-gradient(from 0deg, var(--cyan), var(--pink), var(--gold), var(--lime), var(--cyan)) border-box;
+  --card-cat: var(--lime);
 }
 
 .card.wildcard-card::before {
@@ -1791,7 +1778,7 @@
 
 /* Route-flexible (Any route) cards get a distinct border so they stand out from route-specific cards. */
 .card.route-flexible-card {
-  --card-route: var(--accent);
+  --card-cat: var(--accent);
   border-color: var(--accent);
   border-width: 2px;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 40%);
@@ -2032,7 +2019,7 @@
 /* "Needed for this role" recolours the border only, so the card keeps showing its
    type colour in the fill. */
 .card.card-key-skill {
-  --card-route: var(--gold);
+  --card-cat: var(--gold);
   box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold), transparent 55%);
   border-color: var(--gold);
 }
@@ -2606,10 +2593,34 @@ body {
 
 .tables .panel {
   flex: 1;
-  /* Sized by its cards rather than by leftover space, so nothing is clipped and
-     no inner scrollbar is needed. */
-  align-content: start;
-  overflow: visible;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-glow) transparent;
+}
+
+/* Custom horizontal scrollbar */
+.tables .panel::-webkit-scrollbar {
+  height: 8px;
+}
+.tables .panel::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+.tables .panel::-webkit-scrollbar-thumb {
+  background: var(--card-glow);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.tables .panel::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+  background-clip: content-box;
+}
+.tables .panel::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .set-builder-status {
@@ -2655,10 +2666,17 @@ body {
   outline-offset: 2px;
   z-index: 90 !important;
 }
+/* Hovering a buried card raises it above the pile so you can see what it is
+   before clicking. */
+.tables .market .card:hover,
+.tables .market .card:focus-visible {
+  z-index: 60;
+}
 
-/* Only the top card of a stack is interactive; the ones under it are the ones
-   you drop onto, so they are marked but not focusable. */
-.tables .market .card.is-stacked:not(.stack-top) { cursor: default; }
+/* Every card in a stack is clickable: the top one opens, and the ones beneath
+   are lifted to the top when clicked. Only the sliver of each buried card is
+   reachable, which is what makes the pile readable. */
+.tables .market .card.is-stacked:not(.stack-top) { cursor: pointer; }
 .tables .market .card.stack-top { z-index: 50; }
 .tables .market .card.dragging-card { opacity: 0.5; z-index: 100; }
 
@@ -2946,3 +2964,25 @@ body {
   line-height: 1.5;
   margin: 0.75rem 0 0;
 }
+
+/* Quiz: a prize, or the note that one was already claimed this run. */
+.quiz-note {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  margin: 0.5rem 0 0;
+  line-height: 1.45;
+}
+.prize-none {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0.75rem 0 0;
+}
+
+.legend-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.legend-note b { color: var(--ink); }

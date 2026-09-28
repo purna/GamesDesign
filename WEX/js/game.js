@@ -227,6 +227,7 @@ function setupResumeButton() {
     state.market = cleanPile(state.market);
     [state.player, ...(state.rivals || [])].forEach((agent) => { agent.hand = cleanPile(agent.hand); });
     state.freeTurn = !!state.freeTurn;
+    state.player.quizPrizeWon = !!state.player.quizPrizeWon;
     state.player.returnsThisRound = state.player.returnsThisRound || 0;
     state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
     state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
@@ -501,7 +502,7 @@ function doMarketSwap() {
 function newAgent(name, strategy) {
   return {
     name, strategy, isPlayer: strategy == null,
-    energy: START_ENERGY, hand: [], banked: [], skills: [], freeTurn: false,
+    energy: START_ENERGY, hand: [], banked: [], skills: [], freeTurn: false, quizPrizeWon: false,
     evidence: 0, reliability: 0, references: 0, distinctions: 0,
     applied: false, actionPenalty: 0,
     marketPicksThisRound: 0, returnsThisRound: 0, marketSwapsThisRound: 0,
@@ -1111,6 +1112,7 @@ function endRoundQuiz() {
       <div class="eyebrow">END OF ROUND ${state.round} \u00b7 KNOWLEDGE CHECK</div>
       <h2>Round Quiz</h2>
       <p class="challenge-q">${escapeHtml(ch.q)}</p>
+      ${state.player.quizPrizeWon ? '<p class="quiz-note">A knowledge check runs at the end of every round. You have already won a quiz prize this run, so this one is for the explanation only.</p>' : ''}
       <div class="modal-actions challenge-options" id="quizOptions"></div>
     </div>
   `);
@@ -1126,9 +1128,19 @@ function endRoundQuiz() {
     btn.textContent = text;
     btn.addEventListener('click', () => {
       if (i === ch.answer) {
+        wrap.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+        // The knowledge check runs every round, but a prize is only awarded once
+        // per game. After that it is still worth answering, for the explanation.
+        if (state.player.quizPrizeWon) {
+          fb.innerHTML = '<p class="prize-none">Correct \u2014 you have already claimed a quiz prize this run, so there is nothing left to win.</p>';
+          addLog('Round quiz answered correctly \u2014 no prize, already claimed this run.');
+          render();
+          persist();
+          return;
+        }
+        state.player.quizPrizeWon = true;
         const prize = ROUND_PRIZES[Math.floor(Math.random() * ROUND_PRIZES.length)];
         const msg = prize.apply();
-        wrap.querySelectorAll('button').forEach((b) => { b.disabled = true; });
         fb.innerHTML = `<p class="prize-win">Correct \u2014 prize: <b>${escapeHtml(prize.label)}</b>. ${escapeHtml(msg)}</p>`;
         addLog(`Round quiz answered correctly \u2014 prize "${prize.label}".`);
         render();
@@ -1810,8 +1822,15 @@ function renderMarket() {
 
     list.forEach((c, depth) => {
       const top = depth === list.length - 1;
+      // Clicking a buried card promotes it to the top of the pile, the way you
+      // would lift a card off a deck. Clicking the card already on top opens it.
+      const promote = () => {
+        if (top) { openPreview('market', c); return; }
+        moveMarketCardToSlot(c.uid, slot, undefined);
+        toast(`${c.name} moved to the top of the stack.`);
+      };
       const card = cardEl(c, {
-        onClick: () => { if (top) openPreview('market', c); },
+        onClick: promote,
         onInspect: (cardToOpen) => { if (top) openPreview('market', cardToOpen); },
         dragSource: 'market',
       });
