@@ -1,4 +1,5 @@
 const fs = require('fs');
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const path = require('path');
 
 // Industry-specific cards for cyber-security (28 cards)
@@ -102,7 +103,7 @@ const filmMakingCards = [
 
 // Write industry-specific cards to individual files in cards/ subfolder
 function writeIndustryCards(industryId, cards) {
-  const cardsDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${industryId}/cards`;
+  const cardsDir = `${PROJECT_ROOT}/data/industries/${industryId}/cards`;
   if (!fs.existsSync(cardsDir)) fs.mkdirSync(cardsDir, { recursive: true });
   
   cards.forEach(card => {

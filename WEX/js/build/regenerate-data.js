@@ -1,4 +1,5 @@
 const fs = require('fs');
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const path = require('path');
 
 function readRoles(dir) {
@@ -6,29 +7,35 @@ function readRoles(dir) {
   return files.filter(f => f.endsWith('.json')).map(f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
 }
 
-function readCards(dir) {
-  const files = fs.readdirSync(dir);
-  const individualFiles = files.filter(f => f.endsWith('.json') && f !== 'cards.json');
-  let cards = individualFiles.map(f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
+function readCards(industryDir) {
+  const cardsDir = path.join(industryDir, 'cards');
+  const industryFiles = fs.readdirSync(industryDir);
   
-  // Also check for cards.json array file
-  if (files.includes('cards.json')) {
-    const arrayCards = JSON.parse(fs.readFileSync(path.join(dir, 'cards.json'), 'utf8'));
-    cards = cards.concat(arrayCards);
+  // If cards.json exists at industry level, use it exclusively (contains all cards)
+  if (industryFiles.includes('cards.json')) {
+    const arrayCards = JSON.parse(fs.readFileSync(path.join(industryDir, 'cards.json'), 'utf8'));
+    if (arrayCards.length > 0) return arrayCards;
   }
   
-  return cards;
+  // Otherwise read individual files from cards subfolder
+  if (fs.existsSync(cardsDir)) {
+    const individualFiles = fs.readdirSync(cardsDir).filter(f => f.endsWith('.json') && f !== 'cards.json');
+    return individualFiles.map(f => JSON.parse(fs.readFileSync(path.join(cardsDir, f), 'utf8')));
+  }
+  
+  return [];
 }
 
-const industries = ['esports', 'game-design', 'games-development', 'animation', 'illustration'];
+const industries2 = ['esports', 'game-design', 'games-development', 'animation', 'illustration', 'cyber-security', 'web-design', 'film-making'];
 
-industries.forEach(ind => {
-  const rolesDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind}/roles`;
-  const cardsDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind}/cards`;
-  const outDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind}`;
+industries2.forEach(ind => {
+  const industryDir = `${PROJECT_ROOT}/data/industries/${ind}`;
+  const rolesDir = path.join(industryDir, 'roles');
+  const cardsDir = path.join(industryDir, 'cards');
+  const outDir = industryDir;
   
   const roles = fs.existsSync(rolesDir) ? readRoles(rolesDir) : [];
-  const cards = fs.existsSync(cardsDir) ? readCards(cardsDir) : [];
+  const cards = readCards(industryDir);
   
   const sets = [
     {
@@ -80,5 +87,7 @@ industries.forEach(ind => {
   
   const data = { roles, cards, sets };
   fs.writeFileSync(path.join(outDir, 'game-data.json'), JSON.stringify(data, null, 2));
-  console.log(`Created ${ind}/game-data.json with ${roles.length} roles and ${cards.length} cards`);
+  console.log(`Regenerated ${ind}/game-data.json with ${roles.length} roles and ${cards.length} cards`);
 });
+
+console.log('Done!');

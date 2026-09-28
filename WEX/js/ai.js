@@ -41,6 +41,12 @@ function rateMarketCard(agent, card) {
   if (recommended.has(card.set)) score += 4;
   if (agent.strategy && card.set === agent.strategy) score += 2;
   if (card.category === 'Wildcard') score += 2;
+  // pickMarketCardFor values flexible cards highly; rateMarketCard scored them 0,
+  // so canSwapMarket read a full market of them as useless and swapped it away.
+  if (card.set === 'any' && card.category !== 'Wildcard') {
+    const usefulRoute = order.find((setId) => !agent.hand.some((held) => held.category === card.category && (held.set === setId || held.set === 'any')));
+    if (usefulRoute) score += 5 + Math.max(0, 2 - order.indexOf(usefulRoute));
+  }
   return score;
 }
 
@@ -51,7 +57,10 @@ function targetSetOrder(agent, job) {
   const strategy = agent && agent.strategy;
   const completed = new Set((agent && agent.banked || []).map((entry) => entry.set));
   const ids = [...recommended.filter((id) => !completed.has(id)), ...recommended.filter((id) => completed.has(id))];
-  if (strategy && !ids.includes(strategy)) ids.push(strategy);
+  // strategy is not always a set id ('balanced' is not a route), so only prefer
+  // it when it names a real route. Pushing an unknown id made bankSet() dereference
+  // an undefined set and throw mid-rival-phase.
+  if (strategy && DATA.sets.some((s) => s.id === strategy) && !ids.includes(strategy)) ids.push(strategy);
   DATA.sets.forEach((set) => { if (!ids.includes(set.id)) ids.push(set.id); });
   return ids;
 }
@@ -103,6 +112,32 @@ function pickMarketCardFor(agent, job) {
   return scores[0].card;
 }
 
+// The `n` least useful cards in the agent's hand, worst first. leastUsefulCard()
+// returns a single card; this ranks the whole hand so a multi-card return drops the
+// genuinely weakest cards rather than the worst plus an arbitrary one.
+function leastUsefulCards(agent, job, n) {
+  const recommended = jobSetOptions(job);
+  const order = targetSetOrder(agent, job);
+  return agent.hand
+    .map((card, index) => {
+      let score = 0;
+      const flexible = card.set === 'any' && card.category !== 'Wildcard';
+      const rank = order.indexOf(card.set);
+      if (rank >= 0) score += Math.max(1, 7 - rank);
+      if (flexible) {
+        score += order.some((setId) => !agent.hand.some((held) => held.uid !== card.uid && held.category === card.category && (held.set === setId || held.set === 'any'))) ? 4 : 0;
+      }
+      if (recommended.has(card.set)) score += 4;
+      if (agent.strategy && card.set === agent.strategy) score += 2;
+      if (card.category === 'Wildcard') score += 5;
+      if (agent.hand.filter((held) => held.set === card.set && held.category === card.category).length > 1) score -= 2;
+      return { card, score, index };
+    })
+    .sort((a, b) => a.score - b.score || a.index - b.index)
+    .slice(0, Math.max(0, n))
+    .map((entry) => entry.card);
+}
+
 function leastUsefulCard(agent, job) {
   const recommended = jobSetOptions(job);
   const order = targetSetOrder(agent, job);
@@ -149,24 +184,26 @@ function runRivalTurn(agent) {
     const bank = tryFindAnyBank(agent, state.job);
     if (bank) {
       const result = bankSet(agent, bank.targetSet, bank.used);
+      if (!result) { actions -= 1; continue; }
       summary.actions.push({ type: 'bank', title: result.meta.name, cards: bank.used.map((c) => ({ name: c.name, category: c.category, art: c.art })), skill: result.skillName, evidence: result.evidenceGain });
       summary.banked.push({ name: result.meta.name, skill: result.skillName, evidence: result.evidenceGain });
-      addLog(`${agent.name} action: banked ${result.meta.name}, gaining ${result.skillName} and CV evidence.`);
+      addLog(`${agent.displayName || agent.name} action: banked ${result.meta.name}, gaining ${result.skillName} and CV evidence.`);
       actions -= 1;
       continue;
     }
 
     const pick = pickMarketCardFor(agent, state.job);
     if (pick && agent.marketPicksThisRound < MAX_MARKET_PICKS_PER_ROUND && agent.hand.length >= HAND_CAP && agent.returnsThisRound < MAX_RETURNS_PER_ROUND) {
-      const leastUseful = leastUsefulCard(agent, state.job);
-      const returns = [leastUseful, ...agent.hand.filter((card) => card.uid !== leastUseful.uid)]
-        .slice(0, Math.min(2, MAX_RETURNS_PER_ROUND - agent.returnsThisRound));
+      // Rank the whole hand and drop the weakest, rather than taking the single worst
+      // plus whichever card happened to be first in the array.
+      const wanted = Math.min(2, MAX_RETURNS_PER_ROUND - agent.returnsThisRound);
+      const returns = leastUsefulCards(agent, state.job, wanted);
       agent.hand = agent.hand.filter((card) => !returns.some((item) => item.uid === card.uid));
       agent.returnsThisRound += returns.length;
       state.deck = shuffle([...state.deck, ...returns]);
       summary.returned.push(...returns.map((card) => ({ name: card.name, category: card.category, art: card.art })));
       summary.actions.push({ type: 'return', cards: returns.map((card) => ({ name: card.name, category: card.category, art: card.art })), reason: 'making room for useful cards' });
-      addLog(`${agent.name} returned ${returns.length} card(s) to the deck.`);
+      addLog(`${agent.displayName || agent.name} returned ${returns.length} card(s) to the deck.`);
       continue;
     }
 
@@ -180,7 +217,7 @@ function runRivalTurn(agent) {
         const reason = meta ? `towards ${meta.name}` : 'to support the target role';
         summary.actions.push({ type: 'pick', card: { name: pick.name, category: pick.category, art: pick.art }, reason });
         summary.picked.push({ name: pick.name, category: pick.category, art: pick.art, reason });
-        addLog(`${agent.name} action: picked ${pick.name} ${reason}.`);
+        addLog(`${agent.displayName || agent.name} action: picked ${pick.name} ${reason}.`);
         refillMarket();
         actions -= 1;
         continue;
@@ -195,17 +232,20 @@ function runRivalTurn(agent) {
     agent.applied = true;
     summary.applied = true;
     state.winner = agent;
-    addLog(`${agent.name} applied for ${state.job.title}!`);
+    addLog(`${agent.displayName || agent.name} applied for ${state.job.title}!`);
   }
   return summary;
 }
 
 /* ====================== Rival Summary UI ====================== */
 
-function rivalCardMarkup(card, label) {
+function rivalCardMarkup(card, label, bankedSetId) {
   if (!card) return '';
-  const cls = card.category === 'Wildcard' ? 'cat-lime' : card.category === 'Action' ? 'cat-pink' : card.category === 'Proof' ? 'cat-gold' : card.category === 'Impact' ? 'cat-orange' : 'cat-cyan';
-  return `<div class="rival-action-card ${cls} ${cardSetClass(card)}"><span class="rival-action-art">${escapeHtml(card.art || '🃏')}</span><span class="rival-action-label">${escapeHtml(label)}</span><strong>${escapeHtml(card.name)}</strong></div>`;
+  const isWild = card.category === 'Wildcard';
+  const isAnyRoute = card.set === 'any' && !isWild;
+  const cls = isWild ? 'cat-lime' : card.category === 'Action' ? 'cat-pink' : card.category === 'Proof' ? 'cat-gold' : card.category === 'Impact' ? 'cat-orange' : 'cat-cyan';
+  const badge = isWild ? '★' : isAnyRoute ? '✦' : '';
+  return `<div class="rival-action-card ${cls} ${cardSetClass(card)}" title="${isWild ? 'Wildcard (substitutes any card)' : isAnyRoute ? 'Any route card' : ''}"><span class="rival-action-art">${escapeHtml(card.art || '🃏')}</span><span class="rival-action-label">${escapeHtml(label)}${badge ? ' ' + badge : ''}</span><strong>${escapeHtml(card.name)}</strong></div>`;
 }
 
 function showRivalTurnPopup() {
@@ -216,7 +256,7 @@ function showRivalTurnPopup() {
   const actionRows = summary.actions.map((action, i) => {
     if (action.type === 'pick') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Picked from the market</b><p>${escapeHtml(action.reason)}</p></div>${rivalCardMarkup(action.card, 'Picked')}</div>`;
     if (action.type === 'return') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Returned to the deck</b><p>${escapeHtml(action.reason)}</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Returned')).join('')}</div></div>`;
-    if (action.type === 'bank') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Completed ${escapeHtml(action.title)}</b><p>Added ${action.evidence} CV evidence and the ${escapeHtml(action.skill)} skill.</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Banked')).join('')}</div></div>`;
+    if (action.type === 'bank') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Completed ${escapeHtml(action.title)}</b><p>Added ${action.evidence} CV evidence and the ${escapeHtml(action.skill)} skill.</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Banked', action.title)).join('')}</div></div>`;
     return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>${escapeHtml(action.title)}</b><p>No move available.</p></div></div>`;
   }).join('');
   const applied = summary.applied ? `<p class="rival-win-callout">${escapeHtml(summary.name)} now meets the role requirements and has applied!</p>` : '';

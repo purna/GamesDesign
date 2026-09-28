@@ -72,6 +72,13 @@ html[data-theme="light"] {
   --good: #3E8E5B;
   --bad: #C64B4B;
   --overlay: rgba(18, 20, 43, 0.5);
+  /* Card category colours. These live with the other tokens so there is a single
+     light-theme block; they were previously split across both stylesheets. */
+  --cyan: #35C4D6;
+  --pink: #E15B9E;
+  --gold: #D6A62B;
+  --lime: #6FCB4D;
+  --orange: #e67935;
 }
 
 /* Dark theme (default — matches Race to the Role prototype) */
@@ -111,21 +118,24 @@ body {
 }
 
 .container {
-  max-width: 1320px;
+  /* Widened from 1320px: the right rail is now a drawer, so the board is only
+     two columns and had room to grow on a wide screen. */
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 28px 28px 48px;
+  padding: 28px 28px 28px;
   width: 100%;
   flex: 1;
+  min-height: 0;
 }
 
 /* ===== Header ===== */
 .header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "eyebrow tools" "title title" "timer timer";
+  grid-template-areas: "eyebrow tools" "title timer";
   align-items: center;
-  gap: 12px 24px;
-  margin-bottom: 24px;
+  gap: 6px 24px;
+  margin-bottom: 12px;
   min-width: 0;
 }
 
@@ -221,7 +231,9 @@ html[data-theme="light"] .icon-btn:hover i {
 }
 
 /* Hide emoji fallback spans (not used when Font Awesome loads) */
-.menu-icon { display: none; }
+.menu-icon {
+  display: none;
+}
 
 html[data-theme="light"] .icon-btn:hover {
   background: var(--black-15);
@@ -230,7 +242,6 @@ html[data-theme="light"] .icon-btn:hover {
 html[data-theme="dark"] .icon-btn:hover {
   background: var(--white-15);
 }
-
 
 h1 {
   font-family: var(--font-display);
@@ -246,6 +257,7 @@ h1 {
   gap: 0.65rem;
   margin: 0;
   min-width: 0;
+  margin-top: 0.25rem;
 }
 
 .header-title-row {
@@ -254,12 +266,7 @@ h1 {
   justify-content: flex-start;
 }
 
-.quiz-title {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: 0.75rem;
-}
+
 
 .quiz-title .logo {
   width: 2.25rem;
@@ -591,50 +598,6 @@ h2 {
   margin: 0 0 1rem;
 }
 
-.timer-display {
-  grid-area: timer;
-  justify-self: end;
-  margin-top: 0.85rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.35rem 0.9rem 0.35rem 0.7rem;
-}
-
-.timer-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.35;
-  }
-}
-
-.timer {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-}
-
-.timer.low {
-  color: var(--bad);
-}
-
 /* ===== Tutorial ===== */
 .tutorial-kicker {
   font-family: var(--font-mono);
@@ -893,8 +856,6 @@ html[data-theme="dark"] #startContinue:disabled {
   background: var(--bg);
 }
 
-
-
 .level-group-title {
   font-family: var(--font-body);
   font-weight: 600;
@@ -994,8 +955,6 @@ html[data-theme="dark"] #startContinue:disabled {
   gap: 0.5rem;
   margin-top: 0.25rem;
 }
-
-
 
 /* ===== Learn screen ===== */
 .learn-header {
@@ -1367,7 +1326,6 @@ html[data-theme="dark"] .btn {
   background: var(--accent);
   color: var(--surface);
 }
-
 
 html[data-theme="dark"] #nextBtn {
   background: var(--accent);
@@ -1819,15 +1777,6 @@ footer p {
   color: var(--ink-soft);
   font-size: 0.78rem;
   margin: 0;
-}
-
-/* ===== Per-question timer ===== */
-.timer-pq {
-  margin-top: 0.5rem;
-}
-
-.timer-pq .timer-dot {
-  animation-duration: 0.8s;
 }
 
 /* ===== Number pyramids ===== */
@@ -2457,6 +2406,16 @@ footer p {
     margin-bottom: 18px;
   }
 
+  /* The timer now shares the title row, which squeezes the wordmark on narrow
+     screens. Give it its own row again and let it sit under the menu. */
+  .header {
+    grid-template-areas: "eyebrow tools" "title title" "timer timer";
+  }
+
+  .header-timer {
+    margin-left: 0;
+  }
+
   .header .eyebrow {
     width: auto;
     text-align: left;
@@ -2479,10 +2438,6 @@ footer p {
     font-size: clamp(1.15rem, 5vw, 1.6rem);
     white-space: nowrap;
   }
-
-  .timer-display {
-    justify-self: center;
-  }
 }
 
 @media (max-width: 480px) {
@@ -2498,13 +2453,13 @@ footer p {
   .results-score {
     font-size: 2.4rem;
   }
-  
+
   .icon-btn {
     width: 2.25rem;
     height: 2.25rem;
     font-size: 0.95rem;
   }
-  
+
   .header-actions {
     gap: 0.25rem;
   }
@@ -2523,10 +2478,6 @@ footer p {
 
   .quiz-title {
     font-size: clamp(1rem, 4.8vw, 1.35rem);
-  }
-  
-  .timer-display {
-    font-size: 0.85rem;
   }
 }
 
@@ -2699,12 +2650,14 @@ body.simple-mode .settings-hint {
   line-height: 1.8;
   max-width: 60ch;
 }
+
 .history {
-  margin-top: 2rem;
+  margin-top: 0.25rem;
   max-width: 620px;
   margin-left: auto;
   margin-right: auto;
 }
+
 .history-header {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -2713,6 +2666,7 @@ body.simple-mode .settings-hint {
   letter-spacing: 0.05em;
   margin-bottom: 0.75rem;
 }
+
 .history-empty {
   color: var(--ink-soft);
   font-size: 0.8rem;
@@ -2721,6 +2675,7 @@ body.simple-mode .settings-hint {
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
 }
+
 .completed-role {
   display: flex;
   align-items: center;
@@ -2728,39 +2683,70 @@ body.simple-mode .settings-hint {
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border);
 }
-.completed-role:last-child { border-bottom: none; }
-.completed-role-art { font-size: 1.2rem; }
-.completed-role-info { flex: 1; min-width: 0; }
-.completed-role-info strong { font-size: 0.85rem; color: var(--ink); }
-.completed-role-info small { display: block; font-size: 0.62rem; color: var(--ink-soft); margin-top: 0.12rem; }
-.completed-role-date { font-family: var(--font-mono); font-size: 0.65rem; color: var(--ink-soft); white-space: nowrap; }
+
+.completed-role:last-child {
+  border-bottom: none;
+}
+
+.completed-role-art {
+  font-size: 1.2rem;
+}
+
+.completed-role-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.completed-role-info strong {
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.completed-role-info small {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+  margin-top: 0.12rem;
+}
+
+.completed-role-date {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
 
 .hall-of-fame {
   max-width: 680px;
   margin: 2rem auto;
   padding: 1.5rem;
 }
+
 .hof-header h2 {
   font-size: 1.4rem;
   margin: 0 0 0.25rem;
 }
+
 .hof-subtitle {
   color: var(--ink-soft);
   font-size: 0.8rem;
   margin: 0 0 1.5rem;
 }
+
 .hof-list {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   margin-bottom: 1.5rem;
 }
+
 .hof-empty {
   text-align: center;
   padding: 2.5rem 1rem;
   color: var(--ink-soft);
   font-size: 0.85rem;
 }
+
 .hof-entry {
   display: flex;
   align-items: center;
@@ -2770,10 +2756,12 @@ body.simple-mode .settings-hint {
   border-radius: var(--radius-sm);
   background: var(--surface-raised, var(--surface));
 }
+
 .hof-entry.recent {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 60%);
 }
+
 .hof-rank {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -2781,11 +2769,38 @@ body.simple-mode .settings-hint {
   width: 2.2rem;
   text-align: center;
 }
-.hof-art { font-size: 1.2rem; }
-.hof-info { flex: 1; min-width: 0; }
-.hof-role { font-size: 0.9rem; color: var(--ink); }
-.hof-date { display: block; font-size: 0.62rem; color: var(--ink-soft); font-family: var(--font-mono); margin-top: 0.1rem; }
-.hof-stats { display: flex; gap: 1rem; margin-top: 0.35rem; font-size: 0.68rem; color: var(--ink-soft); font-family: var(--font-mono); }
+
+.hof-art {
+  font-size: 1.2rem;
+}
+
+.hof-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hof-role {
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.hof-date {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  margin-top: 0.1rem;
+}
+
+.hof-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+
 .hof-badge {
   display: inline-block;
   padding: 0.1rem 0.4rem;
@@ -2797,7 +2812,11 @@ body.simple-mode .settings-hint {
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
-.hof-badges { margin-top: 0.2rem; }
+
+.hof-badges {
+  margin-top: 0.2rem;
+}
+
 .hof-actions {
   display: flex;
   justify-content: space-between;
@@ -2805,13 +2824,40 @@ body.simple-mode .settings-hint {
   border-top: 1px solid var(--border);
 }
 
-.skills-track-card .skills-heading {
+/* The list can run to a dozen entries, so cap it and scroll inside itself
+   rather than letting it push the rail's own scrollbar past the action bar. */
+.skills-list {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 50vh;
+  overflow-y: auto;
+  /* Room for the thumb so it never sits on top of a row. */
+  padding-right: 0.35rem;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink-soft), transparent 45%) transparent;
 }
-.skills-track-card .skills-heading h3 { margin: 0; font-size: 0.85rem; }
-.skills-list { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.skills-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.skills-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.skills-list::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink-soft), transparent 50%);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+.skills-list::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ink-soft), transparent 25%);
+  background-clip: content-box;
+}
+
 .skill-item {
   display: flex;
   align-items: center;
@@ -2822,29 +2868,50 @@ body.simple-mode .settings-hint {
   border-radius: var(--radius-sm);
   color: var(--ink-soft);
 }
+
 .skill-item.needed {
   border: 1px solid color-mix(in srgb, var(--gold), transparent 40%);
   background: color-mix(in srgb, var(--gold), transparent 85%);
 }
+
 .skill-item.owned {
   border: 1px solid color-mix(in srgb, var(--good), transparent 40%);
   background: color-mix(in srgb, var(--good), transparent 85%);
   color: var(--good);
   font-weight: 600;
 }
+
 .skill-check {
   font-family: var(--font-mono);
   font-size: 0.8rem;
 }
-.skill-name { font-weight: 600; }
-.all-skills { margin-top: 0.4rem; border-top: 1px solid var(--border); padding-top: 0.3rem; }
-.all-skills small { color: var(--ink-soft); font-size: 0.6rem; line-height: 1.4; }
+
+.skill-name {
+  font-weight: 600;
+}
+
+.all-skills {
+  margin-top: 0.4rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.3rem;
+}
+
+.all-skills small {
+  color: var(--ink-soft);
+  font-size: 0.6rem;
+  line-height: 1.4;
+}
 
 .skill-item.required {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent), transparent 85%);
 }
-.skill-item.required .skill-name { color: var(--accent); font-weight: 700; }
+
+.skill-item.required .skill-name {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .required-tag {
   color: var(--accent);
   font-size: 0.55rem;
@@ -2856,98 +2923,38 @@ body.simple-mode .settings-hint {
   margin-left: 0.3rem;
 }
 
-.skill-item .skill-hint {
+/* The header toggle now switches the tooltip layer rather than hiding board
+   sections, so there are no helper-hidden rules any more. The guide banner and
+   the status bar still gate themselves, because they carry live information. */
+/* Skills rows are tooltip targets, so they need a positioning context. */
+.skill-item {
+  position: relative;
+}
+
+.skill-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.helper-content {
   display: block;
-  font-size: 0.6rem;
-  font-weight: 400;
-  color: var(--ink-soft);
-  margin-top: 0.15rem;
-  line-height: 1.35;
 }
-.skill-item .skill-hint-warn { color: var(--bad); font-weight: 600; }
 
-.skill-item .skill-hint ul,
-.skill-item .skill-hint { line-height: 1.5; }
-
-/* Skills panel: hint is on-demand, toggled by the "?" button */
-.skill-item { position: relative; flex-wrap: wrap; }
-.skill-name { display: inline-flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
-
-.skill-info {
-  display: inline-grid;
-  place-items: center;
-  width: 1.05rem;
-  height: 1.05rem;
-  border-radius: 50%;
-  border: 1px solid currentColor;
-  background: transparent;
-  color: inherit;
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0.65;
+.guide.hidden {
+  display: none !important;
 }
-.skill-info:hover, .skill-info:focus-visible { opacity: 1; background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
-.skill-tip {
-  display: block;
-  flex-basis: 100%;
-  margin-top: 0.4rem;
-  padding: 0.5rem 0.6rem;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised, var(--surface));
-  color: var(--ink);
-  font-size: 0.65rem;
-  line-height: 1.5;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: normal;
-}
-.skill-tip[hidden] { display: none; }
-.skill-tip .skill-hint { display: block; font-size: inherit; color: inherit; margin: 0; }
-
-/* Only the explicit toggle reveals the tip. Hover/focus must not force it open,
-   otherwise the button cannot be closed while the pointer or focus is on it. */
-.skill-item.tip-open .skill-tip[hidden] { display: none; }
-.skill-item.tip-open .skill-tip { display: block; }
-.skill-item.tip-open { background: color-mix(in srgb, var(--accent), transparent 90%); }
-
-/* Helper hints: toggleable on-demand guidance (legend, drag hints, return zone) */
-.helper-content { display: block; }
-.helper-content.helper-hidden .card-movement-zones,
-.helper-content.helper-hidden .legend { display: none; }
-
-/* The guide banner is outside #helperContent, so it is toggled by class in JS.
-   Guard against a stale empty guide block taking vertical space. */
-.guide.hidden { display: none !important; }
-
-/* When hints are off the status bar collapses unless it has real content. */
-.set-builder-status:empty { display: none; }
-
-/* When hints are hidden the return zone collapses to a slim drop target so
-   drag-and-drop still works without the instructional text. */
-.helper-content.helper-hidden .return-drop-zone {
-  padding: 0.35rem 0.6rem;
-  opacity: 0.55;
-  font-size: 0.62rem;
-}
-.helper-content.helper-hidden .return-drop-zone > span,
-.helper-content.helper-hidden .return-drop-zone > small { display: none; }
-.helper-content.helper-hidden .return-drop-zone::before {
-  content: "Return zone";
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.set-builder-status:empty {
+  display: none;
 }
 
 /* Header hint toggle: lit while helper hints are shown */
-.icon-btn.is-active { color: var(--accent); border-color: var(--accent); }
+.icon-btn.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* How to Play: an overlay above the current panel, not a panel swap */
 .learn-screen {
@@ -2959,13 +2966,18 @@ body.simple-mode .settings-hint {
   justify-content: center;
   padding: 1.5rem 1rem;
 }
-.learn-screen[hidden] { display: none; }
+
+.learn-screen[hidden] {
+  display: none;
+}
+
 .learn-backdrop {
   position: absolute;
   inset: 0;
   background: var(--overlay);
   backdrop-filter: blur(3px);
 }
+
 .learn-panel {
   position: relative;
   z-index: 1;
@@ -2978,11 +2990,71 @@ body.simple-mode .settings-hint {
   box-shadow: var(--shadow-lg, 0 18px 48px rgba(0, 0, 0, 0.45));
   padding: 1.5rem 1.6rem 1.3rem;
 }
-.learn-panel .learn-header { padding-right: 1.8rem; }
+
+.learn-panel .learn-header {
+  padding-right: 1.8rem;
+}
+
 .learn-close {
   position: absolute;
   top: 0.6rem;
   right: 0.7rem;
   z-index: 2;
 }
-body.modal-open { overflow: hidden; }
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Return zone: the instruction now lives in a tooltip, so this is a slim target. */
+.return-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.2rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.return-drop-zone .drop-zone-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Tooltips globally off */
+html.tooltips-off .rttr-tooltip {
+  display: none !important;
+}
+
+/* ===== Site Footer ===== */
+.site-footer {
+  margin-top: auto;
+  padding: 1rem 1rem 0.5rem 1rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+.site-footer p {
+  margin: 0 0 0.5rem;
+}
+
+.site-footer a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer a:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}

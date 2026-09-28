@@ -10,8 +10,8 @@
  * - Bump CACHE_NAME whenever the shell changes. Old caches are deleted on activate.
  */
 
-const CACHE_NAME = 'race-to-the-role-v2';
-const DATA_CACHE = 'race-to-the-role-data-v2';
+const CACHE_NAME = 'race-to-the-role-v4';
+const DATA_CACHE = 'race-to-the-role-data-v4';
 
 // Loaded with the page. Keep this list accurate: a missing entry is precached as a
 // silent no-op, so a stale list fails quietly rather than erroring.
@@ -20,8 +20,12 @@ const APP_SHELL = [
   './index.html',
   './styles.css',
   './card-styles.css',
+  './css/tutorials.css',
+  './js/tutorialConfig.js',
+  './js/tooltip.js',
   './js/game.js',
   './js/ai.js',
+  './js/tutorialSystem.js',
   './js/settings.js',
   './js/accessibility.js',
   './favicon.svg',

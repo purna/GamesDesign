@@ -1,4 +1,5 @@
 const fs = require('fs');
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const path = require('path');
 
 // Additional industry-specific cards for cyber-security (8 more to reach 28)
@@ -44,7 +45,7 @@ const additionalFilmMaking = [
 
 // Write additional cards
 function writeAdditionalCards(industryId, cards) {
-  const cardsDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${industryId}/cards`;
+  const cardsDir = `${PROJECT_ROOT}/data/industries/${industryId}/cards`;
   cards.forEach(card => {
     fs.writeFileSync(path.join(cardsDir, `${card.id}.json`), JSON.stringify(card, null, 2));
   });

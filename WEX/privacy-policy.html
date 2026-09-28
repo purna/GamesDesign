@@ -1,11 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy — Induction Quiz</title>
+  <title>Privacy Policy — Race to the Role</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    (function() {
+      const saved = localStorage.getItem('rttr-settings');
+      if (saved) {
+        try {
+          const s = JSON.parse(saved);
+          if (s.sound !== undefined || s.animations !== undefined || s.autoDraw !== undefined) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      }
+      // Check for explicit theme preference
+      if (localStorage.getItem('rttr-theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="container" style="max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 5rem;">
@@ -16,19 +33,19 @@
 
     <div class="learn-content" style="font-family: var(--font-body); line-height: 1.7; color: var(--ink);">
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">1. Overview</h2>
-      <p>This Privacy Policy describes how C# Quiz collects, uses, and protects your information when you use our application. We are committed to protecting your privacy and complying with applicable data protection laws, including the GDPR and CCPA.</p>
+      <p>This Privacy Policy describes how Race to the Role collects, uses, and protects your information when you use our application. We are committed to protecting your privacy and complying with applicable data protection laws, including the GDPR and CCPA.</p>
 
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">2. Information We Collect</h2>
       <h3 style="font-size: 1rem; margin: 1rem 0 0.35rem;">2.1 Information You Provide Directly</h3>
       <ul style="margin: 0.5rem 0 0.5rem 1.5rem; line-height: 1.6;">
         <li><strong>Google Account Information:</strong> When you sign in with Google, we receive your email address, display name, and profile picture from Google.</li>
-        <li><strong>Quiz Responses:</strong> We store your answers to quiz questions to track your progress and score.</li>
-        <li><strong>Learn Progress:</strong> We store your progress through learning materials (current slide, completion status).</li>
+<li><strong>Game Progress:</strong> We store your progress and scores to track your career runs.</li>
+<li><strong>Learn Progress:</strong> We store your progress through learning materials (current step, completion status).</li>
       </ul>
 
       <h3 style="font-size: 1rem; margin: 1rem 0 0.35rem;">2.2 Information Collected Automatically</h3>
       <ul style="margin: 0.5rem 0 0.5rem 1.5rem; line-height: 1.6;">
-        <li><strong>Usage Data:</strong> We collect information about how you use the app, such as which sections you visit and which quizzes you attempt.</li>
+        <li><strong>Usage Data:</strong> We collect information about how you use the app, such as which sections you visit and which career runs you attempt.</li>
         <li><strong>Device Information:</strong> We may collect device type, browser, and operating system information.</li>
       </ul>
 
@@ -38,9 +55,9 @@
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">3. How We Use Your Information</h2>
       <ul style="margin: 0.5rem 0 0.5rem 1.5rem; line-height: 1.6;">
         <li>To provide and maintain the service</li>
-        <li>To track your quiz results and learning progress</li>
+        <li>To track your career run results and learning progress</li>
         <li>To sync your progress across devices (if signed in)</li>
-        <li>To submit quiz scores to Google Classroom (only if you choose to)</li>
+        <li>To submit scores to Google Classroom (only if you choose to)</li>
         <li>To personalize your learning experience</li>
         <li>To communicate with you (if you opt in)</li>
       </ul>

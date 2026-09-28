@@ -1,11 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device=device-scale=1.0">
-  <title>Terms of Service — Induction Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — Race to the Role</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    (function() {
+      const saved = localStorage.getItem('rttr-settings');
+      if (saved) {
+        try {
+          const s = JSON.parse(saved);
+          if (s.sound !== undefined || s.animations !== undefined || s.autoDraw !== undefined) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      }
+      // Check for explicit theme preference
+      if (localStorage.getItem('rttr-theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="container" style="max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 5rem;">
@@ -16,7 +33,7 @@
 
     <div class="learn-content" style="font-family: var(--font-body); line-height: 1.7; color: var(--ink);">
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">1. Agreement</h2>
-      <p>Thank you for using Induction Quiz ("the App"). By accessing or using the App, you agree to be bound by these Terms of Service. If you do not agree to all the terms, you may not use the App.</p>
+      <p>Thank you for using Race to the Role ("the App"). By accessing or using the App, you agree to be bound by these Terms of Service. If you do not agree to all the terms, you may not use the App.</p>
 
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">2. User Account</h2>
       <ul style="margin: 0.5rem 0 0.5rem 1.5rem; line-height: 1.6;">
@@ -33,13 +50,13 @@
       <ul style="margin: 0.5rem 0 0.5rem 1.5rem; line-height: 1.6;">
         <li>Use the App for any unlawful purpose</li>
         <li>Attempt to gain unauthorized access to the App or its servers</li>
-        <li>Submit false or misleading quiz answers</li>
+        <li>Submit false or misleading answers</li>
         <li>Use any automated means to access the App</li>
         <li>Interfere with or disrupt the App's functionality</li>
       </ul>
 
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">5. Google Classroom Integration</h2>
-      <p>If you use the Google Classroom integration, you authorize the App to submit your quiz score to the Classroom assignment you specify. Only the score and a label are sent — no additional personal data is shared with your teacher beyond what is already visible to them in Classroom.</p>
+      <p>If you use the Google Classroom integration, you authorize the App to submit your score to the Classroom assignment you specify. Only the score and a label are sent — no additional personal data is shared with your teacher beyond what is already visible to them in Classroom.</p>
 
       <h2 style="font-size: 1.15rem; margin: 1.5rem 0 0.5rem;">6. Disclaimer</h2>
       <p>THE APP IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. WE DO NOT WARRANT THAT THE APP WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE. YOUR USE OF THE APP IS AT YOUR SOLE RISK.</p>

@@ -36,6 +36,8 @@
       sound: app.el.soundEnabled ? !app.el.soundEnabled.checked : true,
       animations: app.el.animationsEnabled ? !app.el.animationsEnabled.checked : false,
       autoDraw: app.el.autoDrawEnabled ? !app.el.autoDrawEnabled.checked : true,
+      // Not inverted: this box is ticked when the tutorial is switched on.
+      tutorial: app.el.tutorialEnabled ? app.el.tutorialEnabled.checked : true,
     };
   }
 
@@ -48,6 +50,8 @@
     if (app.el.soundEnabled) app.el.soundEnabled.checked = !settings.sound;
     if (app.el.animationsEnabled) app.el.animationsEnabled.checked = !settings.animations;
     if (app.el.autoDrawEnabled) app.el.autoDrawEnabled.checked = !settings.autoDraw;
+    if (app.el.tutorialEnabled) app.el.tutorialEnabled.checked = settings.tutorial !== false;
+    app.state.tutorialEnabled = settings.tutorial !== false;
     app.state.soundEnabled = settings.sound;
     app.state.animationsEnabled = settings.animations;
     app.state.autoDrawEnabled = settings.autoDraw;

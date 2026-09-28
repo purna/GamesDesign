@@ -1476,7 +1476,14 @@
         "evidenceValue": 2,
         "reference": true
       },
-      "why": "A placement gives practical experience and, if it goes well, an employer reference."
+      "why": "A placement gives practical experience and, if it goes well, an employer reference.",
+      "steps": [
+        "Choose a role linked to your target job",
+        "Find an employer and agree tasks, dates and hours",
+        "Get the employer's contact name, phone, email and full address",
+        "Check the hours fit the college rules and are agreed in writing",
+        "Submit the complete request, then attend and log your hours"
+      ]
     },
     {
       "id": "visit",
@@ -1492,7 +1499,14 @@
         "evidenceValue": 1,
         "reference": false
       },
-      "why": "A visit builds industry understanding and useful contacts."
+      "why": "A visit builds industry understanding and useful contacts.",
+      "steps": [
+        "Find a visit relevant to your target job",
+        "Check the date, location and joining arrangements",
+        "Book or confirm your place",
+        "Prepare questions about jobs in the industry",
+        "Attend, then follow up with a reflection"
+      ]
     },
     {
       "id": "volunteering",
@@ -1509,7 +1523,13 @@
         "evidenceValue": 1,
         "reference": false
       },
-      "why": "Volunteering shows reliability, initiative and teamwork."
+      "why": "Volunteering shows reliability, initiative and teamwork.",
+      "steps": [
+        "Find an activity with a genuine organisation need",
+        "Check responsibilities, dates, location and supervision",
+        "Agree the commitment with the organiser",
+        "Attend and record what you contributed"
+      ]
     },
     {
       "id": "brief",
@@ -1526,7 +1546,14 @@
         "evidenceValue": 2,
         "reference": false
       },
-      "why": "A finished brief creates a portfolio piece that shows you can respond to a client's needs."
+      "why": "A finished brief creates a portfolio piece that shows you can respond to a client's needs.",
+      "steps": [
+        "Review the brief and the deadline",
+        "Clarify what the client actually needs",
+        "Plan and complete the work",
+        "Present the output and respond to feedback",
+        "Save the finished work for your portfolio"
+      ]
     },
     {
       "id": "partnership",
@@ -1544,7 +1571,14 @@
         "evidenceValue": 2,
         "reference": false
       },
-      "why": "A partnership gives you specialist feedback and experience working with professionals."
+      "why": "A partnership gives you specialist feedback and experience working with professionals.",
+      "steps": [
+        "Find a course or college-linked opportunity",
+        "Apply or confirm your participation",
+        "Understand the partner's expectations",
+        "Attend sessions or complete the agreed work",
+        "Build the connection and capture the outcome"
+      ]
     }
   ]
 }

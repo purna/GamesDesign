@@ -1,4 +1,5 @@
 const fs = require('fs');
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const path = require('path');
 
 // Shared cards (24 cards) - same for all industries
@@ -125,7 +126,7 @@ function readIndustryCards(industryDir, industryId) {
 }
 
 industries.forEach(ind => {
-  const industryDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind.id}`;
+  const industryDir = `${PROJECT_ROOT}/data/industries/${ind.id}`;
   const industryCards = readIndustryCards(industryDir, ind.id);
   
   // Build shared cards with industry-specific prefix and icons

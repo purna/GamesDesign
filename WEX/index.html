@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/tutorials.css">
   <link rel="stylesheet" href="card-styles.css">
 </head>
 <body>
@@ -21,7 +22,6 @@
         <div class="header-actions">
           <button class="icon-btn" id="homeBtn" aria-label="Main menu" title="Main menu"><i class="fa-solid fa-house"></i></button>
           <button class="icon-btn" id="helpBtn" aria-label="How it works" title="How it works"><i class="fa-solid fa-book-open"></i></button>
-          <button class="icon-btn" id="helperToggle" aria-expanded="true" aria-controls="helperContent" aria-label="Hide helper hints" title="Hide helper hints"><i class="fa-solid fa-lightbulb"></i></button>
           <button class="icon-btn" id="settingsBtn" aria-label="Open settings" title="Settings"><i class="fa-solid fa-gear"></i></button>
           <button class="icon-btn" id="a11yBtn" aria-label="Accessibility settings" title="Accessibility"><i class="fa-solid fa-universal-access"></i></button>
           <button class="icon-btn" id="themeToggle" aria-label="Toggle night mode" title="Toggle night mode"><i class="fa-solid fa-moon"></i></button>
@@ -36,9 +36,25 @@
           <span>RACE TO THE ROLE</span>
         </h1>
       </div>
-      <div id="timerDisplay" class="timer-display hidden">
-        <span class="timer-dot"></span>
-        <span class="timer" id="timer">05:00</span>
+          <!-- Turn timer sits under the menu row rather than floating over the feed. -->
+      <div class="header-meta">
+        <div class="header-timer hidden" id="timerDisplay">
+          <span class="timer-dot"></span>
+          <span class="timer" id="timer">05:00</span>
+        </div>
+        <!-- Rivals are a core part of the race, so this is a labelled control
+             rather than another anonymous icon. -->
+        <button class="players-btn" id="drawerBtn" aria-label="Show players and race status"
+                aria-expanded="false" aria-controls="rightRail" title="Show players and race status">
+          <i class="fa-solid fa-users" aria-hidden="true"></i>
+          <span class="players-label">Players</span>
+          <span class="players-count" id="playerCount">3</span>
+        </button>
+        <button class="icon-btn tip-toggle" id="helperToggle"
+                data-tip="Tooltips are off. Click to turn them on."
+                aria-expanded="false" aria-label="Tooltips off" title="Tooltips off">
+          <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+        </button>
       </div>
     </header>
 
@@ -64,6 +80,15 @@
               <span>Auto-draw replacement cards</span>
               <input type="checkbox" id="autoDrawEnabled" checked>
             </label>
+          </div>
+          <div class="settings-section">
+            <h3>Guidance</h3>
+            <label class="settings-row" for="tutorialEnabled">
+              <span>Show the tutorial on new runs</span>
+              <input type="checkbox" id="tutorialEnabled" checked>
+            </label>
+            <p class="settings-hint">The tutorial is a spotlight walkthrough of the game board. Turn it off to start straight into your first round.</p>
+            <button class="btn" id="replayTutorial">Play the tutorial now</button>
           </div>
           <div class="settings-section">
             <h3>Reset progress</h3>
@@ -126,9 +151,6 @@
       </div>
     </section>
 
-    <!-- COMPLETED ROLES HISTORY -->
-    <section class="history" id="completedRoles"></section>
-
     <!-- HALL OF FAME -->
     <section class="hall-of-fame hidden" id="hallOfFame">
       <div class="hof-header">
@@ -163,120 +185,138 @@
 
     <!-- MAIN GAME -->
     <main class="game hidden" id="game">
-      <section class="jobbar">
-        <div>
-          <div class="eyebrow">TARGET ROLE</div>
-          <div class="job-title" id="jobTitle"></div>
-          <p class="job-desc" id="jobDesc"></p>
-        </div>
-        <div class="job-goal" id="jobNeeds"></div>
-      </section>
+      <div class="board">
 
-      <section class="guide" id="guide"></section>
-
-      <div class="layout">
-        <section class="maincol">
-          <div class="turnbar">
-            <div class="turntext" id="turnText"></div>
-            <div class="actions-left" id="actionInfo"></div>
+        <!-- ===== LEFT RAIL: reference material behind tabs ===== -->
+        <aside class="rail rail-left" aria-label="Job information">
+          <div class="rail-tabs" role="tablist" aria-label="Job information">
+            <button class="rail-tab is-active" role="tab" aria-selected="true" aria-controls="tab-needs" id="tabbtn-needs" data-rail-tab="needs">Needs</button>
+            <button class="rail-tab" role="tab" aria-selected="false" aria-controls="tab-skills" id="tabbtn-skills" data-rail-tab="skills">Skills</button>
+            <button class="rail-tab" role="tab" aria-selected="false" aria-controls="tab-routes" id="tabbtn-routes" data-rail-tab="routes">Routes</button>
+            <button class="rail-tab" role="tab" aria-selected="false" aria-controls="tab-cv" id="tabbtn-cv" data-rail-tab="cv">CV</button>
           </div>
 
-          <section class="rival-board" aria-labelledby="rivalBoardTitle">
-            <div class="rival-board-head">
-              <div><h3 id="rivalBoardTitle">Your competitors</h3><p>After your turn, each rival gets 2 actions to bank experience, take cards, or return unwanted cards.</p></div>
-              <span class="rival-turn-order">YOU → 3 RIVALS</span>
+          <div class="rail-body">
+            <div class="rail-panel is-active" role="tabpanel" id="tab-needs" aria-labelledby="tabbtn-needs">
+              <h3>What this job needs</h3>
+              <p class="job-desc" id="jobDesc"></p>
+              <div class="job-goal" id="jobNeeds"></div>
+              <h3 class="rail-subhead">How it works</h3>
+              <div class="help">Pick a colour route, collect one card of each type it needs, then bank the set. You need completed sets from two different recommended routes, plus the evidence and skill it asks for.</div>
             </div>
-            <div class="rivals" id="rivals"></div>
-          </section>
 
-          <section class="table">
-            <div class="section-head">
-              <h3>Community card market</h3>
-              <small>2 NEW CARDS EACH ROUND · TAKE UP TO 2</small>
+            <div class="rail-panel" role="tabpanel" id="tab-skills" aria-labelledby="tabbtn-skills" hidden>
+              <h3>Skills for the role</h3>
+              <div id="skillsRequired" class="skills-list"></div>
             </div>
-            <div class="panel market" id="market"></div>
-          </section>
 
-          <section class="table">
-            <div class="section-head">
-              <h3>Your hand</h3>
-              <small id="handCount"></small>
-            </div>
-            <div class="panel hand" id="hand"></div>
-
-              <div class="helper-content" id="helperContent">
-            <div class="card-movement-zones">
-              <div class="return-drop-zone" id="returnZone">
-                <span>Drag hand cards here to return them to the deck</span>
-                <small>Up to 2 per round — or use the Return button below</small>
-              </div>
-              <div class="take-drop-hint">
-                <span>Drag market cards to your hand to pick them up</span>
-                <span class="drop-hint-alt">Drag hand cards to the market to return them</span>
-                <small>Up to 2 of each per round — or click to preview</small>
+            <div class="rail-panel" role="tabpanel" id="tab-routes" aria-labelledby="tabbtn-routes" hidden>
+              <h3>Experience sets</h3>
+              <div class="set-list" id="sets"></div>
+              <h3 class="rail-subhead">Card types</h3>
+              <div class="legend legend-compact">
+                <span><i class="dot" style="background:var(--cyan)"></i>Setup</span>
+                <span><i class="dot" style="background:var(--pink)"></i>Do the work</span>
+                <span><i class="dot" style="background:var(--gold)"></i>Proof</span>
+                <span><i class="dot" style="background:var(--orange)"></i>Impact</span>
+                <span><i class="dot" style="background:var(--lime)"></i>Wildcard</span>
               </div>
             </div>
 
-            <div class="set-builder-status" id="setBuilderStatus" aria-live="polite"></div>
+            <div class="rail-panel" role="tabpanel" id="tab-cv" aria-labelledby="tabbtn-cv" hidden>
+              <h3>Your CV / <span id="playerName">PLAYER</span></h3>
+              <div class="cv-stats" id="cvStats"></div>
+              <h3 class="rail-subhead">Stored experience sets</h3>
+              <div class="storage-count" id="bankedSetProgress">0 / 2 role-fit types</div>
+              <div class="banked-set-list" id="bankedSets"><div class="storage-empty">Your completed sets will appear here.</div></div>
+            </div>
+          </div>
 
-            <div class="controls">
-              <div class="left-actions">
-                <button class="quiet-btn" id="returnBtn">↩ Return selected to deck</button>
-                <button class="quiet-btn" id="swapMarketBtn">↻ Swap market cards</button>
-                <button class="quiet-btn challenge-btn" id="challengeBtn" title="Answer a career question correctly to earn an extra action this turn">⭐ Mini-challenge</button>
-              <button class="quiet-btn" id="bankBtn">✦ Bank completed set</button>
+          <!-- Pinned to the bottom of the rail, outside the scrolling body, so it
+               can never be scrolled off. -->
+          <div class="rail-actions">
+            <button class="quiet-btn" id="bankBtn">&#10022; Bank set</button>
+            <button class="primary-btn" id="applyBtn" data-tip="Unlocks once you meet every requirement for your target job. First to apply wins.">Apply for the job</button>
+            <button class="primary-btn" id="endBtn">End turn &rarr;</button>
+          </div>
+        </aside>
+
+        <!-- ===== CENTRE: the play area, always visible ===== -->
+        <section class="board-main">
+          <div class="board-head">
+            <div class="board-role">
+              <span class="eyebrow">TARGET ROLE</span>
+              <div class="job-title" id="jobTitle"></div>
+            </div>
+            <div class="turnbar">
+              <div class="turntext" id="turnText"></div>
+              <div class="actions-left" id="actionInfo"></div>
+            </div>
+          </div>
+
+          <div class="guide" id="guide"></div>
+
+          <div class="tables">
+            <section class="table">
+              <div class="section-head">
+                <h3 data-tip="Cards you can take from here. 2 per round, 1 action each.">Market</h3>
               </div>
-              <div class="right-actions">
-                <button class="primary-btn" id="applyBtn">Apply for the job</button>
-                <button class="primary-btn" id="endBtn">End turn →</button>
+              <div class="panel market" id="market" data-tip="Border colours show which experience route a card belongs to. Wildcards can fill any set slot. Drag a card to your hand to take it, or click it to preview."></div>
+            </section>
+
+            <section class="table">
+              <div class="section-head">
+                <h3 data-tip="Your six cards. Click to select them into a set.">Your hand</h3>
+                <span class="hand-count" id="handCount"></span>
               </div>
+              <div class="panel hand" id="hand" data-tip="Each round you can return up to 2 cards for free and take up to 2 cards at 1 action each. Click to select for a set, drag to reorder. Hand limit: 6."></div>
+            </section>
+          </div>
+
+          <div class="set-builder-status" id="setBuilderStatus" aria-live="polite"></div>
+
+          <div class="controls">
+            <div class="left-actions">
+              <button class="quiet-btn" id="returnBtn" data-tip="Return up to 2 selected cards to the deck each round, for free.">&larr; Return selected to deck</button>
+              <button class="quiet-btn" id="swapMarketBtn" data-tip="Swap up to 2 market cards for a fresh draw. Costs no action, but you only get 2 per round.">&#8635; Swap market cards</button>
             </div>
 
-            <div class="legend">
-              <span><i class="dot" style="background:var(--cyan)"></i>Setup</span>
-              <span><i class="dot" style="background:var(--pink)"></i>Do the work</span>
-              <span><i class="dot" style="background:var(--gold)"></i>Proof</span>
-              <span><i class="dot" style="background:var(--orange)"></i>Impact</span>
-              <span><i class="dot" style="background:var(--lime)"></i>Wildcard</span>
-              <span>Border colors show experience routes; wildcards can fill any set slot.</span>
-              <span>Each round: return up to 2 cards for free and take up to 2 cards (1 action each). Drag cards between the market, hand and return area, or use the card popup. Hand limit: 6.</span>
-            </div>
-            </div>
-          </section>
+          </div>
         </section>
 
-        <aside class="sidebar">
-          <section class="sidebar-card banked-storage-card">
-            <div class="storage-heading"><h3>Stored experience sets</h3><span class="storage-count" id="bankedSetProgress">0 / 2 role-fit types</span></div>
-            <p class="storage-help">Bank a set to store it here as CV experience. Your target job needs completed experience from at least two recommended routes.</p>
-            <div class="banked-set-list" id="bankedSets"><div class="storage-empty">Your completed sets will appear here.</div></div>
-          </section>
-          <section class="sidebar-card skills-track-card">
-            <div class="skills-heading"><h3>Skills for the role</h3></div>
-            <div id="skillsRequired" class="skills-list"></div>
-          </section>
-          <section class="sidebar-card">
-            <h3>Experience sets</h3>
-            <div class="set-list" id="sets"></div>
-          </section>
+        <!-- ===== RIGHT RAIL: rivals and race state behind tabs ===== -->
+        <aside class="rail rail-right" id="rightRail" aria-label="Race status">
+          <div class="drawer-head">
+            <h2 class="drawer-title">Race status</h2>
+            <button class="drawer-close" id="drawerCloseBtn" aria-label="Close race status">&times;</button>
+          </div>
+          <div class="rail-tabs" role="tablist" aria-label="Race status">
+            <button class="rail-tab is-active" role="tab" aria-selected="true" aria-controls="tab-rivals" id="tabbtn-rivals" data-rail-tab="rivals">Rivals</button>
+            <button class="rail-tab" role="tab" aria-selected="false" aria-controls="tab-feed" id="tabbtn-feed" data-rail-tab="feed">Feed</button>
+          </div>
 
-          <section class="sidebar-card">
-            <h3>Your CV / <span id="playerName">PLAYER</span></h3>
-            <div class="cv-stats" id="cvStats"></div>
-          </section>
+          <div class="rail-body">
+            <div class="rail-panel is-active" role="tabpanel" id="tab-rivals" aria-labelledby="tabbtn-rivals">
+              <section class="rival-board" aria-labelledby="rivalBoardTitle">
+                <div class="rival-board-head">
+                  <div><h3 id="rivalBoardTitle">Your competitors</h3></div>
+                  <span class="rival-turn-order">YOU &rarr; 3 RIVALS</span>
+                </div>
+                <div class="rivals" id="rivals"></div>
+              </section>
+            </div>
 
-          <section class="sidebar-card">
-            <h3>Career feed</h3>
-            <div class="log" id="log"></div>
-          </section>
-
-          <section class="sidebar-card">
-            <h3>Your next steps</h3>
-            <div class="help">Follow the green guide at the top. It tells you exactly what to collect and which button to press. Bank completed sets to store CV experience. Your target job needs at least two different recommended routes, plus its evidence and skill requirements. Wildcards can fill any missing card slot.</div>
-          </section>
+            <div class="rail-panel rail-panel-feed" role="tabpanel" id="tab-feed" aria-labelledby="tabbtn-feed" hidden>
+              <div class="log" id="log"></div>
+              <!-- Completed roles ride along with the career feed. -->
+              <section class="history" id="completedRoles"></section>
+            </div>
+          </div>
         </aside>
+
       </div>
     </main>
+
 
     <!-- ACCESSIBILITY MODAL -->
     <div id="a11yModal" class="modal hidden">
@@ -346,16 +386,37 @@
       </div>
     </div>
 
+      <footer class="site-footer">
+   
+    <nav class="footer-links">
+       <p>&copy; 2026 <a href="https://www.pixelagent.co.uk" target="_blank" rel="noopener">Pixel Agent</a>. All rights reserved. | 
+      <a href="privacy-policy.html">Privacy Policy</a> |
+      <a href="terms-of-service.html">Terms of Service</a>
+      </p>
+    </nav>
+  </footer>
+
   </div>
 
-  <div class="game-over-overlay hidden" id="gameOverOverlay"></div>
+<div class="game-over-overlay hidden" id="gameOverOverlay"></div>
+  <div class="drawer-scrim" id="drawerScrim"></div>
+
   <div class="toast" id="toast"></div>
   <div class="card-preview-backdrop" id="cardPreview" aria-modal="true" role="dialog"></div>
-  <div class="modal-back" id="modal"><div class="modal-content" id="modalBody"></div></div>
+  <div class="modal-back" id="modal"><div class="modal-content" id="modalBody"></div>
 
-   <!-- Game Scripts -->
+
+
+
+</div>
+
+
+  <!-- Game Scripts -->
+   <script src="js/tutorialConfig.js" defer></script>
+   <script src="js/tooltip.js" defer></script>
    <script src="js/game.js" defer></script>
    <script src="js/ai.js" defer></script>
+   <script src="js/tutorialSystem.js" defer></script>
    <script src="js/settings.js" defer></script>
    <script src="js/accessibility.js" defer></script>
 </body>

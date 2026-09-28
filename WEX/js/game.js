@@ -24,7 +24,7 @@ window.RTTR = {
   getSettings() {
     try {
       const s = JSON.parse(localStorage.getItem(this.SETTINGS_KEY) || '{}');
-      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true };
+      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true, tutorial: s.tutorial !== undefined ? s.tutorial : true };
     } catch (e) { return { sound: true, animations: true, autoDraw: true }; }
   },
   saveSettings(s) { try { localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(s)); } catch (e) {} },
@@ -66,7 +66,7 @@ const el = {
   market: $('market'),
   hand: $('hand'), handCount: $('handCount'),
   setBuilderStatus: $('setBuilderStatus'),
-  returnBtn: $('returnBtn'), returnZone: $('returnZone'), bankBtn: $('bankBtn'),
+  returnBtn: $('returnBtn'), bankBtn: $('bankBtn'),
   swapMarketBtn: $('swapMarketBtn'),
   applyBtn: $('applyBtn'), endBtn: $('endBtn'),
   sets: $('sets'),
@@ -80,9 +80,13 @@ const el = {
   gameOverOverlay: $('gameOverOverlay'),
   skillsRequired: $('skillsRequired'),
   homeBtn: $('homeBtn'),
-  challengeBtn: $('challengeBtn'),
+  rightRail: $('rightRail'),
+  playerCount: $('playerCount'),
+  drawerBtn: $('drawerBtn'),
+  drawerCloseBtn: $('drawerCloseBtn'),
+  drawerScrim: $('drawerScrim'),
+  replayTutorial: $('replayTutorial'),
   helperToggle: $('helperToggle'),
-  helperContent: $('helperContent'),
 };
 
 app.el = el;
@@ -222,6 +226,7 @@ function setupResumeButton() {
     state.discard = cleanPile(state.discard);
     state.market = cleanPile(state.market);
     [state.player, ...(state.rivals || [])].forEach((agent) => { agent.hand = cleanPile(agent.hand); });
+    state.freeTurn = !!state.freeTurn;
     state.player.returnsThisRound = state.player.returnsThisRound || 0;
     state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
     state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
@@ -333,29 +338,42 @@ function buildDeck() {
   // templates that share the same (route, category), so each route's total supply of
   // Setup/Action/Proof/Impact cards stays roughly balanced regardless of how many
   // distinct card names exist for that category.
-  const groupCounts = {};
-  DATA.cards.forEach((tmpl) => {
-    if (tmpl.category === 'Wildcard') return;
-    const key = tmpl.set + '|' + tmpl.category;
-    groupCounts[key] = (groupCounts[key] || 0) + 1;
-  });
   // A small starting buffer only: bankSet() deals a fresh copy back whenever a
   // required-skill card is consumed, so supply is maintained during play instead.
   const REQUIRED_SKILL_COPIES = 2;
 
+  // Distribute a fixed total across the templates sharing a (route, category) slot.
+  // Dividing by the template count and rounding is not enough: it produced wildly
+  // uneven slot totals (3 cards in a 3-template slot, 23 in a 23-template one) because
+  // Math.max(1, ...) pins sparse slots at one copy each. Here every slot gets exactly
+  // SLOT_COPIES cards, with the first remainder templates taking the extra one.
+  const SLOT_COPIES = 5;
+  const slots = new Map();
   DATA.cards.forEach((tmpl) => {
-    let copies;
-    if (tmpl.category === 'Wildcard') {
-      copies = 2;
-    } else {
-      const key = tmpl.set + '|' + tmpl.category;
-      copies = Math.max(1, Math.round(BASE_COPIES / groupCounts[key]));
-    }
-    if (cardGrantsAny(tmpl, isRoleRequiredSkill)) {
-      copies = Math.max(copies, REQUIRED_SKILL_COPIES);
-    }
-    for (let i = 0; i < copies; i++) pool.push(tmpl);
+    if (tmpl.category === 'Wildcard') return;
+    const key = tmpl.set + '|' + tmpl.category;
+    if (!slots.has(key)) slots.set(key, []);
+    slots.get(key).push(tmpl);
   });
+
+  slots.forEach((templates) => {
+    const n = templates.length;
+    const base = Math.floor(SLOT_COPIES / n);
+    const remainder = SLOT_COPIES % n;
+    templates.forEach((tmpl, i) => {
+      let copies = base + (i < remainder ? 1 : 0);
+      if (cardGrantsAny(tmpl, isRoleRequiredSkill)) {
+        copies = Math.max(copies, REQUIRED_SKILL_COPIES);
+      }
+      for (let k = 0; k < copies; k++) pool.push(tmpl);
+    });
+  });
+
+  // Wildcards are not part of any single route, so they get their own small supply.
+  DATA.cards.filter((tmpl) => tmpl.category === 'Wildcard').forEach((tmpl) => {
+    for (let k = 0; k < 2; k++) pool.push(tmpl);
+  });
+
   return shuffle(pool).map(instantiate);
 }
 
@@ -483,7 +501,7 @@ function doMarketSwap() {
 function newAgent(name, strategy) {
   return {
     name, strategy, isPlayer: strategy == null,
-    energy: START_ENERGY, hand: [], banked: [], skills: [], challengeUsed: false,
+    energy: START_ENERGY, hand: [], banked: [], skills: [], freeTurn: false,
     evidence: 0, reliability: 0, references: 0, distinctions: 0,
     applied: false, actionPenalty: 0,
     marketPicksThisRound: 0, returnsThisRound: 0, marketSwapsThisRound: 0,
@@ -572,11 +590,14 @@ function newGame(jobId) {
   state.rivals.forEach((r) => { r.hand = draw(START_HAND); });
   selectedHandUids = new Set();
   addLog(`You start your race for ${job.title}.`);
-  showGuide(`START HERE: choose one colour route and collect its listed card types. Employer Visit needs 2 cards; Volunteering and Live Project Brief need 3; Block Placement and Industry Partnership need 4. There are several examples to choose from. Select only one card of each required type, then bank the set to add CV experience, evidence and a skill.`);
+  showGuide(`Pick a colour route, collect one card of each type it lists, then bank the set. See the Routes tab for what each route needs.`);
   showOnlyPanel(el.game);
   startTurnTimer();
   render();
   persist();
+  // The tutorial spotlights board elements, so it can only run once they exist.
+  // maybeStart() is a no-op for anyone who has already seen this version.
+  if (window.Tutorial && typeof Tutorial.maybeStart === 'function') Tutorial.maybeStart();
 }
 
 /* ============================== Banking logic ============================ */
@@ -591,7 +612,8 @@ function findBank(cards, forcedSet, allowSubset = false) {
   const targetSet = setIds.size ? [...setIds][0] : null;
   if (!targetSet) return { ok: false, msg: "Include at least one card from an experience route so I know which group you're banking." };
   const meta = setMeta(targetSet);
-  const required = meta && Array.isArray(meta.requiredCategories) ? meta.requiredCategories : ['Setup', 'Action', 'Proof'];
+  if (!meta) return { ok: false, msg: `"${targetSet}" is not a valid experience route.` };
+  const required = Array.isArray(meta.requiredCategories) ? meta.requiredCategories : ['Setup', 'Action', 'Proof'];
   if (cards.length < required.length || (!allowSubset && cards.length !== required.length)) return { ok: false, msg: `${setName(targetSet)} needs exactly ${required.length} cards: ${required.join(', ')}.` };
   const groups = [];
   function choose(start, chosen) {
@@ -610,7 +632,7 @@ function findBank(cards, forcedSet, allowSubset = false) {
     const missing = [];
     for (const cat of required) {
       const idx = remaining.findIndex((c) => c.category === cat && (c.set === targetSet || c.set === 'any'));
-      const wildcardIdx = remaining.findIndex((c) => c.category === 'Wildcard');
+      const wildcardIdx = remaining.findIndex((c) => c.category === 'Wildcard' && (c.set === targetSet || c.set === 'any'));
       const chosen = idx !== -1 ? idx : wildcardIdx;
       if (chosen === -1) { missing.push(cat); continue; }
       used.push(remaining[chosen]);
@@ -642,6 +664,7 @@ function bankSet(agent, targetSet, used) {
     }
   });
 
+  if (!meta) { addLog(`${agent.name} tried to bank an unknown route — skipped.`); return null; }
   let evidenceGain = meta.reward.evidenceValue;
   let strong = true;
   if (targetSet === 'brief') {
@@ -663,10 +686,13 @@ function bankSet(agent, targetSet, used) {
   if (meta.reward.reference) agent.references += 1;
   if (targetSet === 'volunteering') agent.reliability += 1;
 
-  const settings = window.RTTR ? window.RTTR.getSettings() : { autoDraw: true };
+  // Auto-draw is a player preference; it must not govern the rivals, or turning it
+  // off would silently stop them topping their hands up after banking.
+  const isPlayer = agent === state.player;
+  const settings = isPlayer && window.RTTR ? window.RTTR.getSettings() : { autoDraw: true };
   if (settings.autoDraw) {
     const fresh = draw(Math.max(0, START_HAND - agent.hand.length));
-    agent.hand.push(...fresh);
+    agent.hand.push(...fresh.filter(isValidCard));
   }
 
   return { meta, evidenceGain, skillName, strong };
@@ -770,7 +796,12 @@ function doBank() {
     showGuide(`${result.msg} Choose the different card types listed for this experience route. Wildcards can fill one missing type each.`);
     return;
   }
-  const { meta, evidenceGain, skillName, strong } = bankSet(state.player, result.targetSet, result.used);
+  const banked = bankSet(state.player, result.targetSet, result.used);
+  if (!banked) {
+    // requireActions() only checks, so no action was spent yet.
+    return toast('That route is not available, so the set was not banked.');
+  }
+  const { meta, evidenceGain, skillName, strong } = banked;
   spendActions(1);
   selectedHandUids = new Set();
   addLog(`You banked ${meta.name}! +${evidenceGain} evidence, gained the ${skillName} skill${strong ? '' : ' (basic evidence — low energy)'}.`);
@@ -890,6 +921,13 @@ function endTurn() {
   addLog(`— End of round ${state.round} for you —`);
   state.rivalTurnSummaries = [];
   state.rivalTurnIndex = 0;
+  if (state.freeTurn) {
+    // Free turn prize: the rivals do not move, so there is no phase to show.
+    state.freeTurn = false;
+    addLog('Free turn \u2014 the rivals sit this one out.');
+    finishRivalPhase();
+    return;
+  }
   state.rivals.forEach((r) => {
     if (!state.winner) state.rivalTurnSummaries.push(runRivalTurn(r));
   });
@@ -923,6 +961,7 @@ function finishRivalPhase() {
   startTurnTimer();
   render();
   persist();
+  if (!state.winner) endRoundQuiz();
 }
 
 /* ============================== Events ==================================== */
@@ -970,10 +1009,10 @@ const EVENTS = [
   },
 ];
 
-// Knowledge check the player can spend once per game. A correct answer buys an
-// extra action, which is the difficulty lever: rivals take a fixed 2 actions a
-// turn with no way to answer back, so without this the AI is very hard to beat.
-const MINI_CHALLENGES = [
+// End-of-round knowledge check. A correct answer awards a random prize; a wrong one
+// awards nothing but explains the reasoning, since the teaching matters more than
+// the reward.
+const ROUND_QUESTIONS = [
   {
     q: 'You have finished a work placement. What turns it into strong CV evidence?',
     options: [
@@ -998,17 +1037,12 @@ const MINI_CHALLENGES = [
   },
   {
     q: 'Which experience is most likely to earn an employer reference?',
-    options: [
-      'An employer visit',
-      'Volunteering',
-      'A work placement',
-      'A live project brief',
-    ],
+    options: ['An employer visit', 'Volunteering', 'A work placement', 'A live project brief'],
     answer: 2,
     why: 'A placement is sustained work with an employer, so it is the route that carries a reference.',
   },
   {
-    q: 'You have drawn an opportunity card but have not taken part yet. What happens to your CV?',
+    q: 'You drew an opportunity card but have not taken part yet. What happens to your CV?',
     options: [
       'Nothing yet, because experience only counts once you complete it and record what you did',
       'The opportunity is added as experience immediately',
@@ -1040,50 +1074,74 @@ const MINI_CHALLENGES = [
     answer: 1,
     why: 'A set needs one card of every required category, all from the same experience route.',
   },
+  {
+    q: 'How many different recommended routes do you need completed sets from to meet the job requirement?',
+    options: ['One', 'Two', 'Three', 'All five'],
+    answer: 1,
+    why: 'You need completed sets from two different role-fit routes, not two sets from the same route.',
+  },
+  {
+    q: 'An opportunity is set up but the employer contact details are missing. What happens?',
+    options: [
+      'You can still take part, the details are not needed',
+      'You must spend an action contacting the employer to complete the request before you can take part',
+      'The opportunity is discarded automatically',
+      'You can take part and sort the details later',
+    ],
+    answer: 1,
+    why: 'A placement request must be complete before you can start. Missing information blocks the opportunity.',
+  },
 ];
 
-function openMiniChallenge() {
+// Prizes are applied to the round that is about to start.
+const ROUND_PRIZES = [
+  { id: 'extra-go', label: 'Extra go', apply: () => { state.actionsLeft += 1; return 'You get an extra action this round.'; } },
+  { id: 'free-turn', label: 'Free turn', apply: () => { state.freeTurn = true; return 'The rivals skip their next turn \u2014 it is your move.'; } },
+  { id: 'double-turns', label: 'Double turns', apply: () => { state.actionsLeft *= 2; return `Your actions double to ${state.actionsLeft}.`; } },
+  { id: 'draw-one', label: 'Draw a card', apply: () => { const f = draw(1); state.player.hand.push(...f); return f.length ? 'You draw 1 card.' : 'The deck is empty, so no card.'; } },
+  { id: 'draw-two', label: 'Draw 2 cards', apply: () => { const f = draw(2); state.player.hand.push(...f); return f.length ? `You draw ${f.length} cards.` : 'The deck is empty, so no cards.'; } },
+  { id: 'new-deck', label: 'New deck', apply: () => { state.deck = buildDeck(); return 'A fresh supply of opportunity cards arrives.'; } },
+];
+
+function endRoundQuiz() {
   if (!state || state.winner) return;
-  if (state.player.challengeUsed) {
-    return toast('You have already used your mini-challenge this run.');
-  }
-  const ch = MINI_CHALLENGES[Math.floor(Math.random() * MINI_CHALLENGES.length)];
+  const ch = ROUND_QUESTIONS[Math.floor(Math.random() * ROUND_QUESTIONS.length)];
   openModal(`
-    <div class="mini-challenge">
-      <div class="eyebrow">MINI-CHALLENGE · ONE CHALLENGE PER RUN</div>
-      <h2>Career Knowledge Check</h2>
+    <div class="round-quiz">
+      <div class="eyebrow">END OF ROUND ${state.round} \u00b7 KNOWLEDGE CHECK</div>
+      <h2>Round Quiz</h2>
       <p class="challenge-q">${escapeHtml(ch.q)}</p>
-      <div class="modal-actions challenge-options" id="challengeOptions"></div>
+      <div class="modal-actions challenge-options" id="quizOptions"></div>
     </div>
   `);
-  const wrap = $('challengeOptions');
+  const wrap = $('quizOptions');
+  const fb = document.createElement('div');
+  fb.className = 'challenge-feedback';
+  fb.id = 'quizFeedback';
+  wrap.parentNode.appendChild(fb);
+
   ch.options.forEach((text, i) => {
     const btn = document.createElement('button');
     btn.className = 'btn';
     btn.textContent = text;
     btn.addEventListener('click', () => {
       if (i === ch.answer) {
-        state.player.challengeUsed = true;
-        state.actionsLeft += 1;
-        addLog(`You answered the mini-challenge correctly — +1 action this turn.`);
-        closeModal();
+        const prize = ROUND_PRIZES[Math.floor(Math.random() * ROUND_PRIZES.length)];
+        const msg = prize.apply();
+        wrap.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+        fb.innerHTML = `<p class="prize-win">Correct \u2014 prize: <b>${escapeHtml(prize.label)}</b>. ${escapeHtml(msg)}</p>`;
+        addLog(`Round quiz answered correctly \u2014 prize "${prize.label}".`);
         render();
         persist();
-        toast('Correct — extra action granted this turn.');
       } else {
         btn.classList.add('wrong');
         btn.disabled = true;
-        $('challengeFeedback').innerHTML =
-          `<p class="wrong-note">Not quite. ${escapeHtml(ch.why)}</p>`
-          + '<p class="wrong-hint">Try another answer — the challenge stays open until you get it right.</p>';
+        fb.innerHTML = `<p class="wrong-note">Not quite. ${escapeHtml(ch.why)}</p>`
+          + '<p class="wrong-hint">Try another answer \u2014 a correct answer still earns a prize.</p>';
       }
     });
     wrap.appendChild(btn);
   });
-  const fb = document.createElement('div');
-  fb.id = 'challengeFeedback';
-  fb.className = 'challenge-feedback';
-  wrap.parentNode.appendChild(fb);
 }
 
 function triggerEvent() {
@@ -1194,7 +1252,8 @@ if (el.cardPreview) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (el.learnScreen && !el.learnScreen.classList.contains('hidden')) closeLearn();
+  if (el.rightRail && el.rightRail.classList.contains('is-open')) setDrawerOpen(false);
+  else if (el.learnScreen && !el.learnScreen.classList.contains('hidden')) closeLearn();
   else closePreview();
 });
 
@@ -1217,6 +1276,8 @@ function startTurnTimer() {
   if (!el.timerDisplay) return;
   let remaining = TURN_SECONDS;
   el.timerDisplay.classList.remove('hidden');
+  // Re-check: the feed may still be empty, in which case stay hidden.
+  if (!state || !state.log.length) el.timerDisplay.classList.add('hidden');
   renderTimer(remaining);
   turnTimerHandle = setInterval(() => {
     remaining -= 1;
@@ -1295,108 +1356,42 @@ function renderSkills() {
   el.skillsRequired.innerHTML = allSkills.map((skill) => {
     const has = playerSkills.includes(skill);
     const isRequired = skill === req.skill;
-    const grantors = DATA.cards.filter((c) => cardGrantsAny(c, (s) => s === skill));
     const cls = isRequired ? (has ? 'owned required' : 'needed required') : (has ? 'owned' : 'needed');
-    let hint = '';
-    if (isRequired && !has) {
-      if (!grantors.length) {
-        hint = '<small class="skill-hint skill-hint-warn">No card in this pack grants it \u2014 this role cannot be completed.</small>';
-      } else {
-        // Group the granting cards by route, role-fit routes first, fewest cards first,
-        // so the player can see the cheapest way to actually earn the skill.
-        const recs = state.job.recommendedSets || [];
-        const byRoute = new Map();
-        grantors.forEach((g) => {
-          if (!byRoute.has(g.set)) byRoute.set(g.set, []);
-          byRoute.get(g.set).push(g);
-        });
-        const routes = [...byRoute.entries()].map(([id, cs]) => {
-          const req = requiredCategories(id);
-          return {
-            id,
-            name: id === 'any' ? 'Any route' : setName(id),
-            req,
-            cheapest: cs.slice().sort((a, b) => req.indexOf(a.category) - req.indexOf(b.category))[0],
-            count: cs.length,
-            isFit: recs.includes(id),
-          };
-        }).sort((a, b) => (b.isFit - a.isFit) || (a.req.length - b.req.length));
-        const shortest = Math.min(...routes.map((r) => r.req.length));
-        const items = routes.slice(0, 3).map((r) => {
-          const fit = r.isFit ? ' \u2b50 role-fit' : '';
-          const usable = r.req.includes(r.cheapest.category);
-          const tryText = usable
-            ? `try "${escapeHtml(r.cheapest.name)}" as the ${escapeHtml(r.cheapest.category)} slot`
-            : `"${escapeHtml(r.cheapest.name)}" is a ${escapeHtml(r.cheapest.category)} card, which this route does not use`;
-          return `${escapeHtml(r.name)}${fit}: bank ${r.req.length} cards \u2014 ${escapeHtml(r.req.join(' + '))}; ${tryText}`;
-        });
-        const more = routes.length > 3 ? ` (+${routes.length - 3} more route${routes.length - 3 === 1 ? '' : 's'})` : '';
-        const cheapestNote = routes.some((r) => r.req.length === shortest && r.isFit)
-          ? ''
-          : ` Cheapest is ${shortest} cards.`;
-        hint = `<small class="skill-hint">Get it by banking a set:<br>\u2022 ${items.join('<br>\u2022 ')}${more}.${escapeHtml(cheapestNote)}</small>`;
-      }
+
+    // Every skill gets the same "how do I get this" breakdown, on the shared
+    // tooltip system rather than a bespoke expand/collapse per row.
+    const { routes } = skillRouteBreakdown(skill);
+    const name = escapeHtml(skill);
+    let tip;
+    if (has) {
+      tip = `<b>${name}</b><span class="tip-why">Collected. It counts toward your CV and the role requirements.</span>`;
+    } else if (!routes.length) {
+      tip = `<b>${name}</b><span class="tip-why">No card in this pack grants this skill, so this role cannot be completed.</span>`;
+    } else {
+      const items = routes.slice(0, 3).map((r) => {
+        const fit = r.isFit ? ' <span class="tip-fit">role-fit</span>' : '';
+        const usable = r.req.includes(r.cheapest.category);
+        const tryText = usable
+          ? `Try <b>${escapeHtml(r.cheapest.name)}</b> as the ${escapeHtml(r.cheapest.category)} slot.`
+          : `<b>${escapeHtml(r.cheapest.name)}</b> is a ${escapeHtml(r.cheapest.category)} card, which this route does not use.`;
+        return `<li><b>${escapeHtml(r.name)}</b>${fit} \u2014 bank ${r.req.length} cards (${escapeHtml(r.req.join(' + '))}).<br><span class="tip-dim">${tryText}</span></li>`;
+      });
+      const more = routes.length > 3
+        ? `<span class="tip-dim">+${routes.length - 3} more route${routes.length - 3 === 1 ? '' : 's'}</span>`
+        : '';
+      const shortest = Math.min(...routes.map((r) => r.req.length));
+      const cheapestNote = routes.some((r) => r.req.length === shortest && r.isFit)
+        ? ''
+        : `<span class="tip-dim">Cheapest option is ${shortest} cards.</span>`;
+      tip = `<b>${name}</b><span class="tip-head">Get it by banking a set</span><ul>${items.join('')}</ul>${more}${cheapestNote}`;
     }
-    const tipId = `skill-tip-${slugify(skill)}`;
-    const isOpen = hint && openSkillTips.has(skill);
-    const trigger = hint
-      ? `<button type="button" class="skill-info" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${tipId}" aria-describedby="${tipId}" title="How do I get this skill?">?</button>`
-      : '';
-    const tip = hint
-      ? `<span class="skill-tip" id="${tipId}" role="tooltip"${isOpen ? '' : ' hidden'}>${hint}</span>`
-      : '';
-    return `<span class="skill-item ${cls}${isOpen ? ' tip-open' : ''}" data-skill="${escapeHtml(skill)}">
+
+    return `<span class="skill-item ${cls}" data-skill="${escapeHtml(skill)}" data-tip="${escapeHtml(tip)}">
       <span class="skill-check">${has ? '\u2713' : '\u25cb'}</span>
-      <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}${trigger}</span>
-      ${tip}
+      <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}</span>
     </span>`;
   }).join('');
-  wireSkillTips();
 }
-
-function slugify(text) {
-  return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-}
-
-// renderSkills() rebuilds the panel on every render, so open/closed state lives
-// here rather than in the DOM.
-let openSkillTips = new Set();
-
-// Explicit click toggles a skill hint open/closed. Hover and focus deliberately do
-// NOT reveal it: either would override the closed state and make the button look
-// stuck-on, since the trigger keeps focus after a click.
-function wireSkillTips() {
-  if (!el.skillsRequired) return;
-  el.skillsRequired.querySelectorAll('.skill-info').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const item = btn.closest('.skill-item');
-      const tip = item && item.querySelector('.skill-tip');
-      const skill = item && item.dataset.skill;
-      if (!tip || !skill) return;
-      const nowOpen = !openSkillTips.has(skill);
-      if (nowOpen) openSkillTips.add(skill);
-      else openSkillTips.delete(skill);
-      if (nowOpen) tip.removeAttribute('hidden');
-      else tip.setAttribute('hidden', '');
-      btn.setAttribute('aria-expanded', String(nowOpen));
-      item.classList.toggle('tip-open', nowOpen);
-    });
-  });
-}
-
-// Clicking anywhere else closes an open hint.
-document.addEventListener('click', () => {
-  if (!openSkillTips.size || !el.skillsRequired) return;
-  openSkillTips.clear();
-  el.skillsRequired.querySelectorAll('.skill-item.tip-open').forEach((item) => {
-    item.classList.remove('tip-open');
-    const tip = item.querySelector('.skill-tip');
-    if (tip) tip.setAttribute('hidden', '');
-    const btn = item.querySelector('.skill-info');
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-  });
-});
 
 function renderJobNeeds() {
   const req = state.job.requirements;
@@ -1420,6 +1415,11 @@ function renderTurnBar() {
 }
 
 function renderRivals() {
+  if (el.playerCount && state) {
+    // Rivals still racing. The player is not counted; this is who you are up against.
+    const active = state.rivals.filter((r) => !r.applied).length;
+    el.playerCount.textContent = String(active);
+  }
   el.rivals.innerHTML = '';
   state.rivals.forEach((r, i) => {
     const seed = RIVAL_SEEDS[i];
@@ -1524,8 +1524,8 @@ function cardEl(c, opts) {
     div.addEventListener('dragstart', (event) => {
       event.dataTransfer.setData('text/plain', JSON.stringify({ source: opts.dragSource, uid: c.uid }));
       // A second, plain-key type: some browsers expose only `types` during dragover.
-      if (opts.dragSource === 'hand' && event.dataTransfer.setData) {
-        try { event.dataTransfer.setData('application/x-rtt-hand', c.uid); } catch (e) { /* older browsers */ }
+      if (event.dataTransfer.setData) {
+        try { event.dataTransfer.setData('application/x-rtt-' + opts.dragSource, c.uid); } catch (e) { /* older browsers */ }
       }
       event.dataTransfer.effectAllowed = 'move';
       div.classList.add('dragging-card');
@@ -1722,15 +1722,112 @@ function returnPreviewCard() {
   returnCardsToDeck([previewState.card.uid]);
 }
 
-function renderMarket() {
-  el.market.innerHTML = '';
+// The market is a surface of slots. Cards live in one of MARKET_SLOTS columns, and
+// any number of cards can share a slot, in which case they are drawn as a stack with
+// the most recently placed card on top. Dragging a card moves it to the slot you
+// drop on, and dropping it directly over a card joins that card's stack.
+const MARKET_SLOTS = 6;
+const STACK_COVER = 0.5;  // each stacked card covers half of the one below it
+const STACK_DROP = 3;     // px of vertical stagger, so the pile reads as a stack
+const STACK_GAP = 8;       // matches the panel gap
+
+function marketSlotCount() {
+  return MARKET_SLOTS;
+}
+
+// Assign slots to any card that does not have one yet. The first six fill the row,
+// and anything beyond that stacks onto the last slot rather than wrapping.
+function assignMarketSlots() {
+  if (!state || !Array.isArray(state.market)) return;
+  const taken = new Set(state.market.map((c) => c._slot).filter((s) => Number.isInteger(s)));
+  let next = 0;
+  state.market.forEach((c, i) => {
+    if (!Number.isInteger(c._slot)) {
+      while (next < MARKET_SLOTS && taken.has(next)) next += 1;
+      c._slot = Math.min(next, MARKET_SLOTS - 1);
+      taken.add(c._slot);
+    }
+    if (!Number.isInteger(c._z)) c._z = i;
+  });
+}
+
+// Cards grouped by slot, ordered within each stack, top card last.
+function marketStacks() {
+  assignMarketSlots();
+  const bySlot = new Map();
   state.market.forEach((c) => {
-    const card = cardEl(c, {
-      onClick: () => openPreview('market', c),
-      onInspect: (cardToOpen) => openPreview('market', cardToOpen),
-      dragSource: 'market',
+    if (!bySlot.has(c._slot)) bySlot.set(c._slot, []);
+    bySlot.get(c._slot).push(c);
+  });
+  bySlot.forEach((list) => list.sort((a, b) => (a._z || 0) - (b._z || 0)));
+  return [...bySlot.entries()].sort((a, b) => a[0] - b[0]);
+}
+
+function moveMarketCardToSlot(uid, slot, stackIndex) {
+  const card = state.market.find((c) => c.uid === uid);
+  if (!card) return;
+  const target = state.market.filter((c) => c._slot === slot && c.uid !== uid);
+  card._slot = slot;
+  // Land it on top of the target stack by default, or at a chosen depth.
+  const z = Number.isInteger(stackIndex)
+    ? stackIndex
+    : Math.max(-1, ...target.map((c) => c._z || 0)) + 1;
+  card._z = z;
+  // Re-pack the stack order so the z values stay contiguous.
+  const stack = state.market.filter((c) => c._slot === slot).sort((a, b) => (a._z || 0) - (b._z || 0));
+  stack.forEach((c, i) => { c._z = i; });
+  renderMarket();
+  persist();
+}
+
+// Which slot is this clientX over? Six even columns across the panel.
+function marketSlotAt(clientX) {
+  const box = el.market.getBoundingClientRect();
+  if (box.width <= 0) return 0;
+  const rel = clientX - box.left;
+  const slot = Math.floor((rel / box.width) * MARKET_SLOTS);
+  return Math.max(0, Math.min(MARKET_SLOTS - 1, slot));
+}
+
+function renderMarket() {
+  if (!el.market) return;
+  el.market.innerHTML = '';
+  assignMarketSlots();
+  const stacks = marketStacks();
+  const box = el.market.getBoundingClientRect();
+  const width = box.width || el.market.clientWidth || MARKET_SLOTS * 150;
+  const slotW = width / MARKET_SLOTS;
+
+  stacks.forEach(([slot, list]) => {
+    const cardW = slotW - STACK_GAP;
+    const offset = cardW * STACK_COVER;
+    // A 50% overlap makes a deep pile wide, so shift the whole stack left by
+    // whatever would push it past the panel edge. Without this, overflow cards
+    // (which land on the last column) spill well outside the market.
+    const spread = (list.length - 1) * offset + cardW;
+    const baseX = slot * slotW;
+    const shift = Math.max(0, baseX + spread - width);
+
+    list.forEach((c, depth) => {
+      const top = depth === list.length - 1;
+      const card = cardEl(c, {
+        onClick: () => { if (top) openPreview('market', c); },
+        onInspect: (cardToOpen) => { if (top) openPreview('market', cardToOpen); },
+        dragSource: 'market',
+      });
+      card.dataset.marketSlot = String(slot);
+      card.style.position = 'absolute';
+      // Each card covers half of the one beneath it, so the card below stays
+      // readable while the pile still reads as a stack.
+      card.style.left = (baseX - shift + depth * offset) + 'px';
+      card.style.top = (depth * STACK_DROP) + 'px';
+      card.style.width = 'calc(' + (100 / MARKET_SLOTS) + '% - ' + (STACK_GAP / 2) + 'px)';
+      card.style.zIndex = String(depth + 1);
+      card.classList.toggle('stack-top', top);
+      card.classList.toggle('is-stacked', list.length > 1);
+      card.setAttribute('data-stack-depth', String(depth));
+      el.market.appendChild(card);
     });
-    el.market.appendChild(card);
   });
 }
 
@@ -1746,7 +1843,7 @@ function renderHand() {
     card.addEventListener('dblclick', () => openPreview('hand', c));
     el.hand.appendChild(card);
   });
-  el.handCount.textContent = `${state.player.hand.length}/${HAND_CAP} cards · returned ${state.player.returnsThisRound}/${MAX_RETURNS_PER_ROUND} · picked ${state.player.marketPicksThisRound}/${MAX_MARKET_PICKS_PER_ROUND} this round`;
+  if (el.handCount) el.handCount.textContent = `${state.player.hand.length}/${HAND_CAP} cards · returned ${state.player.returnsThisRound}/${MAX_RETURNS_PER_ROUND} · picked ${state.player.marketPicksThisRound}/${MAX_MARKET_PICKS_PER_ROUND} this round`;
 }
 
 function renderSets() {
@@ -1756,6 +1853,21 @@ function renderSets() {
     const required = requiredCategories(s.id);
     const row = document.createElement('div');
     row.className = `set-row set-${s.id}`;
+    // Hover (or tap) a route to see what you actually have to do to earn it.
+    const steps = s.steps || [];
+    const rewardBits = [];
+    if (s.reward && s.reward.reference) rewardBits.push('can earn an employer reference');
+    if (s.reward && s.reward.evidenceValue) rewardBits.push(`+${s.reward.evidenceValue} evidence`);
+    // Formatted tooltip. Data values are escaped; the surrounding markup is ours.
+    const tip = [
+      `<b>${escapeHtml(s.name)}</b> <span class="tip-dim">${required.length} cards: ${escapeHtml(required.join(' + '))}</span>`,
+      steps.length
+        ? `<span class="tip-head">What you need to do</span><ul>${steps.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
+        : '',
+      s.why ? `<span class="tip-why">${escapeHtml(s.why)}</span>` : '',
+      rewardBits.length ? `<span class="tip-reward">Rewards: ${escapeHtml(rewardBits.join(', '))}.</span>` : '',
+    ].filter(Boolean).join('');
+    row.dataset.tip = tip;
     row.title = `${required.length} cards: ${required.join(' + ')}. ${s.why}`;
     row.innerHTML = `<span class="set-art">${s.art}</span><span class="set-name">${escapeHtml(s.name)}<small class="set-recipe">${required.length} cards · ${escapeHtml(required.join(' + '))}</small></span><span class="set-count">${count}</span>`;
     el.sets.appendChild(row);
@@ -1781,13 +1893,30 @@ function renderBankedSets() {
 
 function renderCV() {
   const p = state.player;
-  el.cvStats.innerHTML = `
-    <div class="cv-row"><span>Experience</span><strong>${p.banked.length}</strong></div>
-    <div class="cv-row"><span>Evidence</span><strong>${p.evidence}</strong></div>
-    <div class="cv-row"><span>Skills</span><strong>${p.skills.length}</strong></div>
-    <div class="cv-row"><span>Reliability</span><strong>${'★'.repeat(p.reliability) || '—'}</strong></div>
-    <div class="cv-row"><span>References</span><strong>${p.references}</strong></div>
-  `;
+  // Each stat explains what it is and how you earn it, on the shared tooltip system.
+  const rows = [
+    ['Experience', p.banked.length,
+      'Completed experience sets, in any route. You need at least the number this role asks for before you can apply.'],
+    ['Evidence', p.evidence,
+      'Proof that your work produced something. Placement, partnership and brief routes give the most; a visit or volunteering gives some.'],
+    ['Skills', p.skills.length,
+      'Every banked set grants the skills on its cards. You need your target role\u2019s required skill to apply.'],
+    ['Reliability', '\u2605'.repeat(p.reliability) || '\u2014',
+      'Earned by completing volunteering sets, which show you follow through on a commitment. Take a day off and tell the organiser and your tutor to protect it.'],
+    ['References', p.references,
+      'An employer reference only comes from sustained work with an employer, so bank a Block Placement to earn one.'],
+  ];
+  // Built as elements rather than an HTML string: the tooltip content itself
+  // contains double quotes (class="tip-why"), which cannot sit inside a
+  // double-quoted attribute. Assigning dataset.tip avoids attribute parsing.
+  el.cvStats.innerHTML = '';
+  rows.forEach(([label, value, tip]) => {
+    const row = document.createElement('div');
+    row.className = 'cv-row';
+    row.innerHTML = '<span>' + escapeHtml(label) + '</span><strong>' + value + '</strong>';
+    row.dataset.tip = '<b>' + escapeHtml(label) + '</b><span class="tip-why">' + escapeHtml(tip) + '</span>';
+    el.cvStats.appendChild(row);
+  });
 }
 
 function renderControls() {
@@ -1815,21 +1944,20 @@ function renderControls() {
   el.bankBtn.disabled = !canBank;
   el.bankBtn.textContent = route
     ? `✦ Bank ${setName(route)} (${selectedHandUids.size}/${requiredCount})`
-    : `✦ Bank completed set (${selectedHandUids.size} selected)`;
+    : `✦ Bank set (${selectedHandUids.size} selected)`;
 
   // Highlight bank button when a valid set is ready to bank
   el.bankBtn.classList.toggle('ready-to-bank', canBank);
-  if (el.challengeBtn) {
-    const spent = !!state.player.challengeUsed;
-    el.challengeBtn.disabled = spent || !!state.winner;
-    el.challengeBtn.title = spent
-      ? 'You have used your mini-challenge this run'
-      : 'Answer a career question correctly to earn an extra action this turn';
-    el.challengeBtn.classList.toggle('challenge-spent', spent);
-  }
 
   renderSetBuilderStatus();
-  el.applyBtn.disabled = !!state.winner;
+  // Applying is gated on actually meeting every requirement, not just on the
+  // game still being live. This used to disable only once the game was over, so
+  // the button was clickable long before the player qualified.
+  const canApply = !state.winner && eligible(state.player, state.job);
+  el.applyBtn.disabled = !canApply;
+  el.applyBtn.title = canApply
+    ? 'You meet every requirement. Apply before a rival does.'
+    : `Not ready yet — ${missingRequirements(state.player, state.job).join(', ')}.`;
   el.endBtn.disabled = !!state.winner;
 }
 
@@ -1851,9 +1979,9 @@ function renderSetBuilderStatus() {
   if (routeId && count === required.length) {
     const result = findBank(cards);
     if (result.ok && state.actionsLeft < 1) {
-      el.setBuilderStatus.innerHTML = `<strong>Set complete: ${escapeHtml(setName(result.targetSet))}</strong><span>You're out of actions this round, so <b>Bank completed set</b> is disabled. Press <b>End turn</b> — your selection is kept, and you can bank it as soon as your next turn starts.</span>`;
+      el.setBuilderStatus.innerHTML = `<strong>Set complete: ${escapeHtml(setName(result.targetSet))}</strong><span>You're out of actions this round, so <b>Bank set</b> is disabled. Press <b>End turn</b> — your selection is kept, and you can bank it as soon as your next turn starts.</span>`;
     } else if (result.ok) {
-      el.setBuilderStatus.innerHTML = `<strong>✓ Ready to bank: ${escapeHtml(setName(result.targetSet))}</strong><span>Press <b>Bank completed set</b> to store this experience on your CV. You’ll gain evidence and a skill too.</span>`;
+      el.setBuilderStatus.innerHTML = `<strong>✓ Ready to bank: ${escapeHtml(setName(result.targetSet))}</strong><span>Press <b>Bank set</b> to store this experience on your CV. You’ll gain evidence and a skill too.</span>`;
     } else {
       el.setBuilderStatus.innerHTML = `<strong>Not a complete set yet</strong><span>${escapeHtml(result.msg)} Remove a selected card or choose the missing type from the same route.</span>`;
     }
@@ -1880,20 +2008,125 @@ function renderSetBuilderStatus() {
 
 function renderLog() {
   el.log.innerHTML = state.log.map((l) => `<div class="log-line">${escapeHtml(l)}</div>`).join('');
+  // The timer floats over the career feed, so there is nothing to float over when
+  // the feed is empty. Hide it in that case regardless of turn state.
+  if (el.timerDisplay) el.timerDisplay.classList.toggle('hidden', !state.log.length);
 }
 
 function showGuide(text) {
   el.guide.textContent = text;
+  // The full text is always available on hover, but the banner itself is clamped
+  // so a long message can never push the market and hand off screen.
+  el.guide.title = text;
 }
 
 /* ============================== Learn / how-to-play ======================= */
 
 const LEARN_STEPS = [
-  { title: 'Pick a target job', body: 'Choose the gaming-industry role you want. Each role needs a set number of completed experiences, evidence, and one specific skill.' },
-  { title: 'Take or return cards', body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the deck. Returns are free; taking each market card costs 1 action. You can also swap up to 2 market cards at the start of your turn by clicking the Swap button — put back unwanted market cards and draw fresh ones. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. You can also drag market cards into your hand and drag hand cards to the market or return area.' },
-  { title: 'Bank a set', body: 'Each colour route needs a different group: Employer Visit needs Setup + Action (2 cards); Volunteering and Live Project Brief need Setup + Action + Proof (3); Block Placement and Industry Partnership need Setup + Action + Proof + Impact (4). You will see several examples for each type. Choose only one card per required type and bank it for CV experience, evidence and a skill. Any route cards work in every route; wildcards replace a missing type.' },
-  { title: 'Watch your rivals', body: 'Three AI candidates take two actions each after your turn, each with a different strategy. Keep an eye on their progress bars in the rivals panel.' },
-  { title: 'Apply for the job', body: "Once your CV meets the job's requirements, press Apply. The first eligible candidate — you or a rival — wins the race." },
+  {
+    title: 'Pick a target job',
+    body: 'Choose the gaming-industry role you want. Each role needs a set number of completed experiences, evidence, and one specific skill.',
+    visual: `
+      <div class="learn-visual">
+        <div class="learn-card-example">
+          <div class="example-card cat-cyan"><span class="card-art">📋</span><strong>Setup</strong><span>Arrange the opportunity</span></div>
+          <div class="example-card cat-pink"><span class="card-art">🎮</span><strong>Action</strong><span>Do the work</span></div>
+          <div class="example-card cat-gold"><span class="card-art">📝</span><strong>Proof</strong><span>Record what you learned</span></div>
+          <div class="example-card cat-orange"><span class="card-art">📈</span><strong>Impact</strong><span>Show the outcome</span></div>
+          <div class="example-card cat-lime"><span class="card-art">⭐</span><strong>Wildcard</strong><span>Substitutes any type</span></div>
+        </div>
+        <p class="learn-caption">Each card has a colour indicating its type. Border colours show the experience route.</p>
+      </div>
+    `
+  },
+  {
+    title: 'Take or return cards',
+    body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the deck. Returns are free; taking each market card costs 1 action. You can also swap up to 2 market cards at the start of your turn. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. You can also drag market cards into your hand and drag hand cards to the market or return area.',
+    visual: `
+      <div class="learn-visual">
+        <div class="learn-flow">
+          <div class="flow-step">
+            <div class="flow-label">Market (6 cards)</div>
+            <div class="flow-cards">
+              <div class="mini-card cat-cyan">Setup</div>
+              <div class="mini-card cat-pink">Action</div>
+              <div class="mini-card cat-gold">Proof</div>
+              <div class="mini-card cat-lime">Wildcard</div>
+            </div>
+          </div>
+          <span class="flow-arrow">→ Click or drag →</span>
+          <div class="flow-step">
+            <div class="flow-label">Your Hand (max 6)</div>
+            <div class="flow-cards">
+              <div class="mini-card cat-cyan selected">Setup ✓</div>
+              <div class="mini-card cat-pink">Action</div>
+            </div>
+          </div>
+        </div>
+        <p class="learn-caption">Click a market card to take it (costs 1 action). Drag hand cards to the Return Zone to return for free.</p>
+      </div>
+    `
+  },
+  {
+    title: 'Bank a set',
+    body: 'Each colour route needs a different group: Employer Visit needs Setup + Action (2 cards); Volunteering and Live Project Brief need Setup + Action + Proof (3); Block Placement and Industry Partnership need Setup + Action + Proof + Impact (4). You will see several examples for each type. Choose only one card per required type and bank it for CV experience, evidence and a skill. Any route cards work in every route; wildcards replace a missing type.',
+    visual: `
+      <div class="learn-visual">
+        <div class="learn-set-examples">
+          <div class="set-example">
+            <div class="set-header"><span class="set-icon">🏭</span><strong>Employer Visit</strong> <span class="set-size">2 cards</span></div>
+            <div class="set-cards"><div class="set-card cat-cyan">Setup</div><div class="set-card cat-pink">Action</div></div>
+          </div>
+          <div class="set-example">
+            <div class="set-header"><span class="set-icon">🙌</span><strong>Volunteering</strong> <span class="set-size">3 cards</span></div>
+            <div class="set-cards"><div class="set-card cat-cyan">Setup</div><div class="set-card cat-pink">Action</div><div class="set-card cat-gold">Proof</div></div>
+          </div>
+          <div class="set-example">
+            <div class="set-header"><span class="set-icon">🏢</span><strong>Block Placement</strong> <span class="set-size">4 cards</span></div>
+            <div class="set-cards"><div class="set-card cat-cyan">Setup</div><div class="set-card cat-pink">Action</div><div class="set-card cat-gold">Proof</div><div class="set-card cat-orange">Impact</div></div>
+          </div>
+        </div>
+        <div class="set-example wildcard-demo">
+          <div class="set-header"><span class="set-icon">🎨</span><strong>Live Project Brief</strong> <span class="set-size">3 cards (with wildcard)</span></div>
+          <div class="set-cards"><div class="set-card cat-cyan">Setup</div><div class="set-card cat-pink">Action</div><div class="set-card cat-lime">Wildcard ★</div></div>
+          <p class="wildcard-note">Wildcards (★) substitute for any missing card type in a set.</p>
+        </div>
+        <p class="learn-caption">Select one card of each required type, then press <strong>Bank completed set</strong>. You gain CV experience, evidence, and a skill.</p>
+      </div>
+    `
+  },
+  {
+    title: 'Watch your rivals',
+    body: 'Three AI candidates take two actions each after your turn, each with a different strategy. Keep an eye on their progress bars in the rivals panel.',
+    visual: `
+      <div class="learn-visual">
+        <div class="rival-preview">
+          <div class="rival-row"><span class="rival-name">PixelPilot</span><span class="rival-strat">Portfolio builder</span><div class="rival-bar"><div class="rival-bar-fill" style="width: 40%"></div></div></div>
+          <div class="rival-row"><span class="rival-name">GG_Grinder</span><span class="rival-strat">Placement chaser</span><div class="rival-bar"><div class="rival-bar-fill" style="width: 65%"></div></div></div>
+          <div class="rival-row"><span class="rival-name">Questline</span><span class="rival-strat">All-rounder</span><div class="rival-bar"><div class="rival-bar-fill" style="width: 30%"></div></div></div>
+        </div>
+        <p class="learn-caption">Rivals take 2 actions after your turn. Each has a different strategy — track their progress bars.</p>
+      </div>
+    `
+  },
+  {
+    title: 'Apply for the job',
+    body: "Once your CV meets the job's requirements, press Apply. The first eligible candidate — you or a rival — wins the race.",
+    visual: `
+      <div class="learn-visual">
+        <div class="apply-preview">
+          <div class="cv-checklist">
+            <div class="check-item passed"><span class="check-icon">✓</span>2+ completed experience sets</div>
+            <div class="check-item passed"><span class="check-icon">✓</span>Sets from 2 different routes</div>
+            <div class="check-item passed"><span class="check-icon">✓</span>Required evidence collected</div>
+            <div class="check-item passed"><span class="check-icon">✓</span>Required skill obtained</div>
+          </div>
+          <button class="btn primary-btn" style="width: 100%; margin-top: 1rem;">Apply for the job →</button>
+        </div>
+        <p class="learn-caption">All requirements met? Press <strong>Apply</strong>. First to apply wins!</p>
+      </div>
+    `
+  },
 ];
 let learnIndex = 0;
 let learnReturnTo = 'setup';
@@ -1901,7 +2134,11 @@ let learnReturnTo = 'setup';
 function renderLearn() {
   const step = LEARN_STEPS[learnIndex];
   el.learnStepNum.textContent = String(learnIndex + 1);
-  el.learnContent.innerHTML = `<h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.body)}</p>`;
+  el.learnContent.innerHTML = `
+    <h3>${escapeHtml(step.title)}</h3>
+    <p>${escapeHtml(step.body)}</p>
+    ${step.visual ? step.visual : ''}
+  `;
   el.learnPrevBtn.disabled = learnIndex === 0;
   el.learnNextBtn.textContent = learnIndex === LEARN_STEPS.length - 1 ? 'Got it →' : 'Next';
 }
@@ -1931,7 +2168,8 @@ function closeLearn() {
 }
 
 app.openLearn = openLearn;
-app.openMiniChallenge = openMiniChallenge;
+app.showRailTab = showRailTab;
+app.isRailTabVisible = isRailTabVisible;
 app.toast = toast;
 app.showGuide = showGuide;
 app.state = Object.assign(app.state || {}, { round: 0, actionsLeft: 0 });
@@ -1968,9 +2206,67 @@ function setupDragAndDrop() {
     });
   }
   attach(el.hand, 'market', onMarketCardClick);
-  attach(el.returnZone, 'hand', (uid) => returnCardsToDeck([uid]));
   attach(el.market, 'hand', (uid) => returnCardsToDeck([uid]));
   attachHandReorder();
+  attachMarketStack();
+}
+
+// Lets a market card be dragged to a new slot, or dropped onto a card to join that
+// card's stack. The hand is untouched: its reorder handler already owns it.
+function attachMarketStack() {
+  const market = el.market;
+  if (!market) return;
+
+  const cardUnder = (x, y) => {
+    const cards = [...market.querySelectorAll('.card')].filter((n) => n.dataset.uid);
+    for (let i = cards.length - 1; i >= 0; i -= 1) {
+      const box = cards[i].getBoundingClientRect();
+      if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) {
+        return cards[i];
+      }
+    }
+    return null;
+  };
+
+  market.addEventListener('dragover', (event) => {
+    const types = event.dataTransfer ? event.dataTransfer.types : [];
+    // Only handle market-sourced drags here; hand drops are handled by attach().
+    if (!types || !types.includes('application/x-rtt-market')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    const over = cardUnder(event.clientX, event.clientY);
+    market.querySelectorAll('.drop-target').forEach((n) => n.classList.remove('drop-target'));
+    if (over) over.classList.add('drop-target');
+    market.classList.add('stacking');
+  });
+
+  market.addEventListener('dragleave', (event) => {
+    if (!market.contains(event.relatedTarget)) {
+      market.classList.remove('stacking');
+      market.querySelectorAll('.drop-target').forEach((n) => n.classList.remove('drop-target'));
+    }
+  });
+
+  market.addEventListener('drop', (event) => {
+    const types = event.dataTransfer ? event.dataTransfer.types : [];
+    if (!types || !types.includes('application/x-rtt-market')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const uid = event.dataTransfer.getData('application/x-rtt-market');
+    if (!uid) return;
+    const over = cardUnder(event.clientX, event.clientY);
+    market.classList.remove('stacking');
+    market.querySelectorAll('.drop-target').forEach((n) => n.classList.remove('drop-target'));
+    if (over) {
+      // Dropped onto a card: join that card's stack, just underneath it.
+      const slot = Number(over.dataset.marketSlot);
+      const depth = Number(over.getAttribute('data-stack-depth') || 0);
+      moveMarketCardToSlot(uid, slot, depth);
+    } else {
+      moveMarketCardToSlot(uid, marketSlotAt(event.clientX), undefined);
+    }
+  });
 }
 
 // Lets the player arrange their hand. Reordering is cosmetic: nothing in the game
@@ -1985,9 +2281,14 @@ function attachHandReorder() {
     .forEach((n) => n.classList.remove('drop-before', 'drop-after'));
 
   // Which card is the pointer over, and is it before or after that card's centre?
+  // Cards past the sixth overlap their neighbour, so their rectangles overlap too.
+  // The browser hands the pointer to the topmost card, which is the last one in DOM
+  // order, so this must scan in reverse: otherwise a drop on a visible sliver of an
+  // overlapped card would be attributed to the card hiding underneath it.
   function insertionTarget(event) {
     const cards = [...hand.querySelectorAll('.card')].filter((n) => n.dataset.uid);
-    for (const node of cards) {
+    for (let i = cards.length - 1; i >= 0; i -= 1) {
+      const node = cards[i];
       const box = node.getBoundingClientRect();
       if (event.clientX >= box.left && event.clientX <= box.right) {
         return { node, after: event.clientX > box.left + box.width / 2 };
@@ -2060,23 +2361,135 @@ function goToMainMenu() {
   showOnlyPanel(el.industrySelect);
 }
 
+/* ============================== Drawer ==================================== */
+
+// The race-status rail is a pull-out drawer rather than a third column, so the
+// market and hand get the space. Escape and the scrim both close it, and focus
+// returns to the button that opened it.
+let drawerReturnFocus = false;
+
+function setDrawerOpen(open) {
+  const rail = el.rightRail;
+  if (!rail) return;
+  rail.classList.toggle('is-open', open);
+  if (el.drawerScrim) el.drawerScrim.classList.toggle('is-open', open);
+  if (el.drawerBtn) {
+    el.drawerBtn.setAttribute('aria-expanded', String(open));
+    const label = open ? 'Hide race status' : 'Show race status';
+    el.drawerBtn.setAttribute('aria-label', label);
+    el.drawerBtn.title = label;
+  }
+  if (open) {
+    if (el.drawerCloseBtn) el.drawerCloseBtn.focus();
+    if (state && el.playerCount) {
+      el.playerCount.textContent = String(state.rivals.filter((r) => !r.applied).length);
+    }
+  } else if (drawerReturnFocus) {
+    el.drawerBtn && el.drawerBtn.focus();
+  }
+  drawerReturnFocus = open;
+}
+
+function initDrawer() {
+  if (el.drawerBtn) el.drawerBtn.addEventListener('click', () => setDrawerOpen(!el.rightRail.classList.contains('is-open')));
+  if (el.drawerCloseBtn) el.drawerCloseBtn.addEventListener('click', () => setDrawerOpen(false));
+  if (el.drawerScrim) el.drawerScrim.addEventListener('click', () => setDrawerOpen(false));
+}
+
+/* ============================== Rail tabs ================================= */
+
+// The rails hold reference material and race state behind tabs so the board fits
+// one screen. Only one panel per rail is mounted-visible at a time; the panels stay
+// in the DOM so render() keeps writing into them without being re-shown.
+function initRailTabs() {
+  document.querySelectorAll('.rail-tabs').forEach((bar) => {
+    bar.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-rail-tab]');
+      if (!btn) return;
+      selectRailTab(btn);
+    });
+    // Arrow-key navigation, as expected of a tablist.
+    bar.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      const tabs = [...bar.querySelectorAll('[data-rail-tab]')];
+      const i = tabs.findIndex((t) => t === document.activeElement);
+      if (i === -1) return;
+      event.preventDefault();
+      const next = tabs[(i + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+      next.focus();
+      selectRailTab(next);
+    });
+  });
+}
+
+function selectRailTab(btn) {
+  const name = btn.getAttribute('data-rail-tab');
+  const rail = btn.closest('.rail');
+  if (!rail) return;
+  rail.querySelectorAll('[data-rail-tab]').forEach((t) => {
+    const on = t === btn;
+    t.classList.toggle('is-active', on);
+    t.setAttribute('aria-selected', String(on));
+  });
+  rail.querySelectorAll('.rail-panel').forEach((panel) => {
+    const on = panel.id === 'tab-' + name;
+    panel.classList.toggle('is-active', on);
+    if (on) panel.removeAttribute('hidden');
+    else panel.setAttribute('hidden', '');
+  });
+}
+
+// Used by the tutorial so a step can point at a panel that is behind a tab.
+function showRailTab(name) {
+  const btn = document.querySelector('[data-rail-tab="' + name + '"]');
+  if (btn) selectRailTab(btn);
+}
+
+window.showRailTab = showRailTab;
+window.isRailTabVisible = isRailTabVisible;
+
+function isRailTabVisible(name) {
+  const panel = document.getElementById('tab-' + name);
+  return !!panel && !panel.hasAttribute('hidden');
+}
+
 /* ============================== Wiring ==================================== */
+
+// Catches a renamed or removed element at boot instead of letting it surface as a
+// TypeError deep inside a render, which is what happened when the board was
+// restructured and an id was dropped. Missing ids are listed by name.
+function verifyElements() {
+  const missing = Object.keys(el).filter((k) => el[k] === null || el[k] === undefined);
+  if (missing.length) {
+    console.warn('[race-to-the-role] Elements referenced by the game but not found in the page:');
+    missing.forEach((k) => console.warn('  #' + k));
+  }
+  return missing;
+}
+
+
 
 const HELPER_KEY = 'rttr-helper-hints';
 // Read by renderSetBuilderStatus so the tutorial blurb can be hidden with the
 // other hints, while live set feedback stays visible.
 let helperHintsVisible = true;
 
+// The header toggle now switches the tooltip layer on and off. The explanatory
+// text it used to reveal is carried on data-tip attributes instead, so the board
+// carries no permanent instruction blocks.
 function setHelperHintsVisible(visible) {
   helperHintsVisible = !!visible;
   if (el.guide) el.guide.classList.toggle('hidden', !visible);
-  if (!el.helperContent || !el.helperToggle) return;
-  el.helperContent.classList.toggle('helper-hidden', !visible);
+  if (window.Tooltip && typeof Tooltip.setEnabled === 'function') Tooltip.setEnabled(visible);
+  if (!el.helperToggle) return;
   el.helperToggle.setAttribute('aria-expanded', String(visible));
-  const label = visible ? 'Hide helper hints' : 'Show helper hints';
+  const label = visible ? 'Tooltips on — click to hide' : 'Tooltips off — click to turn on';
   el.helperToggle.setAttribute('aria-label', label);
   el.helperToggle.title = label;
   el.helperToggle.classList.toggle('is-active', visible);
+  // An unlit bulb is easy to miss, and with tooltips off the button's own tooltip
+  // is unavailable, so mark the off state explicitly.
+  el.helperToggle.classList.toggle('is-off', !visible);
   try { localStorage.setItem(HELPER_KEY, visible ? '1' : '0'); } catch (e) {}
 }
 
@@ -2087,7 +2500,9 @@ if (el.helperToggle) {
   try { stored = localStorage.getItem(HELPER_KEY); } catch (e) {}
   setHelperHintsVisible(stored === null ? true : stored === '1');
   el.helperToggle.addEventListener('click', () => {
-    setHelperHintsVisible(el.helperContent.classList.contains('helper-hidden'));
+    // Flip the tracked state. This once read a .helper-hidden class off an element
+    // that no longer exists, so the button only ever turned tooltips off.
+    setHelperHintsVisible(!helperHintsVisible);
   });
 }
 
@@ -2095,11 +2510,25 @@ el.startBtn.addEventListener('click', () => newGame(el.jobSelect.value));
 el.backToIndustryBtn.addEventListener('click', goToMainMenu);
 if (el.homeBtn) el.homeBtn.addEventListener('click', goToMainMenu);
 el.returnBtn.addEventListener('click', doReturnSelected);
-el.challengeBtn.addEventListener('click', openMiniChallenge);
   setupDragAndDrop();
+  initRailTabs();
+  initDrawer();
 el.bankBtn.addEventListener('click', doBank);
 el.applyBtn.addEventListener('click', doApply);
 el.endBtn.addEventListener('click', endTurn);
+
+if (el.replayTutorial) {
+  el.replayTutorial.addEventListener('click', () => {
+    closeModal();
+    if (window.Tutorial) {
+      // A manual replay is an explicit request, so it ignores the auto-start toggle;
+      // it just clears the seen flag so the next new run offers it again.
+      Tutorial.reset();
+      if (state && !state.winner) Tutorial.start();
+      else toast('Start a career run first, then replay the tutorial.');
+    }
+  });
+}
 
 if (el.signInBtn) {
   el.signInBtn.addEventListener('click', () => toast('Sign-in requires a Firebase project. Your progress saves locally in this browser.'));
@@ -2120,8 +2549,12 @@ if (el.signInBtn) {
     }
   });
 
+  verifyElements();
   setupResumeButton();
   registerServiceWorker();
+  // Tooltip listeners are delegated from document, so binding once is enough for
+  // markup that is added later.
+  if (window.Tooltip && typeof Tooltip.attach === 'function') Tooltip.attach();
 })();
 
 // Registered here rather than in js/app.js, which index.html does not load. A worker

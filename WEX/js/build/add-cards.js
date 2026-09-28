@@ -1,4 +1,5 @@
 const fs = require('fs');
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const path = require('path');
 
 function readRoles(dir) {
@@ -150,7 +151,7 @@ const additionalCards = [
 
 // Process each industry
 industries.forEach(ind => {
-  const cardsDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind.id}/cards`;
+  const cardsDir = `${PROJECT_ROOT}/data/industries/${ind.id}/cards`;
   const cards = readCards(cardsDir);
   
   // Find the highest existing ID number for this industry
@@ -210,9 +211,9 @@ industries.forEach(ind => {
 const industries2 = ['esports', 'game-design', 'games-development', 'animation', 'illustration'];
 
 industries2.forEach(ind => {
-  const rolesDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind}/roles`;
-  const cardsDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind}/cards`;
-  const outDir = `/Users/nigelmorris/Documents/GitHub/GamesDesign/WEX/data/industries/${ind}`;
+  const rolesDir = `${PROJECT_ROOT}/data/industries/${ind}/roles`;
+  const cardsDir = `${PROJECT_ROOT}/data/industries/${ind}/cards`;
+  const outDir = `${PROJECT_ROOT}/data/industries/${ind}`;
   
   const roles = fs.existsSync(rolesDir) ? readRoles(rolesDir) : [];
   const cards = readCards(cardsDir);
