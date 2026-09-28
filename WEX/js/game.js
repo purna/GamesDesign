@@ -1993,4 +1993,18 @@ if (el.signInBtn) {
   });
 
   setupResumeButton();
+  registerServiceWorker();
 })();
+
+// Registered here rather than in js/app.js, which index.html does not load. A worker
+// stays active once registered, so an old registration outlives the script that made
+// it -- keeping this call next to the app it caches is what makes the version bump in
+// sw.js actually take effect.
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  // A file:// page has no service worker support and would throw on register.
+  if (location.protocol === 'file:') return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional */ });
+  });
+}
