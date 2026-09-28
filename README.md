@@ -22,6 +22,8 @@ Copyright & Ethics
 
 [Induction - Myself](https://purna.github.io/GamesDesign/induction-myself.html)
 
+[Induction - WEX](https://purna.github.io/GamesDesign/WEX/)
+
 
 ## Unit 1
 
