@@ -17,6 +17,7 @@ app.state.autoDrawEnabled = true;
 window.RTTR = {
   KEY: 'rttr-game-save',
   SETTINGS_KEY: 'rttr-settings',
+  HISTORY_KEY: 'rttr-completed-roles',
   saveGame(s) { try { localStorage.setItem(this.KEY, JSON.stringify(s)); } catch (e) {} },
   loadGame() { try { const v = localStorage.getItem(this.KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
   clearGame() { try { localStorage.removeItem(this.KEY); } catch (e) {} },
@@ -27,13 +28,29 @@ window.RTTR = {
     } catch (e) { return { sound: true, animations: true, autoDraw: true }; }
   },
   saveSettings(s) { try { localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(s)); } catch (e) {} },
-  resetAll() { try { localStorage.removeItem(this.KEY); localStorage.removeItem(this.SETTINGS_KEY); } catch (e) {} },
+  loadCompletedRoles() {
+    try {
+      const v = localStorage.getItem(this.HISTORY_KEY);
+      return v ? JSON.parse(v) : [];
+    } catch (e) { return []; }
+  },
+  saveCompletedRole(entry) {
+    try {
+      const roles = this.loadCompletedRoles();
+      roles.unshift(entry);
+      if (roles.length > 20) roles.pop();
+      localStorage.setItem(this.HISTORY_KEY, JSON.stringify(roles));
+    } catch (e) {}
+  },
+  clearHistory() { try { localStorage.removeItem(this.HISTORY_KEY); } catch (e) {} },
+  resetAll() { try { localStorage.removeItem(this.KEY); localStorage.removeItem(this.SETTINGS_KEY); localStorage.removeItem(this.HISTORY_KEY); } catch (e) {} },
 };
 
 const $ = (id) => document.getElementById(id);
 
 const el = {
   jobSelect: $('jobSelect'), startBtn: $('startBtn'),
+  completedRoles: $('completedRoles'),
   helpBtn: $('helpBtn'),
   setup: $('setup'),
   learnScreen: $('learnScreen'), learnStepNum: $('learnStepNum'), learnContent: $('learnContent'),
@@ -782,6 +799,20 @@ function endGame(winnerAgent) {
   stopTurnTimer();
   if (window.RTTR) window.RTTR.clearGame();
   const you = winnerAgent === state.player;
+  if (you && state.job) {
+    const cv = agentCV(winnerAgent);
+    window.RTTR.saveCompletedRole({
+      jobId: state.job.id,
+      jobTitle: state.job.title,
+      art: state.job.art,
+      date: new Date().toISOString(),
+      experience: winnerAgent.banked.length,
+      evidence: winnerAgent.evidence,
+      skills: winnerAgent.skills.slice(),
+      rounds: state.round,
+    });
+    renderCompletedRoles();
+  }
   el.game.classList.add('game-over');
   const overlay = el.gameOverOverlay;
   if (overlay) {
@@ -814,6 +845,7 @@ function endGame(winnerAgent) {
       el.game.classList.remove('game-over');
       el.game.classList.add('hidden');
       el.setup.classList.remove('hidden');
+      closeHallOfFame();
     });
     $('closeGameOver').addEventListener('click', () => {
       overlay.classList.add('hidden');
@@ -888,6 +920,26 @@ function render() {
   renderCV();
   renderControls();
   renderLog();
+}
+
+function renderCompletedRoles() {
+  const roles = window.RTTR ? window.RTTR.loadCompletedRoles() : [];
+  if (!el.completedRoles) return;
+  if (!roles.length) {
+    el.completedRoles.innerHTML = '<div class="history-empty">No roles completed yet. Start a new career run to earn your place in the hall of fame.</div>';
+    return;
+  }
+  el.completedRoles.innerHTML = `<div class="history-header"><span>${roles.length} role${roles.length !== 1 ? 's' : ''} completed</span></div>${    roles.slice(0, 8).map((r) => `
+      <div class="completed-role">
+        <span class="completed-role-art">${r.art || '🎮'}</span>
+        <div class="completed-role-info">
+          <strong>${escapeHtml(r.jobTitle)}</strong>
+          <small>${r.rounds} round${r.rounds !== 1 ? 's' : ''} · ${r.evidence} evidence · Skills: ${r.skills.join(', ') || 'none'}</small>
+        </div>
+        <span class="completed-role-date">${new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })})</span>
+      </div>
+    `).join('')
+  }`;
 }
 
 function renderJobNeeds() {
@@ -1354,6 +1406,15 @@ if (el.signInBtn) {
     return;
   }
   populateJobs();
+  renderCompletedRoles();
+  if (el.hofBackBtn) el.hofBackBtn.addEventListener('click', closeHallOfFame);
+  if (el.hofClearBtn) el.hofClearBtn.addEventListener('click', () => {
+    if (confirm('Clear all completed role history? This cannot be undone.')) {
+      if (window.RTTR) window.RTTR.clearHistory();
+      renderCompletedRoles();
+      if (el.hofList) el.hofList.innerHTML = '<div class="hof-empty">No roles completed yet.</div>';
+    }
+  });
 
   const saved = window.RTTR ? window.RTTR.loadGame() : null;
   if (saved && saved.job && !saved.winner) {
