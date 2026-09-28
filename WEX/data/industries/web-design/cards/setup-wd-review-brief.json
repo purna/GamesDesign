@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-review-brief",
+  "name": "Understand the Web Brief",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Clarify the brief: target audience, key journeys, tech stack, accessibility requirements, deadline.",
+  "flavor": "A brief understood prevents rework.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "brief",
+  "value": 1
+}

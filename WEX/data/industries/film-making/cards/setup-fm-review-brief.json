@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-review-brief",
+  "name": "Understand the Film Brief",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Clarify the brief: genre, tone, runtime, deliverables (festival DCP, broadcast, social cuts), deadline.",
+  "flavor": "Deliverables define the workflow.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "brief",
+  "value": 1
+}

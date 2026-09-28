@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-book-visit",
+  "name": "Book Post House Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Arrange a visit to a post-production facility. Confirm date, NDA, and suite access.",
+  "flavor": "See where the magic gets polished.",
+  "rarity": "Common",
+  "art": "🎫",
+  "set": "visit",
+  "value": 1
+}

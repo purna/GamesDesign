@@ -1,0 +1,12 @@
+{
+  "id": "impact-wd-partner-feedback",
+  "name": "Partner Site Improved",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your work improved the partner's site: performance, accessibility, conversion, or developer velocity.",
+  "flavor": "Lighthouse scores don't lie.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "partnership",
+  "value": 1
+}

@@ -1,0 +1,12 @@
+{
+  "id": "design-systems-engineer",
+  "title": "Design Systems Engineer",
+  "category": "Web Development",
+  "description": "Build and maintain component libraries, tokens, and design-to-code workflows.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Consistency at scale is an engineering problem.",
+  "art": "🧩",
+  "rarity": "Rare",
+  "stats": { "industryKnowledge": 8, "networking": 5, "technicalSkill": 9, "creativity": 6, "reliability": 8 }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "action-wd-partner-2",
+  "name": "Deliver Design System Foundation",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create tokens, core components, and documentation site for the partner's design system.",
+  "flavor": "Foundations first. Patterns later.",
+  "rarity": "Rare",
+  "art": "🏗️",
+  "set": "partnership",
+  "value": 2
+}

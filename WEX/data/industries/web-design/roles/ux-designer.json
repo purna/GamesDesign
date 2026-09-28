@@ -1,0 +1,12 @@
+{
+  "id": "ux-designer",
+  "title": "UX Designer",
+  "category": "Web Design",
+  "description": "Research user needs, design flows, wireframes, and validate through testing.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Analysis" },
+  "recommendedSets": ["placement", "volunteering"],
+  "flavor": "Design for the user, not the stakeholder.",
+  "art": "🧭",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 6, "technicalSkill": 5, "creativity": 8, "reliability": 8 }
+}

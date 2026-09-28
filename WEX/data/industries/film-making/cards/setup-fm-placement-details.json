@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-placement-details",
+  "name": "Confirm Placement Details",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree tasks, dates, and hours with the production company; confirm your supervisor and call sheets.",
+  "flavor": "Call time is sacred. Be ready.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "placement",
+  "value": 1
+}

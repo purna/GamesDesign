@@ -1,0 +1,12 @@
+{
+  "id": "action-cs-partner-2",
+  "name": "Deliver Threat Model",
+  "type": "Action",
+  "category": "Action",
+  "description": "Produce a structured threat model document with data flow diagrams and risk ratings.",
+  "flavor": "A good threat model is a roadmap for defense.",
+  "rarity": "Uncommon",
+  "art": "🗺️",
+  "set": "partnership",
+  "value": 2
+}

@@ -1,0 +1,12 @@
+{
+  "id": "impact-wd-measure-contribution",
+  "name": "Measure UX Impact",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Explain how your work improved usability, accessibility, performance, or conversion.",
+  "flavor": "Good UX shows in the numbers.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "placement",
+  "value": 1
+}

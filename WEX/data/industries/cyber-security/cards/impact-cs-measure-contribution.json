@@ -1,0 +1,12 @@
+{
+  "id": "impact-cs-measure-contribution",
+  "name": "Measure Security Impact",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Explain how your work improved detection coverage, response time, or security posture.",
+  "flavor": "Metrics make security visible.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "placement",
+  "value": 1
+}

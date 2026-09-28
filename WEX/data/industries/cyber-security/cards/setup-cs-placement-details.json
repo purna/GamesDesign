@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-placement-details",
+  "name": "Confirm Placement Details",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree tasks, dates, and hours with the security team; confirm your mentor and system access.",
+  "flavor": "Access granted. Trust earned.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "placement",
+  "value": 1
+}

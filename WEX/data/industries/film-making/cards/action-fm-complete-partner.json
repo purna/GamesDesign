@@ -1,0 +1,12 @@
+{
+  "id": "action-fm-complete-partner",
+  "name": "Complete Partner Film Project",
+  "type": "Action",
+  "category": "Action",
+  "description": "Deliver the partner project: creative edit, sound design, color, and final exports per spec.",
+  "flavor": "Broadcast standards. Festival deadlines.",
+  "rarity": "Rare",
+  "art": "✨",
+  "set": "partnership",
+  "value": 2
+}

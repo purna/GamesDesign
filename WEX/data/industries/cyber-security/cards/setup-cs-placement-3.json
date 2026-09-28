@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-placement-3",
+  "name": "Configure Monitoring Rules",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Create detection rules for SIEM: correlation searches, thresholds, and alert routing.",
+  "flavor": "Good rules reduce noise. Great rules catch attackers.",
+  "rarity": "Common",
+  "art": "⚙️",
+  "set": "placement",
+  "value": 1
+}

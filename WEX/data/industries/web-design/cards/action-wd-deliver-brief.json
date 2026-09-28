@@ -1,0 +1,12 @@
+{
+  "id": "action-wd-deliver-brief",
+  "name": "Deliver Web Project",
+  "type": "Action",
+  "category": "Action",
+  "description": "Design and build the project: responsive pages, components, CMS integration, and QA.",
+  "flavor": "Responsive by default. Accessible by design.",
+  "rarity": "Uncommon",
+  "art": "🖥️",
+  "set": "brief",
+  "value": 2
+}

@@ -1,0 +1,13 @@
+{
+  "id": "action-fm-placement-3",
+  "name": "Create Motion Graphics Template",
+  "type": "Action",
+  "category": "Action",
+  "description": "Build a reusable MOGRT: lower thirds, titles, or transitions with editable controls.",
+  "flavor": "Templates save hours on every episode.",
+  "rarity": "Common",
+  "art": "🎨",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-find-volunteer",
+  "name": "Find Film Festival Volunteer",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Volunteer at a film festival: projection, guest services, or filmmaker hospitality.",
+  "flavor": "Festivals run on volunteer passion.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "volunteering",
+  "value": 1
+}

@@ -1,0 +1,12 @@
+{
+  "id": "gaffer",
+  "title": "Gaffer",
+  "category": "Production",
+  "description": "Design and execute the lighting plan. Collaborate with DP to shape the visual look.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Light writes the story. Shadow directs the eye.",
+  "art": "💡",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 6, "technicalSkill": 8, "creativity": 7, "reliability": 8 }
+}

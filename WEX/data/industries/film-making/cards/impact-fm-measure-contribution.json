@@ -1,0 +1,12 @@
+{
+  "id": "impact-fm-measure-contribution",
+  "name": "Measure Creative Impact",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Explain how your editing elevated the narrative, pacing, or emotional resonance.",
+  "flavor": "Invisible edits make the best stories.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "placement",
+  "value": 1
+}

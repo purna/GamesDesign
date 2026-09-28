@@ -1,0 +1,12 @@
+{
+  "id": "impact-cs-partner-2",
+  "name": "Risk Mitigated",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Partner implemented mitigations for high-risk threats identified in your model.",
+  "flavor": "Risk accepted, transferred, or mitigated.",
+  "rarity": "Uncommon",
+  "art": "🛡️",
+  "set": "partnership",
+  "value": 1
+}

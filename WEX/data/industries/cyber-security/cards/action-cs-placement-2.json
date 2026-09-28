@@ -1,0 +1,13 @@
+{
+  "id": "action-cs-placement-2",
+  "name": "Run Vulnerability Scans",
+  "type": "Action",
+  "category": "Action",
+  "description": "Execute authenticated and unauthenticated scans, validate findings, and prioritize remediation.",
+  "flavor": "Scanners find vulns. Analysts find risk.",
+  "rarity": "Common",
+  "art": "📊",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

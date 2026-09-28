@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-placement-onboarding",
+  "name": "Complete Production Onboarding",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Learn the workflow: NLE setup, media management, naming conventions, and backup protocols.",
+  "flavor": "Organization is the editor's superpower.",
+  "rarity": "Common",
+  "art": "🎞️",
+  "set": "placement",
+  "value": 1
+}

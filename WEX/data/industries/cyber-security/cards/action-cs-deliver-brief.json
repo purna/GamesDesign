@@ -1,0 +1,12 @@
+{
+  "id": "action-cs-deliver-brief",
+  "name": "Complete Vulnerability Assessment",
+  "type": "Action",
+  "category": "Action",
+  "description": "Run scans, manually verify findings, and produce a prioritized remediation report.",
+  "flavor": "A scanner finds vulns. An analyst finds risk.",
+  "rarity": "Uncommon",
+  "art": "📊",
+  "set": "brief",
+  "value": 2
+}

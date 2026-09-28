@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-partner-2",
+  "name": "Threat Model Workshop",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Facilitate a threat modeling session with the partner: assets, threats, mitigations, and priorities.",
+  "flavor": "Threat model first. Controls second.",
+  "rarity": "Common",
+  "art": "🧠",
+  "set": "partnership",
+  "value": 1
+}

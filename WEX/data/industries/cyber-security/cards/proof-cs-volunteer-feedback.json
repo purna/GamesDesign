@@ -1,0 +1,13 @@
+{
+  "id": "proof-cs-volunteer-feedback",
+  "name": "CTF Write-up",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Document your solution path, tools used, and what you learned from each challenge.",
+  "flavor": "A write-up proves you understand, not just solved.",
+  "rarity": "Common",
+  "art": "📝",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Communication"
+}

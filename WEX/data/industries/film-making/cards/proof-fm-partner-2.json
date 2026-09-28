@@ -1,0 +1,13 @@
+{
+  "id": "proof-fm-partner-2",
+  "name": "Trailer Review Deck",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present trailer versions with rationale: structure, music choices, pacing, and test screening data.",
+  "flavor": "Data defends creative choices.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

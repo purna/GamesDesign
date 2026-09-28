@@ -1,0 +1,13 @@
+{
+  "id": "action-cs-placement-3",
+  "name": "Perform Log Analysis",
+  "type": "Action",
+  "category": "Action",
+  "description": "Deep-dive into logs to reconstruct attack timeline and identify root cause.",
+  "flavor": "Logs don't lie. But they do hide.",
+  "rarity": "Common",
+  "art": "📜",
+  "set": "placement",
+  "value": 1,
+  "skill": "Analysis"
+}

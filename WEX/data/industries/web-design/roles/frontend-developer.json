@@ -1,0 +1,12 @@
+{
+  "id": "frontend-developer",
+  "title": "Frontend Developer",
+  "category": "Web Development",
+  "description": "Build performant, accessible web applications with modern frameworks.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Code that works everywhere is code that ships.",
+  "art": "⚛️",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 4, "technicalSkill": 9, "creativity": 6, "reliability": 8 }
+}

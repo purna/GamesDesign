@@ -1,0 +1,12 @@
+{
+  "id": "soc-analyst",
+  "title": "SOC Analyst",
+  "category": "Security Operations",
+  "description": "Detect, investigate, and respond to security incidents in a 24/7 Security Operations Center.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "volunteering"],
+  "flavor": "Every alert tells a story. Most are fiction.",
+  "art": "🖥️",
+  "rarity": "Common",
+  "stats": { "industryKnowledge": 7, "networking": 4, "technicalSkill": 8, "creativity": 4, "reliability": 9 }
+}

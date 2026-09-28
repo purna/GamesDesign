@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-find-volunteer",
+  "name": "Find Nonprofit Web Project",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Join a volunteer project building a website for a nonprofit or community group.",
+  "flavor": "Real users. Real constraints. Real impact.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "volunteering",
+  "value": 1
+}

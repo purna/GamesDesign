@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-partner-expectations",
+  "name": "Partner Web Requirements",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree on deliverables with an industry partner: design system audit, component library, or migration.",
+  "flavor": "Partners want maintainable, scalable solutions.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "partnership",
+  "value": 1
+}

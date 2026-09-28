@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-placement-details",
+  "name": "Confirm Placement Details",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree tasks, dates, and hours with the design/dev team; confirm your mentor and repo access.",
+  "flavor": "Clear handoffs prevent broken builds.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "placement",
+  "value": 1
+}

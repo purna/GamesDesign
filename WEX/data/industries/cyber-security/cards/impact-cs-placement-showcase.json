@@ -1,0 +1,12 @@
+{
+  "id": "impact-cs-placement-showcase",
+  "name": "Incident Resolved",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "You helped resolve a real security incident. Document the impact and your contribution.",
+  "flavor": "Stopped the breach. Protected the data.",
+  "rarity": "Uncommon",
+  "art": "✅",
+  "set": "placement",
+  "value": 1
+}

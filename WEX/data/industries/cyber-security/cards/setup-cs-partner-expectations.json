@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-partner-expectations",
+  "name": "Partner Security Requirements",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree on deliverables with an industry partner: pentest, code review, or security architecture.",
+  "flavor": "Partners need trust, not just tools.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "partnership",
+  "value": 1
+}

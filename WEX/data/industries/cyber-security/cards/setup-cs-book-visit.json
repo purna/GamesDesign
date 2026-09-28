@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-book-visit",
+  "name": "Book SOC Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Arrange a visit to a Security Operations Center. Confirm date, NDA, and tour agenda.",
+  "flavor": "See where the alerts come alive.",
+  "rarity": "Common",
+  "art": "🎫",
+  "set": "visit",
+  "value": 1
+}

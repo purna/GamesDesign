@@ -2839,3 +2839,32 @@ body.simple-mode .settings-hint {
 .skill-name { font-weight: 600; }
 .all-skills { margin-top: 0.4rem; border-top: 1px solid var(--border); padding-top: 0.3rem; }
 .all-skills small { color: var(--ink-soft); font-size: 0.6rem; line-height: 1.4; }
+
+.skill-item.required {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent), transparent 85%);
+}
+.skill-item.required .skill-name { color: var(--accent); font-weight: 700; }
+.required-tag {
+  color: var(--accent);
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: var(--accent-soft);
+  border-radius: 2px;
+  padding: 0.1rem 0.3rem;
+  margin-left: 0.3rem;
+}
+
+.skill-item .skill-hint {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+  line-height: 1.35;
+}
+.skill-item .skill-hint-warn { color: var(--bad); font-weight: 600; }
+
+.skill-item .skill-hint ul,
+.skill-item .skill-hint { line-height: 1.5; }

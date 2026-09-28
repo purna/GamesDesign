@@ -1,0 +1,12 @@
+{
+  "id": "junior-security-analyst",
+  "title": "Junior Security Analyst",
+  "category": "Security Operations",
+  "description": "Monitor alerts, triage incidents, and support vulnerability management.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Analysis" },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "The best defense is knowing what you're defending.",
+  "art": "🛡️",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 4, "technicalSkill": 8, "creativity": 5, "reliability": 8 }
+}

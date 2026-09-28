@@ -1,0 +1,13 @@
+{
+  "id": "action-fm-placement-2",
+  "name": "Sync and Organize Dailies",
+  "type": "Action",
+  "category": "Action",
+  "description": "Sync audio to picture, organize bins, create stringouts, and prep for the editor.",
+  "flavor": "Dailies done right save weeks later.",
+  "rarity": "Common",
+  "art": "🎬",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

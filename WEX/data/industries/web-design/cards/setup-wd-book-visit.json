@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-book-visit",
+  "name": "Book Design Team Visit",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Arrange a visit to a product design team. Confirm date, NDA, and design critique invitation.",
+  "flavor": "See how design decisions happen at scale.",
+  "rarity": "Common",
+  "art": "🎫",
+  "set": "visit",
+  "value": 1
+}

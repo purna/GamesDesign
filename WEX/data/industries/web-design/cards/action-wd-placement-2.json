@@ -1,0 +1,13 @@
+{
+  "id": "action-wd-placement-2",
+  "name": "Improve Accessibility",
+  "type": "Action",
+  "category": "Action",
+  "description": "Audit and fix WCAG violations: color contrast, keyboard navigation, ARIA labels, focus management.",
+  "flavor": "Accessible design is better design.",
+  "rarity": "Common",
+  "art": "♿",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

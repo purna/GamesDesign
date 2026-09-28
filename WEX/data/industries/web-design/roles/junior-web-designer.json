@@ -1,0 +1,12 @@
+{
+  "id": "junior-web-designer",
+  "title": "Junior Web Designer",
+  "category": "Web Design",
+  "description": "Create responsive, accessible web interfaces and design systems.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Design" },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Good design is obvious. Great design is invisible.",
+  "art": "🎨",
+  "rarity": "Common",
+  "stats": { "industryKnowledge": 7, "networking": 5, "technicalSkill": 6, "creativity": 9, "reliability": 7 }
+}

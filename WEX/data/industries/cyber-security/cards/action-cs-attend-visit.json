@@ -1,0 +1,12 @@
+{
+  "id": "action-cs-attend-visit",
+  "name": "Attend SOC Shift Shadow",
+  "type": "Action",
+  "category": "Action",
+  "description": "Shadow an analyst through a shift: alert triage, escalation, and handoff procedures.",
+  "flavor": "Watch how pros separate signal from noise.",
+  "rarity": "Common",
+  "art": "👁️",
+  "set": "visit",
+  "value": 1
+}

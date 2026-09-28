@@ -1,0 +1,13 @@
+{
+  "id": "proof-wd-partner-2",
+  "name": "Design System Handoff",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Walk partner team through the system: tokens, components, contribution model, and governance.",
+  "flavor": "A system without governance is just a library.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Communication"
+}

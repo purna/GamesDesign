@@ -1,0 +1,941 @@
+{
+  "roles": [
+    {
+      "id": "assistant-editor",
+      "title": "Assistant Editor",
+      "category": "Post Production",
+      "description": "Organize footage, sync audio, prep timelines, and support the lead editor.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering"
+      ],
+      "flavor": "Organization is the editor's superpower.",
+      "art": "🎞️",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 8,
+        "creativity": 6,
+        "reliability": 9
+      }
+    },
+    {
+      "id": "camera-operator",
+      "title": "Camera Operator",
+      "category": "Production",
+      "description": "Operate camera, frame shots, and collaborate with DP on visual storytelling.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "The frame is your canvas. Light is your paint.",
+      "art": "📷",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 6,
+        "technicalSkill": 8,
+        "creativity": 8,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "colorist",
+      "title": "Colorist",
+      "category": "Post Production",
+      "description": "Grade footage for mood, continuity, and visual style across the entire project.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "partnership"
+      ],
+      "flavor": "Color is emotion made visible.",
+      "art": "🌈",
+      "rarity": "Rare",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 9,
+        "creativity": 9,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "gaffer",
+      "title": "Gaffer",
+      "category": "Production",
+      "description": "Design and execute the lighting plan. Collaborate with DP to shape the visual look.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "partnership"
+      ],
+      "flavor": "Light writes the story. Shadow directs the eye.",
+      "art": "💡",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 6,
+        "technicalSkill": 8,
+        "creativity": 7,
+        "reliability": 8
+      }
+    },
+    {
+      "id": "production-assistant",
+      "title": "Production Assistant",
+      "category": "Production",
+      "description": "Support the set: manage call sheets, coordinate talent, handle logistics, and keep the day on schedule.",
+      "requirements": {
+        "experience": 1,
+        "evidence": 1,
+        "skill": "Teamwork"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering",
+        "visit"
+      ],
+      "flavor": "The PA makes the production possible.",
+      "art": "📋",
+      "rarity": "Common",
+      "stats": {
+        "industryKnowledge": 6,
+        "networking": 7,
+        "technicalSkill": 5,
+        "creativity": 4,
+        "reliability": 9
+      }
+    },
+    {
+      "id": "script-supervisor",
+      "title": "Script Supervisor",
+      "category": "Production",
+      "description": "Track continuity, coverage, and timing on set. Ensure the edit has what it needs.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Analysis"
+      },
+      "recommendedSets": [
+        "placement",
+        "volunteering"
+      ],
+      "flavor": "Continuity is invisible until it's broken.",
+      "art": "📝",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 5,
+        "technicalSkill": 6,
+        "creativity": 5,
+        "reliability": 9
+      }
+    },
+    {
+      "id": "sound-designer",
+      "title": "Sound Designer",
+      "category": "Post Production",
+      "description": "Create and layer sound effects, ambience, and Foley to build the sonic world.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Sound is half the picture.",
+      "art": "🎧",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 8,
+        "creativity": 8,
+        "reliability": 7
+      }
+    },
+    {
+      "id": "vfx-compositor",
+      "title": "VFX Compositor",
+      "category": "Post Production",
+      "description": "Integrate CG elements, green screen, and effects into live-action footage seamlessly.",
+      "requirements": {
+        "experience": 2,
+        "evidence": 2,
+        "skill": "Technical Setup"
+      },
+      "recommendedSets": [
+        "placement",
+        "brief"
+      ],
+      "flavor": "Invisible effects are the best effects.",
+      "art": "✨",
+      "rarity": "Uncommon",
+      "stats": {
+        "industryKnowledge": 7,
+        "networking": 4,
+        "technicalSkill": 9,
+        "creativity": 8,
+        "reliability": 7
+      }
+    }
+  ],
+  "cards": [
+    {
+      "id": "action-fm-attend-visit",
+      "name": "Attend Color Grade / Mix Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Sit in on a color grading session, sound mix, or online conform review.",
+      "flavor": "Color and sound are the final rewrite.",
+      "rarity": "Common",
+      "art": "👁️",
+      "set": "visit",
+      "value": 1
+    },
+    {
+      "id": "action-fm-complete-partner",
+      "name": "Complete Partner Film Project",
+      "type": "Action",
+      "category": "Action",
+      "description": "Deliver the partner project: creative edit, sound design, color, and final exports per spec.",
+      "flavor": "Broadcast standards. Festival deadlines.",
+      "rarity": "Rare",
+      "art": "✨",
+      "set": "partnership",
+      "value": 2
+    },
+    {
+      "id": "action-fm-complete-placement",
+      "name": "Edit a Production Sequence",
+      "type": "Action",
+      "category": "Action",
+      "description": "Cut a scene, segment, or sequence: assemble, rough cut, fine cut, and deliver for review.",
+      "flavor": "Editing is rewriting with footage.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "placement",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "action-fm-deliver-brief",
+      "name": "Deliver Film Project",
+      "type": "Action",
+      "category": "Action",
+      "description": "Edit the project from assembly to picture lock. Handle notes, conform, and export deliverables.",
+      "flavor": "Picture lock is a milestone, not the finish.",
+      "rarity": "Uncommon",
+      "art": "🎞️",
+      "set": "brief",
+      "value": 2
+    },
+    {
+      "id": "action-fm-partner-2",
+      "name": "Cut the Trailer",
+      "type": "Action",
+      "category": "Action",
+      "description": "Edit the trailer: select beats, pace to music, add graphics, and iterate on feedback.",
+      "flavor": "Two minutes. Maximum impact.",
+      "rarity": "Rare",
+      "art": "🎬",
+      "set": "partnership",
+      "value": 2
+    },
+    {
+      "id": "action-fm-placement-2",
+      "name": "Sync and Organize Dailies",
+      "type": "Action",
+      "category": "Action",
+      "description": "Sync audio to picture, organize bins, create stringouts, and prep for the editor.",
+      "flavor": "Dailies done right save weeks later.",
+      "rarity": "Common",
+      "art": "🎬",
+      "set": "placement",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "action-fm-placement-3",
+      "name": "Create Motion Graphics Template",
+      "type": "Action",
+      "category": "Action",
+      "description": "Build a reusable MOGRT: lower thirds, titles, or transitions with editable controls.",
+      "flavor": "Templates save hours on every episode.",
+      "rarity": "Common",
+      "art": "🎨",
+      "set": "placement",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "action-fm-volunteer-tournament",
+      "name": "Crew a Short Film",
+      "type": "Action",
+      "category": "Action",
+      "description": "Work on a student/indie short: camera, sound, grip, or post. Experience the full pipeline.",
+      "flavor": "Small crew. Big lessons.",
+      "rarity": "Common",
+      "art": "🎥",
+      "set": "volunteering",
+      "value": 1
+    },
+    {
+      "id": "impact-fm-measure-contribution",
+      "name": "Measure Creative Impact",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Explain how your editing elevated the narrative, pacing, or emotional resonance.",
+      "flavor": "Invisible edits make the best stories.",
+      "rarity": "Uncommon",
+      "art": "📈",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "impact-fm-partner-2",
+      "name": "Trailer Released",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Partner's trailer launches: track views, engagement, and conversion to ticket sales/streams.",
+      "flavor": "The trailer sold the show.",
+      "rarity": "Uncommon",
+      "art": "📈",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "impact-fm-partner-feedback",
+      "name": "Partner Film Released",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Your edit was released: festival selection, broadcast, or client approval. Document the outcome.",
+      "flavor": "Screened. Selected. Seen.",
+      "rarity": "Uncommon",
+      "art": "📈",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "impact-fm-placement-3",
+      "name": "Template Adopted",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Your MOGRT is used across the production. Document time saved per episode.",
+      "flavor": "Standardization scales creativity.",
+      "rarity": "Uncommon",
+      "art": "📈",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "impact-fm-placement-showcase",
+      "name": "Sequence in Final Cut",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Your edited sequence appears in the final deliverable. Document the context and your contribution.",
+      "flavor": "Your cut made the final cut.",
+      "rarity": "Uncommon",
+      "art": "🎬",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "proof-fm-document-brief-learnings",
+      "name": "Document Film Project Learnings",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write a post-mortem: creative challenges, technical workflow, collaboration, and festival strategy.",
+      "flavor": "Every film teaches a new workflow.",
+      "rarity": "Common",
+      "art": "📓",
+      "set": "brief",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-fm-log-placement-hours",
+      "name": "Log Edit Hours & Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record hours and reflect on creative choices, director feedback, and technical problem-solving.",
+      "flavor": "Every cut is a decision. Every revision is growth.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "placement",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "proof-fm-partner-2",
+      "name": "Trailer Review Deck",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Present trailer versions with rationale: structure, music choices, pacing, and test screening data.",
+      "flavor": "Data defends creative choices.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-fm-placement-3",
+      "name": "Template Documentation",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document the MOGRT: controls, use cases, font requirements, and version history.",
+      "flavor": "A template without docs is a mystery box.",
+      "rarity": "Common",
+      "art": "📄",
+      "set": "placement",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-fm-placement-reflection",
+      "name": "Sequence Reflection",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Write a reflection on the edit: pacing, storytelling, sound design, and lessons learned.",
+      "flavor": "The best edit serves the story.",
+      "rarity": "Common",
+      "art": "📄",
+      "set": "placement",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "proof-fm-showcase-partner-work",
+      "name": "Showcase Partner Film Work",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Present your partner work: brief, rough cut evolution, director collaboration, and final deliverable.",
+      "flavor": "Show the journey from assembly to answer print.",
+      "rarity": "Uncommon",
+      "art": "🖼️",
+      "set": "partnership",
+      "value": 2,
+      "skill": "Communication"
+    },
+    {
+      "id": "proof-fm-volunteer-feedback",
+      "name": "Short Film Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Collect feedback from the director/producer on your contribution to the production.",
+      "flavor": "Set etiquette matters as much as skill.",
+      "rarity": "Common",
+      "art": "🗣️",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "setup-fm-book-visit",
+      "name": "Book Post House Visit",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Arrange a visit to a post-production facility. Confirm date, NDA, and suite access.",
+      "flavor": "See where the magic gets polished.",
+      "rarity": "Common",
+      "art": "🎫",
+      "set": "visit",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-find-volunteer",
+      "name": "Find Film Festival Volunteer",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Volunteer at a film festival: projection, guest services, or filmmaker hospitality.",
+      "flavor": "Festivals run on volunteer passion.",
+      "rarity": "Common",
+      "art": "🤝",
+      "set": "volunteering",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-partner-2",
+      "name": "Trailer Strategy Session",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Align with partner on trailer goals: audience, tone, key beats, platform specs, and approval chain.",
+      "flavor": "A trailer is a promise. Keep it.",
+      "rarity": "Common",
+      "art": "🎯",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-partner-expectations",
+      "name": "Partner Production Requirements",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Agree on deliverables with an industry partner: trailer, sizzle reel, or episodic editing.",
+      "flavor": "Partners need storytellers who hit deadlines.",
+      "rarity": "Common",
+      "art": "🤝",
+      "set": "partnership",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-placement-3",
+      "name": "Set Up Project Template",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Create project template: bin structure, sequence settings, export presets, and keyboard shortcuts.",
+      "flavor": "Template once. Use forever.",
+      "rarity": "Common",
+      "art": "📐",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-placement-details",
+      "name": "Confirm Placement Details",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Agree tasks, dates, and hours with the production company; confirm your supervisor and call sheets.",
+      "flavor": "Call time is sacred. Be ready.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-placement-onboarding",
+      "name": "Complete Production Onboarding",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Learn the workflow: NLE setup, media management, naming conventions, and backup protocols.",
+      "flavor": "Organization is the editor's superpower.",
+      "rarity": "Common",
+      "art": "🎞️",
+      "set": "placement",
+      "value": 1
+    },
+    {
+      "id": "setup-fm-review-brief",
+      "name": "Understand the Film Brief",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Clarify the brief: genre, tone, runtime, deliverables (festival DCP, broadcast, social cuts), deadline.",
+      "flavor": "Deliverables define the workflow.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "brief",
+      "value": 1
+    },
+    {
+      "id": "fm-setup-shared-1",
+      "name": "Research Industry Standards",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Study current best practices, pipelines, and quality bars for your discipline.",
+      "flavor": "Know the bar before you raise it.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-setup-shared-2",
+      "name": "Create Personal Learning Plan",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Map skills to acquire, resources to use, and milestones to hit during the experience.",
+      "flavor": "A plan turns hope into progress.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-setup-shared-3",
+      "name": "Set Up Portfolio Tracking",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Create a system to capture work-in-progress, feedback, and final pieces for your portfolio.",
+      "flavor": "Document as you go, not after.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-setup-shared-4",
+      "name": "Establish Communication Routines",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Agree on check-in frequency, update formats, and escalation paths with your supervisor.",
+      "flavor": "Communication is a skill, not an afterthought.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-setup-shared-5",
+      "name": "Define Success Metrics",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Agree on what \"done well\" looks like: quality, speed, innovation, or player impact.",
+      "flavor": "You can't hit a target you can't see.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-setup-shared-6",
+      "name": "Prepare Questions for Mentor",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "List specific technical, creative, and career questions to maximize mentor sessions.",
+      "flavor": "Good questions get better answers.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-action-shared-7",
+      "name": "Prototype a Core System",
+      "type": "Action",
+      "category": "Action",
+      "description": "Build a quick proof-of-concept for a key mechanic, tool, or pipeline.",
+      "flavor": "Prototypes answer questions designs can't.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "any",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "fm-action-shared-8",
+      "name": "Collaborate Cross-Discipline",
+      "type": "Action",
+      "category": "Action",
+      "description": "Work with a different discipline (art/code/design) to integrate a feature end-to-end.",
+      "flavor": "Great games are built at discipline boundaries.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "any",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "fm-action-shared-9",
+      "name": "Optimize a Workflow",
+      "type": "Action",
+      "category": "Action",
+      "description": "Identify a bottleneck and implement a faster process, script, or template.",
+      "flavor": "Automation compounds.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "any",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "fm-action-shared-10",
+      "name": "Run a Playtest Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Observe players, take notes, and identify friction points in the experience.",
+      "flavor": "Players reveal what designers miss.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "any",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "fm-action-shared-11",
+      "name": "Create Technical Documentation",
+      "type": "Action",
+      "category": "Action",
+      "description": "Write clear docs for a system, API, or pipeline so others can use and maintain it.",
+      "flavor": "Documentation is empathy for your future self.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "any",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "fm-action-shared-12",
+      "name": "Refactor for Maintainability",
+      "type": "Action",
+      "category": "Action",
+      "description": "Clean up messy code, rigs, or files to improve readability and reduce future bugs.",
+      "flavor": "Clean craft enables speed.",
+      "rarity": "Common",
+      "art": "✂️",
+      "set": "any",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "fm-proof-shared-13",
+      "name": "Record Peer Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document specific feedback from teammates and how you acted on it.",
+      "flavor": "Feedback implemented is growth demonstrated.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1,
+      "skill": "Communication"
+    },
+    {
+      "id": "fm-proof-shared-14",
+      "name": "Capture Before/After Comparison",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Show side-by-side evidence of improvement: performance, quality, or player experience.",
+      "flavor": "Visual proof needs no translation.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1,
+      "skill": "Analysis"
+    },
+    {
+      "id": "fm-proof-shared-15",
+      "name": "Write a Case Study Outline",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Structure a portfolio case study: problem, process, solution, result, reflection.",
+      "flavor": "Case studies get you hired.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1,
+      "skill": "Teamwork"
+    },
+    {
+      "id": "fm-proof-shared-16",
+      "name": "Collect Quantitative Metrics",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Gather data: frame rates, load times, player retention, iteration speed, bug counts.",
+      "flavor": "Numbers convince skeptics.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1,
+      "skill": "Design"
+    },
+    {
+      "id": "fm-proof-shared-17",
+      "name": "Document a Failure & Recovery",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record what went wrong, root cause analysis, and the fix that prevented recurrence.",
+      "flavor": "Failures documented become wisdom.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1,
+      "skill": "Technical Setup"
+    },
+    {
+      "id": "fm-proof-shared-18",
+      "name": "Create a Showcase Video/GIF",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Record a 30-second clip of your work in context: in-engine, in-game, or in-pipeline.",
+      "flavor": "Show, don't just tell.",
+      "rarity": "Common",
+      "art": "📝",
+      "set": "any",
+      "value": 1,
+      "skill": "Reliability"
+    },
+    {
+      "id": "fm-impact-shared-19",
+      "name": "Feature Adopted by Team",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Your prototype, tool, or process was adopted as standard practice by the team.",
+      "flavor": "Adoption is the ultimate validation.",
+      "rarity": "Uncommon",
+      "art": "🎬",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-impact-shared-20",
+      "name": "Mentored a Peer",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Helped another student/junior improve their skills through guidance and knowledge sharing.",
+      "flavor": "Teaching proves mastery.",
+      "rarity": "Uncommon",
+      "art": "🎬",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-impact-shared-21",
+      "name": "Contributed to Shipped Content",
+      "type": "Impact",
+      "category": "Impact",
+      "description": "Your work is part of content that reached players, even in a small way.",
+      "flavor": "Shipped is the only metric that counts.",
+      "rarity": "Uncommon",
+      "art": "🎬",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-wildcard-shared-22",
+      "name": "Wild Card: Industry Veteran Insight",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A veteran shares hard-won wisdom. Use in place of any Setup, Action, or Proof card for any set.",
+      "flavor": "Experience is the best teacher.",
+      "rarity": "Rare",
+      "art": "⭐",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-wildcard-shared-23",
+      "name": "Wild Card: Cross-Discipline Workshop",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "An intensive workshop bridges disciplines. Use in place of any card for any set.",
+      "flavor": "Boundaries are where innovation lives.",
+      "rarity": "Rare",
+      "art": "⭐",
+      "set": "any",
+      "value": 1
+    },
+    {
+      "id": "fm-wildcard-shared-24",
+      "name": "Wild Card: Personal Project Sprint",
+      "type": "Wildcard",
+      "category": "Wildcard",
+      "description": "A focused personal project fills a gap. Use in place of any card for any set.",
+      "flavor": "Self-directed work shows drive.",
+      "rarity": "Rare",
+      "art": "⭐",
+      "set": "any",
+      "value": 1
+    }
+  ],
+  "sets": [
+    {
+      "id": "placement",
+      "name": "Block Placement",
+      "art": "🏢",
+      "groupSize": 4,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof",
+        "Impact"
+      ],
+      "reward": {
+        "experience": "Film-making Industry Placement",
+        "evidenceValue": 2,
+        "reference": true
+      },
+      "why": "A placement gives practical experience and, if it goes well, an employer reference."
+    },
+    {
+      "id": "visit",
+      "name": "Employer Visit",
+      "art": "🏭",
+      "groupSize": 2,
+      "requiredCategories": [
+        "Setup",
+        "Action"
+      ],
+      "reward": {
+        "experience": "Industry Insight Visit",
+        "evidenceValue": 1,
+        "reference": false
+      },
+      "why": "A visit builds industry understanding and useful contacts."
+    },
+    {
+      "id": "volunteering",
+      "name": "Volunteering",
+      "art": "🙌",
+      "groupSize": 3,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof"
+      ],
+      "reward": {
+        "experience": "Film-making Volunteer",
+        "evidenceValue": 1,
+        "reference": false
+      },
+      "why": "Volunteering shows reliability, initiative and teamwork."
+    },
+    {
+      "id": "brief",
+      "name": "Live Project Brief",
+      "art": "🎨",
+      "groupSize": 3,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof"
+      ],
+      "reward": {
+        "experience": "Film-making Project",
+        "evidenceValue": 2,
+        "reference": false
+      },
+      "why": "A finished brief creates a portfolio piece that shows you can respond to a client's needs."
+    },
+    {
+      "id": "partnership",
+      "name": "Industry Partnership",
+      "art": "🎓",
+      "groupSize": 4,
+      "requiredCategories": [
+        "Setup",
+        "Action",
+        "Proof",
+        "Impact"
+      ],
+      "reward": {
+        "experience": "Industry Collaboration",
+        "evidenceValue": 2,
+        "reference": false
+      },
+      "why": "A partnership gives you specialist feedback and experience working with professionals."
+    }
+  ]
+}

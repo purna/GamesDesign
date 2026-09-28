@@ -1,0 +1,12 @@
+{
+  "id": "impact-fm-placement-showcase",
+  "name": "Sequence in Final Cut",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your edited sequence appears in the final deliverable. Document the context and your contribution.",
+  "flavor": "Your cut made the final cut.",
+  "rarity": "Uncommon",
+  "art": "🎬",
+  "set": "placement",
+  "value": 1
+}

@@ -77,6 +77,7 @@ const el = {
   signInBtn: $('signInBtn'), signOutBtn: $('signOutBtn'),
   cardPreview: $('cardPreview'),
   gameOverOverlay: $('gameOverOverlay'),
+  skillsRequired: $('skillsRequired'),
 };
 
 app.el = el;
@@ -114,6 +115,9 @@ const INDUSTRIES = [
   { id: 'games-development', name: 'Games Development', icon: '💻', desc: 'Programming, engineering, and technical art' },
   { id: 'animation', name: 'Animation', icon: '🎭', desc: 'Character, cinematic, and technical animation' },
   { id: 'illustration', name: 'Illustration', icon: '🎨', desc: 'Concept art, 3D modeling, environments, and VFX' },
+  { id: 'cyber-security', name: 'Cyber Security', icon: '🛡️', desc: 'Security operations, penetration testing, and incident response' },
+  { id: 'web-design', name: 'Web Design', icon: '🌐', desc: 'UX/UI design, frontend development, and design systems' },
+  { id: 'film-making', name: 'Film Making', icon: '🎬', desc: 'Editing, cinematography, and post-production' },
 ];
 
 const RIVAL_SEEDS = [
@@ -121,6 +125,21 @@ const RIVAL_SEEDS = [
   { name: 'GG_Grinder', strategy: 'placement', blurb: 'Placement chaser', plan: 'Prioritises placements and practical experience.' },
   { name: 'Questline', strategy: 'balanced', blurb: 'All-rounder', plan: 'Builds a mix of experience, skills and evidence.' },
 ];
+
+const RIVAL_NAMES = [
+  'AceGamer', 'ByteBard', 'CodeCatalyst', 'DesignDruid', 'EcoExplorer',
+  'FluxFighter', 'GlyphGuru', 'HexHero', 'IonInnovator', 'JoltJockey',
+  'KineticKane', 'LumenLark', 'MavenMara', 'NexusNinja', 'OmegaOracle',
+  'PixelPunk', 'QuarkQueen', 'RiftRunner', 'SynthSage', 'TokenTitan',
+  'UltraUrsa', 'VoxVoyager', 'WildWrench', 'XenonX', 'YieldYonder',
+  'ZephyrZoom', 'ApexAce', 'BoltBard', 'CipherSpark', 'DriftDynamo',
+];
+
+function randomRivalName() {
+  const prefix = RIVAL_NAMES[Math.floor(Math.random() * RIVAL_NAMES.length)];
+  const suffix = Math.floor(100 + Math.random() * 900);
+  return prefix + '_' + suffix;
+}
 
 let currentIndustry = null;
 let DATA = null;      // { roles, cards, sets }
@@ -184,6 +203,35 @@ async function loadIndustryData() {
   setupResumeButton();
 }
 
+function setupResumeButton() {
+  const existing = $('resumeBtn');
+  if (existing) existing.remove();
+  const saved = window.RTTR ? window.RTTR.loadGame() : null;
+  if (!saved || !saved.job || saved.winner) return;
+  const resumeBtn = document.createElement('button');
+  resumeBtn.id = 'resumeBtn';
+  resumeBtn.className = 'btn btn-secondary';
+  resumeBtn.style.marginTop = '0.75rem';
+  resumeBtn.textContent = `Continue race for ${saved.job.title} \u2192`;
+  resumeBtn.addEventListener('click', () => {
+    state = saved;
+    state.player.returnsThisRound = state.player.returnsThisRound || 0;
+    state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
+    state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
+    state.rivals.forEach((r) => {
+      r.returnsThisRound = r.returnsThisRound || 0;
+      r.marketPicksThisRound = r.marketPicksThisRound || 0;
+      r.marketSwapsThisRound = r.marketSwapsThisRound || 0;
+    });
+    el.setup.classList.add('hidden');
+    if (el.industrySelect) el.industrySelect.classList.add('hidden');
+    el.game.classList.remove('hidden');
+    startTurnTimer();
+    render();
+  });
+  el.startBtn.insertAdjacentElement('afterend', resumeBtn);
+}
+
 /* ============================== Helpers ================================ */
 
 function escapeHtml(s) {
@@ -208,12 +256,16 @@ function shuffle(arr) {
   return a;
 }
 
+let toastTimer = null;
 function toast(msg) {
   if (!el.toast) return;
   el.toast.textContent = msg;
   el.toast.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.toast.classList.remove('show'), 2600);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.toast.classList.remove('show');
+    toastTimer = null;
+  }, 2600);
 }
 
 function addLog(msg) {
@@ -227,6 +279,18 @@ function persist() {
 }
 
 /* ============================== Deck ==================================== */
+
+let requiredSkillCache = null;
+function isRoleRequiredSkill(skill) {
+  if (!skill) return false;
+  if (!requiredSkillCache || requiredSkillCache.data !== DATA) {
+    requiredSkillCache = {
+      data: DATA,
+      set: new Set(DATA.roles.map((r) => r.requirements && r.requirements.skill).filter(Boolean)),
+    };
+  }
+  return requiredSkillCache.set.has(skill);
+}
 
 function buildDeck() {
   const pool = [];
@@ -244,6 +308,10 @@ function buildDeck() {
     const key = tmpl.set + '|' + tmpl.category;
     groupCounts[key] = (groupCounts[key] || 0) + 1;
   });
+  // A small starting buffer only: bankSet() deals a fresh copy back whenever a
+  // required-skill card is consumed, so supply is maintained during play instead.
+  const REQUIRED_SKILL_COPIES = 2;
+
   DATA.cards.forEach((tmpl) => {
     let copies;
     if (tmpl.category === 'Wildcard') {
@@ -251,6 +319,9 @@ function buildDeck() {
     } else {
       const key = tmpl.set + '|' + tmpl.category;
       copies = Math.max(1, Math.round(BASE_COPIES / groupCounts[key]));
+    }
+    if (tmpl.skill && isRoleRequiredSkill(tmpl.skill)) {
+      copies = Math.max(copies, REQUIRED_SKILL_COPIES);
     }
     for (let i = 0; i < copies; i++) pool.push(tmpl);
   });
@@ -428,7 +499,7 @@ function newGame(jobId) {
     discard: [],
     market: [],
     player: newAgent('You', null),
-    rivals: RIVAL_SEEDS.map((r) => newAgent(r.name, r.strategy)),
+    rivals: RIVAL_SEEDS.map((r) => { const agent = newAgent(r.name, r.strategy); agent.displayName = randomRivalName(); return agent; }),
   };
   state.deck = buildDeck();
   refillMarket();
@@ -488,7 +559,7 @@ function findBank(cards, forcedSet, allowSubset = false) {
   if (bestMissing && bestMissing.length) {
     const haveText = nonWild.length ? nonWild.map((c) => c.category).join(', ') : 'no route cards yet';
     const missingText = bestMissing.length === 1
-      ? `a ${bestMissing[0]} card`
+      ? `${/^[AEIOU]/i.test(bestMissing[0]) ? 'an' : 'a'} ${bestMissing[0]} card`
       : `${bestMissing.length} cards (${bestMissing.join(', ')})`;
     return { ok: false, msg: `Missing ${missingText} for ${setName(targetSet)}. You have: ${haveText}.` };
   }
@@ -500,6 +571,12 @@ function bankSet(agent, targetSet, used) {
   used.forEach((c) => {
     agent.hand = agent.hand.filter((h) => h.uid !== c.uid);
     state.discard.push(c);
+    // A role-required skill card went into a banked set, so deal a fresh copy back
+    // to circulation. The skill stays obtainable for every agent still racing.
+    if (isRoleRequiredSkill(c.skill)) {
+      const tmpl = DATA.cards.find((d) => d.id === c.id);
+      if (tmpl) state.deck = shuffle([...state.deck, instantiate(tmpl)]);
+    }
   });
 
   let evidenceGain = meta.reward.evidenceValue;
@@ -919,6 +996,9 @@ function openModal(html) {
   el.modalBody.innerHTML = html;
   el.modalBack.classList.add('show');
 }
+function closeModal() {
+  el.modalBack.classList.remove('show');
+}
 function closeHallOfFame() {
   el.hallOfFame.classList.add('hidden');
   el.industrySelect.classList.remove('hidden');
@@ -1019,16 +1099,65 @@ function renderCompletedRoles() {
 function renderSkills() {
   if (!el.skillsRequired || !state) return;
   const req = state.job.requirements;
-  const neededSkills = [req.skill];
   const playerSkills = state.player.skills || [];
-  el.skillsRequired.innerHTML = neededSkills.map((skill) => {
+  // Required skill always leads the list, even if no card currently grants it,
+  // so the panel can never silently omit what the player still has to collect.
+  const others = [...new Set(DATA.cards
+    .filter((c) => {
+      if (!c.skill || c.skill === req.skill) return false;
+      return (state.job.recommendedSets || []).includes(c.set);
+    })
+    .map((c) => c.skill))]
+    .sort();
+  const allSkills = [req.skill, ...others.filter((s) => s !== req.skill)];
+
+  el.skillsRequired.innerHTML = allSkills.map((skill) => {
     const has = playerSkills.includes(skill);
-    return `<span class="skill-item ${has ? 'owned' : 'needed'}">
-      <span class="skill-check">${has ? '✓' : '○'}</span>
-      <span class="skill-name">${escapeHtml(skill)}</span>
+    const isRequired = skill === req.skill;
+    const grantors = DATA.cards.filter((c) => c.skill === skill);
+    const cls = isRequired ? (has ? 'owned required' : 'needed required') : (has ? 'owned' : 'needed');
+    let hint = '';
+    if (isRequired && !has) {
+      if (!grantors.length) {
+        hint = '<small class="skill-hint skill-hint-warn">No card in this pack grants it \u2014 this role cannot be completed.</small>';
+      } else {
+        // Group the granting cards by route, role-fit routes first, fewest cards first,
+        // so the player can see the cheapest way to actually earn the skill.
+        const recs = state.job.recommendedSets || [];
+        const byRoute = new Map();
+        grantors.forEach((g) => {
+          if (!byRoute.has(g.set)) byRoute.set(g.set, []);
+          byRoute.get(g.set).push(g);
+        });
+        const routes = [...byRoute.entries()].map(([id, cs]) => {
+          const req = requiredCategories(id);
+          return {
+            id,
+            name: id === 'any' ? 'Any route' : setName(id),
+            req,
+            cheapest: cs.slice().sort((a, b) => req.indexOf(a.category) - req.indexOf(b.category))[0],
+            count: cs.length,
+            isFit: recs.includes(id),
+          };
+        }).sort((a, b) => (b.isFit - a.isFit) || (a.req.length - b.req.length));
+        const shortest = Math.min(...routes.map((r) => r.req.length));
+        const items = routes.slice(0, 3).map((r) => {
+          const slot = r.req.includes(r.cheapest.category) ? ` (${r.cheapest.category} slot)` : '';
+          const fit = r.isFit ? ' \u2b50 role-fit' : '';
+          return `${escapeHtml(r.name)}${fit}: bank ${r.req.length} cards \u2014 ${escapeHtml(r.req.join(' + '))}. Try "${escapeHtml(r.cheapest.name)}" for the ${escapeHtml(r.cheapest.category)} slot${slot}`;
+        });
+        const more = routes.length > 3 ? ` (+${routes.length - 3} more route${routes.length - 3 === 1 ? '' : 's'})` : '';
+        const cheapestNote = routes.some((r) => r.req.length === shortest && r.isFit)
+          ? ''
+          : ` Cheapest is ${shortest} cards.`;
+        hint = `<small class="skill-hint">Get it by banking a set:<br>\u2022 ${items.join('<br>\u2022 ')}${more}.${escapeHtml(cheapestNote)}</small>`;
+      }
+    }
+    return `<span class="skill-item ${cls}">
+      <span class="skill-check">${has ? '\u2713' : '\u25cb'}</span>
+      <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}${hint}</span>
     </span>`;
   }).join('');
-  el.skillsRequired.innerHTML += `<div class="all-skills"><small>Your skills: ${escapeHtml(playerSkills.join(', ') || 'none')}</small></div>`;
 }
 
 function renderJobNeeds() {
@@ -1065,7 +1194,7 @@ function renderRivals() {
     const bankedSets = (r.banked || []).map((b) => setMeta(b.set)?.name || b.set);
     card.innerHTML = `
       <div class="rival-head">
-        <strong>${escapeHtml(r.name)}</strong>
+        <strong>${escapeHtml(r.displayName || r.name)}</strong>
         <span class="rival-strategy">${escapeHtml(seed.blurb)}</span>
         <span class="rival-bank-count" title="Completed sets">${bankedSets.length}</span>
       </div>
@@ -1096,7 +1225,7 @@ function showRivalSets(index) {
     return `<span class="rival-banked-set ${taken}">${escapeHtml(s.name)}: ${taken}</span>`;
   }).join('');
   openModal(`
-    <h2>${escapeHtml(rival.name)}'s Completed Sets</h2>
+    <h2>${escapeHtml(rival.displayName || rival.name)}'s Completed Sets</h2>
     <p>Banked experience sets:</p>
     <div class="rival-banked-list">${rows}</div>
     <p style="margin-top:1rem">Community card availability:</p>
@@ -1161,13 +1290,52 @@ function openPreview(where, card) {
     : 'Use this as a substitute for a missing set card.';
   const routeDesc = cat !== 'Wildcard' && card.set === 'any' ? 'This card can count as its printed type in any experience route.' : '';
 
+  // Role-fit highlighting: does this card help complete a route the job recommends?
+  const jobOptions = jobSetOptions(state.job);
+  const flexible = cat !== 'Wildcard' && card.set === 'any';
+  const routeId = flexible ? null : card.set;
+  const isRoleFit = flexible || (routeId && jobOptions.has(routeId));
+  const doneTypes = completedJobSetTypes(state.player, state.job);
+  const neededTypes = Math.max(0, REQUIRED_SET_VARIETY - doneTypes.size);
+  let roleFitHtml = '';
+  if (isRoleFit) {
+    if (flexible) {
+      const useful = [...jobOptions].filter((id) => !doneTypes.has(id));
+      roleFitHtml = useful.length
+        ? `<p class="preview-rolefit fit"><b>Counts toward a role-fit route</b> — usable for ${useful.map((id) => escapeHtml(setName(id))).join(' or ')}.</p>`
+        : '<p class="preview-rolefit done"><b>Role-fit routes complete</b> — this card adds CV experience but not the required set variety.</p>';
+    } else {
+      const requiredCats = requiredCategories(routeId);
+      const held = new Set(state.player.hand
+        .filter((h) => h.uid !== card.uid && (h.set === routeId || h.set === 'any') && h.category !== 'Wildcard')
+        .map((h) => h.category));
+      const stillNeeded = requiredCats.filter((cat) => !held.has(cat));
+      const slotText = stillNeeded.length
+        ? `Still needed for ${escapeHtml(setName(routeId))}: ${stillNeeded.map(escapeHtml).join(' + ')}.`
+        : `With this card you have all ${requiredCats.length} types for ${escapeHtml(setName(routeId))} — select your cards and bank it.`;
+      let varietyNote;
+      if (doneTypes.has(routeId)) {
+        varietyNote = 'You already banked this route — doing it again adds experience but not new set variety.';
+      } else if (neededTypes > 1) {
+        const after = neededTypes - 1;
+        varietyNote = `New role-fit route — you would still need ${after} more role-fit route${after === 1 ? '' : 's'}.`;
+      } else {
+        varietyNote = 'New role-fit route — this would complete your role-fit set variety.';
+      }
+      roleFitHtml = `<p class="preview-rolefit fit"><b>✓ Role-fit route — ${escapeHtml(setName(routeId))}</b> ${escapeHtml(slotText)}<br><span class="rolefit-note">${escapeHtml(varietyNote)}</span></p>`;
+    }
+  }
+
   const inHand = where === 'hand';
   const isSelected = inHand && selectedHandUids.has(card.uid);
 
   let actionHtml = '';
   if (where === 'market') {
+    const marketIndex = state.market.findIndex((c) => c.uid === card.uid);
+    const canSwap = marketIndex !== -1 && state.player.marketSwapsThisRound < MAX_MARKET_SWAPS_PER_ROUND && !state.winner;
     actionHtml = `
       <button class="btn primary-btn" onclick="takePreviewCard()" ${state.actionsLeft < 1 || state.winner || state.player.hand.length >= HAND_CAP || state.player.marketPicksThisRound >= MAX_MARKET_PICKS_PER_ROUND ? 'disabled' : ''}>Take this card (1 action)</button>
+      <button class="btn btn-secondary" onclick="swapPreviewCard()" ${!canSwap ? 'disabled' : ''}>Swap this card</button>
       <button class="btn btn-secondary" onclick="closePreview()">Done</button>
     `;
   } else {
@@ -1185,6 +1353,7 @@ function openPreview(where, card) {
         <div class="card-art">${card.art || '🃏'}</div>
         <div class="card-name">${escapeHtml(card.name)}</div>
         <div class="card-description">${escapeHtml(card.description)}</div>
+        ${roleFitHtml}
         <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}${card.skill ? '<br><span class="skill-badge">' + escapeHtml(card.skill) + ' skill</span>' : ''}</div>
         <div class="card-top">
           <span class="${card.set === 'any' ? 'any-route' : ''}">${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
@@ -1226,6 +1395,23 @@ function takePreviewCard() {
   addLog(`You took ${card.name} from the market.`);
   closePreview();
   afterPlayerAction();
+}
+
+function swapPreviewCard() {
+  if (!previewState || previewState.where !== 'market' || state.winner) return;
+  if (state.player.marketSwapsThisRound >= MAX_MARKET_SWAPS_PER_ROUND) {
+    toast(`You can swap ${MAX_MARKET_SWAPS_PER_ROUND} market cards per round.`);
+    return;
+  }
+  const uid = previewState.card.uid;
+  const marketIndex = state.market.findIndex((c) => c.uid === uid);
+  if (marketIndex === -1) return;
+  swapMarketCard(marketIndex, state.player);
+  state.player.marketSwapsThisRound += 1;
+  renderMarket();
+  renderControls();
+  persist();
+  closePreview();
 }
 
 function togglePreviewSelect() {
@@ -1308,7 +1494,7 @@ function renderCV() {
   el.cvStats.innerHTML = `
     <div class="cv-row"><span>Experience</span><strong>${p.banked.length}</strong></div>
     <div class="cv-row"><span>Evidence</span><strong>${p.evidence}</strong></div>
-    <div class="cv-row"><span>Skills</span><strong>${p.skills.join(', ') || '—'}</strong></div>
+    <div class="cv-row"><span>Skills</span><strong>${p.skills.length}</strong></div>
     <div class="cv-row"><span>Reliability</span><strong>${'★'.repeat(p.reliability) || '—'}</strong></div>
     <div class="cv-row"><span>References</span><strong>${p.references}</strong></div>
   `;
@@ -1323,31 +1509,26 @@ function renderControls() {
     : `↩ Return selected to deck (${returnsLeft} left this round)`;
    el.returnBtn.title = 'Select up to two cards in your hand and return them to the deck, or drag one to the return area. Returns are free, up to two each round.';
   const swapsLeft = MAX_MARKET_SWAPS_PER_ROUND - state.player.marketSwapsThisRound;
-  el.swapMarketBtn.disabled = !state.market.length || swapsLeft < 1 || !!state.winner;
-  el.swapMarketBtn.textContent = swapsLeft
-    ? `↻ Swap market (${swapsLeft} left)`
-    : `↻ Swap market (0 left)`;
-  el.swapMarketBtn.title = 'Put back up to 2 market cards and draw fresh ones from the deck. Free, up to 2 per round.';
+  el.swapMarketBtn.textContent = `↻ Swaps left: ${swapsLeft}/${MAX_MARKET_SWAPS_PER_ROUND}`;
+  el.swapMarketBtn.title = 'Swap market cards by clicking a card in the market and using "Swap this card" in the preview. Free, up to 2 per round.';
+  el.swapMarketBtn.disabled = true;
+  el.swapMarketBtn.style.cursor = 'default';
+  el.swapMarketBtn.style.opacity = '0.7';
   const selectedCards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
   const route = selectedRoute(selectedCards);
   const requiredCount = route ? requiredCategories(route).length : 0;
-  el.bankBtn.disabled = !requiredCount || selectedHandUids.size !== requiredCount || state.actionsLeft < 1 || !!state.winner;
+  // The count must match AND the cards must actually be a valid set for that route,
+  // otherwise the button is clickable but doBank() can only report a failure.
+  const countMatches = !!requiredCount && selectedHandUids.size === requiredCount;
+  const bankResult = countMatches ? findBank(selectedCards) : { ok: false };
+  const canBank = countMatches && bankResult.ok && state.actionsLeft >= 1 && !state.winner;
+  el.bankBtn.disabled = !canBank;
   el.bankBtn.textContent = route
     ? `✦ Bank ${setName(route)} (${selectedHandUids.size}/${requiredCount})`
     : `✦ Bank completed set (${selectedHandUids.size} selected)`;
 
   // Highlight bank button when a valid set is ready to bank
-  const canBank = route && selectedHandUids.size === requiredCount && state.actionsLeft >= 1 && !state.winner;
-  if (canBank) {
-    const result = findBank(selectedCards);
-    if (result.ok) {
-      el.bankBtn.classList.add('ready-to-bank');
-    } else {
-      el.bankBtn.classList.remove('ready-to-bank');
-    }
-  } else {
-    el.bankBtn.classList.remove('ready-to-bank');
-  }
+  el.bankBtn.classList.toggle('ready-to-bank', canBank);
 
   renderSetBuilderStatus();
   el.applyBtn.disabled = !!state.winner;
@@ -1478,8 +1659,7 @@ el.backToIndustryBtn.addEventListener('click', () => {
   el.industrySelect.classList.remove('hidden');
 });
 el.returnBtn.addEventListener('click', doReturnSelected);
-el.swapMarketBtn.addEventListener('click', doMarketSwap);
-setupDragAndDrop();
+  setupDragAndDrop();
 el.bankBtn.addEventListener('click', doBank);
 el.applyBtn.addEventListener('click', doApply);
 el.endBtn.addEventListener('click', endTurn);
@@ -1503,24 +1683,5 @@ if (el.signInBtn) {
     }
   });
 
-  const saved = window.RTTR ? window.RTTR.loadGame() : null;
-  if (saved && saved.job && !saved.winner) {
-    const resumeBtn = document.createElement('button');
-    resumeBtn.className = 'btn btn-secondary';
-    resumeBtn.style.marginTop = '0.75rem';
-    resumeBtn.textContent = `Continue race for ${saved.job.title} →`;
-    resumeBtn.addEventListener('click', () => {
-      state = saved;
-      state.player.returnsThisRound = state.player.returnsThisRound || 0;
-      state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
-      state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
-      state.rivals.forEach((r) => { r.returnsThisRound = r.returnsThisRound || 0; r.marketPicksThisRound = r.marketPicksThisRound || 0; r.marketSwapsThisRound = r.marketSwapsThisRound || 0; });
-      el.setup.classList.add('hidden');
-      el.industrySelect.classList.add('hidden');
-      el.game.classList.remove('hidden');
-      startTurnTimer();
-      render();
-    });
-    el.startBtn.insertAdjacentElement('afterend', resumeBtn);
-  }
+  setupResumeButton();
 })();

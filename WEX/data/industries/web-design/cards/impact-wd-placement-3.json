@@ -1,0 +1,12 @@
+{
+  "id": "impact-wd-placement-3",
+  "name": "Component Adopted",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your component is used across multiple pages/products. Document adoption metrics.",
+  "flavor": "Adoption proves utility.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "placement",
+  "value": 1
+}

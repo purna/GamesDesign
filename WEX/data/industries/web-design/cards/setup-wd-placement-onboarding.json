@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-placement-onboarding",
+  "name": "Complete Web Design Onboarding",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up Figma, Storybook, and the component library. Review the design system documentation.",
+  "flavor": "Know the system before you extend it.",
+  "rarity": "Common",
+  "art": "🎨",
+  "set": "placement",
+  "value": 1
+}

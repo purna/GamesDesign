@@ -1,0 +1,12 @@
+{
+  "id": "production-assistant",
+  "title": "Production Assistant",
+  "category": "Production",
+  "description": "Support the set: manage call sheets, coordinate talent, handle logistics, and keep the day on schedule.",
+  "requirements": { "experience": 1, "evidence": 1, "skill": "Teamwork" },
+  "recommendedSets": ["placement", "volunteering", "visit"],
+  "flavor": "The PA makes the production possible.",
+  "art": "📋",
+  "rarity": "Common",
+  "stats": { "industryKnowledge": 6, "networking": 7, "technicalSkill": 5, "creativity": 4, "reliability": 9 }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "proof-fm-volunteer-feedback",
+  "name": "Short Film Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Collect feedback from the director/producer on your contribution to the production.",
+  "flavor": "Set etiquette matters as much as skill.",
+  "rarity": "Common",
+  "art": "🗣️",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Teamwork"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "impact-fm-partner-feedback",
+  "name": "Partner Film Released",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your edit was released: festival selection, broadcast, or client approval. Document the outcome.",
+  "flavor": "Screened. Selected. Seen.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "partnership",
+  "value": 1
+}

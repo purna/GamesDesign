@@ -1,0 +1,13 @@
+{
+  "id": "proof-fm-showcase-partner-work",
+  "name": "Showcase Partner Film Work",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present your partner work: brief, rough cut evolution, director collaboration, and final deliverable.",
+  "flavor": "Show the journey from assembly to answer print.",
+  "rarity": "Uncommon",
+  "art": "🖼️",
+  "set": "partnership",
+  "value": 2,
+  "skill": "Communication"
+}

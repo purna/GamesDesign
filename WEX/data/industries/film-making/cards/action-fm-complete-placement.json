@@ -1,0 +1,13 @@
+{
+  "id": "action-fm-complete-placement",
+  "name": "Edit a Production Sequence",
+  "type": "Action",
+  "category": "Action",
+  "description": "Cut a scene, segment, or sequence: assemble, rough cut, fine cut, and deliver for review.",
+  "flavor": "Editing is rewriting with footage.",
+  "rarity": "Common",
+  "art": "✂️",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

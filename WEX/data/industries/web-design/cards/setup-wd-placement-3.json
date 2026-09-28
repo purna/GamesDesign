@@ -1,0 +1,12 @@
+{
+  "id": "setup-wd-placement-3",
+  "name": "Set Up Design Token Pipeline",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Configure Style Dictionary or similar: tokens, build scripts, and platform outputs (iOS, Android, Web).",
+  "flavor": "Tokens are the single source of truth.",
+  "rarity": "Common",
+  "art": "🎯",
+  "set": "placement",
+  "value": 1
+}

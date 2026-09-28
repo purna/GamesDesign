@@ -1,0 +1,12 @@
+{
+  "id": "action-fm-volunteer-tournament",
+  "name": "Crew a Short Film",
+  "type": "Action",
+  "category": "Action",
+  "description": "Work on a student/indie short: camera, sound, grip, or post. Experience the full pipeline.",
+  "flavor": "Small crew. Big lessons.",
+  "rarity": "Common",
+  "art": "🎥",
+  "set": "volunteering",
+  "value": 1
+}

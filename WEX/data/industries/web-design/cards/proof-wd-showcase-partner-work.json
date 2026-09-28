@@ -1,0 +1,13 @@
+{
+  "id": "proof-wd-showcase-partner-work",
+  "name": "Showcase Partner Web Work",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present your partner project: requirements, design process, technical implementation, and outcomes.",
+  "flavor": "Show the system, not just the screens.",
+  "rarity": "Uncommon",
+  "art": "🖼️",
+  "set": "partnership",
+  "value": 2,
+  "skill": "Communication"
+}

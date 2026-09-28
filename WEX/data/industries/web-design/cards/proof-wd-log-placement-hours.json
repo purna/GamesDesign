@@ -1,0 +1,13 @@
+{
+  "id": "proof-wd-log-placement-hours",
+  "name": "Log Web Design Hours & Reflection",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Record hours and reflect on components built, design decisions, and cross-browser testing.",
+  "flavor": "Every component teaches a new constraint.",
+  "rarity": "Common",
+  "art": "📝",
+  "set": "placement",
+  "value": 1,
+  "skill": "Reliability"
+}

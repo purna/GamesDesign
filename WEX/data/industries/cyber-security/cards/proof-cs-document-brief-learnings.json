@@ -1,0 +1,13 @@
+{
+  "id": "proof-cs-document-brief-learnings",
+  "name": "Document Assessment Learnings",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Write a post-assessment review: methodology, findings, false positives, and improvements.",
+  "flavor": "Every assessment sharpens your methodology.",
+  "rarity": "Common",
+  "art": "📓",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

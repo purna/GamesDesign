@@ -1,0 +1,12 @@
+{
+  "id": "security-engineer",
+  "title": "Security Engineer",
+  "category": "Security Engineering",
+  "description": "Build and maintain security tooling, automation, and secure infrastructure.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Security baked in beats security bolted on.",
+  "art": "🔧",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 8, "networking": 4, "technicalSkill": 9, "creativity": 6, "reliability": 8 }
+}

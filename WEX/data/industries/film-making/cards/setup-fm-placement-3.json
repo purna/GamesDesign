@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-placement-3",
+  "name": "Set Up Project Template",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Create project template: bin structure, sequence settings, export presets, and keyboard shortcuts.",
+  "flavor": "Template once. Use forever.",
+  "rarity": "Common",
+  "art": "📐",
+  "set": "placement",
+  "value": 1
+}

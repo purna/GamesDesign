@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-find-volunteer",
+  "name": "Find CTF Volunteer Role",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Join a Capture The Flag event or security competition as a volunteer or participant.",
+  "flavor": "CTFs are the gym for security skills.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "volunteering",
+  "value": 1
+}

@@ -1,0 +1,13 @@
+{
+  "id": "proof-fm-document-brief-learnings",
+  "name": "Document Film Project Learnings",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Write a post-mortem: creative challenges, technical workflow, collaboration, and festival strategy.",
+  "flavor": "Every film teaches a new workflow.",
+  "rarity": "Common",
+  "art": "📓",
+  "set": "brief",
+  "value": 1,
+  "skill": "Communication"
+}

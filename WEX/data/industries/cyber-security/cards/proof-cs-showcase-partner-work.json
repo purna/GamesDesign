@@ -1,0 +1,13 @@
+{
+  "id": "proof-cs-showcase-partner-work",
+  "name": "Showcase Partner Security Work",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Present your partner engagement with scope, findings, and remediation guidance.",
+  "flavor": "Show the risk, not just the vulnerability.",
+  "rarity": "Uncommon",
+  "art": "🖼️",
+  "set": "partnership",
+  "value": 2,
+  "skill": "Communication"
+}

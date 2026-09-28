@@ -1,0 +1,12 @@
+{
+  "id": "setup-cs-placement-onboarding",
+  "name": "Complete Security Onboarding",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Set up SIEM access, configure lab environment, and review security policies.",
+  "flavor": "Know the environment before you defend it.",
+  "rarity": "Common",
+  "art": "🔐",
+  "set": "placement",
+  "value": 1
+}

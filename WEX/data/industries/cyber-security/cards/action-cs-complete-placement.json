@@ -1,0 +1,13 @@
+{
+  "id": "action-cs-complete-placement",
+  "name": "Investigate Security Alerts",
+  "type": "Action",
+  "category": "Action",
+  "description": "Triage alerts, analyze logs, and determine false positives vs real incidents.",
+  "flavor": "Signal hides in noise. Find it.",
+  "rarity": "Common",
+  "art": "🔍",
+  "set": "placement",
+  "value": 1,
+  "skill": "Analysis"
+}

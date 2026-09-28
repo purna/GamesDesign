@@ -1,0 +1,12 @@
+{
+  "id": "impact-cs-partner-feedback",
+  "name": "Partner Security Improved",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your work led to measurable security improvements in the partner's environment.",
+  "flavor": "Fixed in production. Verified in staging.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "partnership",
+  "value": 1
+}

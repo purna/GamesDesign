@@ -1,0 +1,13 @@
+{
+  "id": "action-wd-complete-placement",
+  "name": "Build a Production Feature",
+  "type": "Action",
+  "category": "Action",
+  "description": "Design and implement a UI feature: component, page, or flow. Follow the design system.",
+  "flavor": "Design in Figma. Ship in code.",
+  "rarity": "Common",
+  "art": "⚛️",
+  "set": "placement",
+  "value": 1,
+  "skill": "Design"
+}

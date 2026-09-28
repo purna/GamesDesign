@@ -1,0 +1,13 @@
+{
+  "id": "proof-wd-volunteer-feedback",
+  "name": "Volunteer Project Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Collect feedback from the nonprofit on usability, maintenance, and goal achievement.",
+  "flavor": "Client feedback is the ultimate test.",
+  "rarity": "Common",
+  "art": "🗣️",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Teamwork"
+}

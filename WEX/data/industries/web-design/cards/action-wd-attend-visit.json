@@ -1,0 +1,12 @@
+{
+  "id": "action-wd-attend-visit",
+  "name": "Attend Design Critique",
+  "type": "Action",
+  "category": "Action",
+  "description": "Sit in on a design review, usability test, or design system office hours.",
+  "flavor": "Watch how feedback shapes the product.",
+  "rarity": "Common",
+  "art": "👁️",
+  "set": "visit",
+  "value": 1
+}

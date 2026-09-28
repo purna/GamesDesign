@@ -1,0 +1,12 @@
+{
+  "id": "action-wd-complete-partner",
+  "name": "Complete Partner Web Project",
+  "type": "Action",
+  "category": "Action",
+  "description": "Deliver the agreed web project: accessible components, documented APIs, and deployment guide.",
+  "flavor": "Professional code. Professional docs.",
+  "rarity": "Rare",
+  "art": "✨",
+  "set": "partnership",
+  "value": 2
+}

@@ -1,0 +1,12 @@
+{
+  "id": "action-fm-partner-2",
+  "name": "Cut the Trailer",
+  "type": "Action",
+  "category": "Action",
+  "description": "Edit the trailer: select beats, pace to music, add graphics, and iterate on feedback.",
+  "flavor": "Two minutes. Maximum impact.",
+  "rarity": "Rare",
+  "art": "🎬",
+  "set": "partnership",
+  "value": 2
+}

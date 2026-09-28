@@ -1,0 +1,12 @@
+{
+  "id": "action-cs-complete-partner",
+  "name": "Complete Partner Security Project",
+  "type": "Action",
+  "category": "Action",
+  "description": "Execute the agreed security engagement: pentest, secure code review, or threat model.",
+  "flavor": "Professional scope. Professional results.",
+  "rarity": "Rare",
+  "art": "✨",
+  "set": "partnership",
+  "value": 2
+}

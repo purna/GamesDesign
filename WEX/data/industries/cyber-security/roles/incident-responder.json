@@ -1,0 +1,12 @@
+{
+  "id": "incident-responder",
+  "title": "Incident Responder",
+  "category": "Security Operations",
+  "description": "Lead the response when breaches happen: containment, eradication, recovery.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Communication" },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Calm in chaos. Clear in crisis.",
+  "art": "🚨",
+  "rarity": "Rare",
+  "stats": { "industryKnowledge": 8, "networking": 6, "technicalSkill": 8, "creativity": 5, "reliability": 9 }
+}

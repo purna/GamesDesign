@@ -1,0 +1,12 @@
+{
+  "id": "sound-designer",
+  "title": "Sound Designer",
+  "category": "Post Production",
+  "description": "Create and layer sound effects, ambience, and Foley to build the sonic world.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Sound is half the picture.",
+  "art": "🎧",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 4, "technicalSkill": 8, "creativity": 8, "reliability": 7 }
+}

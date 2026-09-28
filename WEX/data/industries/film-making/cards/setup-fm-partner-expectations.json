@@ -1,0 +1,12 @@
+{
+  "id": "setup-fm-partner-expectations",
+  "name": "Partner Production Requirements",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Agree on deliverables with an industry partner: trailer, sizzle reel, or episodic editing.",
+  "flavor": "Partners need storytellers who hit deadlines.",
+  "rarity": "Common",
+  "art": "🤝",
+  "set": "partnership",
+  "value": 1
+}

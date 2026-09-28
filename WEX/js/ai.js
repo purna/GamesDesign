@@ -124,8 +124,8 @@ function leastUsefulCard(agent, job) {
 
 function runRivalTurn(agent) {
   const seed = RIVAL_SEEDS.find((r) => r.name === agent.name);
-  const summary = { name: agent.name, strategy: seed ? seed.blurb : 'Competitor', plan: seed ? seed.plan : '', actions: [], picked: [], returned: [], banked: [], applied: false };
-  addLog(`${agent.name}'s turn (${summary.strategy}): taking 2 actions.`);
+  const summary = { name: agent.displayName || agent.name, strategy: seed ? seed.blurb : 'Competitor', plan: seed ? seed.plan : '', actions: [], picked: [], returned: [], banked: [], applied: false };
+  addLog(`${agent.displayName || agent.name}'s turn (${summary.strategy}): taking 2 actions.`);
   agent.energy = Math.min(START_ENERGY, agent.energy + 1);
   agent.marketPicksThisRound = 0;
   agent.returnsThisRound = 0;

@@ -1,0 +1,12 @@
+{
+  "id": "impact-fm-partner-2",
+  "name": "Trailer Released",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Partner's trailer launches: track views, engagement, and conversion to ticket sales/streams.",
+  "flavor": "The trailer sold the show.",
+  "rarity": "Uncommon",
+  "art": "📈",
+  "set": "partnership",
+  "value": 1
+}

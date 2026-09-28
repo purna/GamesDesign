@@ -1,0 +1,13 @@
+{
+  "id": "action-wd-placement-3",
+  "name": "Build a Reusable Component",
+  "type": "Action",
+  "category": "Action",
+  "description": "Create a fully tested, documented, accessible component with variants and states.",
+  "flavor": "A component library is a product, not a project.",
+  "rarity": "Common",
+  "art": "🧩",
+  "set": "placement",
+  "value": 1,
+  "skill": "Technical Setup"
+}

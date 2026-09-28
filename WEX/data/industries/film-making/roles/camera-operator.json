@@ -1,0 +1,12 @@
+{
+  "id": "camera-operator",
+  "title": "Camera Operator",
+  "category": "Production",
+  "description": "Operate camera, frame shots, and collaborate with DP on visual storytelling.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "The frame is your canvas. Light is your paint.",
+  "art": "📷",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 6, "technicalSkill": 8, "creativity": 8, "reliability": 7 }
+}

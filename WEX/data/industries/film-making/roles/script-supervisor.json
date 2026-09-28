@@ -1,0 +1,12 @@
+{
+  "id": "script-supervisor",
+  "title": "Script Supervisor",
+  "category": "Production",
+  "description": "Track continuity, coverage, and timing on set. Ensure the edit has what it needs.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Analysis" },
+  "recommendedSets": ["placement", "volunteering"],
+  "flavor": "Continuity is invisible until it's broken.",
+  "art": "📝",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 5, "technicalSkill": 6, "creativity": 5, "reliability": 9 }
+}

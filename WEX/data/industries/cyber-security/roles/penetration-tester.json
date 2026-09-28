@@ -1,0 +1,12 @@
+{
+  "id": "penetration-tester",
+  "title": "Penetration Tester",
+  "category": "Offensive Security",
+  "description": "Simulate attacks to find vulnerabilities before real adversaries do.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Analysis" },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Think like an attacker. Defend like a pro.",
+  "art": "🎯",
+  "rarity": "Rare",
+  "stats": { "industryKnowledge": 8, "networking": 5, "technicalSkill": 9, "creativity": 7, "reliability": 7 }
+}

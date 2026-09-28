@@ -1,0 +1,12 @@
+{
+  "id": "action-fm-attend-visit",
+  "name": "Attend Color Grade / Mix Session",
+  "type": "Action",
+  "category": "Action",
+  "description": "Sit in on a color grading session, sound mix, or online conform review.",
+  "flavor": "Color and sound are the final rewrite.",
+  "rarity": "Common",
+  "art": "👁️",
+  "set": "visit",
+  "value": 1
+}

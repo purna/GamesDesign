@@ -1,0 +1,12 @@
+{
+  "id": "vfx-compositor",
+  "title": "VFX Compositor",
+  "category": "Post Production",
+  "description": "Integrate CG elements, green screen, and effects into live-action footage seamlessly.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "brief"],
+  "flavor": "Invisible effects are the best effects.",
+  "art": "✨",
+  "rarity": "Uncommon",
+  "stats": { "industryKnowledge": 7, "networking": 4, "technicalSkill": 9, "creativity": 8, "reliability": 7 }
+}

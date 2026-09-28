@@ -1,0 +1,12 @@
+{
+  "id": "colorist",
+  "title": "Colorist",
+  "category": "Post Production",
+  "description": "Grade footage for mood, continuity, and visual style across the entire project.",
+  "requirements": { "experience": 2, "evidence": 2, "skill": "Technical Setup" },
+  "recommendedSets": ["placement", "partnership"],
+  "flavor": "Color is emotion made visible.",
+  "art": "🌈",
+  "rarity": "Rare",
+  "stats": { "industryKnowledge": 7, "networking": 5, "technicalSkill": 9, "creativity": 9, "reliability": 8 }
+}

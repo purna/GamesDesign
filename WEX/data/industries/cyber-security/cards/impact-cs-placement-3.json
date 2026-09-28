@@ -1,0 +1,12 @@
+{
+  "id": "impact-cs-placement-3",
+  "name": "Detection Rule Deployed",
+  "type": "Impact",
+  "category": "Impact",
+  "description": "Your detection rule is in production and generating true positive alerts.",
+  "flavor": "Rule deployed. Attacker detected.",
+  "rarity": "Uncommon",
+  "art": "🎯",
+  "set": "placement",
+  "value": 1
+}
