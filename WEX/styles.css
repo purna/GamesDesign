@@ -2768,7 +2768,7 @@ body.simple-mode .settings-hint {
   padding: 0.7rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  background: var(--surface-raised, var(--surface));
 }
 .hof-entry.recent {
   border-color: var(--accent);
@@ -2899,7 +2899,7 @@ body.simple-mode .settings-hint {
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  background: var(--surface-raised, var(--surface));
   color: var(--ink);
   font-size: 0.65rem;
   line-height: 1.5;

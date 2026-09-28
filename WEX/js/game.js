@@ -80,6 +80,7 @@ const el = {
   gameOverOverlay: $('gameOverOverlay'),
   skillsRequired: $('skillsRequired'),
   homeBtn: $('homeBtn'),
+  challengeBtn: $('challengeBtn'),
   helperToggle: $('helperToggle'),
   helperContent: $('helperContent'),
 };
@@ -482,7 +483,7 @@ function doMarketSwap() {
 function newAgent(name, strategy) {
   return {
     name, strategy, isPlayer: strategy == null,
-    energy: START_ENERGY, hand: [], banked: [], skills: [],
+    energy: START_ENERGY, hand: [], banked: [], skills: [], challengeUsed: false,
     evidence: 0, reliability: 0, references: 0, distinctions: 0,
     applied: false, actionPenalty: 0,
     marketPicksThisRound: 0, returnsThisRound: 0, marketSwapsThisRound: 0,
@@ -969,6 +970,122 @@ const EVENTS = [
   },
 ];
 
+// Knowledge check the player can spend once per game. A correct answer buys an
+// extra action, which is the difficulty lever: rivals take a fixed 2 actions a
+// turn with no way to answer back, so without this the AI is very hard to beat.
+const MINI_CHALLENGES = [
+  {
+    q: 'You have finished a work placement. What turns it into strong CV evidence?',
+    options: [
+      'Recording what you did, the skill you used, what you produced, and how it links to your target job',
+      'Turning up for every shift you were rostered to',
+      'Listing the organisation name and the dates you attended',
+      'Getting a colleague to confirm you worked there',
+    ],
+    answer: 0,
+    why: 'Evidence is strong when the student can explain all four parts. Naming the activity alone is only basic evidence.',
+  },
+  {
+    q: 'Your placement hours have been offered as 11:00am to 7:00pm. What should you do before requesting it?',
+    options: [
+      'Accept it straight away so the place is secured',
+      'Agree suitable hours in writing that fit the college rules',
+      'Ask the employer to split it across two days',
+      'Request it and mention the hours in the notes field',
+    ],
+    answer: 1,
+    why: 'The lesson requires agreed, written hours that fit college rules, with a maximum eight-hour day.',
+  },
+  {
+    q: 'Which experience is most likely to earn an employer reference?',
+    options: [
+      'An employer visit',
+      'Volunteering',
+      'A work placement',
+      'A live project brief',
+    ],
+    answer: 2,
+    why: 'A placement is sustained work with an employer, so it is the route that carries a reference.',
+  },
+  {
+    q: 'You have drawn an opportunity card but have not taken part yet. What happens to your CV?',
+    options: [
+      'Nothing yet, because experience only counts once you complete it and record what you did',
+      'The opportunity is added as experience immediately',
+      'It counts as half an experience',
+      'It counts as evidence if you keep the card',
+    ],
+    answer: 0,
+    why: 'Drawing or setting up an opportunity is not CV evidence on its own. The work has to be completed.',
+  },
+  {
+    q: 'You have missed a day of volunteering. What best protects your reliability record?',
+    options: [
+      'Nothing, a missed day is always recorded as a failure',
+      'Contacting the organiser and your tutor, and rescheduling',
+      'Finding someone else to do the shift',
+      'Mentioning it at the end of the month',
+    ],
+    answer: 1,
+    why: 'Contacting people and rescheduling is professional conduct. One setback slows you down but does not end your prospects.',
+  },
+  {
+    q: 'A Block Placement needs Setup, Action, Proof and Impact cards. How do you complete it?',
+    options: [
+      'Any four cards from your hand',
+      'One card of each required type, all from the same route',
+      'One card of each type from any routes',
+      'Four cards of the same type',
+    ],
+    answer: 1,
+    why: 'A set needs one card of every required category, all from the same experience route.',
+  },
+];
+
+function openMiniChallenge() {
+  if (!state || state.winner) return;
+  if (state.player.challengeUsed) {
+    return toast('You have already used your mini-challenge this run.');
+  }
+  const ch = MINI_CHALLENGES[Math.floor(Math.random() * MINI_CHALLENGES.length)];
+  openModal(`
+    <div class="mini-challenge">
+      <div class="eyebrow">MINI-CHALLENGE · ONE CHALLENGE PER RUN</div>
+      <h2>Career Knowledge Check</h2>
+      <p class="challenge-q">${escapeHtml(ch.q)}</p>
+      <div class="modal-actions challenge-options" id="challengeOptions"></div>
+    </div>
+  `);
+  const wrap = $('challengeOptions');
+  ch.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = text;
+    btn.addEventListener('click', () => {
+      if (i === ch.answer) {
+        state.player.challengeUsed = true;
+        state.actionsLeft += 1;
+        addLog(`You answered the mini-challenge correctly — +1 action this turn.`);
+        closeModal();
+        render();
+        persist();
+        toast('Correct — extra action granted this turn.');
+      } else {
+        btn.classList.add('wrong');
+        btn.disabled = true;
+        $('challengeFeedback').innerHTML =
+          `<p class="wrong-note">Not quite. ${escapeHtml(ch.why)}</p>`
+          + '<p class="wrong-hint">Try another answer — the challenge stays open until you get it right.</p>';
+      }
+    });
+    wrap.appendChild(btn);
+  });
+  const fb = document.createElement('div');
+  fb.id = 'challengeFeedback';
+  fb.className = 'challenge-feedback';
+  wrap.parentNode.appendChild(fb);
+}
+
 function triggerEvent() {
   const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
   openModal(`
@@ -1420,7 +1537,8 @@ function cardEl(c, opts) {
     <div class="card-art">${c.art || '🃏'}</div>
     <div class="card-name">${escapeHtml(c.name)}</div>
     <div class="card-type">${c.category}${c.set === 'any' ? ' · <span class="any-route">Any route</span>' : ' · ' + escapeHtml(setName(c.set))}</div>
-    ${cardSkills(c).length ? '<div class="card-skill' + (isRequiredSkillCard(c) ? ' card-skill-key' : '') + '"><i class="fa-solid fa-star"></i> ' + escapeHtml(cardSkills(c)[0]) + (cardSkills(c).length > 1 ? '<span class="card-skill-more">+' + (cardSkills(c).length - 1) + '</span>' : '') + (isRequiredSkillCard(c) ? '<span class="card-skill-need">needed</span>' : '') + '</div>' : ''}
+    ${cardSkills(c).length ? '<div class="card-skill' + (isRequiredSkillCard(c) ? ' card-skill-key' : '') + '"><i class="fa-solid fa-star"></i><span class="card-skill-name">' + escapeHtml(cardSkills(c)[0]) + '</span>' + (cardSkills(c).length > 1 ? '<span class="card-skill-more">+' + (cardSkills(c).length - 1) + '</span>' : '') + '</div>' : ''}
+    ${isRequiredSkillCard(c) ? '<span class="card-skill-need">needed</span>' : ''}
   `;
   if (opts.onClick) div.addEventListener('click', opts.onClick);
   if (opts.onInspect) {
@@ -1701,6 +1819,14 @@ function renderControls() {
 
   // Highlight bank button when a valid set is ready to bank
   el.bankBtn.classList.toggle('ready-to-bank', canBank);
+  if (el.challengeBtn) {
+    const spent = !!state.player.challengeUsed;
+    el.challengeBtn.disabled = spent || !!state.winner;
+    el.challengeBtn.title = spent
+      ? 'You have used your mini-challenge this run'
+      : 'Answer a career question correctly to earn an extra action this turn';
+    el.challengeBtn.classList.toggle('challenge-spent', spent);
+  }
 
   renderSetBuilderStatus();
   el.applyBtn.disabled = !!state.winner;
@@ -1805,6 +1931,7 @@ function closeLearn() {
 }
 
 app.openLearn = openLearn;
+app.openMiniChallenge = openMiniChallenge;
 app.toast = toast;
 app.showGuide = showGuide;
 app.state = Object.assign(app.state || {}, { round: 0, actionsLeft: 0 });
@@ -1968,6 +2095,7 @@ el.startBtn.addEventListener('click', () => newGame(el.jobSelect.value));
 el.backToIndustryBtn.addEventListener('click', goToMainMenu);
 if (el.homeBtn) el.homeBtn.addEventListener('click', goToMainMenu);
 el.returnBtn.addEventListener('click', doReturnSelected);
+el.challengeBtn.addEventListener('click', openMiniChallenge);
   setupDragAndDrop();
 el.bankBtn.addEventListener('click', doBank);
 el.applyBtn.addEventListener('click', doApply);

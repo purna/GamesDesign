@@ -273,7 +273,9 @@ html[data-theme="light"] {
   gap: 1rem;
   align-items: start;
 }
-@media (max-width: 760px) {
+@media (max-width: 1000px) {
+  /* Collapse the sidebar earlier: at 1000px a 280px sidebar beside the card grid
+     squeezes four columns down to ~120px, which is too tight to read. */
   .layout { grid-template-columns: 1fr; }
 }
 
@@ -359,9 +361,12 @@ html[data-theme="light"] {
 
 .market, .hand {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  /* Hand cap is 6 and the market holds 6, so six equal columns keeps a full hand on
+     one row at desktop widths. Cards fill their column instead of a fixed 182px. */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.6rem;
 }
+.market .card, .hand .card { width: 100%; }
 
 /* ===== Cards ===== */
 .card {
@@ -817,9 +822,15 @@ html[data-theme="light"] {
     min-width: 0;
   }
 }
+@media (max-width: 1200px) {
+  .market, .hand {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 600px) {
   .market, .hand {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -958,7 +969,10 @@ html[data-theme="light"] {
   padding: 1rem;
 }
 .game-over-card {
-  background: var(--surface-2);
+  /* Was var(--surface-2), which is not a defined token in this project, so the
+     background resolved to nothing and the dark overlay showed through. */
+  background: var(--surface-raised, var(--surface));
+  color: var(--ink);
   border: 2px solid var(--accent);
   border-radius: var(--radius);
   padding: 2rem;
@@ -1004,7 +1018,7 @@ html[data-theme="light"] {
 }
 .preview-rolefit.done {
   border: 1px dashed var(--border);
-  background: color-mix(in srgb, var(--surface-2), transparent 40%);
+  background: color-mix(in srgb, var(--surface-raised, var(--surface)), transparent 40%);
   color: var(--ink-soft);
 }
 .preview-rolefit b { display: block; font-size: 0.72rem; margin-bottom: 0.15rem; }
@@ -1012,7 +1026,6 @@ html[data-theme="light"] {
 
 /* Cards that grant the target role's required skill */
 .card-skill-key { color: var(--gold) !important; }
-.card-skill-key::before { content: "\2605"; }
 .card.card-key-skill {
   box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold), transparent 55%);
   border-color: var(--gold);
@@ -1027,8 +1040,23 @@ html[data-theme="light"] {
 .card.invalid-card { opacity: 0.35; border-style: dashed; }
 
 /* Card face: one skill, extras collapsed to +N, required marker */
-.card-skill { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
+.card-skill {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
+}
+.card-skill-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-skill i { flex: 0 0 auto; }
 .card-skill-more {
+  flex: 0 0 auto;
   font-weight: 700;
   color: var(--ink-soft);
   background: color-mix(in srgb, var(--ink-soft), transparent 80%);
@@ -1036,13 +1064,30 @@ html[data-theme="light"] {
   padding: 0 0.25rem;
   font-size: 0.55rem;
 }
+/* 45 degree corner ribbon. The card clips overflow, so the rotated pill reads as a
+   diagonal flag in the top-left corner without needing extra markup. */
 .card-skill-need {
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  border-radius: 3px;
-  padding: 0 0.25rem;
+  position: absolute;
+  /* Offsets are chosen so the rotated pill's bounding box stays inside the card:
+     a 45deg box is (w+h)/sqrt(2) on a side, so it must clear the corner on both
+     axes or overflow:hidden clips the text. */
+  top: 1rem;
+  left: 0.5rem;
+  z-index: 2;
+  transform: rotate(-45deg);
+  transform-origin: center;
+  margin-left: -0.45rem;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: var(--font-mono);
   font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  padding: 0.08rem 0.3rem;
+  border-radius: 2px;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 /* Explicit "open this card" affordance: works on touch, no double-click needed */
@@ -1081,3 +1126,15 @@ html[data-theme="light"] {
 #hand .card.drop-after { box-shadow: 4px 0 0 0 var(--accent), 0 0 0 1px var(--border); }
 #hand .card.dragging-card { opacity: 0.4; }
 #hand { min-height: 60px; }
+
+/* Mini-challenge: one correct answer per run buys an extra action */
+.challenge-btn { border-color: var(--gold); color: var(--gold); }
+.challenge-btn:disabled { opacity: 0.45; border-color: var(--border); color: var(--ink-soft); }
+.challenge-btn.challenge-spent::before { content: "\2713 "; }
+.challenge-options { flex-direction: column; align-items: stretch; }
+.challenge-options .btn { text-align: left; line-height: 1.4; padding: 0.6rem 0.8rem; }
+.challenge-options .btn.wrong { border-color: var(--bad); color: var(--bad); opacity: 0.7; }
+.challenge-q { font-size: 1rem; line-height: 1.5; margin: 0.5rem 0 1rem; }
+.challenge-feedback:empty { display: none; }
+.wrong-note { color: var(--ink); font-size: 0.8rem; line-height: 1.5; margin: 0.75rem 0 0.25rem; }
+.wrong-hint { color: var(--ink-soft); font-size: 0.72rem; margin: 0; }

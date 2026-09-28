@@ -494,34 +494,137 @@ Key features implemented:
 
 ## Current prototype state
 
-### Data counts (game-data.json)
-- 17 target roles (16 original + Esports Event Assistant)
-- 63 card templates (including 5 group-specific wildcards)
-- 5 opportunity sets: Block Placement, Employer Visit, Volunteering, Live Project Brief, Industry Partnership
-- 8 skills: Analysis, Communication, Coaching, Design, Organisation, Problem solving, Teamwork, Technical Setup
-- Each skill has ≥2 cards across multiple routes
-- 82 JSON files total (1 game-data + 17 roles + 63 cards + 1 firebase config + 1 classroom)
+_Last updated 28 Sep 2026. Everything above this line is the original design
+conversation and is kept as history; this section is the accurate description of the
+code as it stands._
 
-### Wildcards
-5 wildcards, each tied to ONE specific route:
-- wild-mentor-advice (brief)
-- wild-careers-team (placement)
-- wild-card-evidence-boost (placement)
-- wild-card-extra-time (brief)
-- wild-card-tutor-advice (volunteering)
+### Architecture
 
-Game logic allows wildcards to substitute for any missing card type in their assigned route only.
+Single-page app, no build step. Must be served over HTTP (service worker and `fetch`
+of JSON both require it) — `python3 -m http.server` from the project root.
 
-### Key mechanics
-- 2 actions per turn, 2 market picks per round (costs 1 action each), 2 returns per round (free)
-- Market rotates 2 cards at start of each round even if unclaimed
-- Deck reshuffles from discard pile, or builds fresh supply, when draw pile runs out
-- 5 card categories: Setup (cyan), Action (pink), Proof (gold), Impact (orange), Wildcard (lime)
-- "Any route" cards display with accent-colored border for distinction
-- Players click hand cards to select, double-click to preview
-- Players drag market cards to hand, or drag hand cards to return zone/market to return
-- Clicking a rival card opens a modal showing their completed sets and route availability
-- Events trigger every 3rd round; "Bonus Mini-Challenge" event offers card redraw (2 cards) on success
-- AIs return cards to the draw deck (not the market)
-- Skill hints shown in job needs bar when a required skill is missing
-- Card previews show a gold skill-badge when a card grants a skill
+| File | Role |
+| --- | --- |
+| `index.html` | All markup: header, industry select, setup, Hall of Fame, learn screen, game board, modals |
+| `styles.css` | Layout, screens, panels, modals |
+| `card-styles.css` | Card faces, drop zones, rival modal, game-over overlay |
+| `js/game.js` | Data loading, state, all rendering, player actions, banking, events, persistence |
+| `js/ai.js` | Rival decision logic only (`runRivalTurn`, market heuristics, rival turn popup) |
+| `js/settings.js` | Theme, sound, animations, auto-draw, reset |
+| `js/accessibility.js` | High contrast, large text, TTS, simple mode |
+| `sw.js` | Offline cache. Network-first for code and data, cache-first for images |
+
+Scripts are plain deferred `<script>` tags sharing one global scope. There is no
+module system, so functions cross-reference freely between `game.js` and `ai.js`.
+
+### Data layout
+
+```
+data/industries/<industry>/
+  game-data.json   <-- THE ONLY FILE THE GAME READS
+  cards/           <-- source data, one file per card (28 per industry)
+  roles/           <-- source data, one file per role
+data/industries/shared/cards/   46 cards used by every industry
+```
+
+Eight industries: `animation`, `cyber-security`, `esports`, `film-making`,
+`game-design`, `games-development`, `illustration`, `web-design`.
+
+| Industry | Cards | Roles |
+| --- | --- | --- |
+| esports | 74 | 18 |
+| game-design | 74 | 13 |
+| illustration | 74 | 12 |
+| animation | 74 | 10 |
+| film-making | 74 | 8 |
+| cyber-security | 74 | 5 |
+| games-development | 74 | 5 |
+| web-design | 74 | 4 |
+
+Every industry is 28 own cards + 46 shared = **74 cards**, and 5 opportunity sets
+(placement 4, visit 2, volunteering 3, brief 3, partnership 4). 13 distinct skills:
+Analysis, Coaching, Communication, Design, Documentation, Industry Knowledge,
+Organisation, Presentation, Problem solving, Reflection, Reliability, Teamwork,
+Technical Setup.
+
+### Gotcha: `game-data.json` is the runtime source of truth
+
+**Editing a file in `cards/` or `roles/` changes nothing until `game-data.json` is
+regenerated** from those folders. This has caused repeated confusion (an art fix, a
+skills change, and a coverage pass all appeared to "not work" because the
+consolidated file still held the old data). There is no build script — regeneration
+has been done ad hoc. **Adding one is the highest-value next task in this project.**
+
+### Gotcha: the service worker caches aggressively
+
+`sw.js` is network-first for HTML, JS, CSS and game data, and cache-first for images,
+so online edits should always land. The previous version was cache-first for
+everything, which served stale `game.js` indefinitely and caused the same confusion
+repeatedly. If stale content ever appears again, unregister the worker in DevTools →
+Application → Service Workers, then hard-reload.
+
+### Gotcha: saved games hold card copies
+
+Cards in `localStorage` are full objects, not id references, so a save freezes the
+card data as it was. `resyncCard()` (called from `cleanPile()` on resume) re-reads
+each card from current data by id and keeps its `uid`, which repairs art, skill and
+route changes inside an in-progress game. The same function drops malformed cards.
+
+### Mechanics as built
+
+- 2 actions per turn; 2 market picks per round (1 action each); 2 returns per round
+  (free); 2 market swaps per round; hand cap 6
+- Bank a set when the selected cards exactly match a route's required categories.
+  The bank button is gated on a real `findBank()` check, not just the card count
+- A banked set grants **every** skill on its cards (capped at 2 skills per card)
+- Cards granting a skill that some role requires are dealt back into the deck when
+  consumed, so required skills can never be exhausted
+- Market rotates 2 cards each round; deck reshuffles from discard, then rebuilds
+- Events every 3rd round
+- Win: meet experience, evidence, set-variety and required-skill gates, then Apply.
+  Rivals play visibly turn by turn and can win
+
+### UX affordances added
+
+- Required-skill cards get a gold outline and a `needed` pill in hand and market
+- Card face shows one skill plus `+N`; preview shows the full list
+- Per-card `ⓘ` button opens the preview on touch (click alone selects)
+- Hand can be reordered by dragging; the order is cosmetic (nothing reads hand order)
+- "Skills for the role" panel with a `?` tooltip listing routes, required card types
+  and a concrete example card per route
+- Helper-hints toggle in the header hides the legend, drag hints, guide banner and
+  the empty-selection tutorial blurb, but never the live set-builder feedback
+- Hall of Fame page and per-run completion history, stored in `localStorage`
+- How to Play is a modal overlay, not a panel swap
+- Home button returns to the main menu, with a single `showOnlyPanel()` used by every
+  navigation path
+
+### Dead files, safe to delete
+
+- `js/app.js` — not loaded by `index.html`; it was the only service worker
+  registration, now moved into `game.js`
+- Root scripts: `add-cards.js`, `add-more-industry-cards.js`, `build-cards.js`,
+  `create-industry-cards.js`, `generate-industry-data.js`, `regenerate-data.js`,
+  `script.js` — none referenced by the page
+- `data/industries/*/cards.json` and `data/industries/*/cards/cards.json` — generated
+  aggregate arrays sitting inside the card folders; they are never loaded, but they
+  pollute the folder and break any tooling that globs it
+- `prototype/`, `cloud-functions/`, `functions/`, `plugins/` — not part of the app
+
+### Testing
+
+No test framework. Verification during development was done with a throwaway Node
+harness (`/tmp/smoke.js`) that stubs the DOM, evals `game.js`, and calls the real
+render functions against live game data. It caught bugs that `node --check` cannot
+(scope errors, missing DOM lookups). It is worth moving into the repo.
+
+**Always run `node --check` on all JS after edits** — it catches syntax only, and has
+missed real runtime errors.
+
+### Not browser-verified
+
+Most UI work has been validated by the harness and by static checks, but the visual
+result has not been seen in a browser. Worth a pass over: card face density with
+multi-skill labels, the gold key-card outline, tooltip positioning in the sidebar,
+the learn-screen overlay at short viewport heights, the hand reorder drop indicator
+on a wrapped hand, and the header icon row on narrow screens.
