@@ -1,0 +1,13 @@
+{
+  "id": "action-run-coaching-session",
+  "name": "Run a Coaching Session",
+  "type": "Action",
+  "category": "Action",
+  "description": "Deliver a one-to-one or small-group coaching moment focused on a specific skill.",
+  "flavor": "The best coaches listen more than they speak.",
+  "rarity": "Common",
+  "art": "🎯",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Coaching"
+}

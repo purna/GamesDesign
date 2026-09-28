@@ -1,0 +1,13 @@
+{
+  "id": "setup-confirm-venue-logistics",
+  "name": "Confirm Venue Logistics",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Book the venue, confirm access, arrange equipment, and create a run sheet for the event.",
+  "flavor": "The devil is in the details, and the angels love a well-run event.",
+  "rarity": "Common",
+  "art": "🏢",
+  "set": "visit",
+  "value": 1,
+  "skill": "Organisation"
+}

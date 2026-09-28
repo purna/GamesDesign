@@ -555,7 +555,12 @@ function missingRequirements(agent, job) {
   const setVariety = completedJobSetTypes(agent, job).size;
   if (setVariety < REQUIRED_SET_VARIETY) out.push(`experience from ${REQUIRED_SET_VARIETY - setVariety} more job-relevant set type(s)`);
   if (cv.evidence < job.requirements.evidence) out.push(`${job.requirements.evidence - cv.evidence} more evidence`);
-  if (!agent.skills.includes(job.requirements.skill)) out.push(`the ${job.requirements.skill} skill`);
+  if (!agent.skills.includes(job.requirements.skill)) {
+    const skillCards = DATA.cards.filter((c) => c.skill === job.requirements.skill);
+    const cardNames = skillCards.slice(0, 3).map((c) => `"${c.name}" (${setName(c.set || 'any')})`);
+    const hint = cardNames.length ? ` Look for: ${cardNames.join(', ')}.` : '';
+    out.push(`the ${job.requirements.skill} skill${hint}`);
+  }
   return out;
 }
 
@@ -991,12 +996,15 @@ function render() {
 function renderJobNeeds() {
   const req = state.job.requirements;
   const cv = agentCV(state.player);
-  const line = (ok, text) => `<span class="need ${ok ? 'met' : ''}">${ok ? '✓' : '•'} ${text}</span>`;
+  const line = (ok, text, subtext) => `<span class="need ${ok ? 'met' : ''}">${ok ? '✓' : '•'} ${text}${subtext ? '<small>' + subtext + '</small>' : ''}</span>`;
+  const hasSkill = state.player.skills.includes(req.skill);
+  const skillCards = DATA.cards.filter((c) => c.skill === req.skill);
+  const skillHint = hasSkill ? '' : skillCards.length ? `Includes: ${skillCards.slice(0, 3).map((c) => `"${c.name}"`).join(', ')}` : '';
   el.jobNeeds.innerHTML = [
     line(cv.experience >= minimumExperienceForJob(state.job), `${cv.experience}/${minimumExperienceForJob(state.job)} completed sets`),
     line(completedJobSetTypes(state.player, state.job).size >= REQUIRED_SET_VARIETY, `${completedJobSetTypes(state.player, state.job).size}/${REQUIRED_SET_VARIETY} role-fit set types`),
     line(cv.evidence >= req.evidence, `${req.evidence} evidence`),
-    line(state.player.skills.includes(req.skill), `Skill: ${req.skill}`),
+    line(hasSkill, `Skill: ${req.skill}`, skillHint),
   ].join('');
 }
 
@@ -1137,7 +1145,7 @@ function openPreview(where, card) {
         <div class="card-art">${card.art || '🃏'}</div>
         <div class="card-name">${escapeHtml(card.name)}</div>
         <div class="card-description">${escapeHtml(card.description)}</div>
-        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}</div>
+        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}${card.skill ? '<br><span class="skill-badge">' + escapeHtml(card.skill) + ' skill</span>' : ''}</div>
         <div class="card-top">
           <span class="${card.set === 'any' ? 'any-route' : ''}">${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
           <span>${cat === 'Wildcard' ? '★' : cat === 'Proof' ? '◆' : cat === 'Action' ? '●' : '◇'}</span>

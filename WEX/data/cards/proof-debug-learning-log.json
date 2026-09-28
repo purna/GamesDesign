@@ -1,0 +1,13 @@
+{
+  "id": "proof-debug-learning-log",
+  "name": "Debug & Learning Log",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Document a bug or unexpected issue you hit, the steps you took to diagnose it, and what you learned.",
+  "flavor": "Every bug is a lesson in disguise.",
+  "rarity": "Common",
+  "art": "🐛",
+  "set": "brief",
+  "value": 1,
+  "skill": "Problem solving"
+}

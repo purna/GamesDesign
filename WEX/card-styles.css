@@ -151,6 +151,7 @@ html[data-theme="light"] {
   white-space: nowrap;
 }
 .need.met { color: var(--good); font-weight: 600; }
+.need small { color: var(--ink-soft); font-size: 0.62rem; font-weight: 400; display: block; margin-top: 0.15rem; }
 
 .guide {
   background: var(--accent-soft);
@@ -776,6 +777,7 @@ html[data-theme="light"] {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 40%);
 }
 .card .any-route { color: var(--accent); font-weight: 600; font-size: 0.8em; }
+.card .skill-badge { color: var(--gold); font-weight: 600; font-size: 0.8em; }
 
 /* Drag-and-drop card movement: clear targets, with popup/button alternatives. */
 .card[draggable="true"] { cursor: grab; touch-action: none; }

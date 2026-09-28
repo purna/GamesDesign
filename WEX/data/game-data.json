@@ -541,6 +541,19 @@
       "value": 1
     },
     {
+      "id": "setup-confirm-venue-logistics",
+      "name": "Confirm Venue Logistics",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Book the venue, confirm access, arrange equipment, and create a run sheet for the event.",
+      "flavor": "The devil is in the details, and the angels love a well-run event.",
+      "rarity": "Common",
+      "art": "🏢",
+      "set": "visit",
+      "value": 1,
+      "skill": "Organisation"
+    },
+    {
       "id": "action-attend-visit",
       "name": "Attend Employer Visit",
       "type": "Action",
@@ -589,6 +602,32 @@
       "set": "volunteering",
       "value": 1,
       "skill": "Teamwork"
+    },
+    {
+      "id": "action-run-coaching-session",
+      "name": "Run a Coaching Session",
+      "type": "Action",
+      "category": "Action",
+      "description": "Deliver a one-to-one or small-group coaching moment focused on a specific skill.",
+      "flavor": "The best coaches listen more than they speak.",
+      "rarity": "Common",
+      "art": "🎯",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Coaching"
+    },
+    {
+      "id": "action-co-ordinate-volunteers",
+      "name": "Coordinate Volunteer Roles",
+      "type": "Action",
+      "category": "Action",
+      "description": "Assign shifts, brief volunteers on their roles, and set up a communication channel for the day.",
+      "flavor": "Herd management, esports edition.",
+      "rarity": "Common",
+      "art": "📱",
+      "set": "volunteering",
+      "value": 1,
+      "skill": "Organisation"
     },
     {
       "id": "proof-reliability-checkin",
@@ -668,6 +707,32 @@
       "skill": "Reflection"
     },
     {
+      "id": "proof-give-coaching-feedback",
+      "name": "Reflect on Coaching Feedback",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document how coaching conversations helped a player improve their performance or mindset.",
+      "flavor": "Coaching lives in the follow-through.",
+      "rarity": "Uncommon",
+      "art": "💭",
+      "set": "brief",
+      "value": 1,
+      "skill": "Coaching"
+    },
+    {
+      "id": "proof-debug-learning-log",
+      "name": "Debug & Learning Log",
+      "type": "Proof",
+      "category": "Proof",
+      "description": "Document a bug or unexpected issue you hit, the steps you took to diagnose it, and what you learned.",
+      "flavor": "Every bug is a lesson in disguise.",
+      "rarity": "Common",
+      "art": "🐛",
+      "set": "brief",
+      "value": 1,
+      "skill": "Problem solving"
+    },
+    {
       "id": "setup-confirm-partner-project",
       "name": "Confirm Partner Project",
       "type": "Setup",
@@ -678,6 +743,19 @@
       "art": "🤝",
       "set": "partnership",
       "value": 1
+    },
+    {
+      "id": "setup-stage-run-sheet",
+      "name": "Stage the Run Sheet",
+      "type": "Setup",
+      "category": "Setup",
+      "description": "Create a detailed run sheet with roles, timings, contacts and contingency plans for the event.",
+      "flavor": "A good run sheet saves the day before anyone knows there was a problem.",
+      "rarity": "Common",
+      "art": "📋",
+      "set": "partnership",
+      "value": 1,
+      "skill": "Organisation"
     },
     {
       "id": "action-complete-partner-task",

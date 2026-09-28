@@ -1,0 +1,13 @@
+{
+  "id": "proof-give-coaching-feedback",
+  "name": "Reflect on Coaching Feedback",
+  "type": "Proof",
+  "category": "Proof",
+  "description": "Document how coaching conversations helped a player improve their performance or mindset.",
+  "flavor": "Coaching lives in the follow-through.",
+  "rarity": "Uncommon",
+  "art": "💭",
+  "set": "brief",
+  "value": 1,
+  "skill": "Coaching"
+}

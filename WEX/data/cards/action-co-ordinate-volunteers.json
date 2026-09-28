@@ -1,0 +1,13 @@
+{
+  "id": "action-co-ordinate-volunteers",
+  "name": "Coordinate Volunteer Roles",
+  "type": "Action",
+  "category": "Action",
+  "description": "Assign shifts, brief volunteers on their roles, and set up a communication channel for the day.",
+  "flavor": "Herd management, esports edition.",
+  "rarity": "Common",
+  "art": "📱",
+  "set": "volunteering",
+  "value": 1,
+  "skill": "Organisation"
+}

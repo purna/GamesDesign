@@ -1,0 +1,13 @@
+{
+  "id": "setup-stage-run-sheet",
+  "name": "Stage the Run Sheet",
+  "type": "Setup",
+  "category": "Setup",
+  "description": "Create a detailed run sheet with roles, timings, contacts and contingency plans for the event.",
+  "flavor": "A good run sheet saves the day before anyone knows there was a problem.",
+  "rarity": "Common",
+  "art": "📋",
+  "set": "partnership",
+  "value": 1,
+  "skill": "Organisation"
+}
