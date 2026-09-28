@@ -1526,8 +1526,8 @@
   max-height: calc(100vh - 2rem);
   box-sizing: border-box;
   border-radius: var(--radius);
-  border: 2px solid color-mix(in srgb, var(--border), var(--card-glow) 58%);
-  background: linear-gradient(150deg, color-mix(in srgb, var(--card-glow), var(--surface) 80%), var(--surface) 58%, color-mix(in srgb, var(--surface), var(--bg) 38%));
+  border: 2px solid var(--card-route);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--card-route), var(--surface) 80%), var(--surface) 58%, color-mix(in srgb, var(--surface), var(--bg) 38%));
   color: var(--ink);
   box-shadow: var(--shadow-md), inset 0 0 0 4px var(--surface), inset 0 0 0 5px var(--border);
   overflow: hidden;
