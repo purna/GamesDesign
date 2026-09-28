@@ -390,7 +390,7 @@ html[data-theme="light"] {
 
 #bankBtn.ready-to-bank {
   background: linear-gradient(135deg, var(--gold), var(--gold-soft));
-  color: #101118;
+  color: #fff;
   box-shadow: 0 0 0 3px var(--gold), 0 0 20px 4px var(--gold);
   animation: bankPulse 1.5s ease-in-out infinite;
 }

@@ -47,6 +47,7 @@ const el = {
   hand: $('hand'), handCount: $('handCount'),
   setBuilderStatus: $('setBuilderStatus'),
   returnBtn: $('returnBtn'), returnZone: $('returnZone'), bankBtn: $('bankBtn'),
+  swapMarketBtn: $('swapMarketBtn'),
   applyBtn: $('applyBtn'), endBtn: $('endBtn'),
   sets: $('sets'),
   bankedSets: $('bankedSets'), bankedSetProgress: $('bankedSetProgress'),
@@ -84,6 +85,7 @@ const ACTIONS_PER_TURN = 2;
 const HAND_CAP = 6;
 const MAX_MARKET_PICKS_PER_ROUND = 2;
 const MAX_RETURNS_PER_ROUND = 2;
+const MAX_MARKET_SWAPS_PER_ROUND = 2;
 const TURN_SECONDS = 300;
 
 const RIVAL_SEEDS = [
@@ -217,6 +219,41 @@ function redrawHandCards(agent, count, success = true) {
   }
 }
 
+function canSwapMarket(agent) {
+  if (state.market.length === 0) return false;
+  const useful = state.market.some((c) => {
+    const score = rateMarketCard(agent, c);
+    return score > 0;
+  });
+  return !useful;
+}
+
+function findWorstMarketCard(agent) {
+  let worstIdx = -1;
+  let worstScore = Infinity;
+  state.market.forEach((c, i) => {
+    const score = rateMarketCard(agent, c);
+    if (score < worstScore) {
+      worstScore = score;
+      worstIdx = i;
+    }
+  });
+  return worstIdx;
+}
+
+function rateMarketCard(agent, card) {
+  const order = targetSetOrder(agent, state.job);
+  const recommended = jobSetOptions(state.job);
+  let score = 0;
+  const rank = order.indexOf(card.set);
+  if (rank >= 0) score += Math.max(1, 7 - rank);
+  if (recommended.has(card.set)) score += 4;
+  if (agent.strategy && card.set === agent.strategy) score += 2;
+  if (card.category === 'Wildcard') score += 2;
+  return score;
+}
+
+
 function refillMarket() {
   while (state.market.length < MARKET_SIZE) {
     const [c] = draw(1);
@@ -234,6 +271,37 @@ function refreshMarketForRound() {
   addLog(`The community market refreshed with ${freshCards.length} new card(s).`);
 }
 
+function swapMarketCard(index, agent) {
+  if (!state || state.winner) return;
+  if (index < 0 || index >= state.market.length) return;
+  const swapped = state.market.splice(index, 1);
+  state.discard.push(...swapped);
+  const [fresh] = draw(1);
+  if (fresh) state.market.splice(index, 0, fresh);
+  if (agent === state.player) {
+    addLog(`You swapped a market card for a fresh draw.`);
+  } else {
+    addLog(`${agent.name} swapped a market card.`);
+  }
+}
+
+function doMarketSwap() {
+  if (state.winner || state.player.marketSwapsThisRound >= MAX_MARKET_SWAPS_PER_ROUND) {
+    toast(`You can swap ${MAX_MARKET_SWAPS_PER_ROUND} market cards per round.`);
+    return;
+  }
+  const available = state.market.length;
+  if (!available) return toast('No market cards to swap.');
+  const count = Math.min(MAX_MARKET_SWAPS_PER_ROUND - state.player.marketSwapsThisRound, available);
+  const indices = [];
+  for (let i = 0; i < available && indices.length < count; i++) indices.push(i);
+  indices.sort(() => Math.random() - 0.5);
+  indices.slice(0, count).forEach((i) => swapMarketCard(i, state.player));
+  state.player.marketSwapsThisRound += count;
+  render();
+  persist();
+}
+
 /* ============================== Agents ================================== */
 
 function newAgent(name, strategy) {
@@ -242,7 +310,7 @@ function newAgent(name, strategy) {
     energy: START_ENERGY, hand: [], banked: [], skills: [],
     evidence: 0, reliability: 0, references: 0, distinctions: 0,
     applied: false, actionPenalty: 0,
-    marketPicksThisRound: 0, returnsThisRound: 0,
+    marketPicksThisRound: 0, returnsThisRound: 0, marketSwapsThisRound: 0,
   };
 }
 
@@ -663,6 +731,7 @@ function finishRivalPhase() {
   state.player.energy = Math.min(START_ENERGY, state.player.energy + 1);
   state.player.marketPicksThisRound = 0;
   state.player.returnsThisRound = 0;
+  state.player.marketSwapsThisRound = 0;
   state.actionsLeft = ACTIONS_PER_TURN - (state.player.actionPenalty || 0);
   state.player.actionPenalty = 0;
   if (state.actionsLeft < 1) state.actionsLeft = 1;
@@ -680,6 +749,19 @@ function runRivalTurn(agent) {
   agent.energy = Math.min(START_ENERGY, agent.energy + 1);
   agent.marketPicksThisRound = 0;
   agent.returnsThisRound = 0;
+  agent.marketSwapsThisRound = 0;
+  if (agent.hand.length < HAND_CAP && canSwapMarket(agent)) {
+    const swapCount = Math.min(MAX_MARKET_SWAPS_PER_ROUND, state.market.length);
+    for (let i = 0; i < swapCount; i++) {
+      const worstIdx = findWorstMarketCard(agent);
+      if (worstIdx === -1) break;
+      swapMarketCard(worstIdx, agent);
+    }
+    if (swapCount > 0) {
+      summary.actions.push({ type: 'swap', count: swapCount });
+      agent.marketSwapsThisRound = swapCount;
+    }
+  }
   let actions = ACTIONS_PER_TURN;
   agent.actionPenalty = 0;
 
@@ -1281,7 +1363,13 @@ function renderControls() {
   el.returnBtn.textContent = returnCount
     ? `↩ Return ${returnCount} to deck`
     : `↩ Return selected to deck (${returnsLeft} left this round)`;
-  el.returnBtn.title = 'Select up to two cards in your hand and return them to the deck, or drag one to the return area. Returns are free, up to two each round.';
+   el.returnBtn.title = 'Select up to two cards in your hand and return them to the deck, or drag one to the return area. Returns are free, up to two each round.';
+  const swapsLeft = MAX_MARKET_SWAPS_PER_ROUND - state.player.marketSwapsThisRound;
+  el.swapMarketBtn.disabled = !state.market.length || swapsLeft < 1 || !!state.winner;
+  el.swapMarketBtn.textContent = swapsLeft
+    ? `↻ Swap market (${swapsLeft} left)`
+    : `↻ Swap market (0 left)`;
+  el.swapMarketBtn.title = 'Put back up to 2 market cards and draw fresh ones from the deck. Free, up to 2 per round.';
   const selectedCards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
   const route = selectedRoute(selectedCards);
   const requiredCount = route ? requiredCategories(route).length : 0;
@@ -1361,7 +1449,7 @@ function showGuide(text) {
 
 const LEARN_STEPS = [
   { title: 'Pick a target job', body: 'Choose the gaming-industry role you want. Each role needs a set number of completed experiences, evidence, and one specific skill.' },
-  { title: 'Take or return cards', body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the deck. Returns are free; taking each market card costs 1 action. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. You can also drag market cards into your hand and drag hand cards to the return area, or use the Return button.' },
+  { title: 'Take or return cards', body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the deck. Returns are free; taking each market card costs 1 action. You can also swap up to 2 market cards at the start of your turn by clicking the Swap button — put back unwanted market cards and draw fresh ones. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. You can also drag market cards into your hand and drag hand cards to the market or return area.' },
   { title: 'Bank a set', body: 'Each colour route needs a different group: Employer Visit needs Setup + Action (2 cards); Volunteering and Live Project Brief need Setup + Action + Proof (3); Block Placement and Industry Partnership need Setup + Action + Proof + Impact (4). You will see several examples for each type. Choose only one card per required type and bank it for CV experience, evidence and a skill. Any route cards work in every route; wildcards replace a missing type.' },
   { title: 'Watch your rivals', body: 'Three AI candidates take two actions each after your turn, each with a different strategy. Keep an eye on their progress bars in the rivals panel.' },
   { title: 'Apply for the job', body: "Once your CV meets the job's requirements, press Apply. The first eligible candidate — you or a rival — wins the race." },
@@ -1427,11 +1515,12 @@ function setupDragAndDrop() {
 /* ============================== Wiring ==================================== */
 
 el.startBtn.addEventListener('click', () => newGame(el.jobSelect.value));
-el.returnBtn.addEventListener('click', doReturnSelected);
-setupDragAndDrop();
-el.bankBtn.addEventListener('click', doBank);
-el.applyBtn.addEventListener('click', doApply);
-el.endBtn.addEventListener('click', endTurn);
+  el.returnBtn.addEventListener('click', doReturnSelected);
+  el.swapMarketBtn.addEventListener('click', doMarketSwap);
+  setupDragAndDrop();
+  el.bankBtn.addEventListener('click', doBank);
+  el.applyBtn.addEventListener('click', doApply);
+  el.endBtn.addEventListener('click', endTurn);
 
 if (el.signInBtn) {
   el.signInBtn.addEventListener('click', () => toast('Sign-in requires a Firebase project. Your progress saves locally in this browser.'));
@@ -1459,7 +1548,8 @@ if (el.signInBtn) {
       state = saved;
       state.player.returnsThisRound = state.player.returnsThisRound || 0;
       state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
-      state.rivals.forEach((r) => { r.returnsThisRound = r.returnsThisRound || 0; r.marketPicksThisRound = r.marketPicksThisRound || 0; });
+      state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
+      state.rivals.forEach((r) => { r.returnsThisRound = r.returnsThisRound || 0; r.marketPicksThisRound = r.marketPicksThisRound || 0; r.marketSwapsThisRound = r.marketSwapsThisRound || 0; });
       el.setup.classList.add('hidden');
       el.game.classList.remove('hidden');
       startTurnTimer();

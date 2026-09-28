@@ -491,3 +491,37 @@ Key features implemented:
 - Turn timer (5 minutes per turn)
 - Event system (random events every 3 rounds)
 - LocalStorage game persistence with resume capability
+
+## Current prototype state
+
+### Data counts (game-data.json)
+- 17 target roles (16 original + Esports Event Assistant)
+- 63 card templates (including 5 group-specific wildcards)
+- 5 opportunity sets: Block Placement, Employer Visit, Volunteering, Live Project Brief, Industry Partnership
+- 8 skills: Analysis, Communication, Coaching, Design, Organisation, Problem solving, Teamwork, Technical Setup
+- Each skill has ≥2 cards across multiple routes
+- 82 JSON files total (1 game-data + 17 roles + 63 cards + 1 firebase config + 1 classroom)
+
+### Wildcards
+5 wildcards, each tied to ONE specific route:
+- wild-mentor-advice (brief)
+- wild-careers-team (placement)
+- wild-card-evidence-boost (placement)
+- wild-card-extra-time (brief)
+- wild-card-tutor-advice (volunteering)
+
+Game logic allows wildcards to substitute for any missing card type in their assigned route only.
+
+### Key mechanics
+- 2 actions per turn, 2 market picks per round (costs 1 action each), 2 returns per round (free)
+- Market rotates 2 cards at start of each round even if unclaimed
+- Deck reshuffles from discard pile, or builds fresh supply, when draw pile runs out
+- 5 card categories: Setup (cyan), Action (pink), Proof (gold), Impact (orange), Wildcard (lime)
+- "Any route" cards display with accent-colored border for distinction
+- Players click hand cards to select, double-click to preview
+- Players drag market cards to hand, or drag hand cards to return zone/market to return
+- Clicking a rival card opens a modal showing their completed sets and route availability
+- Events trigger every 3rd round; "Bonus Mini-Challenge" event offers card redraw (2 cards) on success
+- AIs return cards to the draw deck (not the market)
+- Skill hints shown in job needs bar when a required skill is missing
+- Card previews show a gold skill-badge when a card grants a skill
