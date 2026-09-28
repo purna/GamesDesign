@@ -1549,6 +1549,7 @@ function cardEl(c, opts) {
     <div class="card-art">${c.art || '🃏'}</div>
     <div class="card-name">${escapeHtml(c.name)}</div>
     <div class="card-type">${c.category}${c.set === 'any' ? ' · <span class="any-route">Any route</span>' : ' · ' + escapeHtml(setName(c.set))}</div>
+    <i class="card-type-dot dot-${CAT_COLOR[c.category] || 'cyan'}" title="${escapeHtml(c.category)} card" aria-label="${escapeHtml(c.category)} card"></i>
     ${cardSkills(c).length ? '<div class="card-skill' + (isRequiredSkillCard(c) ? ' card-skill-key' : '') + '"><i class="fa-solid fa-star"></i><span class="card-skill-name">' + escapeHtml(cardSkills(c)[0]) + '</span>' + (cardSkills(c).length > 1 ? '<span class="card-skill-more">+' + (cardSkills(c).length - 1) + '</span>' : '') + '</div>' : ''}
     ${isRequiredSkillCard(c) ? '<span class="card-skill-need">needed</span>' : ''}
   `;

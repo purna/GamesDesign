@@ -667,8 +667,13 @@
    the card's text line ("Setup · Block Placement") and explained in the Routes tab
    and the card tooltip. The route list items in the rail do keep their own route
    colours, since there each row is a single route. */
+/* Two pieces of information, one dominant and one discreet:
+     the card's colour is its experience ROUTE, so it matches the Experience sets
+     list, and its TYPE (Setup / Action / Proof / Impact / Wildcard) is the small
+     dot in the bottom-right corner. */
 .card {
-  --card-cat: var(--cyan);
+  --card-route: var(--cyan);
+  --card-cat: var(--card-route);
   --card-glow: var(--card-cat);
   width: 182px;
   min-height: 178px;
@@ -676,7 +681,8 @@
   isolation: isolate;
   overflow: hidden;
   border-radius: 14px;
-  border: 2px solid color-mix(in srgb, var(--border), var(--card-cat) 65%);
+  /* Pure route colour, matching the Experience sets list exactly. */
+  border: 2px solid var(--card-route);
   background: linear-gradient(180deg, color-mix(in srgb, var(--card-cat), var(--surface) 90%) 0%, var(--surface) 35%, color-mix(in srgb, var(--surface), var(--bg) 20%) 100%);
   color: var(--ink);
   padding: 0.65rem;
@@ -687,7 +693,7 @@
   text-align: center;
   gap: 0.3rem;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-  box-shadow: var(--shadow-md), inset 0 0 0 1px color-mix(in srgb, var(--card-cat), var(--surface) 70%);
+  box-shadow: var(--shadow-md), inset 0 0 0 1px color-mix(in srgb, var(--card-route), var(--surface) 70%);
 }
 
 .card::before,
@@ -753,61 +759,88 @@
   border-radius: 12px 12px 0 0;
 }
 
-.card.cat-cyan,
-.card.tone-setup {
-  --card-cat: var(--cyan);
+.card.cat-cyan .card-type-dot,
+.card.tone-setup .card-type-dot {
+  background: var(--cyan);
+  /* Setup: a square. It is the foundation of a set, and the plainest shape. */
+  border-radius: 2px;
 }
 
-.card.cat-pink,
-.card.tone-action {
-  --card-cat: var(--pink);
+.card.cat-pink .card-type-dot,
+.card.tone-action .card-type-dot {
+  background: var(--pink);
+  /* Action: a triangle, pointing the way you have to go. */
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  border-radius: 0;
 }
 
-.card.cat-gold,
-.card.tone-proof {
-  --card-cat: var(--gold);
+.card.cat-gold .card-type-dot,
+.card.tone-proof .card-type-dot {
+  background: var(--gold);
+  /* Proof: a plain dot, the simplest marker. */
+  border-radius: 50%;
+  clip-path: none;
 }
 
-.card.cat-orange,
-.card.tone-impact {
-  --card-cat: var(--orange);
+.card.cat-orange .card-type-dot,
+.card.tone-impact .card-type-dot {
+  background: var(--orange);
+  /* Impact: a diamond, the punchiest shape here. */
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  border-radius: 0;
 }
 
-.card.cat-lime,
-.card.tone-wild {
-  --card-cat: var(--lime);
+.card.cat-lime .card-type-dot,
+.card.tone-wild .card-type-dot {
+  background: var(--lime);
+  /* Wildcard: a star. It gets a size bump because a star at the same box as the
+     other shapes reads thinner than they do. */
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  border-radius: 0;
+  width: 0.92rem;
+  height: 0.92rem;
+  right: 0.32rem;
+  bottom: 0.3rem;
 }
 
 /* Match card borders and stored-set tiles by opportunity route. */
+.card.set-placement,
 .set-row.set-placement,
 .banked-set-tile.set-placement {
+  --card-route: #4fa6ef;
   --card-glow: #4fa6ef;
 }
 
+.card.set-visit,
 .set-row.set-visit,
 .banked-set-tile.set-visit {
+  --card-route: #b184ea;
   --card-glow: #b184ea;
 }
 
+.card.set-volunteering,
 .set-row.set-volunteering,
 .banked-set-tile.set-volunteering {
+  --card-route: #40b99a;
   --card-glow: #40b99a;
 }
 
+.card.set-brief,
 .set-row.set-brief,
 .banked-set-tile.set-brief {
+  --card-route: #ed9c4d;
   --card-glow: #ed9c4d;
 }
 
+.card.set-partnership,
 .set-row.set-partnership,
 .banked-set-tile.set-partnership {
+  --card-route: #e66b98;
   --card-glow: #e66b98;
 }
 
-/* Route classes exist so the card can be identified in the DOM, but they carry no
-   colour of their own. */
 .card[class*="set-"] {
-  border-color: color-mix(in srgb, var(--border), var(--card-cat) 65%);
+  border-color: var(--card-route);
 }
 
 .set-row[class*="set-"] {
@@ -820,7 +853,9 @@
    "fills any slot" fact is carried by the card's text and its tooltip rather than
    by a rainbow border, which was a second, competing colour signal. */
 .card.wildcard-card {
-  --card-cat: var(--lime);
+  /* A wildcard fits any route, so it carries no route colour. */
+  --card-cat: var(--surface);
+  --card-route: color-mix(in srgb, var(--border), var(--ink) 18%);
 }
 
 .card.wildcard-card::before {
@@ -1670,7 +1705,6 @@
     height: 8px;
   }
 
-
   .rivals {
     grid-template-columns: 1fr;
   }
@@ -1778,7 +1812,7 @@
 
 /* Route-flexible (Any route) cards get a distinct border so they stand out from route-specific cards. */
 .card.route-flexible-card {
-  --card-cat: var(--accent);
+  --card-route: var(--accent);
   border-color: var(--accent);
   border-width: 2px;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 40%);
@@ -2019,7 +2053,7 @@
 /* "Needed for this role" recolours the border only, so the card keeps showing its
    type colour in the fill. */
 .card.card-key-skill {
-  --card-cat: var(--gold);
+  /* Ring only: recolouring would lose the route, which is now the card's colour. */
   box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold), transparent 55%);
   border-color: var(--gold);
 }
@@ -2986,3 +3020,55 @@ body {
   color: var(--ink-soft);
 }
 .legend-note b { color: var(--ink); }
+
+/* Card type dot, bottom-right. The card's colour already says which route it
+/* Cards with a bottom "needed" ribbon need the dot lifted clear of it. */
+
+/* Card type dot, bottom-right. The card's colour already says which route it
+   belongs to, so the type is a small discrete marker. */
+/* Card type marker, bottom-right. The card's colour already shows which route it
+   belongs to, so the type is a small shape: square, triangle, star, diamond or
+   half moon. Shape and colour together, so it reads without relying on hue. */
+.card-type-dot {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  background: var(--card-cat);
+  opacity: 0.95;
+  /* No box-shadow: clip-path and mask both cut it away, which would leave the
+     shapes sitting on whatever is behind the card. Each type sets its own shape
+     below. */
+}
+/* A card carrying the "needed" ribbon needs the dot lifted clear of it. */
+.card:has(.card-skill-need) .card-type-dot { bottom: 0.9rem; }
+
+/* The same five shapes, sized for the legend key. They mirror the markers on the
+   card face so the key and the cards read identically. */
+.legend .dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.legend .dot-square { border-radius: 2px; }
+.legend .dot-triangle { clip-path: polygon(50% 0%, 100% 100%, 0% 100%); border-radius: 0; }
+.legend .dot-diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); border-radius: 0; }
+/* Proof is a plain dot: no clip needed, just a full round. */
+.legend .dot-plain { border-radius: 50%; clip-path: none; }
+/* Wildcard is the star, sized up to match the weight of the other shapes. */
+.legend .dot-star {
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  border-radius: 0;
+  width: 0.86rem;
+  height: 0.86rem;
+}
+
+/* The "Card types" heading reads solid black in day mode, so the key looks like a
+   heading rather than muted secondary text. Scoped to that heading only, since
+   .rail-subhead is shared with the other rail sections. */
+html[data-theme="light"] .card-types-head,
+.card-types-head { color: #000; font-weight: 700; }
