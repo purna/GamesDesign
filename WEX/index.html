@@ -19,7 +19,9 @@
       <div class="header-top">
         <p class="eyebrow">CAREER QUEST / SEASON 01</p>
         <div class="header-actions">
-          <button class="icon-btn" id="helpBtn" aria-label="How it works" title="How it works"><i class="fa-solid fa-circle-question"></i></button>
+          <button class="icon-btn" id="homeBtn" aria-label="Main menu" title="Main menu"><i class="fa-solid fa-house"></i></button>
+          <button class="icon-btn" id="helpBtn" aria-label="How it works" title="How it works"><i class="fa-solid fa-book-open"></i></button>
+          <button class="icon-btn" id="helperToggle" aria-expanded="true" aria-controls="helperContent" aria-label="Hide helper hints" title="Hide helper hints"><i class="fa-solid fa-lightbulb"></i></button>
           <button class="icon-btn" id="settingsBtn" aria-label="Open settings" title="Settings"><i class="fa-solid fa-gear"></i></button>
           <button class="icon-btn" id="a11yBtn" aria-label="Accessibility settings" title="Accessibility"><i class="fa-solid fa-universal-access"></i></button>
           <button class="icon-btn" id="themeToggle" aria-label="Toggle night mode" title="Toggle night mode"><i class="fa-solid fa-moon"></i></button>
@@ -143,15 +145,19 @@
     </section>
 
     <!-- LEARN / HOW TO PLAY -->
-    <section class="learn-screen hidden" id="learnScreen">
+    <section class="learn-screen hidden" id="learnScreen" role="dialog" aria-modal="true" aria-labelledby="learnTitle">
+      <div class="learn-backdrop" id="learnBackdrop"></div>
+      <div class="learn-panel">
+      <button class="preview-close learn-close" id="learnCloseBtn" aria-label="Close how to play">&times;</button>
       <div class="learn-header">
-        <h2>How to Play</h2>
+        <h2 id="learnTitle">How to Play</h2>
         <p class="learn-progress"><span id="learnStepNum">1</span> / 5</p>
       </div>
       <div class="learn-content" id="learnContent"></div>
       <div class="navigation">
         <button class="btn btn-secondary" id="learnPrevBtn">Previous</button>
         <button class="btn" id="learnNextBtn">Next</button>
+      </div>
       </div>
     </section>
 
@@ -198,7 +204,8 @@
             </div>
             <div class="panel hand" id="hand"></div>
 
-              <div class="card-movement-zones">
+              <div class="helper-content" id="helperContent">
+            <div class="card-movement-zones">
               <div class="return-drop-zone" id="returnZone">
                 <span>Drag hand cards here to return them to the deck</span>
                 <small>Up to 2 per round — or use the Return button below</small>
@@ -232,6 +239,7 @@
               <span><i class="dot" style="background:var(--lime)"></i>Wildcard</span>
               <span>Border colors show experience routes; wildcards can fill any set slot.</span>
               <span>Each round: return up to 2 cards for free and take up to 2 cards (1 action each). Drag cards between the market, hand and return area, or use the card popup. Hand limit: 6.</span>
+            </div>
             </div>
           </section>
         </section>

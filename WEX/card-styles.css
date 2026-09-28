@@ -358,15 +358,15 @@ html[data-theme="light"] {
 }
 
 .market, .hand {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 0.6rem;
 }
 
 /* ===== Cards ===== */
 .card {
   --card-glow: var(--cyan);
-  width: 132px;
+  width: 182px;
   min-height: 178px;
   position: relative;
   isolation: isolate;
@@ -817,8 +817,17 @@ html[data-theme="light"] {
     min-width: 0;
   }
 }
+@media (max-width: 600px) {
+  .market, .hand {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
+
+  .market, .hand {
+    grid-template-columns: 1fr;
+  }
 
   .card {
     width: clamp(100px, 27vw, 116px);
@@ -1016,3 +1025,59 @@ html[data-theme="light"] {
 .preview-rolefit.key b { color: var(--gold); }
 
 .card.invalid-card { opacity: 0.35; border-style: dashed; }
+
+/* Card face: one skill, extras collapsed to +N, required marker */
+.card-skill { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
+.card-skill-more {
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--ink-soft), transparent 80%);
+  border-radius: 3px;
+  padding: 0 0.25rem;
+  font-size: 0.55rem;
+}
+.card-skill-need {
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 0 0.25rem;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+
+/* Explicit "open this card" affordance: works on touch, no double-click needed */
+.card-inspect {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  z-index: 3;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface), transparent 25%);
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.card:hover .card-inspect,
+.card-inspect:focus-visible { opacity: 1; }
+.card-inspect:hover { color: var(--accent); border-color: var(--accent); }
+@media (hover: none) { .card-inspect { opacity: 1; } }
+
+/* Highlight for the header helper-hints toggle when hints are visible */
+.icon-btn.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 70%);
+}
+
+/* Hand reordering: insertion indicator while dragging over the hand */
+#hand .card.drop-before { box-shadow: -4px 0 0 0 var(--accent), 0 0 0 1px var(--border); }
+#hand .card.drop-after { box-shadow: 4px 0 0 0 var(--accent), 0 0 0 1px var(--border); }
+#hand .card.dragging-card { opacity: 0.4; }
+#hand { min-height: 60px; }

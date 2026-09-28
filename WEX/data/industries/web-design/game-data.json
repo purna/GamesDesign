@@ -143,9 +143,7 @@
       "skill": "Design",
       "skills": [
         "Design",
-        "Documentation",
-        "Analysis",
-        "Problem solving"
+        "Analysis"
       ]
     },
     {
@@ -189,9 +187,7 @@
       "skill": "Technical Setup",
       "skills": [
         "Technical Setup",
-        "Design",
-        "Documentation",
-        "Analysis"
+        "Design"
       ]
     },
     {
@@ -208,8 +204,7 @@
       "skill": "Technical Setup",
       "skills": [
         "Technical Setup",
-        "Design",
-        "Documentation"
+        "Design"
       ]
     },
     {
@@ -240,8 +235,7 @@
       "value": 1,
       "skills": [
         "Technical Setup",
-        "Design",
-        "Analysis"
+        "Design"
       ]
     },
     {
@@ -319,7 +313,6 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
         "Design"
       ]
     },
@@ -337,9 +330,7 @@
       "skill": "Reliability",
       "skills": [
         "Reliability",
-        "Organisation",
-        "Analysis",
-        "Design"
+        "Analysis"
       ]
     },
     {
@@ -356,8 +347,7 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability"
+        "Teamwork"
       ]
     },
     {
@@ -374,8 +364,7 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability"
+        "Teamwork"
       ]
     },
     {
@@ -392,8 +381,7 @@
       "skill": "Analysis",
       "skills": [
         "Analysis",
-        "Technical Setup",
-        "Design"
+        "Technical Setup"
       ]
     },
     {
@@ -410,8 +398,7 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability"
+        "Teamwork"
       ]
     },
     {
@@ -428,7 +415,6 @@
       "skill": "Teamwork",
       "skills": [
         "Teamwork",
-        "Reliability",
         "Analysis"
       ]
     },
@@ -502,8 +488,7 @@
       "value": 1,
       "skills": [
         "Technical Setup",
-        "Design",
-        "Analysis"
+        "Design"
       ]
     },
     {
@@ -566,9 +551,7 @@
       "skill": "Design",
       "skills": [
         "Design",
-        "Documentation",
-        "Analysis",
-        "Problem solving"
+        "Documentation"
       ]
     },
     {
@@ -585,9 +568,7 @@
       "skill": "Organisation",
       "skills": [
         "Organisation",
-        "Problem solving",
-        "Analysis",
-        "Technical Setup"
+        "Analysis"
       ]
     },
     {
@@ -604,8 +585,7 @@
       "skill": "Problem solving",
       "skills": [
         "Problem solving",
-        "Analysis",
-        "Technical Setup"
+        "Analysis"
       ]
     },
     {
@@ -637,9 +617,7 @@
       "skill": "Technical Setup",
       "skills": [
         "Technical Setup",
-        "Design",
-        "Documentation",
-        "Analysis"
+        "Teamwork"
       ]
     },
     {
@@ -654,7 +632,8 @@
       "set": "brief",
       "value": 2,
       "skills": [
-        "Design"
+        "Design",
+        "Organisation"
       ]
     },
     {
@@ -695,8 +674,7 @@
       "skill": "Coaching",
       "skills": [
         "Coaching",
-        "Communication",
-        "Teamwork"
+        "Communication"
       ]
     },
     {
@@ -725,9 +703,6 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability",
-        "Technical Setup",
         "Design"
       ]
     },
@@ -745,9 +720,7 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability",
-        "Documentation"
+        "Teamwork"
       ]
     },
     {
@@ -764,10 +737,7 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability",
-        "Technical Setup",
-        "Documentation"
+        "Problem solving"
       ]
     },
     {
@@ -784,9 +754,7 @@
       "skill": "Presentation",
       "skills": [
         "Presentation",
-        "Communication",
-        "Teamwork",
-        "Design"
+        "Communication"
       ]
     },
     {
@@ -839,9 +807,7 @@
       "skill": "Problem solving",
       "skills": [
         "Problem solving",
-        "Analysis",
-        "Organisation",
-        "Design"
+        "Organisation"
       ]
     },
     {
@@ -870,9 +836,7 @@
       "skill": "Reflection",
       "skills": [
         "Reflection",
-        "Communication",
-        "Teamwork",
-        "Problem solving"
+        "Communication"
       ]
     },
     {
@@ -889,9 +853,7 @@
       "skill": "Coaching",
       "skills": [
         "Coaching",
-        "Communication",
-        "Teamwork",
-        "Analysis"
+        "Communication"
       ]
     },
     {
@@ -908,10 +870,7 @@
       "skill": "Reliability",
       "skills": [
         "Reliability",
-        "Organisation",
-        "Problem solving",
-        "Technical Setup",
-        "Analysis"
+        "Organisation"
       ]
     },
     {
@@ -928,10 +887,7 @@
       "skill": "Reflection",
       "skills": [
         "Reflection",
-        "Communication",
-        "Teamwork",
-        "Documentation",
-        "Coaching"
+        "Communication"
       ]
     },
     {
@@ -948,9 +904,7 @@
       "skill": "Communication",
       "skills": [
         "Communication",
-        "Teamwork",
-        "Reliability",
-        "Organisation"
+        "Teamwork"
       ]
     },
     {
@@ -967,8 +921,7 @@
       "skill": "Industry Knowledge",
       "skills": [
         "Industry Knowledge",
-        "Analysis",
-        "Technical Setup"
+        "Analysis"
       ]
     },
     {
@@ -985,10 +938,7 @@
       "skill": "Reliability",
       "skills": [
         "Reliability",
-        "Organisation",
-        "Problem solving",
-        "Technical Setup",
-        "Communication"
+        "Organisation"
       ]
     },
     {
@@ -1005,10 +955,7 @@
       "skill": "Analysis",
       "skills": [
         "Analysis",
-        "Technical Setup",
-        "Communication",
-        "Design",
-        "Problem solving"
+        "Technical Setup"
       ]
     },
     {
@@ -1037,10 +984,7 @@
       "skill": "Documentation",
       "skills": [
         "Documentation",
-        "Analysis",
-        "Technical Setup",
-        "Organisation",
-        "Communication"
+        "Analysis"
       ]
     },
     {
@@ -1057,9 +1001,7 @@
       "skill": "Teamwork",
       "skills": [
         "Teamwork",
-        "Reliability",
-        "Organisation",
-        "Analysis"
+        "Organisation"
       ]
     },
     {
@@ -1099,8 +1041,7 @@
       "value": 1,
       "skills": [
         "Problem solving",
-        "Organisation",
-        "Communication"
+        "Organisation"
       ]
     },
     {
@@ -1117,9 +1058,7 @@
       "skill": "Organisation",
       "skills": [
         "Organisation",
-        "Problem solving",
-        "Analysis",
-        "Teamwork"
+        "Problem solving"
       ]
     },
     {
@@ -1159,8 +1098,7 @@
       "value": 1,
       "skills": [
         "Technical Setup",
-        "Documentation",
-        "Design"
+        "Documentation"
       ]
     },
     {
@@ -1176,10 +1114,7 @@
       "value": 1,
       "skills": [
         "Problem solving",
-        "Communication",
-        "Organisation",
-        "Teamwork",
-        "Analysis"
+        "Communication"
       ]
     },
     {
@@ -1196,8 +1131,7 @@
       "skill": "Organisation",
       "skills": [
         "Organisation",
-        "Problem solving",
-        "Analysis"
+        "Problem solving"
       ]
     },
     {

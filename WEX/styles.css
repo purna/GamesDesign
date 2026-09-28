@@ -2868,3 +2868,121 @@ body.simple-mode .settings-hint {
 
 .skill-item .skill-hint ul,
 .skill-item .skill-hint { line-height: 1.5; }
+
+/* Skills panel: hint is on-demand, toggled by the "?" button */
+.skill-item { position: relative; flex-wrap: wrap; }
+.skill-name { display: inline-flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
+
+.skill-info {
+  display: inline-grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.65;
+}
+.skill-info:hover, .skill-info:focus-visible { opacity: 1; background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+.skill-tip {
+  display: block;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 0.65rem;
+  line-height: 1.5;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.skill-tip[hidden] { display: none; }
+.skill-tip .skill-hint { display: block; font-size: inherit; color: inherit; margin: 0; }
+
+/* Only the explicit toggle reveals the tip. Hover/focus must not force it open,
+   otherwise the button cannot be closed while the pointer or focus is on it. */
+.skill-item.tip-open .skill-tip[hidden] { display: none; }
+.skill-item.tip-open .skill-tip { display: block; }
+.skill-item.tip-open { background: color-mix(in srgb, var(--accent), transparent 90%); }
+
+/* Helper hints: toggleable on-demand guidance (legend, drag hints, return zone) */
+.helper-content { display: block; }
+.helper-content.helper-hidden .card-movement-zones,
+.helper-content.helper-hidden .legend { display: none; }
+
+/* The guide banner is outside #helperContent, so it is toggled by class in JS.
+   Guard against a stale empty guide block taking vertical space. */
+.guide.hidden { display: none !important; }
+
+/* When hints are off the status bar collapses unless it has real content. */
+.set-builder-status:empty { display: none; }
+
+/* When hints are hidden the return zone collapses to a slim drop target so
+   drag-and-drop still works without the instructional text. */
+.helper-content.helper-hidden .return-drop-zone {
+  padding: 0.35rem 0.6rem;
+  opacity: 0.55;
+  font-size: 0.62rem;
+}
+.helper-content.helper-hidden .return-drop-zone > span,
+.helper-content.helper-hidden .return-drop-zone > small { display: none; }
+.helper-content.helper-hidden .return-drop-zone::before {
+  content: "Return zone";
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Header hint toggle: lit while helper hints are shown */
+.icon-btn.is-active { color: var(--accent); border-color: var(--accent); }
+
+/* How to Play: an overlay above the current panel, not a panel swap */
+.learn-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+.learn-screen[hidden] { display: none; }
+.learn-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  backdrop-filter: blur(3px);
+}
+.learn-panel {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg, 0 18px 48px rgba(0, 0, 0, 0.45));
+  padding: 1.5rem 1.6rem 1.3rem;
+}
+.learn-panel .learn-header { padding-right: 1.8rem; }
+.learn-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  z-index: 2;
+}
+body.modal-open { overflow: hidden; }

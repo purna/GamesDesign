@@ -56,6 +56,7 @@ const el = {
   helpBtn: $('helpBtn'),
   setup: $('setup'),
   learnScreen: $('learnScreen'), learnStepNum: $('learnStepNum'), learnContent: $('learnContent'),
+  learnCloseBtn: $('learnCloseBtn'), learnBackdrop: $('learnBackdrop'),
   learnPrevBtn: $('learnPrevBtn'), learnNextBtn: $('learnNextBtn'),
   game: $('game'),
   jobTitle: $('jobTitle'), jobDesc: $('jobDesc'), jobNeeds: $('jobNeeds'),
@@ -78,6 +79,9 @@ const el = {
   cardPreview: $('cardPreview'),
   gameOverOverlay: $('gameOverOverlay'),
   skillsRequired: $('skillsRequired'),
+  homeBtn: $('homeBtn'),
+  helperToggle: $('helperToggle'),
+  helperContent: $('helperContent'),
 };
 
 app.el = el;
@@ -176,16 +180,14 @@ function renderIndustryGrid() {
 function selectIndustry(industryId) {
   currentIndustry = industryId;
   const ind = INDUSTRIES.find(i => i.id === industryId);
-  el.industrySelect.classList.add('hidden');
-  el.setup.classList.remove('hidden');
+  showOnlyPanel(el.setup);
   el.industryBreadcrumb.innerHTML = `
     <button class="breadcrumb-link" id="backToIndustryLink">
       <i class="fa-solid fa-chevron-left"></i> ${ind.icon} ${ind.name}
     </button>
   `;
   document.getElementById('backToIndustryLink').addEventListener('click', () => {
-    el.setup.classList.add('hidden');
-    el.industrySelect.classList.remove('hidden');
+    showOnlyPanel(el.industrySelect);
   });
   loadIndustryData();
 }
@@ -227,9 +229,7 @@ function setupResumeButton() {
       r.marketPicksThisRound = r.marketPicksThisRound || 0;
       r.marketSwapsThisRound = r.marketSwapsThisRound || 0;
     });
-    el.setup.classList.add('hidden');
-    if (el.industrySelect) el.industrySelect.classList.add('hidden');
-    el.game.classList.remove('hidden');
+    showOnlyPanel(el.game);
     startTurnTimer();
     render();
   });
@@ -368,15 +368,31 @@ function instantiate(tmpl) {
   return Object.assign({}, tmpl, { uid: 'c' + uidCounter++ });
 }
 
-// Strips malformed entries out of a pile of cards. A bare `{uid}` (no id/name/
-// category/set) otherwise renders as an "undefined" card and throws when previewed.
+// Re-syncs a saved card against the current card data, keeping its unique id so
+// hand/market/deck references stay valid. Without this, a resumed game keeps the
+// card copy frozen in localStorage, so art, skills and route changes to the data
+// files never reach an in-progress save.
+function resyncCard(card) {
+  if (!isValidCard(card)) return null;
+  const tmpl = DATA.cards.find((d) => d.id === card.id);
+  if (!tmpl) return card;
+  return Object.assign({}, tmpl, { uid: card.uid });
+}
+
+// Strips malformed entries out of a pile of cards and refreshes the rest from
+// current data. A bare `{uid}` (no id/name/category/set) otherwise renders as an
+// "undefined" card and throws when previewed.
 function cleanPile(pile) {
   if (!Array.isArray(pile)) return [];
-  return pile.filter((card) => {
-    if (isValidCard(card)) return true;
-    addLog('A malformed card was removed from the pile.');
-    return false;
+  const kept = [];
+  let dropped = 0;
+  pile.forEach((card) => {
+    const next = resyncCard(card);
+    if (next) kept.push(next);
+    else dropped += 1;
   });
+  if (dropped) addLog(`${dropped} damaged card(s) were removed from play.`);
+  return kept;
 }
 
 function draw(n) {
@@ -556,9 +572,7 @@ function newGame(jobId) {
   selectedHandUids = new Set();
   addLog(`You start your race for ${job.title}.`);
   showGuide(`START HERE: choose one colour route and collect its listed card types. Employer Visit needs 2 cards; Volunteering and Live Project Brief need 3; Block Placement and Industry Partnership need 4. There are several examples to choose from. Select only one card of each required type, then bank the set to add CV experience, evidence and a skill.`);
-  el.setup.classList.add('hidden');
-  el.learnScreen.classList.add('hidden');
-  el.game.classList.remove('hidden');
+  showOnlyPanel(el.game);
   startTurnTimer();
   render();
   persist();
@@ -1051,10 +1065,7 @@ function closeModal() {
   el.modalBack.classList.remove('show');
 }
 function closeHallOfFame() {
-  el.hallOfFame.classList.add('hidden');
-  el.industrySelect.classList.remove('hidden');
-  el.setup.classList.add('hidden');
-  el.game.classList.add('hidden');
+  showOnlyPanel(el.industrySelect);
 }
 if (el.modalBack) {
   el.modalBack.addEventListener('click', (e) => { if (e.target === el.modalBack) closeModal(); });
@@ -1065,7 +1076,9 @@ if (el.cardPreview) {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closePreview();
+  if (e.key !== 'Escape') return;
+  if (el.learnScreen && !el.learnScreen.classList.contains('hidden')) closeLearn();
+  else closePreview();
 });
 
 /* Auto-save on page hide / unload / refresh so progress survives crashes */
@@ -1207,12 +1220,66 @@ function renderSkills() {
         hint = `<small class="skill-hint">Get it by banking a set:<br>\u2022 ${items.join('<br>\u2022 ')}${more}.${escapeHtml(cheapestNote)}</small>`;
       }
     }
-    return `<span class="skill-item ${cls}">
+    const tipId = `skill-tip-${slugify(skill)}`;
+    const isOpen = hint && openSkillTips.has(skill);
+    const trigger = hint
+      ? `<button type="button" class="skill-info" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${tipId}" aria-describedby="${tipId}" title="How do I get this skill?">?</button>`
+      : '';
+    const tip = hint
+      ? `<span class="skill-tip" id="${tipId}" role="tooltip"${isOpen ? '' : ' hidden'}>${hint}</span>`
+      : '';
+    return `<span class="skill-item ${cls}${isOpen ? ' tip-open' : ''}" data-skill="${escapeHtml(skill)}">
       <span class="skill-check">${has ? '\u2713' : '\u25cb'}</span>
-      <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}${hint}</span>
+      <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}${trigger}</span>
+      ${tip}
     </span>`;
   }).join('');
+  wireSkillTips();
 }
+
+function slugify(text) {
+  return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+// renderSkills() rebuilds the panel on every render, so open/closed state lives
+// here rather than in the DOM.
+let openSkillTips = new Set();
+
+// Explicit click toggles a skill hint open/closed. Hover and focus deliberately do
+// NOT reveal it: either would override the closed state and make the button look
+// stuck-on, since the trigger keeps focus after a click.
+function wireSkillTips() {
+  if (!el.skillsRequired) return;
+  el.skillsRequired.querySelectorAll('.skill-info').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = btn.closest('.skill-item');
+      const tip = item && item.querySelector('.skill-tip');
+      const skill = item && item.dataset.skill;
+      if (!tip || !skill) return;
+      const nowOpen = !openSkillTips.has(skill);
+      if (nowOpen) openSkillTips.add(skill);
+      else openSkillTips.delete(skill);
+      if (nowOpen) tip.removeAttribute('hidden');
+      else tip.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', String(nowOpen));
+      item.classList.toggle('tip-open', nowOpen);
+    });
+  });
+}
+
+// Clicking anywhere else closes an open hint.
+document.addEventListener('click', () => {
+  if (!openSkillTips.size || !el.skillsRequired) return;
+  openSkillTips.clear();
+  el.skillsRequired.querySelectorAll('.skill-item.tip-open').forEach((item) => {
+    item.classList.remove('tip-open');
+    const tip = item.querySelector('.skill-tip');
+    if (tip) tip.setAttribute('hidden', '');
+    const btn = item.querySelector('.skill-info');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+});
 
 function renderJobNeeds() {
   const req = state.job.requirements;
@@ -1339,6 +1406,10 @@ function cardEl(c, opts) {
     div.draggable = true;
     div.addEventListener('dragstart', (event) => {
       event.dataTransfer.setData('text/plain', JSON.stringify({ source: opts.dragSource, uid: c.uid }));
+      // A second, plain-key type: some browsers expose only `types` during dragover.
+      if (opts.dragSource === 'hand' && event.dataTransfer.setData) {
+        try { event.dataTransfer.setData('application/x-rtt-hand', c.uid); } catch (e) { /* older browsers */ }
+      }
       event.dataTransfer.effectAllowed = 'move';
       div.classList.add('dragging-card');
     });
@@ -1349,9 +1420,22 @@ function cardEl(c, opts) {
     <div class="card-art">${c.art || '🃏'}</div>
     <div class="card-name">${escapeHtml(c.name)}</div>
     <div class="card-type">${c.category}${c.set === 'any' ? ' · <span class="any-route">Any route</span>' : ' · ' + escapeHtml(setName(c.set))}</div>
-    ${cardSkills(c).length ? '<div class="card-skill' + (isRequiredSkillCard(c) ? ' card-skill-key' : '') + '"><i class="fa-solid fa-star"></i> ' + escapeHtml(cardSkills(c).join(' \u00b7 ')) + (isRequiredSkillCard(c) ? ' \u2014 needed for this role' : '') + '</div>' : ''}
+    ${cardSkills(c).length ? '<div class="card-skill' + (isRequiredSkillCard(c) ? ' card-skill-key' : '') + '"><i class="fa-solid fa-star"></i> ' + escapeHtml(cardSkills(c)[0]) + (cardSkills(c).length > 1 ? '<span class="card-skill-more">+' + (cardSkills(c).length - 1) + '</span>' : '') + (isRequiredSkillCard(c) ? '<span class="card-skill-need">needed</span>' : '') + '</div>' : ''}
   `;
   if (opts.onClick) div.addEventListener('click', opts.onClick);
+  if (opts.onInspect) {
+    const info = document.createElement('button');
+    info.type = 'button';
+    info.className = 'card-inspect';
+    info.setAttribute('aria-label', 'View ' + c.name + ' details');
+    info.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+    info.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      opts.onInspect(c);
+    });
+    div.appendChild(info);
+  }
   return div;
 }
 
@@ -1440,7 +1524,7 @@ function openPreview(where, card) {
         <div class="card-name">${escapeHtml(card.name)}</div>
         <div class="card-description">${escapeHtml(card.description)}</div>
         ${roleFitHtml}
-        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}${cardSkills(card).length ? '<br><span class="skill-badge">' + escapeHtml(cardSkills(card).join(' \u00b7 ')) + '</span>' : ''}</div>
+        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}${cardSkills(card).length ? '<br><span class="skill-badge">Skills: ' + escapeHtml(cardSkills(card).join(', ')) + '</span>' : ''}</div>
         <div class="card-top">
           <span class="${card.set === 'any' ? 'any-route' : ''}">${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
           <span>${cat === 'Wildcard' ? '★' : cat === 'Proof' ? '◆' : cat === 'Action' ? '●' : '◇'}</span>
@@ -1525,6 +1609,7 @@ function renderMarket() {
   state.market.forEach((c) => {
     const card = cardEl(c, {
       onClick: () => openPreview('market', c),
+      onInspect: (cardToOpen) => openPreview('market', cardToOpen),
       dragSource: 'market',
     });
     el.market.appendChild(card);
@@ -1537,6 +1622,7 @@ function renderHand() {
     const card = cardEl(c, {
       selected: selectedHandUids.has(c.uid),
       onClick: () => toggleHandSelect(c.uid),
+      onInspect: (cardToOpen) => openPreview('hand', cardToOpen),
       dragSource: 'hand',
     });
     card.addEventListener('dblclick', () => openPreview('hand', c));
@@ -1626,6 +1712,10 @@ function renderSetBuilderStatus() {
   const cards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
   const count = cards.length;
   if (!count) {
+    if (!helperHintsVisible) {
+      el.setBuilderStatus.innerHTML = '';
+      return;
+    }
     el.setBuilderStatus.innerHTML = `<strong>Build an experience set</strong><span>Each route has several card examples. Click hand cards to select them — choose only one of each required type: Employer Visit needs 2 cards; Volunteering and Live Project Brief need 3; Block Placement and Industry Partnership need 4. Cards marked Any route fit any colour route. Wildcards belong to one route — check the card's opportunity before using it. Double-click any card to preview its details.</span>`;
     return;
   }
@@ -1693,10 +1783,25 @@ function renderLearn() {
 function openLearn(returnTo) {
   learnReturnTo = returnTo;
   learnIndex = 0;
-  el.setup.classList.add('hidden');
-  el.game.classList.add('hidden');
+  // Overlay: the panel underneath stays mounted and visible behind the backdrop,
+  // so returning does not rebuild or re-show it.
   el.learnScreen.classList.remove('hidden');
+  el.learnScreen.classList.add('open');
+  document.body.classList.add('modal-open');
   renderLearn();
+  if (el.learnCloseBtn) el.learnCloseBtn.focus();
+}
+
+function closeLearn() {
+  if (!el.learnScreen) return;
+  el.learnScreen.classList.add('hidden');
+  el.learnScreen.classList.remove('open');
+  document.body.classList.remove('modal-open');
+  // Restore whichever panel was underneath, unless something else took over.
+  if (!state) el.setup.classList.remove('hidden');
+  else if (el.game.classList.contains('hidden') && !el.gameOverOverlay.classList.contains('show')) {
+    el.game.classList.remove('hidden');
+  }
 }
 
 app.openLearn = openLearn;
@@ -1707,10 +1812,13 @@ app.state = Object.assign(app.state || {}, { round: 0, actionsLeft: 0 });
 el.learnPrevBtn.addEventListener('click', () => { if (learnIndex > 0) { learnIndex--; renderLearn(); } });
 el.learnNextBtn.addEventListener('click', () => {
   if (learnIndex < LEARN_STEPS.length - 1) { learnIndex++; renderLearn(); return; }
-  el.learnScreen.classList.add('hidden');
-  if (learnReturnTo === 'game' && state) el.game.classList.remove('hidden');
-  else el.setup.classList.remove('hidden');
+  closeLearn();
 });
+
+if (el.learnCloseBtn) el.learnCloseBtn.addEventListener('click', closeLearn);
+if (el.learnBackdrop) {
+  el.learnBackdrop.addEventListener('click', (e) => { if (e.target === el.learnBackdrop) closeLearn(); });
+}
 
 function setupDragAndDrop() {
   function attach(zone, acceptedSource, onDrop) {
@@ -1735,15 +1843,130 @@ function setupDragAndDrop() {
   attach(el.hand, 'market', onMarketCardClick);
   attach(el.returnZone, 'hand', (uid) => returnCardsToDeck([uid]));
   attach(el.market, 'hand', (uid) => returnCardsToDeck([uid]));
+  attachHandReorder();
+}
+
+// Lets the player arrange their hand. Reordering is cosmetic: nothing in the game
+// reads hand order (selection is by uid), it is purely so a set can be grouped and
+// read more easily. The new order is written back into state.player.hand so it
+// survives a re-render and the auto-save.
+function attachHandReorder() {
+  const hand = el.hand;
+  if (!hand) return;
+
+  const clearMarks = () => hand.querySelectorAll('.drop-before, .drop-after')
+    .forEach((n) => n.classList.remove('drop-before', 'drop-after'));
+
+  // Which card is the pointer over, and is it before or after that card's centre?
+  function insertionTarget(event) {
+    const cards = [...hand.querySelectorAll('.card')].filter((n) => n.dataset.uid);
+    for (const node of cards) {
+      const box = node.getBoundingClientRect();
+      if (event.clientX >= box.left && event.clientX <= box.right) {
+        return { node, after: event.clientX > box.left + box.width / 2 };
+      }
+    }
+    return null;
+  }
+
+  hand.addEventListener('dragover', (event) => {
+    if (!event.dataTransfer) return;
+    const types = event.dataTransfer.types || [];
+    // Only react to a hand-sourced drag; market drops are handled by attach().
+    if (!types.includes('application/x-rtt-hand')) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    clearMarks();
+    const target = insertionTarget(event);
+    if (target) target.node.classList.add(target.after ? 'drop-after' : 'drop-before');
+  });
+
+  hand.addEventListener('dragleave', (event) => {
+    if (!hand.contains(event.relatedTarget)) clearMarks();
+  });
+
+  hand.addEventListener('drop', (event) => {
+    const uid = event.dataTransfer && event.dataTransfer.getData('application/x-rtt-hand');
+    if (!uid) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const target = insertionTarget(event);
+    clearMarks();
+    if (target) reorderHand(uid, target.node.dataset.uid, target.after);
+  });
+}
+
+function reorderHand(draggedUid, targetUid, placeAfter) {
+  if (!state || !draggedUid || !targetUid || draggedUid === targetUid) return;
+  const hand = state.player.hand;
+  const from = hand.findIndex((c) => c.uid === draggedUid);
+  if (from === -1) return;
+  const [moved] = hand.splice(from, 1);
+  let to = hand.findIndex((c) => c.uid === targetUid);
+  if (to === -1) { hand.splice(from, 0, moved); return; }
+  if (placeAfter) to += 1;
+  hand.splice(to, 0, moved);
+  render();
+  persist();
+}
+
+/* ============================== Navigation ================================ */
+
+// The one place that decides which panel is on screen. Every "back to menu" entry
+// point goes through here so they cannot drift apart and leave two panels visible.
+function showOnlyPanel(panel) {
+  [el.industrySelect, el.setup, el.game, el.hallOfFame, el.learnScreen].forEach((p) => {
+    if (p) p.classList.add('hidden');
+  });
+  if (el.learnScreen) el.learnScreen.classList.remove('open');
+  document.body.classList.remove('modal-open');
+  if (panel) panel.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToMainMenu() {
+  const inPlay = !!state && !state.winner;
+  if (inPlay) {
+    const ok = confirm('Return to the main menu?\n\nYour current run is saved and you can resume it from the setup screen.');
+    if (!ok) return;
+  }
+  showOnlyPanel(el.industrySelect);
 }
 
 /* ============================== Wiring ==================================== */
 
+const HELPER_KEY = 'rttr-helper-hints';
+// Read by renderSetBuilderStatus so the tutorial blurb can be hidden with the
+// other hints, while live set feedback stays visible.
+let helperHintsVisible = true;
+
+function setHelperHintsVisible(visible) {
+  helperHintsVisible = !!visible;
+  if (el.guide) el.guide.classList.toggle('hidden', !visible);
+  if (!el.helperContent || !el.helperToggle) return;
+  el.helperContent.classList.toggle('helper-hidden', !visible);
+  el.helperToggle.setAttribute('aria-expanded', String(visible));
+  const label = visible ? 'Hide helper hints' : 'Show helper hints';
+  el.helperToggle.setAttribute('aria-label', label);
+  el.helperToggle.title = label;
+  el.helperToggle.classList.toggle('is-active', visible);
+  try { localStorage.setItem(HELPER_KEY, visible ? '1' : '0'); } catch (e) {}
+}
+
+if (el.helperToggle) {
+  // The return drop zone stays wired for dragging; hiding it only removes the hint
+  // styling and text, so players who prefer the buttons can reclaim the space.
+  let stored = null;
+  try { stored = localStorage.getItem(HELPER_KEY); } catch (e) {}
+  setHelperHintsVisible(stored === null ? true : stored === '1');
+  el.helperToggle.addEventListener('click', () => {
+    setHelperHintsVisible(el.helperContent.classList.contains('helper-hidden'));
+  });
+}
+
 el.startBtn.addEventListener('click', () => newGame(el.jobSelect.value));
-el.backToIndustryBtn.addEventListener('click', () => {
-  el.setup.classList.add('hidden');
-  el.industrySelect.classList.remove('hidden');
-});
+el.backToIndustryBtn.addEventListener('click', goToMainMenu);
+if (el.homeBtn) el.homeBtn.addEventListener('click', goToMainMenu);
 el.returnBtn.addEventListener('click', doReturnSelected);
   setupDragAndDrop();
 el.bankBtn.addEventListener('click', doBank);
