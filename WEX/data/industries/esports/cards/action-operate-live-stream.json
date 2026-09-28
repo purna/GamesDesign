@@ -4,10 +4,16 @@
   "type": "Action",
   "category": "Action",
   "description": "Run camera, graphics or audio during a live broadcast.",
-  "flavor": "The stream is the show — and the show must go on.",
+  "flavor": "The stream is the show \u2014 and the show must go on.",
   "rarity": "Uncommon",
-  "art": "📡",
+  "art": "\ud83d\udce1",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation",
+    "Problem solving"
+  ]
 }

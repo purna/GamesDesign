@@ -6,8 +6,13 @@
   "description": "Present your partner project: requirements, design process, technical implementation, and outcomes.",
   "flavor": "Show the system, not just the screens.",
   "rarity": "Uncommon",
-  "art": "🖼️",
+  "art": "\ud83d\uddbc\ufe0f",
   "set": "partnership",
   "value": 2,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

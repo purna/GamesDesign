@@ -280,6 +280,32 @@ function persist() {
 
 /* ============================== Deck ==================================== */
 
+// Builds the "how do I get this skill" breakdown: which routes grant it, what each
+// route needs, and a concrete example card. Shared by the sidebar panel and the
+// "not ready yet" message so they can never disagree or hide the cheapest route.
+function skillRouteBreakdown(skill) {
+  const grantors = DATA.cards.filter((c) => cardGrantsAny(c, (s) => s === skill));
+  if (!grantors.length) return { routes: [], text: null };
+  const recs = state.job.recommendedSets || [];
+  const byRoute = new Map();
+  grantors.forEach((g) => {
+    if (!byRoute.has(g.set)) byRoute.set(g.set, []);
+    byRoute.get(g.set).push(g);
+  });
+  const routes = [...byRoute.entries()].map(([id, cs]) => {
+    const req = requiredCategories(id);
+    return {
+      id,
+      name: id === 'any' ? 'Any route' : setName(id),
+      req,
+      count: cs.length,
+      isFit: recs.includes(id),
+      cheapest: cs.slice().sort((a, b) => req.indexOf(a.category) - req.indexOf(b.category))[0],
+    };
+  }).sort((a, b) => (b.isFit - a.isFit) || (a.req.length - b.req.length));
+  return { routes, text: routes.map((r) => r.name + ' (' + r.req.length + ' cards: ' + r.req.join(' + ') + ')').join('; ') };
+}
+
 let requiredSkillCache = null;
 function isRoleRequiredSkill(skill) {
   if (!skill) return false;
@@ -320,7 +346,7 @@ function buildDeck() {
       const key = tmpl.set + '|' + tmpl.category;
       copies = Math.max(1, Math.round(BASE_COPIES / groupCounts[key]));
     }
-    if (tmpl.skill && isRoleRequiredSkill(tmpl.skill)) {
+    if (cardGrantsAny(tmpl, isRoleRequiredSkill)) {
       copies = Math.max(copies, REQUIRED_SKILL_COPIES);
     }
     for (let i = 0; i < copies; i++) pool.push(tmpl);
@@ -573,7 +599,7 @@ function bankSet(agent, targetSet, used) {
     state.discard.push(c);
     // A role-required skill card went into a banked set, so deal a fresh copy back
     // to circulation. The skill stays obtainable for every agent still racing.
-    if (isRoleRequiredSkill(c.skill)) {
+    if (cardGrantsAny(c, isRoleRequiredSkill)) {
       const tmpl = DATA.cards.find((d) => d.id === c.id);
       if (tmpl) state.deck = shuffle([...state.deck, instantiate(tmpl)]);
     }
@@ -589,9 +615,13 @@ function bankSet(agent, targetSet, used) {
   agent.banked.push({ set: targetSet, round: state.round, strong });
   agent.evidence += evidenceGain;
 
-  const skillCard = used.find((c) => c.skill);
-  const skillName = skillCard ? skillCard.skill : 'Adaptability';
-  if (!agent.skills.includes(skillName)) agent.skills.push(skillName);
+  // Every skill card in a banked set counts. Using find() here granted only the first
+  // one and silently dropped the rest, so a set holding the required skill card could
+  // award a different skill instead.
+  const gained = [...new Set(used.flatMap((c) => cardSkills(c)))];
+  if (!gained.length) gained.push('Adaptability');
+  gained.forEach((s) => { if (!agent.skills.includes(s)) agent.skills.push(s); });
+  const skillName = gained.join(' + ');
 
   if (meta.reward.reference) agent.references += 1;
   if (targetSet === 'volunteering') agent.reliability += 1;
@@ -741,10 +771,9 @@ function missingRequirements(agent, job) {
   if (setVariety < REQUIRED_SET_VARIETY) out.push(`experience from ${REQUIRED_SET_VARIETY - setVariety} more job-relevant set type(s)`);
   if (cv.evidence < job.requirements.evidence) out.push(`${job.requirements.evidence - cv.evidence} more evidence`);
   if (!agent.skills.includes(job.requirements.skill)) {
-    const skillCards = DATA.cards.filter((c) => c.skill === job.requirements.skill);
-    const cardNames = skillCards.slice(0, 3).map((c) => `"${c.name}" (${setName(c.set || 'any')})`);
-    const hint = cardNames.length ? ` Look for: ${cardNames.join(', ')}.` : '';
-    out.push(`the ${job.requirements.skill} skill${hint}`);
+    const { routes, text } = skillRouteBreakdown(job.requirements.skill);
+    const hint = text ? ` Get it by banking a set — ${text}.` : ' No card in this pack grants it.';
+    out.push(`the ${job.requirements.skill} skill.${hint}`);
   }
   return out;
 }
@@ -1104,17 +1133,17 @@ function renderSkills() {
   // so the panel can never silently omit what the player still has to collect.
   const others = [...new Set(DATA.cards
     .filter((c) => {
-      if (!c.skill || c.skill === req.skill) return false;
+      if (!cardSkills(c).length) return false;
       return (state.job.recommendedSets || []).includes(c.set);
     })
-    .map((c) => c.skill))]
+    .flatMap((c) => cardSkills(c)))]
     .sort();
   const allSkills = [req.skill, ...others.filter((s) => s !== req.skill)];
 
   el.skillsRequired.innerHTML = allSkills.map((skill) => {
     const has = playerSkills.includes(skill);
     const isRequired = skill === req.skill;
-    const grantors = DATA.cards.filter((c) => c.skill === skill);
+    const grantors = DATA.cards.filter((c) => cardGrantsAny(c, (s) => s === skill));
     const cls = isRequired ? (has ? 'owned required' : 'needed required') : (has ? 'owned' : 'needed');
     let hint = '';
     if (isRequired && !has) {
@@ -1142,9 +1171,12 @@ function renderSkills() {
         }).sort((a, b) => (b.isFit - a.isFit) || (a.req.length - b.req.length));
         const shortest = Math.min(...routes.map((r) => r.req.length));
         const items = routes.slice(0, 3).map((r) => {
-          const slot = r.req.includes(r.cheapest.category) ? ` (${r.cheapest.category} slot)` : '';
           const fit = r.isFit ? ' \u2b50 role-fit' : '';
-          return `${escapeHtml(r.name)}${fit}: bank ${r.req.length} cards \u2014 ${escapeHtml(r.req.join(' + '))}. Try "${escapeHtml(r.cheapest.name)}" for the ${escapeHtml(r.cheapest.category)} slot${slot}`;
+          const usable = r.req.includes(r.cheapest.category);
+          const tryText = usable
+            ? `try "${escapeHtml(r.cheapest.name)}" as the ${escapeHtml(r.cheapest.category)} slot`
+            : `"${escapeHtml(r.cheapest.name)}" is a ${escapeHtml(r.cheapest.category)} card, which this route does not use`;
+          return `${escapeHtml(r.name)}${fit}: bank ${r.req.length} cards \u2014 ${escapeHtml(r.req.join(' + '))}; ${tryText}`;
         });
         const more = routes.length > 3 ? ` (+${routes.length - 3} more route${routes.length - 3 === 1 ? '' : 's'})` : '';
         const cheapestNote = routes.some((r) => r.req.length === shortest && r.isFit)
@@ -1165,7 +1197,7 @@ function renderJobNeeds() {
   const cv = agentCV(state.player);
   const line = (ok, text, subtext, extraClass) => `<span class="need ${ok ? 'met' : ''} ${extraClass || ''}">${ok ? '✓' : '•'} ${text}${subtext ? '<small>' + subtext + '</small>' : ''}</span>`;
   const hasSkill = state.player.skills.includes(req.skill);
-  const skillCards = DATA.cards.filter((c) => c.skill === req.skill);
+  const skillCards = DATA.cards.filter((c) => cardGrantsAny(c, (s) => s === req.skill));
   const skillHint = hasSkill ? '' : skillCards.length ? `Includes: ${skillCards.slice(0, 3).map((c) => `"${c.name}"`).join(', ')}` : '';
   const skillClass = hasSkill ? 'met' : 'skill-needed';
   el.jobNeeds.innerHTML = [
@@ -1236,6 +1268,24 @@ function showRivalSets(index) {
   `);
 }
 
+// Cards may carry a single `skill` string or a `skills` array; normalise both.
+function cardSkills(card) {
+  if (!card) return [];
+  const list = Array.isArray(card.skills) ? card.skills.slice() : [];
+  if (card.skill && !list.includes(card.skill)) list.unshift(card.skill);
+  return list.filter(Boolean);
+}
+
+function cardGrantsAny(card, predicate) {
+  return cardSkills(card).some(predicate);
+}
+
+function isRequiredSkillCard(card) {
+  return !!(state && state.job
+    && cardGrantsAny(card, (s) => s === state.job.requirements.skill)
+    && !(state.player && state.player.skills.includes(state.job.requirements.skill)));
+}
+
 function cardSetClass(card) {
   if (!card || !card.set) return 'wildcard-card';
   if (card.category === 'Wildcard') {
@@ -1251,7 +1301,7 @@ function cardSetClass(card) {
 function cardEl(c, opts) {
   opts = opts || {};
   const div = document.createElement('div');
-  div.className = 'card cat-' + CAT_COLOR[c.category] + ' ' + cardSetClass(c);
+  div.className = 'card cat-' + CAT_COLOR[c.category] + ' ' + cardSetClass(c) + (isRequiredSkillCard(c) ? ' card-key-skill' : '');
   if (opts.selected) div.classList.add('selected');
   div.dataset.uid = c.uid;
   if (opts.dragSource) {
@@ -1268,7 +1318,7 @@ function cardEl(c, opts) {
     <div class="card-art">${c.art || '🃏'}</div>
     <div class="card-name">${escapeHtml(c.name)}</div>
     <div class="card-type">${c.category}${c.set === 'any' ? ' · <span class="any-route">Any route</span>' : ' · ' + escapeHtml(setName(c.set))}</div>
-    ${c.skill ? '<div class="card-skill"><i class="fa-solid fa-star"></i> ' + escapeHtml(c.skill) + '</div>' : ''}
+    ${cardSkills(c).length ? '<div class="card-skill' + (isRequiredSkillCard(c) ? ' card-skill-key' : '') + '"><i class="fa-solid fa-star"></i> ' + escapeHtml(cardSkills(c).join(' \u00b7 ')) + (isRequiredSkillCard(c) ? ' \u2014 needed for this role' : '') + '</div>' : ''}
   `;
   if (opts.onClick) div.addEventListener('click', opts.onClick);
   return div;
@@ -1295,10 +1345,14 @@ function openPreview(where, card) {
   const flexible = cat !== 'Wildcard' && card.set === 'any';
   const routeId = flexible ? null : card.set;
   const isRoleFit = flexible || (routeId && jobOptions.has(routeId));
+  const requiredSkill = state.job.requirements.skill;
+  const isKeySkill = cardGrantsAny(card, (s) => s === requiredSkill) && !(state.player.skills || []).includes(requiredSkill);
   const doneTypes = completedJobSetTypes(state.player, state.job);
   const neededTypes = Math.max(0, REQUIRED_SET_VARIETY - doneTypes.size);
   let roleFitHtml = '';
-  if (isRoleFit) {
+  if (isKeySkill) {
+    roleFitHtml = `<p class="preview-rolefit key"><b>★ This card grants the skill you need: ${escapeHtml(requiredSkill)}</b> Bank it in any set that accepts a ${escapeHtml(card.category)} card.</p>`;
+  } else if (isRoleFit) {
     if (flexible) {
       const useful = [...jobOptions].filter((id) => !doneTypes.has(id));
       roleFitHtml = useful.length
@@ -1354,7 +1408,7 @@ function openPreview(where, card) {
         <div class="card-name">${escapeHtml(card.name)}</div>
         <div class="card-description">${escapeHtml(card.description)}</div>
         ${roleFitHtml}
-        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}${card.skill ? '<br><span class="skill-badge">' + escapeHtml(card.skill) + ' skill</span>' : ''}</div>
+        <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}${cardSkills(card).length ? '<br><span class="skill-badge">' + escapeHtml(cardSkills(card).join(' \u00b7 ')) + '</span>' : ''}</div>
         <div class="card-top">
           <span class="${card.set === 'any' ? 'any-route' : ''}">${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
           <span>${cat === 'Wildcard' ? '★' : cat === 'Proof' ? '◆' : cat === 'Action' ? '●' : '◇'}</span>

@@ -6,7 +6,10 @@
   "description": "Join a Capture The Flag event or security competition as a volunteer or participant.",
   "flavor": "CTFs are the gym for security skills.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

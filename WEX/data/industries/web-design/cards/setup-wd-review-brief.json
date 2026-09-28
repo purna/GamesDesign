@@ -6,7 +6,10 @@
   "description": "Clarify the brief: target audience, key journeys, tech stack, accessibility requirements, deadline.",
   "flavor": "A brief understood prevents rework.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "brief",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Design"
+  ]
 }

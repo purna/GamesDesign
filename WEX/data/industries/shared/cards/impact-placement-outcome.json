@@ -6,8 +6,15 @@
   "description": "Summarise the result of your placement work and how it helped the esports team or event.",
   "flavor": "Show what changed because you were there.",
   "rarity": "Common",
-  "art": "📊",
+  "art": "\ud83d\udcca",
   "set": "placement",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability",
+    "Technical Setup",
+    "Documentation"
+  ]
 }

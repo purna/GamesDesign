@@ -6,7 +6,10 @@
   "description": "Arrange a visit to a post-production facility. Confirm date, NDA, and suite access.",
   "flavor": "See where the magic gets polished.",
   "rarity": "Common",
-  "art": "🎫",
+  "art": "\ud83c\udfab",
   "set": "visit",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Teamwork"
+  ]
 }

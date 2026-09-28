@@ -6,7 +6,12 @@
   "description": "Configure Style Dictionary or similar: tokens, build scripts, and platform outputs (iOS, Android, Web).",
   "flavor": "Tokens are the single source of truth.",
   "rarity": "Common",
-  "art": "🎯",
+  "art": "\ud83c\udfaf",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Analysis"
+  ]
 }

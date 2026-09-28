@@ -6,8 +6,14 @@
   "description": "Collect feedback from the director/producer on your contribution to the production.",
   "flavor": "Set etiquette matters as much as skill.",
   "rarity": "Common",
-  "art": "🗣️",
+  "art": "\ud83d\udde3\ufe0f",
   "set": "volunteering",
   "value": 1,
-  "skill": "Teamwork"
+  "skill": "Teamwork",
+  "skills": [
+    "Teamwork",
+    "Reliability",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

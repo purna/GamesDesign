@@ -6,8 +6,13 @@
   "description": "Present the threat model to stakeholders and incorporate feedback on risk ratings.",
   "flavor": "Alignment on risk enables aligned defense.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "partnership",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

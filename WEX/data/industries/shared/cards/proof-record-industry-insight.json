@@ -6,8 +6,13 @@
   "description": "Write up one thing you learned and how it changes your view of the job.",
   "flavor": "Insight only counts once it's written down.",
   "rarity": "Common",
-  "art": "💡",
+  "art": "\ud83d\udca1",
   "set": "visit",
   "value": 1,
-  "skill": "Industry Knowledge"
+  "skill": "Industry Knowledge",
+  "skills": [
+    "Industry Knowledge",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

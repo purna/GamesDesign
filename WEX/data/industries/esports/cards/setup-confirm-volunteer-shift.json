@@ -6,7 +6,13 @@
   "description": "Confirm the organiser, event date, location, responsibilities, start/finish times and who supervises you.",
   "flavor": "A shift no one confirmed is a shift that falls through.",
   "rarity": "Common",
-  "art": "📅",
+  "art": "\ud83d\udcc5",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Coaching",
+    "Communication",
+    "Organisation"
+  ]
 }

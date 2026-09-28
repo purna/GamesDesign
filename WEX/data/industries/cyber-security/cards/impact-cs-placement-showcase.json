@@ -6,7 +6,10 @@
   "description": "You helped resolve a real security incident. Document the impact and your contribution.",
   "flavor": "Stopped the breach. Protected the data.",
   "rarity": "Uncommon",
-  "art": "✅",
+  "art": "\u2705",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

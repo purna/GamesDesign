@@ -6,8 +6,14 @@
   "description": "Document a bug or unexpected issue you hit, the steps you took to diagnose it, and what you learned.",
   "flavor": "Every bug is a lesson in disguise.",
   "rarity": "Common",
-  "art": "🐛",
+  "art": "\ud83d\udc1b",
   "set": "brief",
   "value": 1,
-  "skill": "Problem solving"
+  "skill": "Problem solving",
+  "skills": [
+    "Problem solving",
+    "Analysis",
+    "Organisation",
+    "Design"
+  ]
 }

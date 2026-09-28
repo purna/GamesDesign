@@ -6,7 +6,12 @@
   "description": "Confirm the visit date, location, booking, and travel or access arrangements. Prepare two questions.",
   "flavor": "Turning up unprepared wastes everyone's time.",
   "rarity": "Common",
-  "art": "🗓️",
+  "art": "\ud83d\uddd3\ufe0f",
   "set": "visit",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Problem solving",
+    "Teamwork",
+    "Communication"
+  ]
 }

@@ -6,8 +6,13 @@
   "description": "Present trailer versions with rationale: structure, music choices, pacing, and test screening data.",
   "flavor": "Data defends creative choices.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "partnership",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

@@ -6,8 +6,13 @@
   "description": "Document new detection rules: logic, test cases, false positive rate, and maintenance notes.",
   "flavor": "Undocumented rules are technical debt.",
   "rarity": "Common",
-  "art": "📄",
+  "art": "\ud83d\udcc4",
   "set": "placement",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

@@ -6,8 +6,14 @@
   "description": "Present your work, note the feedback, and save the final version for your portfolio.",
   "flavor": "Feedback is free improvement if you actually listen.",
   "rarity": "Common",
-  "art": "🎤",
+  "art": "\ud83c\udfa4",
   "set": "brief",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability",
+    "Organisation"
+  ]
 }

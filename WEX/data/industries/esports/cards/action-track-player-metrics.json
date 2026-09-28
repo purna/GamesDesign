@@ -6,8 +6,13 @@
   "description": "Log stats across sessions to spot trends in performance.",
   "flavor": "If you can't measure it, you're guessing.",
   "rarity": "Uncommon",
-  "art": "📐",
+  "art": "\ud83d\udcd0",
   "set": "volunteering",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Design"
+  ]
 }

@@ -9,5 +9,10 @@
   "art": "\ud83d\udc64",
   "set": "placement",
   "value": 1,
-  "skill": "Design"
+  "skill": "Design",
+  "skills": [
+    "Design",
+    "Documentation",
+    "Technical Setup"
+  ]
 }

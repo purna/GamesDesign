@@ -9,5 +9,10 @@
   "art": "\ud83d\udccb",
   "set": "placement",
   "value": 1,
-  "skill": "Organisation"
+  "skill": "Organisation",
+  "skills": [
+    "Organisation",
+    "Problem solving",
+    "Analysis"
+  ]
 }

@@ -6,7 +6,11 @@
   "description": "Clarify the audience, deliverable, deadline and success criteria with the client.",
   "flavor": "A brief misunderstood is a project doomed.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "brief",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Design",
+    "Technical Setup"
+  ]
 }

@@ -6,8 +6,14 @@
   "description": "Sync audio to picture, organize bins, create stringouts, and prep for the editor.",
   "flavor": "Dailies done right save weeks later.",
   "rarity": "Common",
-  "art": "🎬",
+  "art": "\ud83c\udfac",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation",
+    "Analysis"
+  ]
 }

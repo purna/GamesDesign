@@ -6,8 +6,13 @@
   "description": "Collect feedback from the nonprofit on usability, maintenance, and goal achievement.",
   "flavor": "Client feedback is the ultimate test.",
   "rarity": "Common",
-  "art": "🗣️",
+  "art": "\ud83d\udde3\ufe0f",
   "set": "volunteering",
   "value": 1,
-  "skill": "Teamwork"
+  "skill": "Teamwork",
+  "skills": [
+    "Teamwork",
+    "Reliability",
+    "Analysis"
+  ]
 }

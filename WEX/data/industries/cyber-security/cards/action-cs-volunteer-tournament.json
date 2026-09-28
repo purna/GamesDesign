@@ -6,7 +6,10 @@
   "description": "Solve challenges in web exploitation, reverse engineering, crypto, or forensics.",
   "flavor": "Break it to learn how to fix it.",
   "rarity": "Common",
-  "art": "🏁",
+  "art": "\ud83c\udfc1",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

@@ -6,7 +6,10 @@
   "description": "Learn the workflow: NLE setup, media management, naming conventions, and backup protocols.",
   "flavor": "Organization is the editor's superpower.",
   "rarity": "Common",
-  "art": "🎞️",
+  "art": "\ud83c\udf9e\ufe0f",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Teamwork"
+  ]
 }

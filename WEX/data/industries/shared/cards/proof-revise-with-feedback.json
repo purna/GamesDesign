@@ -6,8 +6,15 @@
   "description": "Use the partner's feedback to improve your work before it goes in your portfolio.",
   "flavor": "The revision is where the real learning happens.",
   "rarity": "Common",
-  "art": "🔁",
+  "art": "\ud83d\udd01",
   "set": "partnership",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Communication",
+    "Design",
+    "Problem solving"
+  ]
 }

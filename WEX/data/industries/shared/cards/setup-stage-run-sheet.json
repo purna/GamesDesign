@@ -6,8 +6,13 @@
   "description": "Create a detailed run sheet with roles, timings, contacts and contingency plans for the event.",
   "flavor": "A good run sheet saves the day before anyone knows there was a problem.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "partnership",
   "value": 1,
-  "skill": "Organisation"
+  "skill": "Organisation",
+  "skills": [
+    "Organisation",
+    "Problem solving",
+    "Analysis"
+  ]
 }

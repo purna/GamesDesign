@@ -6,7 +6,10 @@
   "description": "Agree on deliverables with an industry partner: pentest, code review, or security architecture.",
   "flavor": "Partners need trust, not just tools.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

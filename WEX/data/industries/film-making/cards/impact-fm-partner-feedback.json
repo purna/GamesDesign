@@ -6,7 +6,10 @@
   "description": "Your edit was released: festival selection, broadcast, or client approval. Document the outcome.",
   "flavor": "Screened. Selected. Seen.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

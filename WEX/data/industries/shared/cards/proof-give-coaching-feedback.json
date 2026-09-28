@@ -6,8 +6,14 @@
   "description": "Document how coaching conversations helped a player improve their performance or mindset.",
   "flavor": "Coaching lives in the follow-through.",
   "rarity": "Uncommon",
-  "art": "💭",
+  "art": "\ud83d\udcad",
   "set": "brief",
   "value": 1,
-  "skill": "Coaching"
+  "skill": "Coaching",
+  "skills": [
+    "Coaching",
+    "Communication",
+    "Teamwork",
+    "Analysis"
+  ]
 }

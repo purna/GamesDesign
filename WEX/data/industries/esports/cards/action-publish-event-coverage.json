@@ -4,10 +4,16 @@
   "type": "Action",
   "category": "Action",
   "description": "Write up or photograph an event for publication.",
-  "flavor": "If it isn't published, it didn't happen — as far as the internet's concerned.",
+  "flavor": "If it isn't published, it didn't happen \u2014 as far as the internet's concerned.",
   "rarity": "Uncommon",
-  "art": "🗞️",
+  "art": "\ud83d\uddde\ufe0f",
   "set": "brief",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability",
+    "Organisation"
+  ]
 }

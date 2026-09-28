@@ -6,7 +6,10 @@
   "description": "Execute the agreed security engagement: pentest, secure code review, or threat model.",
   "flavor": "Professional scope. Professional results.",
   "rarity": "Rare",
-  "art": "✨",
+  "art": "\u2728",
   "set": "partnership",
-  "value": 2
+  "value": 2,
+  "skills": [
+    "Technical Setup"
+  ]
 }

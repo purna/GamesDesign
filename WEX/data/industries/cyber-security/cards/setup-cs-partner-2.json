@@ -6,7 +6,11 @@
   "description": "Facilitate a threat modeling session with the partner: assets, threats, mitigations, and priorities.",
   "flavor": "Threat model first. Controls second.",
   "rarity": "Common",
-  "art": "🧠",
+  "art": "\ud83e\udde0",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis",
+    "Technical Setup"
+  ]
 }

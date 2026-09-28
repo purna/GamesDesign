@@ -9,5 +9,10 @@
   "art": "\ud83d\udc1b",
   "set": "volunteering",
   "value": 1,
-  "skill": "Problem solving"
+  "skill": "Problem solving",
+  "skills": [
+    "Problem solving",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

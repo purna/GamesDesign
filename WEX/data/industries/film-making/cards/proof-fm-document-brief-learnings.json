@@ -6,8 +6,13 @@
   "description": "Write a post-mortem: creative challenges, technical workflow, collaboration, and festival strategy.",
   "flavor": "Every film teaches a new workflow.",
   "rarity": "Common",
-  "art": "📓",
+  "art": "\ud83d\udcd3",
   "set": "brief",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Technical Setup"
+  ]
 }

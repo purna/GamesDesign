@@ -6,7 +6,10 @@
   "description": "Finish and present work to the brief. Respond to feedback and iterate.",
   "flavor": "Done is better than perfect. Shipped is better than done.",
   "rarity": "Uncommon",
-  "art": "🚀",
+  "art": "\ud83d\ude80",
   "set": "brief",
-  "value": 2
+  "value": 2,
+  "skills": [
+    "Design"
+  ]
 }

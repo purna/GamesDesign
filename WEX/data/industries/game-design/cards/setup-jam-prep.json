@@ -9,5 +9,11 @@
   "art": "\u26a1",
   "set": "volunteering",
   "value": 1,
-  "skill": "Organisation"
+  "skill": "Organisation",
+  "skills": [
+    "Organisation",
+    "Problem solving",
+    "Communication",
+    "Technical Setup"
+  ]
 }

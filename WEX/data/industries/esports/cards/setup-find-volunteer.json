@@ -6,7 +6,14 @@
   "description": "Choose an event with a clear role, organiser and genuine need for help.",
   "flavor": "The best volunteers show up where they're needed most.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Coaching",
+    "Communication",
+    "Teamwork",
+    "Organisation"
+  ]
 }

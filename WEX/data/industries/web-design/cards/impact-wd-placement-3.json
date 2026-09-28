@@ -6,7 +6,11 @@
   "description": "Your component is used across multiple pages/products. Document adoption metrics.",
   "flavor": "Adoption proves utility.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Analysis"
+  ]
 }

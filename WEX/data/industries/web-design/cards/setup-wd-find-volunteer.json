@@ -6,7 +6,10 @@
   "description": "Join a volunteer project building a website for a nonprofit or community group.",
   "flavor": "Real users. Real constraints. Real impact.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis"
+  ]
 }

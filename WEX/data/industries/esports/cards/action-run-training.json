@@ -9,5 +9,10 @@
   "art": "\ud83c\udfcb\ufe0f",
   "set": "placement",
   "value": 1,
-  "skill": "Coaching"
+  "skill": "Coaching",
+  "skills": [
+    "Coaching",
+    "Communication",
+    "Teamwork"
+  ]
 }

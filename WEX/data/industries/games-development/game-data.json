@@ -138,7 +138,12 @@
       "art": "\ud83d\udd17",
       "set": "partnership",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-build-tool",
@@ -151,7 +156,12 @@
       "art": "\ud83d\udd28",
       "set": "brief",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation"
+      ]
     },
     {
       "id": "action-debug-crash",
@@ -164,7 +174,12 @@
       "art": "\ud83d\udc1b",
       "set": "volunteering",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-implement-feature",
@@ -177,7 +192,12 @@
       "art": "\u2699\ufe0f",
       "set": "placement",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-integrate-plugin",
@@ -190,7 +210,12 @@
       "art": "\ud83d\udd0c",
       "set": "visit",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation"
+      ]
     },
     {
       "id": "action-merge-branch",
@@ -203,7 +228,12 @@
       "art": "\ud83d\udd00",
       "set": "partnership",
       "value": 1,
-      "skill": "Communication"
+      "skill": "Communication",
+      "skills": [
+        "Communication",
+        "Teamwork",
+        "Reliability"
+      ]
     },
     {
       "id": "action-optimize-render",
@@ -216,7 +246,12 @@
       "art": "\u26a1",
       "set": "volunteering",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-refactor-module",
@@ -229,7 +264,12 @@
       "art": "\u267b\ufe0f",
       "set": "placement",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-shader-write",
@@ -242,1336 +282,13 @@
       "art": "\ud83d\udd2e",
       "set": "brief",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation"
+      ]
     },
-    [
-      {
-        "id": "action-api-integration",
-        "name": "API Integration",
-        "type": "Action",
-        "category": "Action",
-        "description": "Integrate an external API into the game client.",
-        "flavor": "The internet is an API.",
-        "rarity": "Common",
-        "art": "\ud83d\udd17",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-build-tool",
-        "name": "Build Dev Tool",
-        "type": "Action",
-        "category": "Action",
-        "description": "Create a productivity tool for designers or artists.",
-        "flavor": "Empower your teammates.",
-        "rarity": "Common",
-        "art": "\ud83d\udd28",
-        "set": "brief",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "action-debug-crash",
-        "name": "Debug Crash Report",
-        "type": "Action",
-        "category": "Action",
-        "description": "Investigate and fix a crash reported by players.",
-        "flavor": "Not all bugs are equal.",
-        "rarity": "Common",
-        "art": "\ud83d\udc1b",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-implement-feature",
-        "name": "Implement Feature",
-        "type": "Action",
-        "category": "Action",
-        "description": "Implement a gameplay feature from the design specification.",
-        "flavor": "From design to code.",
-        "rarity": "Common",
-        "art": "\u2699\ufe0f",
-        "set": "placement",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-integrate-plugin",
-        "name": "Integrate Third-Party Plugin",
-        "type": "Action",
-        "category": "Action",
-        "description": "Integrate and configure a third-party plugin into the project.",
-        "flavor": "Don't reinvent the wheel.",
-        "rarity": "Common",
-        "art": "\ud83d\udd0c",
-        "set": "visit",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "action-merge-branch",
-        "name": "Merge Partner Branch",
-        "type": "Action",
-        "category": "Action",
-        "description": "Integrate partner code changes and resolve conflicts.",
-        "flavor": "Collaboration requires patience.",
-        "rarity": "Common",
-        "art": "\ud83d\udd00",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "action-optimize-render",
-        "name": "Optimize Rendering",
-        "type": "Action",
-        "category": "Action",
-        "description": "Profile and optimize rendering performance for the game.",
-        "flavor": "60 FPS or bust.",
-        "rarity": "Common",
-        "art": "\u26a1",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-refactor-module",
-        "name": "Refactor Game Module",
-        "type": "Action",
-        "category": "Action",
-        "description": "Refactor a legacy game module for better maintainability.",
-        "flavor": "Leave the code better than you found it.",
-        "rarity": "Common",
-        "art": "\u267b\ufe0f",
-        "set": "placement",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-shader-write",
-        "name": "Write Shader",
-        "type": "Action",
-        "category": "Action",
-        "description": "Implement a custom shader for visual effects.",
-        "flavor": "Shaders are magic.",
-        "rarity": "Common",
-        "art": "\ud83d\udd2e",
-        "set": "brief",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "impact-cross-platform",
-        "name": "Ship Cross-Platform Build",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Deliver a build that works across all partner platforms.",
-        "flavor": "Write once, debug everywhere.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\udcf1",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "impact-ship-build",
-        "name": "Ship Production Build",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Ship a stable production build of the game.",
-        "flavor": "The real test of any game.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\udea2",
-        "set": "placement",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "proof-code-freeze",
-        "name": "Code Freeze & QA Pass",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Freeze features and address critical bugs before release.",
-        "flavor": "Quality over quantity.",
-        "rarity": "Common",
-        "art": "\ud83e\uddca",
-        "set": "brief",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-code-review",
-        "name": "Code Review",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Review peer code for bugs, performance, and maintainability.",
-        "flavor": "Four eyes see more than two.",
-        "rarity": "Common",
-        "art": "\ud83d\udc41\ufe0f",
-        "set": "placement",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-debug-session",
-        "name": "Debug Multiplayer Session",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Investigate and resolve network desync issues.",
-        "flavor": "The hardest bugs in gamedev.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\udc1b",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "proof-deploy-patch",
-        "name": "Deploy Hotfix",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Build and deploy an emergency hotfix with partner coordination.",
-        "flavor": "Speed and accuracy.",
-        "rarity": "Common",
-        "art": "\ud83d\ude91",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-perf-profiler",
-        "name": "Run Performance Profiler",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Profile and optimise performance on partner hardware.",
-        "flavor": "Milliseconds matter.",
-        "rarity": "Common",
-        "art": "\ud83d\udcc8",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "proof-static-analysis",
-        "name": "Static Analysis Pass",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Run static analysis tools and fix warnings.",
-        "flavor": "Clean code is happy code.",
-        "rarity": "Common",
-        "art": "\ud83d\udd0d",
-        "set": "placement",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-unit-tests",
-        "name": "Write Unit Tests",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Add unit tests to validate core game systems.",
-        "flavor": "Trust but verify.",
-        "rarity": "Common",
-        "art": "\u2705",
-        "set": "brief",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-write-docs",
-        "name": "Write Technical Documentation",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Document how a system or tool works for other developers.",
-        "flavor": "Future you will thank you.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "setup-build-config",
-        "name": "Build Configuration",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Configure build settings for different platforms and environments.",
-        "flavor": "Configuration is king.",
-        "rarity": "Common",
-        "art": "\u2699\ufe0f",
-        "set": "brief",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-ci-config",
-        "name": "Configure CI/CD Pipeline",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Set up automated build and test pipelines for the project.",
-        "flavor": "Automation saves time.",
-        "rarity": "Common",
-        "art": "\ud83d\udd01",
-        "set": "placement",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-code-sync",
-        "name": "Codebase Sync",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Synchronise code with external partner on a shared project.",
-        "flavor": "Merge conflicts happen.",
-        "rarity": "Common",
-        "art": "\ud83d\udd17",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-codebase-intro",
-        "name": "Codebase Introduction",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Understand the existing game codebase, its architecture and conventions.",
-        "flavor": "Every codebase tells a story.",
-        "rarity": "Common",
-        "art": "\ud83d\udcbb",
-        "set": "placement",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-engineer-brief",
-        "name": "Engineer Briefing",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Meet with the design team to understand technical requirements.",
-        "flavor": "Good questions prevent bad code.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "brief",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "setup-game-jam-tech",
-        "name": "Game Jam Tech Support",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Set up engines, tools, and version control for a game jam.",
-        "flavor": "Jams need infrastructure.",
-        "rarity": "Common",
-        "art": "\u26a1",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-tech-spike",
-        "name": "Tech Spike",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Build a small prototype to test a technical approach.",
-        "flavor": "Proof before commitment.",
-        "rarity": "Common",
-        "art": "\ud83d\udd2c",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "setup-tech-visit",
-        "name": "Tech Stack Evaluation",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Visit a tech studio to evaluate their engine and toolchain choices.",
-        "flavor": "Engines matter.",
-        "rarity": "Common",
-        "art": "\ud83d\udd0d",
-        "set": "visit",
-        "value": 1
-      },
-      {
-        "id": "setup-version-control",
-        "name": "Version Control Setup",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Set up version control for a shared project with external partners.",
-        "flavor": "Don't break the build.",
-        "rarity": "Common",
-        "art": "\ud83d\udce6",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "action-api-integration",
-        "name": "API Integration",
-        "type": "Action",
-        "category": "Action",
-        "description": "Integrate an external API into the game client.",
-        "flavor": "The internet is an API.",
-        "rarity": "Common",
-        "art": "\ud83d\udd17",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-build-tool",
-        "name": "Build Dev Tool",
-        "type": "Action",
-        "category": "Action",
-        "description": "Create a productivity tool for designers or artists.",
-        "flavor": "Empower your teammates.",
-        "rarity": "Common",
-        "art": "\ud83d\udd28",
-        "set": "brief",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "action-debug-crash",
-        "name": "Debug Crash Report",
-        "type": "Action",
-        "category": "Action",
-        "description": "Investigate and fix a crash reported by players.",
-        "flavor": "Not all bugs are equal.",
-        "rarity": "Common",
-        "art": "\ud83d\udc1b",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-implement-feature",
-        "name": "Implement Feature",
-        "type": "Action",
-        "category": "Action",
-        "description": "Implement a gameplay feature from the design specification.",
-        "flavor": "From design to code.",
-        "rarity": "Common",
-        "art": "\u2699\ufe0f",
-        "set": "placement",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-integrate-plugin",
-        "name": "Integrate Third-Party Plugin",
-        "type": "Action",
-        "category": "Action",
-        "description": "Integrate and configure a third-party plugin into the project.",
-        "flavor": "Don't reinvent the wheel.",
-        "rarity": "Common",
-        "art": "\ud83d\udd0c",
-        "set": "visit",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "action-merge-branch",
-        "name": "Merge Partner Branch",
-        "type": "Action",
-        "category": "Action",
-        "description": "Integrate partner code changes and resolve conflicts.",
-        "flavor": "Collaboration requires patience.",
-        "rarity": "Common",
-        "art": "\ud83d\udd00",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "action-optimize-render",
-        "name": "Optimize Rendering",
-        "type": "Action",
-        "category": "Action",
-        "description": "Profile and optimize rendering performance for the game.",
-        "flavor": "60 FPS or bust.",
-        "rarity": "Common",
-        "art": "\u26a1",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-refactor-module",
-        "name": "Refactor Game Module",
-        "type": "Action",
-        "category": "Action",
-        "description": "Refactor a legacy game module for better maintainability.",
-        "flavor": "Leave the code better than you found it.",
-        "rarity": "Common",
-        "art": "\u267b\ufe0f",
-        "set": "placement",
-        "value": 1,
-        "skill": "Problem solving"
-      },
-      {
-        "id": "action-shader-write",
-        "name": "Write Shader",
-        "type": "Action",
-        "category": "Action",
-        "description": "Implement a custom shader for visual effects.",
-        "flavor": "Shaders are magic.",
-        "rarity": "Common",
-        "art": "\ud83d\udd2e",
-        "set": "brief",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "impact-cross-platform",
-        "name": "Ship Cross-Platform Build",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Deliver a build that works across all partner platforms.",
-        "flavor": "Write once, debug everywhere.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\udcf1",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "impact-ship-build",
-        "name": "Ship Production Build",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Ship a stable production build of the game.",
-        "flavor": "The real test of any game.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\udea2",
-        "set": "placement",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "proof-code-freeze",
-        "name": "Code Freeze & QA Pass",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Freeze features and address critical bugs before release.",
-        "flavor": "Quality over quantity.",
-        "rarity": "Common",
-        "art": "\ud83e\uddca",
-        "set": "brief",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-code-review",
-        "name": "Code Review",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Review peer code for bugs, performance, and maintainability.",
-        "flavor": "Four eyes see more than two.",
-        "rarity": "Common",
-        "art": "\ud83d\udc41\ufe0f",
-        "set": "placement",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-debug-session",
-        "name": "Debug Multiplayer Session",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Investigate and resolve network desync issues.",
-        "flavor": "The hardest bugs in gamedev.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\udc1b",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "proof-deploy-patch",
-        "name": "Deploy Hotfix",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Build and deploy an emergency hotfix with partner coordination.",
-        "flavor": "Speed and accuracy.",
-        "rarity": "Common",
-        "art": "\ud83d\ude91",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-perf-profiler",
-        "name": "Run Performance Profiler",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Profile and optimise performance on partner hardware.",
-        "flavor": "Milliseconds matter.",
-        "rarity": "Common",
-        "art": "\ud83d\udcc8",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "proof-static-analysis",
-        "name": "Static Analysis Pass",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Run static analysis tools and fix warnings.",
-        "flavor": "Clean code is happy code.",
-        "rarity": "Common",
-        "art": "\ud83d\udd0d",
-        "set": "placement",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-unit-tests",
-        "name": "Write Unit Tests",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Add unit tests to validate core game systems.",
-        "flavor": "Trust but verify.",
-        "rarity": "Common",
-        "art": "\u2705",
-        "set": "brief",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "proof-write-docs",
-        "name": "Write Technical Documentation",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Document how a system or tool works for other developers.",
-        "flavor": "Future you will thank you.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Documentation"
-      },
-      {
-        "id": "setup-build-config",
-        "name": "Build Configuration",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Configure build settings for different platforms and environments.",
-        "flavor": "Configuration is king.",
-        "rarity": "Common",
-        "art": "\u2699\ufe0f",
-        "set": "brief",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-ci-config",
-        "name": "Configure CI/CD Pipeline",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Set up automated build and test pipelines for the project.",
-        "flavor": "Automation saves time.",
-        "rarity": "Common",
-        "art": "\ud83d\udd01",
-        "set": "placement",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-code-sync",
-        "name": "Codebase Sync",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Synchronise code with external partner on a shared project.",
-        "flavor": "Merge conflicts happen.",
-        "rarity": "Common",
-        "art": "\ud83d\udd17",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-codebase-intro",
-        "name": "Codebase Introduction",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Understand the existing game codebase, its architecture and conventions.",
-        "flavor": "Every codebase tells a story.",
-        "rarity": "Common",
-        "art": "\ud83d\udcbb",
-        "set": "placement",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-engineer-brief",
-        "name": "Engineer Briefing",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Meet with the design team to understand technical requirements.",
-        "flavor": "Good questions prevent bad code.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "brief",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "setup-game-jam-tech",
-        "name": "Game Jam Tech Support",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Set up engines, tools, and version control for a game jam.",
-        "flavor": "Jams need infrastructure.",
-        "rarity": "Common",
-        "art": "\u26a1",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "setup-tech-spike",
-        "name": "Tech Spike",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Build a small prototype to test a technical approach.",
-        "flavor": "Proof before commitment.",
-        "rarity": "Common",
-        "art": "\ud83d\udd2c",
-        "set": "volunteering",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "setup-tech-visit",
-        "name": "Tech Stack Evaluation",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Visit a tech studio to evaluate their engine and toolchain choices.",
-        "flavor": "Engines matter.",
-        "rarity": "Common",
-        "art": "\ud83d\udd0d",
-        "set": "visit",
-        "value": 1
-      },
-      {
-        "id": "setup-version-control",
-        "name": "Version Control Setup",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Set up version control for a shared project with external partners.",
-        "flavor": "Don't break the build.",
-        "rarity": "Common",
-        "art": "\ud83d\udce6",
-        "set": "partnership",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "dev-setup-1",
-        "name": "Research Industry Standards",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Study current best practices, pipelines, and quality bars for your discipline.",
-        "flavor": "Know the bar before you raise it.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-2",
-        "name": "Create Personal Learning Plan",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Map skills to acquire, resources to use, and milestones to hit during the experience.",
-        "flavor": "A plan turns hope into progress.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-3",
-        "name": "Set Up Portfolio Tracking",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Create a system to capture work-in-progress, feedback, and final pieces for your portfolio.",
-        "flavor": "Document as you go, not after.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-4",
-        "name": "Establish Communication Routines",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Agree on check-in frequency, update formats, and escalation paths with your supervisor.",
-        "flavor": "Communication is a skill, not an afterthought.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-5",
-        "name": "Define Success Metrics",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Agree on what \"done well\" looks like: quality, speed, innovation, or player impact.",
-        "flavor": "You can't hit a target you can't see.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-6",
-        "name": "Prepare Questions for Mentor",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "List specific technical, creative, and career questions to maximize mentor sessions.",
-        "flavor": "Good questions get better answers.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-action-7",
-        "name": "Prototype a Core System",
-        "type": "Action",
-        "category": "Action",
-        "description": "Build a quick proof-of-concept for a key mechanic, tool, or pipeline.",
-        "flavor": "Prototypes answer questions designs can't.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Design"
-      },
-      {
-        "id": "dev-action-8",
-        "name": "Collaborate Cross-Discipline",
-        "type": "Action",
-        "category": "Action",
-        "description": "Work with a different discipline (art/code/design) to integrate a feature end-to-end.",
-        "flavor": "Great games are built at discipline boundaries.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "dev-action-9",
-        "name": "Optimize a Workflow",
-        "type": "Action",
-        "category": "Action",
-        "description": "Identify a bottleneck and implement a faster process, script, or template.",
-        "flavor": "Automation compounds.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "dev-action-10",
-        "name": "Run a Playtest Session",
-        "type": "Action",
-        "category": "Action",
-        "description": "Observe players, take notes, and identify friction points in the experience.",
-        "flavor": "Players reveal what designers miss.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "dev-action-11",
-        "name": "Create Technical Documentation",
-        "type": "Action",
-        "category": "Action",
-        "description": "Write clear docs for a system, API, or pipeline so others can use and maintain it.",
-        "flavor": "Documentation is empathy for your future self.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Teamwork"
-      },
-      {
-        "id": "dev-action-12",
-        "name": "Refactor for Maintainability",
-        "type": "Action",
-        "category": "Action",
-        "description": "Clean up messy code, rigs, or files to improve readability and reduce future bugs.",
-        "flavor": "Clean craft enables speed.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Reliability"
-      },
-      {
-        "id": "dev-proof-13",
-        "name": "Record Peer Feedback",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Document specific feedback from teammates and how you acted on it.",
-        "flavor": "Feedback implemented is growth demonstrated.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Reliability"
-      },
-      {
-        "id": "dev-proof-14",
-        "name": "Capture Before/After Comparison",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Show side-by-side evidence of improvement: performance, quality, or player experience.",
-        "flavor": "Visual proof needs no translation.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "dev-proof-15",
-        "name": "Write a Case Study Outline",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Structure a portfolio case study: problem, process, solution, result, reflection.",
-        "flavor": "Case studies get you hired.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "dev-proof-16",
-        "name": "Collect Quantitative Metrics",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Gather data: frame rates, load times, player retention, iteration speed, bug counts.",
-        "flavor": "Numbers convince skeptics.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Teamwork"
-      },
-      {
-        "id": "dev-proof-17",
-        "name": "Document a Failure & Recovery",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Record what went wrong, root cause analysis, and the fix that prevented recurrence.",
-        "flavor": "Failures documented become wisdom.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Design"
-      },
-      {
-        "id": "dev-proof-18",
-        "name": "Create a Showcase Video/GIF",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Record a 30-second clip of your work in context: in-engine, in-game, or in-pipeline.",
-        "flavor": "Show, don't just tell.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "dev-impact-19",
-        "name": "Feature Adopted by Team",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Your prototype, tool, or process was adopted as standard practice by the team.",
-        "flavor": "Adoption is the ultimate validation.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\ude80",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-impact-20",
-        "name": "Mentored a Peer",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Helped another student/junior improve their skills through guidance and knowledge sharing.",
-        "flavor": "Teaching proves mastery.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\ude80",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-impact-21",
-        "name": "Contributed to Shipped Content",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Your work is part of content that reached players, even in a small way.",
-        "flavor": "Shipped is the only metric that counts.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\ude80",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-wildcard-22",
-        "name": "Wild Card: Industry Veteran Insight",
-        "type": "Wildcard",
-        "category": "Wildcard",
-        "description": "A veteran shares hard-won wisdom. Use in place of any Setup, Action, or Proof card for any set.",
-        "flavor": "Experience is the best teacher.",
-        "rarity": "Rare",
-        "art": "\u2b50",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-wildcard-23",
-        "name": "Wild Card: Cross-Discipline Workshop",
-        "type": "Wildcard",
-        "category": "Wildcard",
-        "description": "An intensive workshop bridges disciplines. Use in place of any card for any set.",
-        "flavor": "Boundaries are where innovation lives.",
-        "rarity": "Rare",
-        "art": "\u2b50",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-wildcard-24",
-        "name": "Wild Card: Personal Project Sprint",
-        "type": "Wildcard",
-        "category": "Wildcard",
-        "description": "A focused personal project fills a gap. Use in place of any card for any set.",
-        "flavor": "Self-directed work shows drive.",
-        "rarity": "Rare",
-        "art": "\u2b50",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-1",
-        "name": "Research Industry Standards",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Study current best practices, pipelines, and quality bars for your discipline.",
-        "flavor": "Know the bar before you raise it.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-2",
-        "name": "Create Personal Learning Plan",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Map skills to acquire, resources to use, and milestones to hit during the experience.",
-        "flavor": "A plan turns hope into progress.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-3",
-        "name": "Set Up Portfolio Tracking",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Create a system to capture work-in-progress, feedback, and final pieces for your portfolio.",
-        "flavor": "Document as you go, not after.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-4",
-        "name": "Establish Communication Routines",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Agree on check-in frequency, update formats, and escalation paths with your supervisor.",
-        "flavor": "Communication is a skill, not an afterthought.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-5",
-        "name": "Define Success Metrics",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "Agree on what \"done well\" looks like: quality, speed, innovation, or player impact.",
-        "flavor": "You can't hit a target you can't see.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-setup-6",
-        "name": "Prepare Questions for Mentor",
-        "type": "Setup",
-        "category": "Setup",
-        "description": "List specific technical, creative, and career questions to maximize mentor sessions.",
-        "flavor": "Good questions get better answers.",
-        "rarity": "Common",
-        "art": "\ud83d\udccb",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-action-7",
-        "name": "Prototype a Core System",
-        "type": "Action",
-        "category": "Action",
-        "description": "Build a quick proof-of-concept for a key mechanic, tool, or pipeline.",
-        "flavor": "Prototypes answer questions designs can't.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Design"
-      },
-      {
-        "id": "dev-action-8",
-        "name": "Collaborate Cross-Discipline",
-        "type": "Action",
-        "category": "Action",
-        "description": "Work with a different discipline (art/code/design) to integrate a feature end-to-end.",
-        "flavor": "Great games are built at discipline boundaries.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "dev-action-9",
-        "name": "Optimize a Workflow",
-        "type": "Action",
-        "category": "Action",
-        "description": "Identify a bottleneck and implement a faster process, script, or template.",
-        "flavor": "Automation compounds.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "dev-action-10",
-        "name": "Run a Playtest Session",
-        "type": "Action",
-        "category": "Action",
-        "description": "Observe players, take notes, and identify friction points in the experience.",
-        "flavor": "Players reveal what designers miss.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "dev-action-11",
-        "name": "Create Technical Documentation",
-        "type": "Action",
-        "category": "Action",
-        "description": "Write clear docs for a system, API, or pipeline so others can use and maintain it.",
-        "flavor": "Documentation is empathy for your future self.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Teamwork"
-      },
-      {
-        "id": "dev-action-12",
-        "name": "Refactor for Maintainability",
-        "type": "Action",
-        "category": "Action",
-        "description": "Clean up messy code, rigs, or files to improve readability and reduce future bugs.",
-        "flavor": "Clean craft enables speed.",
-        "rarity": "Common",
-        "art": "\u2328\ufe0f",
-        "set": "any",
-        "value": 1,
-        "skill": "Reliability"
-      },
-      {
-        "id": "dev-proof-13",
-        "name": "Record Peer Feedback",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Document specific feedback from teammates and how you acted on it.",
-        "flavor": "Feedback implemented is growth demonstrated.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Reliability"
-      },
-      {
-        "id": "dev-proof-14",
-        "name": "Capture Before/After Comparison",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Show side-by-side evidence of improvement: performance, quality, or player experience.",
-        "flavor": "Visual proof needs no translation.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Communication"
-      },
-      {
-        "id": "dev-proof-15",
-        "name": "Write a Case Study Outline",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Structure a portfolio case study: problem, process, solution, result, reflection.",
-        "flavor": "Case studies get you hired.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Analysis"
-      },
-      {
-        "id": "dev-proof-16",
-        "name": "Collect Quantitative Metrics",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Gather data: frame rates, load times, player retention, iteration speed, bug counts.",
-        "flavor": "Numbers convince skeptics.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Teamwork"
-      },
-      {
-        "id": "dev-proof-17",
-        "name": "Document a Failure & Recovery",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Record what went wrong, root cause analysis, and the fix that prevented recurrence.",
-        "flavor": "Failures documented become wisdom.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Design"
-      },
-      {
-        "id": "dev-proof-18",
-        "name": "Create a Showcase Video/GIF",
-        "type": "Proof",
-        "category": "Proof",
-        "description": "Record a 30-second clip of your work in context: in-engine, in-game, or in-pipeline.",
-        "flavor": "Show, don't just tell.",
-        "rarity": "Common",
-        "art": "\ud83d\udcdd",
-        "set": "any",
-        "value": 1,
-        "skill": "Technical Setup"
-      },
-      {
-        "id": "dev-impact-19",
-        "name": "Feature Adopted by Team",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Your prototype, tool, or process was adopted as standard practice by the team.",
-        "flavor": "Adoption is the ultimate validation.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\ude80",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-impact-20",
-        "name": "Mentored a Peer",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Helped another student/junior improve their skills through guidance and knowledge sharing.",
-        "flavor": "Teaching proves mastery.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\ude80",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-impact-21",
-        "name": "Contributed to Shipped Content",
-        "type": "Impact",
-        "category": "Impact",
-        "description": "Your work is part of content that reached players, even in a small way.",
-        "flavor": "Shipped is the only metric that counts.",
-        "rarity": "Uncommon",
-        "art": "\ud83d\ude80",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-wildcard-22",
-        "name": "Wild Card: Industry Veteran Insight",
-        "type": "Wildcard",
-        "category": "Wildcard",
-        "description": "A veteran shares hard-won wisdom. Use in place of any Setup, Action, or Proof card for any set.",
-        "flavor": "Experience is the best teacher.",
-        "rarity": "Rare",
-        "art": "\u2b50",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-wildcard-23",
-        "name": "Wild Card: Cross-Discipline Workshop",
-        "type": "Wildcard",
-        "category": "Wildcard",
-        "description": "An intensive workshop bridges disciplines. Use in place of any card for any set.",
-        "flavor": "Boundaries are where innovation lives.",
-        "rarity": "Rare",
-        "art": "\u2b50",
-        "set": "any",
-        "value": 1
-      },
-      {
-        "id": "dev-wildcard-24",
-        "name": "Wild Card: Personal Project Sprint",
-        "type": "Wildcard",
-        "category": "Wildcard",
-        "description": "A focused personal project fills a gap. Use in place of any card for any set.",
-        "flavor": "Self-directed work shows drive.",
-        "rarity": "Rare",
-        "art": "\u2b50",
-        "set": "any",
-        "value": 1
-      }
-    ],
     {
       "id": "impact-cross-platform",
       "name": "Ship Cross-Platform Build",
@@ -1583,7 +300,12 @@
       "art": "\ud83d\udcf1",
       "set": "partnership",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Analysis"
+      ]
     },
     {
       "id": "impact-ship-build",
@@ -1596,7 +318,12 @@
       "art": "\ud83d\udea2",
       "set": "placement",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Analysis"
+      ]
     },
     {
       "id": "proof-code-freeze",
@@ -1609,7 +336,12 @@
       "art": "\ud83e\uddca",
       "set": "brief",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "proof-code-review",
@@ -1622,7 +354,12 @@
       "art": "\ud83d\udc41\ufe0f",
       "set": "placement",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "proof-debug-session",
@@ -1635,7 +372,12 @@
       "art": "\ud83d\udc1b",
       "set": "volunteering",
       "value": 1,
-      "skill": "Analysis"
+      "skill": "Analysis",
+      "skills": [
+        "Analysis",
+        "Technical Setup",
+        "Design"
+      ]
     },
     {
       "id": "proof-deploy-patch",
@@ -1648,7 +390,12 @@
       "art": "\ud83d\ude91",
       "set": "partnership",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "proof-perf-profiler",
@@ -1661,7 +408,12 @@
       "art": "\ud83d\udcc8",
       "set": "partnership",
       "value": 1,
-      "skill": "Analysis"
+      "skill": "Analysis",
+      "skills": [
+        "Analysis",
+        "Technical Setup",
+        "Design"
+      ]
     },
     {
       "id": "proof-static-analysis",
@@ -1674,7 +426,12 @@
       "art": "\ud83d\udd0d",
       "set": "placement",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "proof-unit-tests",
@@ -1687,7 +444,12 @@
       "art": "\u2705",
       "set": "brief",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "proof-write-docs",
@@ -1700,7 +462,12 @@
       "art": "\ud83d\udcdd",
       "set": "volunteering",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "setup-build-config",
@@ -1713,7 +480,12 @@
       "art": "\u2699\ufe0f",
       "set": "brief",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation"
+      ]
     },
     {
       "id": "setup-ci-config",
@@ -1726,7 +498,12 @@
       "art": "\ud83d\udd01",
       "set": "placement",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Analysis"
+      ]
     },
     {
       "id": "setup-code-sync",
@@ -1739,7 +516,12 @@
       "art": "\ud83d\udd17",
       "set": "partnership",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Analysis"
+      ]
     },
     {
       "id": "setup-codebase-intro",
@@ -1752,7 +534,13 @@
       "art": "\ud83d\udcbb",
       "set": "placement",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation",
+        "Analysis"
+      ]
     },
     {
       "id": "setup-engineer-brief",
@@ -1765,7 +553,12 @@
       "art": "\ud83d\udccb",
       "set": "brief",
       "value": 1,
-      "skill": "Communication"
+      "skill": "Communication",
+      "skills": [
+        "Communication",
+        "Teamwork",
+        "Reliability"
+      ]
     },
     {
       "id": "setup-game-jam-tech",
@@ -1778,7 +571,12 @@
       "art": "\u26a1",
       "set": "volunteering",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation"
+      ]
     },
     {
       "id": "setup-tech-spike",
@@ -1791,7 +589,12 @@
       "art": "\ud83d\udd2c",
       "set": "volunteering",
       "value": 1,
-      "skill": "Analysis"
+      "skill": "Analysis",
+      "skills": [
+        "Analysis",
+        "Technical Setup",
+        "Design"
+      ]
     },
     {
       "id": "setup-tech-visit",
@@ -1816,7 +619,12 @@
       "art": "\ud83d\udce6",
       "set": "partnership",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation"
+      ]
     },
     {
       "id": "action-build-sponsor-activation",
@@ -1829,7 +637,13 @@
       "art": "\ud83c\udff7\ufe0f",
       "set": "partnership",
       "value": 1,
-      "skill": "Design"
+      "skill": "Design",
+      "skills": [
+        "Design",
+        "Documentation",
+        "Analysis",
+        "Problem solving"
+      ]
     },
     {
       "id": "action-co-ordinate-volunteers",
@@ -1842,7 +656,13 @@
       "art": "\ud83d\udcf1",
       "set": "volunteering",
       "value": 1,
-      "skill": "Organisation"
+      "skill": "Organisation",
+      "skills": [
+        "Organisation",
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-complete-partner-task",
@@ -1855,7 +675,12 @@
       "art": "\ud83d\udce6",
       "set": "partnership",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "action-complete-partner",
@@ -1867,7 +692,10 @@
       "rarity": "Rare",
       "art": "\u2728",
       "set": "partnership",
-      "value": 2
+      "value": 2,
+      "skills": [
+        "Communication"
+      ]
     },
     {
       "id": "action-complete-placement",
@@ -1880,7 +708,13 @@
       "art": "\ud83d\udee0\ufe0f",
       "set": "placement",
       "value": 1,
-      "skill": "Technical Setup"
+      "skill": "Technical Setup",
+      "skills": [
+        "Technical Setup",
+        "Design",
+        "Documentation",
+        "Analysis"
+      ]
     },
     {
       "id": "action-deliver-brief",
@@ -1892,7 +726,10 @@
       "rarity": "Uncommon",
       "art": "\ud83d\ude80",
       "set": "brief",
-      "value": 2
+      "value": 2,
+      "skills": [
+        "Design"
+      ]
     },
     {
       "id": "action-finish-assignment",
@@ -1929,7 +766,12 @@
       "art": "\ud83c\udfaf",
       "set": "volunteering",
       "value": 1,
-      "skill": "Coaching"
+      "skill": "Coaching",
+      "skills": [
+        "Coaching",
+        "Communication",
+        "Teamwork"
+      ]
     },
     {
       "id": "impact-measure-contribution",
@@ -1954,7 +796,14 @@
       "art": "\ud83d\udde3\ufe0f",
       "set": "partnership",
       "value": 1,
-      "skill": "Communication"
+      "skill": "Communication",
+      "skills": [
+        "Communication",
+        "Teamwork",
+        "Reliability",
+        "Technical Setup",
+        "Design"
+      ]
     },
     {
       "id": "impact-partnership-outcome",
@@ -1967,7 +816,13 @@
       "art": "\ud83e\udd1d",
       "set": "partnership",
       "value": 1,
-      "skill": "Communication"
+      "skill": "Communication",
+      "skills": [
+        "Communication",
+        "Teamwork",
+        "Reliability",
+        "Documentation"
+      ]
     },
     {
       "id": "impact-placement-outcome",
@@ -1980,7 +835,14 @@
       "art": "\ud83d\udcca",
       "set": "placement",
       "value": 1,
-      "skill": "Communication"
+      "skill": "Communication",
+      "skills": [
+        "Communication",
+        "Teamwork",
+        "Reliability",
+        "Technical Setup",
+        "Documentation"
+      ]
     },
     {
       "id": "impact-placement-showcase",
@@ -1993,7 +855,13 @@
       "art": "\ud83c\udfa4",
       "set": "placement",
       "value": 1,
-      "skill": "Presentation"
+      "skill": "Presentation",
+      "skills": [
+        "Presentation",
+        "Communication",
+        "Teamwork",
+        "Design"
+      ]
     },
     {
       "id": "proof-ask-reference",
@@ -2042,7 +910,13 @@
       "art": "\ud83d\udc1b",
       "set": "brief",
       "value": 1,
-      "skill": "Problem solving"
+      "skill": "Problem solving",
+      "skills": [
+        "Problem solving",
+        "Analysis",
+        "Organisation",
+        "Design"
+      ]
     },
     {
       "id": "proof-distinction-earned",
@@ -2067,7 +941,13 @@
       "art": "\ud83d\udcd3",
       "set": "brief",
       "value": 1,
-      "skill": "Reflection"
+      "skill": "Reflection",
+      "skills": [
+        "Reflection",
+        "Communication",
+        "Teamwork",
+        "Problem solving"
+      ]
     },
     {
       "id": "proof-give-coaching-feedback",
@@ -2080,7 +960,13 @@
       "art": "\ud83d\udcad",
       "set": "brief",
       "value": 1,
-      "skill": "Coaching"
+      "skill": "Coaching",
+      "skills": [
+        "Coaching",
+        "Communication",
+        "Teamwork",
+        "Analysis"
+      ]
     },
     {
       "id": "proof-log-placement-hours",
@@ -2093,7 +979,14 @@
       "art": "\ud83d\udcdd",
       "set": "placement",
       "value": 1,
-      "skill": "Reliability"
+      "skill": "Reliability",
+      "skills": [
+        "Reliability",
+        "Organisation",
+        "Problem solving",
+        "Technical Setup",
+        "Analysis"
+      ]
     },
     {
       "id": "proof-placement-reflection",
@@ -2106,7 +999,14 @@
       "art": "\ud83e\udd14",
       "set": "placement",
       "value": 1,
-      "skill": "Reflection"
+      "skill": "Reflection",
+      "skills": [
+        "Reflection",
+        "Communication",
+        "Teamwork",
+        "Documentation",
+        "Coaching"
+      ]
     },
     {
       "id": "proof-present-feedback",
@@ -2119,7 +1019,13 @@
       "art": "\ud83c\udfa4",
       "set": "brief",
       "value": 1,
-      "skill": "Communication"
+      "skill": "Communication",
+      "skills": [
+        "Communication",
+        "Teamwork",
+        "Reliability",
+        "Organisation"
+      ]
     },
     {
       "id": "proof-record-industry-insight",
@@ -2132,7 +1038,12 @@
       "art": "\ud83d\udca1",
       "set": "visit",
       "value": 1,
-      "skill": "Industry Knowledge"
+      "skill": "Industry Knowledge",
+      "skills": [
+        "Industry Knowledge",
+        "Analysis",
+        "Technical Setup"
+      ]
     },
     {
       "id": "proof-reliability-checkin",
@@ -2145,7 +1056,14 @@
       "art": "\u2705",
       "set": "volunteering",
       "value": 1,
-      "skill": "Reliability"
+      "skill": "Reliability",
+      "skills": [
+        "Reliability",
+        "Organisation",
+        "Problem solving",
+        "Technical Setup",
+        "Communication"
+      ]
     },
     {
       "id": "proof-revise-with-feedback",
@@ -2158,7 +1076,14 @@
       "art": "\ud83d\udd01",
       "set": "partnership",
       "value": 1,
-      "skill": "Analysis"
+      "skill": "Analysis",
+      "skills": [
+        "Analysis",
+        "Technical Setup",
+        "Communication",
+        "Design",
+        "Problem solving"
+      ]
     },
     {
       "id": "proof-save-portfolio",
@@ -2183,7 +1108,14 @@
       "art": "\ud83d\udcca",
       "set": "partnership",
       "value": 1,
-      "skill": "Documentation"
+      "skill": "Documentation",
+      "skills": [
+        "Documentation",
+        "Analysis",
+        "Technical Setup",
+        "Organisation",
+        "Communication"
+      ]
     },
     {
       "id": "proof-volunteer-feedback",
@@ -2196,7 +1128,13 @@
       "art": "\ud83d\udcac",
       "set": "volunteering",
       "value": 1,
-      "skill": "Teamwork"
+      "skill": "Teamwork",
+      "skills": [
+        "Teamwork",
+        "Reliability",
+        "Organisation",
+        "Analysis"
+      ]
     },
     {
       "id": "setup-agree-dates-times",
@@ -2232,7 +1170,12 @@
       "rarity": "Common",
       "art": "\ud83e\udd1d",
       "set": "partnership",
-      "value": 1
+      "value": 1,
+      "skills": [
+        "Problem solving",
+        "Organisation",
+        "Communication"
+      ]
     },
     {
       "id": "setup-confirm-venue-logistics",
@@ -2245,7 +1188,13 @@
       "art": "\ud83c\udfe2",
       "set": "visit",
       "value": 1,
-      "skill": "Organisation"
+      "skill": "Organisation",
+      "skills": [
+        "Organisation",
+        "Problem solving",
+        "Analysis",
+        "Teamwork"
+      ]
     },
     {
       "id": "setup-employer-contact",
@@ -2281,7 +1230,12 @@
       "rarity": "Common",
       "art": "\ud83e\udd1d",
       "set": "partnership",
-      "value": 1
+      "value": 1,
+      "skills": [
+        "Technical Setup",
+        "Documentation",
+        "Design"
+      ]
     },
     {
       "id": "setup-review-brief",
@@ -2293,7 +1247,14 @@
       "rarity": "Common",
       "art": "\ud83d\udcc4",
       "set": "brief",
-      "value": 1
+      "value": 1,
+      "skills": [
+        "Problem solving",
+        "Communication",
+        "Organisation",
+        "Teamwork",
+        "Analysis"
+      ]
     },
     {
       "id": "setup-stage-run-sheet",
@@ -2306,7 +1267,12 @@
       "art": "\ud83d\udccb",
       "set": "partnership",
       "value": 1,
-      "skill": "Organisation"
+      "skill": "Organisation",
+      "skills": [
+        "Organisation",
+        "Problem solving",
+        "Analysis"
+      ]
     },
     {
       "id": "setup-travel-access",
@@ -2330,7 +1296,11 @@
       "rarity": "Common",
       "art": "\ud83d\udccb",
       "set": "brief",
-      "value": 1
+      "value": 1,
+      "skills": [
+        "Design",
+        "Technical Setup"
+      ]
     },
     {
       "id": "wild-card-evidence-boost",

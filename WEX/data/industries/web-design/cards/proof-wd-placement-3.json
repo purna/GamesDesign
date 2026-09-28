@@ -6,8 +6,13 @@
   "description": "Write component docs: API, usage examples, accessibility notes, and migration guide.",
   "flavor": "Undocumented components don't get adopted.",
   "rarity": "Common",
-  "art": "📄",
+  "art": "\ud83d\udcc4",
   "set": "placement",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

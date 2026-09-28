@@ -9,5 +9,10 @@
   "art": "\u2705",
   "set": "brief",
   "value": 1,
-  "skill": "Documentation"
+  "skill": "Documentation",
+  "skills": [
+    "Documentation",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

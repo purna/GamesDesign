@@ -3,11 +3,16 @@
   "name": "Volunteer at Tournament",
   "type": "Action",
   "category": "Action",
-  "description": "Choose a role — registration, player support, setup, social posts, or match scheduling — and get stuck in.",
+  "description": "Choose a role \u2014 registration, player support, setup, social posts, or match scheduling \u2014 and get stuck in.",
   "flavor": "Tournaments run on volunteers like you.",
   "rarity": "Common",
-  "art": "🙋",
+  "art": "\ud83d\ude4b",
   "set": "volunteering",
   "value": 1,
-  "skill": "Teamwork"
+  "skill": "Teamwork",
+  "skills": [
+    "Teamwork",
+    "Reliability",
+    "Organisation"
+  ]
 }

@@ -6,8 +6,13 @@
   "description": "Walk partner team through the system: tokens, components, contribution model, and governance.",
   "flavor": "A system without governance is just a library.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "partnership",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

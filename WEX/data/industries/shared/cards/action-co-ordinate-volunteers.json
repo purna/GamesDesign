@@ -6,8 +6,14 @@
   "description": "Assign shifts, brief volunteers on their roles, and set up a communication channel for the day.",
   "flavor": "Herd management, esports edition.",
   "rarity": "Common",
-  "art": "📱",
+  "art": "\ud83d\udcf1",
   "set": "volunteering",
   "value": 1,
-  "skill": "Organisation"
+  "skill": "Organisation",
+  "skills": [
+    "Organisation",
+    "Problem solving",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

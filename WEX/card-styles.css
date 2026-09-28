@@ -1000,3 +1000,17 @@ html[data-theme="light"] {
 }
 .preview-rolefit b { display: block; font-size: 0.72rem; margin-bottom: 0.15rem; }
 .rolefit-note { color: var(--ink-soft); font-size: 0.65rem; }
+
+/* Cards that grant the target role's required skill */
+.card-skill-key { color: var(--gold) !important; }
+.card-skill-key::before { content: "\2605"; }
+.card.card-key-skill {
+  box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold), transparent 55%);
+  border-color: var(--gold);
+}
+.preview-rolefit.key {
+  border: 1px solid var(--gold);
+  background: color-mix(in srgb, var(--gold), transparent 82%);
+  color: var(--ink);
+}
+.preview-rolefit.key b { color: var(--gold); }

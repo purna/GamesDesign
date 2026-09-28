@@ -6,7 +6,11 @@
   "description": "Clarify the scope: target systems, rules of engagement, reporting format, and timeline.",
   "flavor": "Scope creep in security causes real damage.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "brief",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Communication",
+    "Analysis"
+  ]
 }

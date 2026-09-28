@@ -9,5 +9,10 @@
   "art": "\u267b\ufe0f",
   "set": "placement",
   "value": 1,
-  "skill": "Problem solving"
+  "skill": "Problem solving",
+  "skills": [
+    "Problem solving",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

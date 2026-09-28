@@ -6,7 +6,10 @@
   "description": "Deliver the agreed web project: accessible components, documented APIs, and deployment guide.",
   "flavor": "Professional code. Professional docs.",
   "rarity": "Rare",
-  "art": "✨",
+  "art": "\u2728",
   "set": "partnership",
-  "value": 2
+  "value": 2,
+  "skills": [
+    "Technical Setup"
+  ]
 }

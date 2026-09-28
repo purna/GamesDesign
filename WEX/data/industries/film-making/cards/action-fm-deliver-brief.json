@@ -6,7 +6,10 @@
   "description": "Edit the project from assembly to picture lock. Handle notes, conform, and export deliverables.",
   "flavor": "Picture lock is a milestone, not the finish.",
   "rarity": "Uncommon",
-  "art": "🎞️",
+  "art": "\ud83c\udf9e\ufe0f",
   "set": "brief",
-  "value": 2
+  "value": 2,
+  "skills": [
+    "Technical Setup"
+  ]
 }

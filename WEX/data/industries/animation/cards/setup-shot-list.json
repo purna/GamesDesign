@@ -9,5 +9,10 @@
   "art": "\ud83d\udccb",
   "set": "brief",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

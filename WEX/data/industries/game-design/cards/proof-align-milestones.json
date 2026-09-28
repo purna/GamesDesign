@@ -9,5 +9,11 @@
   "art": "\ud83d\udcc5",
   "set": "partnership",
   "value": 1,
-  "skill": "Documentation"
+  "skill": "Documentation",
+  "skills": [
+    "Documentation",
+    "Analysis",
+    "Design",
+    "Problem solving"
+  ]
 }

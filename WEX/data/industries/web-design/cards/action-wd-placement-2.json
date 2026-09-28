@@ -6,8 +6,14 @@
   "description": "Audit and fix WCAG violations: color contrast, keyboard navigation, ARIA labels, focus management.",
   "flavor": "Accessible design is better design.",
   "rarity": "Common",
-  "art": "♿",
+  "art": "\u267f",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation",
+    "Analysis"
+  ]
 }

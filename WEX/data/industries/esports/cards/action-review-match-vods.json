@@ -6,8 +6,13 @@
   "description": "Watch back recent matches and note patterns worth acting on.",
   "flavor": "The replay never lies.",
   "rarity": "Uncommon",
-  "art": "📼",
+  "art": "\ud83d\udcfc",
   "set": "placement",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Design"
+  ]
 }

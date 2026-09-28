@@ -6,8 +6,14 @@
   "description": "Design and implement a UI feature: component, page, or flow. Follow the design system.",
   "flavor": "Design in Figma. Ship in code.",
   "rarity": "Common",
-  "art": "⚛️",
+  "art": "\u269b\ufe0f",
   "set": "placement",
   "value": 1,
-  "skill": "Design"
+  "skill": "Design",
+  "skills": [
+    "Design",
+    "Documentation",
+    "Analysis",
+    "Problem solving"
+  ]
 }

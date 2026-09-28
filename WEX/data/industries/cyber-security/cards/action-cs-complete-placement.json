@@ -6,8 +6,13 @@
   "description": "Triage alerts, analyze logs, and determine false positives vs real incidents.",
   "flavor": "Signal hides in noise. Find it.",
   "rarity": "Common",
-  "art": "🔍",
+  "art": "\ud83d\udd0d",
   "set": "placement",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Communication"
+  ]
 }

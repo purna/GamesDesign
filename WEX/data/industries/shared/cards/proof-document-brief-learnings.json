@@ -6,8 +6,14 @@
   "description": "Write up what the brief taught you about your role, the client's needs, and your design decisions.",
   "flavor": "A written record is the bridge between doing and reflecting.",
   "rarity": "Common",
-  "art": "📓",
+  "art": "\ud83d\udcd3",
   "set": "brief",
   "value": 1,
-  "skill": "Reflection"
+  "skill": "Reflection",
+  "skills": [
+    "Reflection",
+    "Communication",
+    "Teamwork",
+    "Problem solving"
+  ]
 }

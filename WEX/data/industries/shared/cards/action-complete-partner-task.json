@@ -6,8 +6,13 @@
   "description": "Complete the agreed task and ask the partner for feedback.",
   "flavor": "Professional feedback is worth more than a grade.",
   "rarity": "Common",
-  "art": "📦",
+  "art": "\ud83d\udce6",
   "set": "partnership",
   "value": 1,
-  "skill": "Problem solving"
+  "skill": "Problem solving",
+  "skills": [
+    "Problem solving",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

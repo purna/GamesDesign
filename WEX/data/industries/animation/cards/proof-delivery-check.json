@@ -9,5 +9,10 @@
   "art": "\u2705",
   "set": "partnership",
   "value": 1,
-  "skill": "Documentation"
+  "skill": "Documentation",
+  "skills": [
+    "Documentation",
+    "Analysis",
+    "Design"
+  ]
 }

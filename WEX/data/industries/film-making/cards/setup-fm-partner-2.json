@@ -6,7 +6,10 @@
   "description": "Align with partner on trailer goals: audience, tone, key beats, platform specs, and approval chain.",
   "flavor": "A trailer is a promise. Keep it.",
   "rarity": "Common",
-  "art": "🎯",
+  "art": "\ud83c\udfaf",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

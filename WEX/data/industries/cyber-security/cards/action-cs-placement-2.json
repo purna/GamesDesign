@@ -6,8 +6,14 @@
   "description": "Execute authenticated and unauthenticated scans, validate findings, and prioritize remediation.",
   "flavor": "Scanners find vulns. Analysts find risk.",
   "rarity": "Common",
-  "art": "📊",
+  "art": "\ud83d\udcca",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation",
+    "Communication"
+  ]
 }

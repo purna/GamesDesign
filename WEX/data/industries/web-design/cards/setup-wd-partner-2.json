@@ -6,7 +6,10 @@
   "description": "Audit partner's existing UI: inventory components, find inconsistencies, and prioritize standardization.",
   "flavor": "Audit before you build. Measure before you cut.",
   "rarity": "Common",
-  "art": "🔍",
+  "art": "\ud83d\udd0d",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

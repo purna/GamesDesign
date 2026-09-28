@@ -3,11 +3,17 @@
   "name": "Showcase Placement Result",
   "type": "Impact",
   "category": "Impact",
-  "description": "Present the final outcome of your placement work — a demo, report, or deliverable — and explain its impact.",
+  "description": "Present the final outcome of your placement work \u2014 a demo, report, or deliverable \u2014 and explain its impact.",
   "flavor": "The best placements end with a story worth telling.",
   "rarity": "Common",
-  "art": "🎤",
+  "art": "\ud83c\udfa4",
   "set": "placement",
   "value": 1,
-  "skill": "Presentation"
+  "skill": "Presentation",
+  "skills": [
+    "Presentation",
+    "Communication",
+    "Teamwork",
+    "Design"
+  ]
 }

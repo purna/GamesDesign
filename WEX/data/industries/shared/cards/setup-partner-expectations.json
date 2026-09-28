@@ -6,7 +6,12 @@
   "description": "Find out what the industry partner expects you to produce and how they'll support you.",
   "flavor": "Partners don't want free labour. They want fresh perspective.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Documentation",
+    "Design"
+  ]
 }

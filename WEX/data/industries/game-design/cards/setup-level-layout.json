@@ -9,5 +9,11 @@
   "art": "\ud83d\uddfa\ufe0f",
   "set": "placement",
   "value": 1,
-  "skill": "Design"
+  "skill": "Design",
+  "skills": [
+    "Design",
+    "Documentation",
+    "Analysis",
+    "Problem solving"
+  ]
 }

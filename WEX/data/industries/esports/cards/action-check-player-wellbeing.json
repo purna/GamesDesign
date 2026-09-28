@@ -6,8 +6,14 @@
   "description": "Check in on rest, workload and mood before a big event.",
   "flavor": "Burnt-out players don't perform.",
   "rarity": "Uncommon",
-  "art": "🌤️",
+  "art": "\ud83c\udf24\ufe0f",
   "set": "volunteering",
   "value": 1,
-  "skill": "Teamwork"
+  "skill": "Teamwork",
+  "skills": [
+    "Teamwork",
+    "Reliability",
+    "Coaching",
+    "Technical Setup"
+  ]
 }

@@ -6,8 +6,15 @@
   "description": "Document the deliverables produced during the partnership, highlighting your specific contribution and the skills applied.",
   "flavor": "The best partnerships leave a paper trail of success.",
   "rarity": "Common",
-  "art": "📊",
+  "art": "\ud83d\udcca",
   "set": "partnership",
   "value": 1,
-  "skill": "Documentation"
+  "skill": "Documentation",
+  "skills": [
+    "Documentation",
+    "Analysis",
+    "Technical Setup",
+    "Organisation",
+    "Communication"
+  ]
 }

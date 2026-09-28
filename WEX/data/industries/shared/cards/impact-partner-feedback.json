@@ -6,8 +6,15 @@
   "description": "Record the partner's response to your completed work and how it met their objectives.",
   "flavor": "External validation is the gold standard of achievement.",
   "rarity": "Common",
-  "art": "🗣️",
+  "art": "\ud83d\udde3\ufe0f",
   "set": "partnership",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability",
+    "Technical Setup",
+    "Design"
+  ]
 }

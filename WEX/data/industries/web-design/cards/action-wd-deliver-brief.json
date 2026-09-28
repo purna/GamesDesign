@@ -6,7 +6,10 @@
   "description": "Design and build the project: responsive pages, components, CMS integration, and QA.",
   "flavor": "Responsive by default. Accessible by design.",
   "rarity": "Uncommon",
-  "art": "🖥️",
+  "art": "\ud83d\udda5\ufe0f",
   "set": "brief",
-  "value": 2
+  "value": 2,
+  "skills": [
+    "Design"
+  ]
 }

@@ -6,8 +6,14 @@
   "description": "Cut a scene, segment, or sequence: assemble, rough cut, fine cut, and deliver for review.",
   "flavor": "Editing is rewriting with footage.",
   "rarity": "Common",
-  "art": "✂️",
+  "art": "\u2702\ufe0f",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Analysis",
+    "Teamwork"
+  ]
 }

@@ -9,5 +9,12 @@
   "art": "\ud83d\udc65",
   "set": "placement",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Organisation",
+    "Problem solving",
+    "Teamwork"
+  ]
 }

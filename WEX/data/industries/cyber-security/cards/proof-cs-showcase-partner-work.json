@@ -6,8 +6,13 @@
   "description": "Present your partner engagement with scope, findings, and remediation guidance.",
   "flavor": "Show the risk, not just the vulnerability.",
   "rarity": "Uncommon",
-  "art": "🖼️",
+  "art": "\ud83d\uddbc\ufe0f",
   "set": "partnership",
   "value": 2,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

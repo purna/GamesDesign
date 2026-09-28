@@ -6,8 +6,15 @@
   "description": "Record your hours and write what you did, what you learned, and how it connects to your target job.",
   "flavor": "Evidence is what turns a placement into a reference.",
   "rarity": "Common",
-  "art": "📝",
+  "art": "\ud83d\udcdd",
   "set": "placement",
   "value": 1,
-  "skill": "Reliability"
+  "skill": "Reliability",
+  "skills": [
+    "Reliability",
+    "Organisation",
+    "Problem solving",
+    "Technical Setup",
+    "Analysis"
+  ]
 }

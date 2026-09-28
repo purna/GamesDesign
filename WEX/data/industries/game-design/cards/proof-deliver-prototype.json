@@ -9,5 +9,11 @@
   "art": "\ud83d\udce6",
   "set": "brief",
   "value": 1,
-  "skill": "Documentation"
+  "skill": "Documentation",
+  "skills": [
+    "Documentation",
+    "Analysis",
+    "Design",
+    "Problem solving"
+  ]
 }

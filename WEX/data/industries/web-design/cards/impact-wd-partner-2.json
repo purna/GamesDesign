@@ -6,7 +6,10 @@
   "description": "Partner's products ship using the new design system. Measure consistency and velocity gains.",
   "flavor": "Consistency scales. Velocity compounds.",
   "rarity": "Uncommon",
-  "art": "🚀",
+  "art": "\ud83d\ude80",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

@@ -6,7 +6,13 @@
   "description": "Agree tasks, dates, days and hours with the employer; collect their contact details and address; confirm your tutor's name.",
   "flavor": "No request goes anywhere without the details.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Problem solving",
+    "Technical Setup",
+    "Organisation",
+    "Analysis"
+  ]
 }

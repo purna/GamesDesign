@@ -9,5 +9,10 @@
   "art": "\ud83c\udfaa",
   "set": "visit",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Organisation"
+  ]
 }

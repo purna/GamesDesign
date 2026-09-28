@@ -6,8 +6,13 @@
   "description": "Document the MOGRT: controls, use cases, font requirements, and version history.",
   "flavor": "A template without docs is a mystery box.",
   "rarity": "Common",
-  "art": "📄",
+  "art": "\ud83d\udcc4",
   "set": "placement",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

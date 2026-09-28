@@ -6,8 +6,13 @@
   "description": "Host a Q&A, watch party or community event for fans or players.",
   "flavor": "Communities grow around people who show up.",
   "rarity": "Uncommon",
-  "art": "🎙️",
+  "art": "\ud83c\udf99\ufe0f",
   "set": "volunteering",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

@@ -6,7 +6,14 @@
   "description": "Read the brief, identify the audience, check the deadline, and decide what you'll make.",
   "flavor": "A clear brief saves three drafts later.",
   "rarity": "Common",
-  "art": "📄",
+  "art": "\ud83d\udcc4",
   "set": "brief",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Problem solving",
+    "Communication",
+    "Organisation",
+    "Teamwork",
+    "Analysis"
+  ]
 }

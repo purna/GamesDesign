@@ -6,7 +6,11 @@
   "description": "Partner implemented mitigations for high-risk threats identified in your model.",
   "flavor": "Risk accepted, transferred, or mitigated.",
   "rarity": "Uncommon",
-  "art": "🛡️",
+  "art": "\ud83d\udee1\ufe0f",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis",
+    "Technical Setup"
+  ]
 }

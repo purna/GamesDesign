@@ -6,7 +6,11 @@
   "description": "Explain how your work improved detection coverage, response time, or security posture.",
   "flavor": "Metrics make security visible.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis",
+    "Technical Setup"
+  ]
 }

@@ -6,8 +6,13 @@
   "description": "Write a post-assessment review: methodology, findings, false positives, and improvements.",
   "flavor": "Every assessment sharpens your methodology.",
   "rarity": "Common",
-  "art": "📓",
+  "art": "\ud83d\udcd3",
   "set": "brief",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Analysis"
+  ]
 }

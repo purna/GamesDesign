@@ -6,7 +6,12 @@
   "description": "Find out who the industry partner is, what the project involves, when sessions happen, and what they expect you to produce.",
   "flavor": "Partnerships work best with clear expectations on both sides.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Problem solving",
+    "Organisation",
+    "Communication"
+  ]
 }

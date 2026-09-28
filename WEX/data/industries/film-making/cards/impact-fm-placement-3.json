@@ -6,7 +6,10 @@
   "description": "Your MOGRT is used across the production. Document time saved per episode.",
   "flavor": "Standardization scales creativity.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

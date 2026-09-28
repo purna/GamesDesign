@@ -6,7 +6,15 @@
   "description": "Submit required paperwork, set up your workspace access, and confirm your reporting line with your supervisor.",
   "flavor": "Paperwork is boring. Getting started is not.",
   "rarity": "Common",
-  "art": "📝",
+  "art": "\ud83d\udcdd",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Problem solving",
+    "Technical Setup",
+    "Coaching",
+    "Teamwork",
+    "Analysis",
+    "Organisation"
+  ]
 }

@@ -6,7 +6,12 @@
   "description": "Create detection rules for SIEM: correlation searches, thresholds, and alert routing.",
   "flavor": "Good rules reduce noise. Great rules catch attackers.",
   "rarity": "Common",
-  "art": "⚙️",
+  "art": "\u2699\ufe0f",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Communication",
+    "Analysis",
+    "Technical Setup"
+  ]
 }

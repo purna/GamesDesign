@@ -6,7 +6,10 @@
   "description": "Set up SIEM access, configure lab environment, and review security policies.",
   "flavor": "Know the environment before you defend it.",
   "rarity": "Common",
-  "art": "🔐",
+  "art": "\ud83d\udd10",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis"
+  ]
 }

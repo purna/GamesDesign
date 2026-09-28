@@ -6,7 +6,12 @@
   "description": "Work on a student/indie short: camera, sound, grip, or post. Experience the full pipeline.",
   "flavor": "Small crew. Big lessons.",
   "rarity": "Common",
-  "art": "🎥",
+  "art": "\ud83c\udfa5",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Teamwork",
+    "Analysis"
+  ]
 }

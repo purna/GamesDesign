@@ -6,8 +6,13 @@
   "description": "Build a reusable MOGRT: lower thirds, titles, or transitions with editable controls.",
   "flavor": "Templates save hours on every episode.",
   "rarity": "Common",
-  "art": "🎨",
+  "art": "\ud83c\udfa8",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation"
+  ]
 }

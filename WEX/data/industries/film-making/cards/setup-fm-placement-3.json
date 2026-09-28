@@ -6,7 +6,12 @@
   "description": "Create project template: bin structure, sequence settings, export presets, and keyboard shortcuts.",
   "flavor": "Template once. Use forever.",
   "rarity": "Common",
-  "art": "📐",
+  "art": "\ud83d\udcd0",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Teamwork",
+    "Analysis"
+  ]
 }

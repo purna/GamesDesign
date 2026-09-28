@@ -6,7 +6,10 @@
   "description": "Agree on deliverables with an industry partner: trailer, sizzle reel, or episodic editing.",
   "flavor": "Partners need storytellers who hit deadlines.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

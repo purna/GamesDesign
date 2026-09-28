@@ -4,10 +4,16 @@
   "type": "Action",
   "category": "Action",
   "description": "Design a small on-site or online activity for a sponsor's brand.",
-  "flavor": "Sponsors fund the scene — treat them well.",
+  "flavor": "Sponsors fund the scene \u2014 treat them well.",
   "rarity": "Uncommon",
-  "art": "🏷️",
+  "art": "\ud83c\udff7\ufe0f",
   "set": "partnership",
   "value": 1,
-  "skill": "Design"
+  "skill": "Design",
+  "skills": [
+    "Design",
+    "Documentation",
+    "Analysis",
+    "Problem solving"
+  ]
 }

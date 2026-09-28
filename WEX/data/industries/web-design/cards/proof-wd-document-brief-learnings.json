@@ -6,8 +6,13 @@
   "description": "Write a case study: problem, user research, design iterations, tech choices, and results.",
   "flavor": "Case studies get you hired.",
   "rarity": "Common",
-  "art": "📓",
+  "art": "\ud83d\udcd3",
   "set": "brief",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Design"
+  ]
 }

@@ -6,7 +6,10 @@
   "description": "Your feature is live. Document the user-facing result and any metrics (conversion, engagement).",
   "flavor": "Live is the only environment that matters.",
   "rarity": "Uncommon",
-  "art": "🚀",
+  "art": "\ud83d\ude80",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Design"
+  ]
 }

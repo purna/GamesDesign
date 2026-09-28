@@ -6,7 +6,10 @@
   "description": "Your edited sequence appears in the final deliverable. Document the context and your contribution.",
   "flavor": "Your cut made the final cut.",
   "rarity": "Uncommon",
-  "art": "🎬",
+  "art": "\ud83c\udfac",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis"
+  ]
 }

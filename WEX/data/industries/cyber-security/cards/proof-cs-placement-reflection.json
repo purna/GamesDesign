@@ -6,8 +6,13 @@
   "description": "Write a reflection on an incident you worked: detection, response, and lessons learned.",
   "flavor": "Post-incident reviews prevent repeat incidents.",
   "rarity": "Common",
-  "art": "📄",
+  "art": "\ud83d\udcc4",
   "set": "placement",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Design"
+  ]
 }

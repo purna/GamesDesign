@@ -6,7 +6,12 @@
   "description": "Confirm your place, location, joining details and any security requirements.",
   "flavor": "A booked visit is a foot in the door.",
   "rarity": "Common",
-  "art": "🎫",
+  "art": "\ud83c\udfab",
   "set": "visit",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Teamwork",
+    "Communication",
+    "Organisation"
+  ]
 }

@@ -6,8 +6,13 @@
   "description": "Present your partner work: brief, rough cut evolution, director collaboration, and final deliverable.",
   "flavor": "Show the journey from assembly to answer print.",
   "rarity": "Uncommon",
-  "art": "🖼️",
+  "art": "\ud83d\uddbc\ufe0f",
   "set": "partnership",
   "value": 2,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability"
+  ]
 }

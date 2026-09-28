@@ -9,5 +9,10 @@
   "art": "\ud83c\udfa8",
   "set": "volunteering",
   "value": 1,
-  "skill": "Design"
+  "skill": "Design",
+  "skills": [
+    "Design",
+    "Documentation",
+    "Communication"
+  ]
 }

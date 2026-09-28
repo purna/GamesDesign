@@ -6,8 +6,15 @@
   "description": "Explain how you'll confirm your shift and contact the organiser if plans change.",
   "flavor": "Reliability is a skill, not a personality trait.",
   "rarity": "Common",
-  "art": "✅",
+  "art": "\u2705",
   "set": "volunteering",
   "value": 1,
-  "skill": "Reliability"
+  "skill": "Reliability",
+  "skills": [
+    "Reliability",
+    "Organisation",
+    "Problem solving",
+    "Technical Setup",
+    "Communication"
+  ]
 }

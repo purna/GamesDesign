@@ -6,8 +6,13 @@
   "description": "Record hours and reflect on creative choices, director feedback, and technical problem-solving.",
   "flavor": "Every cut is a decision. Every revision is growth.",
   "rarity": "Common",
-  "art": "📝",
+  "art": "\ud83d\udcdd",
   "set": "placement",
   "value": 1,
-  "skill": "Reliability"
+  "skill": "Reliability",
+  "skills": [
+    "Reliability",
+    "Organisation",
+    "Analysis"
+  ]
 }

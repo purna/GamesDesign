@@ -9,5 +9,10 @@
   "art": "\ud83d\udcf1",
   "set": "partnership",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Analysis"
+  ]
 }

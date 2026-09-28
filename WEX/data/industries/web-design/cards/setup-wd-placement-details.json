@@ -6,7 +6,11 @@
   "description": "Agree tasks, dates, and hours with the design/dev team; confirm your mentor and repo access.",
   "flavor": "Clear handoffs prevent broken builds.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Analysis"
+  ]
 }

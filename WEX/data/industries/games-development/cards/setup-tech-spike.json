@@ -9,5 +9,10 @@
   "art": "\ud83d\udd2c",
   "set": "volunteering",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Design"
+  ]
 }

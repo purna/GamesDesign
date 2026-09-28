@@ -6,8 +6,14 @@
   "description": "Present the finished result to the partner and explain how you used their feedback.",
   "flavor": "A strong partnership leaves both sides with something useful.",
   "rarity": "Common",
-  "art": "🤝",
+  "art": "\ud83e\udd1d",
   "set": "partnership",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Reliability",
+    "Documentation"
+  ]
 }

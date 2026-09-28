@@ -6,7 +6,12 @@
   "description": "Explain how your work improved usability, accessibility, performance, or conversion.",
   "flavor": "Good UX shows in the numbers.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Analysis"
+  ]
 }

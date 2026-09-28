@@ -6,7 +6,11 @@
   "description": "Run scans, manually verify findings, and produce a prioritized remediation report.",
   "flavor": "A scanner finds vulns. An analyst finds risk.",
   "rarity": "Uncommon",
-  "art": "📊",
+  "art": "\ud83d\udcca",
   "set": "brief",
-  "value": 2
+  "value": 2,
+  "skills": [
+    "Communication",
+    "Analysis"
+  ]
 }

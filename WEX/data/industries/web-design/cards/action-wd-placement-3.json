@@ -6,8 +6,13 @@
   "description": "Create a fully tested, documented, accessible component with variants and states.",
   "flavor": "A component library is a product, not a project.",
   "rarity": "Common",
-  "art": "🧩",
+  "art": "\ud83e\udde9",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation"
+  ]
 }

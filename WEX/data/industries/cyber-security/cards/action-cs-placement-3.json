@@ -6,8 +6,13 @@
   "description": "Deep-dive into logs to reconstruct attack timeline and identify root cause.",
   "flavor": "Logs don't lie. But they do hide.",
   "rarity": "Common",
-  "art": "📜",
+  "art": "\ud83d\udcdc",
   "set": "placement",
   "value": 1,
-  "skill": "Analysis"
+  "skill": "Analysis",
+  "skills": [
+    "Analysis",
+    "Technical Setup",
+    "Design"
+  ]
 }

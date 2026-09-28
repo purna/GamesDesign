@@ -6,8 +6,13 @@
   "description": "Prepare kit, seating, signage and schedules ahead of a live event.",
   "flavor": "Match day starts hours before the first game.",
   "rarity": "Uncommon",
-  "art": "🎮",
+  "art": "\ud83c\udfae",
   "set": "visit",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Documentation"
+  ]
 }

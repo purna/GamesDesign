@@ -6,7 +6,13 @@
   "description": "Ask prepared questions, observe workflows and note one thing you learned.",
   "flavor": "You're not a tourist. You're scouting your future.",
   "rarity": "Common",
-  "art": "👀",
+  "art": "\ud83d\udc40",
   "set": "visit",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Problem solving",
+    "Teamwork",
+    "Communication",
+    "Organisation"
+  ]
 }

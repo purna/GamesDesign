@@ -6,7 +6,11 @@
   "description": "Explain how your editing elevated the narrative, pacing, or emotional resonance.",
   "flavor": "Invisible edits make the best stories.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Analysis"
+  ]
 }

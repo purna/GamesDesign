@@ -6,7 +6,10 @@
   "description": "Clarify the brief: genre, tone, runtime, deliverables (festival DCP, broadcast, social cuts), deadline.",
   "flavor": "Deliverables define the workflow.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "brief",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup"
+  ]
 }

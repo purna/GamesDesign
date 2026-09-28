@@ -9,5 +9,11 @@
   "art": "\ud83c\udfa5",
   "set": "placement",
   "value": 1,
-  "skill": "Technical Setup"
+  "skill": "Technical Setup",
+  "skills": [
+    "Technical Setup",
+    "Design",
+    "Analysis",
+    "Communication"
+  ]
 }

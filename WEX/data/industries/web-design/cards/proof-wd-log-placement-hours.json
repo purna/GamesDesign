@@ -6,8 +6,14 @@
   "description": "Record hours and reflect on components built, design decisions, and cross-browser testing.",
   "flavor": "Every component teaches a new constraint.",
   "rarity": "Common",
-  "art": "📝",
+  "art": "\ud83d\udcdd",
   "set": "placement",
   "value": 1,
-  "skill": "Reliability"
+  "skill": "Reliability",
+  "skills": [
+    "Reliability",
+    "Organisation",
+    "Analysis",
+    "Design"
+  ]
 }

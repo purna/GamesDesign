@@ -9,5 +9,12 @@
   "art": "\ud83c\udf0d",
   "set": "partnership",
   "value": 1,
-  "skill": "Communication"
+  "skill": "Communication",
+  "skills": [
+    "Communication",
+    "Teamwork",
+    "Technical Setup",
+    "Design",
+    "Analysis"
+  ]
 }

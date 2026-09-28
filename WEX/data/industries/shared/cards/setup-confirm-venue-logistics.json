@@ -6,8 +6,14 @@
   "description": "Book the venue, confirm access, arrange equipment, and create a run sheet for the event.",
   "flavor": "The devil is in the details, and the angels love a well-run event.",
   "rarity": "Common",
-  "art": "🏢",
+  "art": "\ud83c\udfe2",
   "set": "visit",
   "value": 1,
-  "skill": "Organisation"
+  "skill": "Organisation",
+  "skills": [
+    "Organisation",
+    "Problem solving",
+    "Analysis",
+    "Teamwork"
+  ]
 }

@@ -6,7 +6,10 @@
   "description": "Set up Figma, Storybook, and the component library. Review the design system documentation.",
   "flavor": "Know the system before you extend it.",
   "rarity": "Common",
-  "art": "🎨",
+  "art": "\ud83c\udfa8",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Design"
+  ]
 }

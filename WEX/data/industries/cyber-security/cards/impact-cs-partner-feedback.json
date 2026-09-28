@@ -6,7 +6,11 @@
   "description": "Your work led to measurable security improvements in the partner's environment.",
   "flavor": "Fixed in production. Verified in staging.",
   "rarity": "Uncommon",
-  "art": "📈",
+  "art": "\ud83d\udcc8",
   "set": "partnership",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis",
+    "Technical Setup"
+  ]
 }

@@ -9,5 +9,11 @@
   "art": "\u270f\ufe0f",
   "set": "brief",
   "value": 1,
-  "skill": "Design"
+  "skill": "Design",
+  "skills": [
+    "Design",
+    "Documentation",
+    "Communication",
+    "Technical Setup"
+  ]
 }

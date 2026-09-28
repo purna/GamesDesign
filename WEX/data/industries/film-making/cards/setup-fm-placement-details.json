@@ -6,7 +6,11 @@
   "description": "Agree tasks, dates, and hours with the production company; confirm your supervisor and call sheets.",
   "flavor": "Call time is sacred. Be ready.",
   "rarity": "Common",
-  "art": "📋",
+  "art": "\ud83d\udccb",
   "set": "placement",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Technical Setup",
+    "Analysis"
+  ]
 }

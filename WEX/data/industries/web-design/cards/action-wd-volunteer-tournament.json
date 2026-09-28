@@ -6,7 +6,10 @@
   "description": "Design and build a responsive site: IA, wireframes, UI, and frontend implementation.",
   "flavor": "Constraints breed creative solutions.",
   "rarity": "Common",
-  "art": "🌐",
+  "art": "\ud83c\udf10",
   "set": "volunteering",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Analysis"
+  ]
 }

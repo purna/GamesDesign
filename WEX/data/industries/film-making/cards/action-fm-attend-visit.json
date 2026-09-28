@@ -6,7 +6,10 @@
   "description": "Sit in on a color grading session, sound mix, or online conform review.",
   "flavor": "Color and sound are the final rewrite.",
   "rarity": "Common",
-  "art": "👁️",
+  "art": "\ud83d\udc41\ufe0f",
   "set": "visit",
-  "value": 1
+  "value": 1,
+  "skills": [
+    "Teamwork"
+  ]
 }
