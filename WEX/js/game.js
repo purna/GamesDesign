@@ -203,6 +203,20 @@ function draw(n) {
   return out;
 }
 
+function redrawHandCards(agent, count, success = true) {
+  const deselectable = agent.hand.slice();
+  if (success && deselectable.length > count) {
+    const shuffled = [...deselectable].sort(() => Math.random() - 0.5);
+    const removed = shuffled.slice(0, count);
+    agent.hand = agent.hand.filter((c) => !removed.some((r) => r.uid === c.uid));
+    agent.hand.push(...draw(count));
+    selectedHandUids = new Set();
+  } else if (success) {
+    const fresh = draw(Math.min(count, HAND_CAP - agent.hand.length));
+    agent.hand.push(...fresh);
+  }
+}
+
 function refillMarket() {
   while (state.market.length < MARKET_SIZE) {
     const [c] = draw(1);
@@ -354,7 +368,7 @@ function findBank(cards, forcedSet, allowSubset = false) {
     const missing = [];
     for (const cat of required) {
       const idx = remaining.findIndex((c) => c.category === cat && (c.set === targetSet || c.set === 'any'));
-      const wildcardIdx = remaining.findIndex((c) => c.category === 'Wildcard' && (c.set === targetSet || c.set === 'any'));
+      const wildcardIdx = remaining.findIndex((c) => c.category === 'Wildcard');
       const chosen = idx !== -1 ? idx : wildcardIdx;
       if (chosen === -1) { missing.push(cat); continue; }
       used.push(remaining[chosen]);
@@ -757,7 +771,7 @@ function targetSetOrder(agent, job) {
 
 function tryFindAnyBank(agent, job) {
   for (const setId of targetSetOrder(agent, job)) {
-    const candidates = agent.hand.filter((c) => (c.category === 'Wildcard' && (c.set === setId || c.set === 'any')) || c.set === setId || c.set === 'any');
+    const candidates = agent.hand.filter((c) => c.category === 'Wildcard' || c.set === setId || c.set === 'any');
     const result = findBank(candidates, setId, true);
     if (result.ok) return result;
   }
@@ -784,11 +798,7 @@ function pickMarketCardFor(agent, job) {
     if (rank >= 0) score += Math.max(2, 8 - rank * 1.2);
     if (recommended.has(card.set)) score += 4;
     if (agent.strategy && card.set === agent.strategy) score += 2;
-    if (card.category === 'Wildcard') {
-      score += 2;
-      if (card.set !== 'any' && order.includes(card.set)) score += 3;
-      else if (card.set !== 'any' && recommended.has(card.set)) score += 2;
-    }
+    if (card.category === 'Wildcard') score += 2;
     if (flexible) {
       const usefulRoute = order.find((setId) => !agent.hand.some((held) => held.category === card.category && (held.set === setId || held.set === 'any')));
       if (usefulRoute) score += 5 + Math.max(0, 2 - order.indexOf(usefulRoute));
@@ -816,10 +826,7 @@ function leastUsefulCard(agent, job) {
     if (flexible) score += order.some((setId) => !agent.hand.some((held) => held.uid !== card.uid && held.category === card.category && (held.set === setId || held.set === 'any'))) ? 4 : 0;
     if (recommended.has(card.set)) score += 4;
     if (agent.strategy && card.set === agent.strategy) score += 2;
-    if (card.category === 'Wildcard') {
-      score += 5;
-      if (card.set !== 'any' && !order.includes(card.set) && !recommended.has(card.set)) score -= 3;
-    }
+    if (card.category === 'Wildcard') score += 5;
     if (agent.hand.filter((held) => held.set === card.set && held.category === card.category).length > 1) score -= 2;
     return { card, score, index };
   }).sort((a, b) => a.score - b.score || a.index - b.index)[0].card;
@@ -858,6 +865,14 @@ const EVENTS = [
     body: 'The placement or visit you were counting on is no longer available.',
     choices: [
       { label: 'Draw two new Opportunity cards', run: (a) => { const fresh = draw(Math.min(2, Math.max(0, HAND_CAP - a.hand.length))); a.hand.push(...fresh); addLog(`You drew ${fresh.length} new opportunity card(s).`); } },
+    ],
+  },
+  {
+    title: 'Bonus Mini-Challenge',
+    body: 'A quick skills challenge pops up in the student portal. Nail it and you can redraw some cards.',
+    choices: [
+      { label: 'Give it a go (redraw 2 cards)', run: (a) => { redrawHandCards(a, 2, true); addLog('You nailed the challenge and redrew 2 cards from your hand.'); } },
+      { label: 'Not today', run: () => { addLog('You skip the challenge and keep your current hand.'); } },
     ],
   },
 ];
@@ -999,17 +1014,50 @@ function renderRivals() {
     const pct = Math.round(Math.min(1, ((cv.experience / minimumExperienceForJob(state.job)) + (completedJobSetTypes(r, state.job).size / REQUIRED_SET_VARIETY) + (cv.evidence / req.evidence) + (r.skills.includes(req.skill) ? 1 : 0)) / 4) * 100);
     const card = document.createElement('div');
     card.className = 'rival-card';
+    card.style.cursor = 'pointer';
+    const bankedSets = (r.banked || []).map((b) => setMeta(b.set)?.name || b.set);
     card.innerHTML = `
       <div class="rival-head">
         <strong>${escapeHtml(r.name)}</strong>
         <span class="rival-strategy">${escapeHtml(seed.blurb)}</span>
+        <span class="rival-bank-count" title="Completed sets">${bankedSets.length}</span>
       </div>
       <div class="rival-plan">${escapeHtml(seed.plan)}</div>
       <div class="rival-bar"><div class="rival-bar-fill" style="width:${pct}%"></div></div>
       <div class="rival-stats">Sets ${cv.experience} · ${completedJobSetTypes(r, state.job).size}/${REQUIRED_SET_VARIETY} role-fit types · Evidence ${cv.evidence}<br>Skills: ${r.skills.join(', ') || '—'}</div>
     `;
+    card.addEventListener('click', () => showRivalSets(i));
     el.rivals.appendChild(card);
   });
+}
+
+function showRivalSets(index) {
+  const rival = state.rivals[index];
+  if (!rival) return;
+  const banked = rival.banked || [];
+  if (!banked.length) return toast('This rival has not completed any sets yet.');
+  const rows = banked.map((b) => {
+    const meta = setMeta(b.set);
+    const name = meta ? meta.name : b.set;
+    const round = b.round;
+    const strong = b.strong ? 'with proof' : 'weaker';
+    return `<div class="rival-banked-row"><strong>${escapeHtml(name)}</strong><small>Round ${round} · ${strong}</small></div>`;
+  }).join('');
+  const usedSets = new Set(banked.map((b) => b.set));
+  const remainingInfo = DATA.sets.map((s) => {
+    const taken = usedSets.has(s.id) ? 'taken' : 'available';
+    return `<span class="rival-banked-set ${taken}">${escapeHtml(s.name)}: ${taken}</span>`;
+  }).join('');
+  openModal(`
+    <h2>${escapeHtml(rival.name)}'s Completed Sets</h2>
+    <p>Banked experience sets:</p>
+    <div class="rival-banked-list">${rows}</div>
+    <p style="margin-top:1rem">Community card availability:</p>
+    <div class="rival-set-tags">${remainingInfo}</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  `);
 }
 
 function cardSetClass(card) {
@@ -1043,7 +1091,7 @@ function cardEl(c, opts) {
   div.innerHTML = `
     <div class="card-art">${c.art || '🃏'}</div>
     <div class="card-name">${escapeHtml(c.name)}</div>
-    <div class="card-type">${c.category}${c.set === 'any' ? ' · Any route' : ' · ' + escapeHtml(setName(c.set))}</div>
+    <div class="card-type">${c.category}${c.set === 'any' ? ' · <span class="any-route">Any route</span>' : ' · ' + escapeHtml(setName(c.set))}</div>
   `;
   if (opts.onClick) div.addEventListener('click', opts.onClick);
   return div;
@@ -1091,7 +1139,7 @@ function openPreview(where, card) {
         <div class="card-description">${escapeHtml(card.description)}</div>
         <div class="preview-meta"><b>${catLabel}</b><br>${catDesc}${routeDesc ? '<br>' + routeDesc : ''}${card.set !== 'any' ? '<br>Opportunity: ' + escapeHtml(setName(card.set)) : card.category === 'Wildcard' ? '<br>Opportunity: Any route' : ''}</div>
         <div class="card-top">
-          <span>${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
+          <span class="${card.set === 'any' ? 'any-route' : ''}">${escapeHtml(card.set === 'any' ? 'Any route' : setName(card.set) || '—')}</span>
           <span>${cat === 'Wildcard' ? '★' : cat === 'Proof' ? '◆' : cat === 'Action' ? '●' : '◇'}</span>
         </div>
         <div class="preview-actions">${actionHtml}</div>
@@ -1233,6 +1281,20 @@ function renderControls() {
   el.bankBtn.textContent = route
     ? `✦ Bank ${setName(route)} (${selectedHandUids.size}/${requiredCount})`
     : `✦ Bank completed set (${selectedHandUids.size} selected)`;
+
+  // Highlight bank button when a valid set is ready to bank
+  const canBank = route && selectedHandUids.size === requiredCount && state.actionsLeft >= 1 && !state.winner;
+  if (canBank) {
+    const result = findBank(selectedCards);
+    if (result.ok) {
+      el.bankBtn.classList.add('ready-to-bank');
+    } else {
+      el.bankBtn.classList.remove('ready-to-bank');
+    }
+  } else {
+    el.bankBtn.classList.remove('ready-to-bank');
+  }
+
   renderSetBuilderStatus();
   el.applyBtn.disabled = !!state.winner;
   el.endBtn.disabled = !!state.winner;
@@ -1351,6 +1413,7 @@ function setupDragAndDrop() {
   }
   attach(el.hand, 'market', onMarketCardClick);
   attach(el.returnZone, 'hand', (uid) => returnCardsToDeck([uid]));
+  attach(el.market, 'hand', (uid) => returnCardsToDeck([uid]));
 }
 
 /* ============================== Wiring ==================================== */

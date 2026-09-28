@@ -387,6 +387,20 @@ html[data-theme="light"] {
 .controls { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 .left-actions, .right-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
+#bankBtn.ready-to-bank {
+  background: linear-gradient(135deg, var(--gold), var(--gold-soft));
+  color: #101118;
+  box-shadow: 0 0 0 3px var(--gold), 0 0 20px 4px var(--gold);
+  animation: bankPulse 1.5s ease-in-out infinite;
+}
+#bankBtn.ready-to-bank:hover {
+  box-shadow: 0 0 0 4px var(--gold), 0 0 30px 6px var(--gold);
+}
+@keyframes bankPulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--gold), 0 0 20px 4px var(--gold); }
+  50% { box-shadow: 0 0 0 5px var(--gold), 0 0 30px 8px var(--gold); }
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;
@@ -755,8 +769,13 @@ html[data-theme="light"] {
     height: 28px;
   }
 }
-/* Route-flexible standalone cards retain their category colour without pretending to be wildcards. */
-.card.route-flexible-card { border-color: color-mix(in srgb, var(--border), var(--card-glow) 65%); }
+/* Route-flexible (Any route) cards get a distinct border so they stand out from route-specific cards. */
+.card.route-flexible-card {
+  border-color: var(--accent);
+  border-width: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 40%);
+}
+.card .any-route { color: var(--accent); font-weight: 600; font-size: 0.8em; }
 
 /* Drag-and-drop card movement: clear targets, with popup/button alternatives. */
 .card[draggable="true"] { cursor: grab; touch-action: none; }
@@ -789,4 +808,25 @@ html[data-theme="light"] {
 }
 @media (max-width: 600px) {
   .card-movement-zones { grid-template-columns: 1fr; }
+  .drop-hint-alt { display: none; }
 }
+.panel.market.drag-over {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  background-color: color-mix(in srgb, var(--surface), var(--accent) 12%);
+}
+
+/* ===== Rival sets modal ===== */
+.rival-banked-list { display: flex; flex-direction: column; gap: 0.4rem; margin: 0.5rem 0 1rem; }
+.rival-banked-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); }
+.rival-banked-row strong { font-size: 0.9rem; }
+.rival-banked-row small { color: var(--ink-soft); font-style: italic; }
+.rival-set-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.rival-banked-set { padding: 0.15rem 0.4rem; border-radius: var(--radius-sm); font-size: 0.75rem; background: color-mix(in srgb, var(--accent), transparent 70%); }
+.rival-banked-set.taken { background: color-mix(in srgb, var(--bad), transparent 70%); }
+.rival-banked-set.available { background: color-mix(in srgb, var(--accent), transparent 70%); }
+.rival-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.rival-head strong { flex: 1; }
+.rival-bank-count { font-size: 0.8rem; color: var(--accent); font-weight: bold; min-width: 1.4rem; text-align: center; }
+.small-btn { font-size: 0.68rem; padding: 0.2rem 0.5rem; }
+
