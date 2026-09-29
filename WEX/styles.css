@@ -3096,3 +3096,79 @@ html.tooltips-off .rttr-tooltip {
   justify-content: center;
   gap: 1.5rem;
 }
+/* ===== Inline explanations =====
+ * Tooltips are off by default, so the guidance for CV stats and skills is always
+ * visible text. These sit under their value rather than in a hover layer.
+ */
+
+/* --- CV rows --- */
+.cv-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+}
+.cv-row strong { text-align: right; }
+.cv-note {
+  grid-column: 1 / -1;
+  margin: 0 0 0.15rem;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* --- Skill rows --- */
+.skills-list { gap: 0.5rem; }
+.skill-item {
+  display: block;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.skill-item.needed { border-color: color-mix(in srgb, var(--border), var(--ink) 25%); }
+.skill-item.owned { border-color: color-mix(in srgb, var(--good), transparent 45%); }
+.skill-item.required { border-color: var(--accent); border-width: 2px; }
+.skill-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.skill-name { display: inline-flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
+.skill-detail {
+  margin: 0.3rem 0 0.1rem;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.skill-detail.is-collected { color: color-mix(in srgb, var(--good), var(--ink) 30%); }
+.skill-detail.is-impossible { color: var(--bad); }
+.skill-detail-head {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.skill-routes {
+  margin: 0;
+  padding-left: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.skill-routes b { color: var(--ink); }
+.skill-hint { color: color-mix(in srgb, var(--ink-soft), transparent 15%); }
+.skill-fit {
+  display: inline-block;
+  padding: 0 0.2rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.skill-detail-more { margin: 0.25rem 0 0; font-size: 0.6rem; color: var(--ink-soft); }

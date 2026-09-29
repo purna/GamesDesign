@@ -24,7 +24,7 @@ window.RTTR = {
   getSettings() {
     try {
       const s = JSON.parse(localStorage.getItem(this.SETTINGS_KEY) || '{}');
-      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true, tutorial: s.tutorial !== undefined ? s.tutorial : true, stacking: s.stacking !== undefined ? !!s.stacking : false };
+      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true, tutorial: s.tutorial !== undefined ? s.tutorial : true, stacking: s.stacking !== undefined ? !!s.stacking : false, tooltips: s.tooltips !== undefined ? !!s.tooltips : false };
     } catch (e) { return { sound: true, animations: true, autoDraw: true }; }
   },
   saveSettings(s) { try { localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(s)); } catch (e) {} },
@@ -79,12 +79,14 @@ const el = {
   gameOverOverlay: $('gameOverOverlay'),
   skillsRequired: $('skillsRequired'),
   homeBtn: $('homeBtn'),
+  headerMeta: $('headerMeta'),
   rightRail: $('rightRail'),
   playerCount: $('playerCount'),
   drawerBtn: $('drawerBtn'),
   drawerCloseBtn: $('drawerCloseBtn'),
   drawerScrim: $('drawerScrim'),
   replayTutorial: $('replayTutorial'),
+  tooltipsEnabled: $('tooltipsEnabled'),
   learnTutorialBtn: $('learnTutorialBtn'),
   helperToggle: $('helperToggle'),
 };
@@ -1232,10 +1234,8 @@ function endGame(winnerAgent) {
       overlay.classList.add('hidden');
       overlay.innerHTML = '';
       el.game.classList.remove('game-over');
-      el.game.classList.add('hidden');
-      el.industrySelect.classList.remove('hidden');
-      el.setup.classList.add('hidden');
       closeHallOfFame();
+      showOnlyPanel(el.industrySelect);
     });
     $('closeGameOver').addEventListener('click', () => {
       overlay.classList.add('hidden');
@@ -1375,42 +1375,39 @@ function renderSkills() {
     const has = playerSkills.includes(skill);
     const isRequired = skill === req.skill;
     const cls = isRequired ? (has ? 'owned required' : 'needed required') : (has ? 'owned' : 'needed');
-
-    // Every skill gets the same "how do I get this" breakdown, on the shared
-    // tooltip system rather than a bespoke expand/collapse per row.
     const { routes } = skillRouteBreakdown(skill);
-    const name = escapeHtml(skill);
-    let tip;
+
+    // The route guidance is inline, not a tooltip: tooltips are off by default, so
+    // anything that lives only on hover is invisible to most players.
+    let detail;
     if (has) {
-      tip = `<b>${name}</b><span class="tip-why">Collected. It counts toward your CV and the role requirements.</span>`;
+      detail = '<p class="skill-detail is-collected">Collected. It counts toward your CV and the role requirements.</p>';
     } else if (!routes.length) {
-      tip = `<b>${name}</b><span class="tip-why">No card in this pack grants this skill, so this role cannot be completed.</span>`;
+      detail = '<p class="skill-detail is-impossible">No card in this pack grants this skill, so this role cannot be completed.</p>';
     } else {
       const items = routes.slice(0, 3).map((r) => {
-        const fit = r.isFit ? ' <span class="tip-fit">role-fit</span>' : '';
+        const fit = r.isFit ? ' <span class="skill-fit">role-fit</span>' : '';
         const usable = r.req.includes(r.cheapest.category);
         const tryText = usable
           ? `Try <b>${escapeHtml(r.cheapest.name)}</b> as the ${escapeHtml(r.cheapest.category)} slot.`
           : `<b>${escapeHtml(r.cheapest.name)}</b> is a ${escapeHtml(r.cheapest.category)} card, which this route does not use.`;
-        return `<li><b>${escapeHtml(r.name)}</b>${fit} \u2014 bank ${r.req.length} cards (${escapeHtml(r.req.join(' + '))}).<br><span class="tip-dim">${tryText}</span></li>`;
+        return `<li><b>${escapeHtml(r.name)}</b>${fit} \u2014 bank ${r.req.length} cards (${escapeHtml(r.req.join(' + '))})<br><span class="skill-hint">${tryText}</span></li>`;
       });
       const more = routes.length > 3
-        ? `<span class="tip-dim">+${routes.length - 3} more route${routes.length - 3 === 1 ? '' : 's'}</span>`
+        ? `<p class="skill-detail-more">+${routes.length - 3} more route${routes.length - 3 === 1 ? '' : 's'}</p>`
         : '';
-      const shortest = Math.min(...routes.map((r) => r.req.length));
-      const cheapestNote = routes.some((r) => r.req.length === shortest && r.isFit)
-        ? ''
-        : `<span class="tip-dim">Cheapest option is ${shortest} cards.</span>`;
-      tip = `<b>${name}</b><span class="tip-head">Get it by banking a set</span><ul>${items.join('')}</ul>${more}${cheapestNote}`;
+      detail = `<p class="skill-detail-head">Get it by banking a set</p><ul class="skill-routes">${items.join('')}</ul>${more}`;
     }
 
-    return `<span class="skill-item ${cls}" data-skill="${escapeHtml(skill)}" data-tip="${escapeHtml(tip)}">
-      <span class="skill-check">${has ? '\u2713' : '\u25cb'}</span>
-      <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}</span>
-    </span>`;
+    return `<div class="skill-item ${cls}">
+      <div class="skill-line">
+        <span class="skill-check">${has ? '\u2713' : '\u25cb'}</span>
+        <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}</span>
+      </div>
+      ${detail}
+    </div>`;
   }).join('');
 }
-
 function renderJobNeeds() {
   const req = state.job.requirements;
   const cv = agentCV(state.player);
@@ -1994,7 +1991,7 @@ function renderBankedSets() {
 
 function renderCV() {
   const p = state.player;
-  // Each stat explains what it is and how you earn it, on the shared tooltip system.
+  // Each stat explains what it is and how you earn it, inline under the value.
   const rows = [
     ['Experience', p.banked.length,
       'Completed experience sets, in any route. You need at least the number this role asks for before you can apply.'],
@@ -2007,15 +2004,13 @@ function renderCV() {
     ['References', p.references,
       'An employer reference only comes from sustained work with an employer, so bank a Block Placement to earn one.'],
   ];
-  // Built as elements rather than an HTML string: the tooltip content itself
-  // contains double quotes (class="tip-why"), which cannot sit inside a
-  // double-quoted attribute. Assigning dataset.tip avoids attribute parsing.
+  // Built as elements rather than one HTML string, so each note is escaped on its own.
   el.cvStats.innerHTML = '';
-  rows.forEach(([label, value, tip]) => {
+  rows.forEach(([label, value, note]) => {
     const row = document.createElement('div');
     row.className = 'cv-row';
-    row.innerHTML = '<span>' + escapeHtml(label) + '</span><strong>' + value + '</strong>';
-    row.dataset.tip = '<b>' + escapeHtml(label) + '</b><span class="tip-why">' + escapeHtml(tip) + '</span>';
+    row.innerHTML = '<span>' + escapeHtml(label) + '</span><strong>' + value + '</strong>'
+      + '<p class="cv-note">' + escapeHtml(note) + '</p>';
     el.cvStats.appendChild(row);
   });
 }
@@ -2256,14 +2251,15 @@ function closeLearn() {
   el.learnScreen.classList.remove('open');
   document.body.classList.remove('modal-open');
   // Restore whichever panel was underneath, unless something else took over.
-  if (!state) el.setup.classList.remove('hidden');
-  else if (el.game.classList.contains('hidden') && !el.gameOverOverlay.classList.contains('show')) {
-    el.game.classList.remove('hidden');
-  }
+  // Routed through showOnlyPanel so the header-meta gate is not bypassed.
+  if (!state) showOnlyPanel(el.setup);
+  else if (el.gameOverOverlay && el.gameOverOverlay.classList.contains('show')) showOnlyPanel(el.industrySelect);
+  else showOnlyPanel(el.game);
 }
 
 app.openLearn = openLearn;
 app.applyCardStacking = applyCardStacking;
+app.setTooltipsEnabled = setHelperHintsVisible;
 app.showRailTab = showRailTab;
 app.isRailTabVisible = isRailTabVisible;
 app.toast = toast;
@@ -2455,6 +2451,12 @@ function reorderHand(draggedUid, targetUid, placeAfter) {
 
 // The one place that decides which panel is on screen. Every "back to menu" entry
 // point goes through here so they cannot drift apart and leave two panels visible.
+// The turn timer, the Players button and the tooltip toggle only mean anything
+// during a run, so they are hidden until one starts.
+function setHeaderMetaVisible(visible) {
+  if (el.headerMeta) el.headerMeta.classList.toggle('hidden', !visible);
+}
+
 function showOnlyPanel(panel) {
   [el.industrySelect, el.setup, el.game, el.hallOfFame, el.learnScreen].forEach((p) => {
     if (p) p.classList.add('hidden');
@@ -2462,6 +2464,7 @@ function showOnlyPanel(panel) {
   if (el.learnScreen) el.learnScreen.classList.remove('open');
   document.body.classList.remove('modal-open');
   if (panel) panel.classList.remove('hidden');
+  setHeaderMetaVisible(panel === el.game);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2603,19 +2606,34 @@ function setHelperHintsVisible(visible) {
   // An unlit bulb is easy to miss, and with tooltips off the button's own tooltip
   // is unavailable, so mark the off state explicitly.
   el.helperToggle.classList.toggle('is-off', !visible);
-  try { localStorage.setItem(HELPER_KEY, visible ? '1' : '0'); } catch (e) {}
+  if (el.tooltipsEnabled) el.tooltipsEnabled.checked = visible;
+}
+
+// Tooltips are off by default. The preference is read from the settings object so
+// the settings modal and this header button stay in step; the standalone key is
+// only consulted for people who set it before the setting existed.
+function tooltipsEnabledByPreference() {
+  try {
+    var s = JSON.parse(localStorage.getItem('rttr-settings') || '{}');
+    if (s.tooltips !== undefined) return !!s.tooltips;
+    var legacy = localStorage.getItem(HELPER_KEY);
+    if (legacy !== null) return legacy === '1';
+  } catch (e) { /* private mode */ }
+  return false;
 }
 
 if (el.helperToggle) {
-  // The return drop zone stays wired for dragging; hiding it only removes the hint
-  // styling and text, so players who prefer the buttons can reclaim the space.
-  let stored = null;
-  try { stored = localStorage.getItem(HELPER_KEY); } catch (e) {}
-  setHelperHintsVisible(stored === null ? true : stored === '1');
+  setHelperHintsVisible(tooltipsEnabledByPreference());
   el.helperToggle.addEventListener('click', () => {
-    // Flip the tracked state. This once read a .helper-hidden class off an element
-    // that no longer exists, so the button only ever turned tooltips off.
-    setHelperHintsVisible(!helperHintsVisible);
+    const next = !helperHintsVisible;
+    setHelperHintsVisible(next);
+    // Keep the settings object in step so the modal checkbox agrees.
+    try {
+      var s = JSON.parse(localStorage.getItem('rttr-settings') || '{}');
+      s.tooltips = next;
+      localStorage.setItem('rttr-settings', JSON.stringify(s));
+    } catch (e) { /* private mode */ }
+    if (el.tooltipsEnabled) el.tooltipsEnabled.checked = next;
   });
 }
 
@@ -2651,7 +2669,7 @@ if (el.signInBtn) {
 
 (async function boot() {
   renderIndustryGrid();
-  el.industrySelect.classList.remove('hidden');
+  showOnlyPanel(el.industrySelect);
   renderCompletedRoles();
   if (el.hofBackBtn) el.hofBackBtn.addEventListener('click', closeHallOfFame);
   if (el.hofClearBtn) el.hofClearBtn.addEventListener('click', () => {

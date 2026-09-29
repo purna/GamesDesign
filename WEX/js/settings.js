@@ -40,6 +40,8 @@
       tutorial: app.el.tutorialEnabled ? app.el.tutorialEnabled.checked : true,
       // Stacking is opt-in: off by default.
       stacking: app.el.stackingEnabled ? app.el.stackingEnabled.checked : false,
+      // Tooltips are opt-in too: off by default.
+      tooltips: app.el.tooltipsEnabled ? app.el.tooltipsEnabled.checked : false,
     };
   }
 
@@ -54,6 +56,8 @@
     if (app.el.autoDrawEnabled) app.el.autoDrawEnabled.checked = !settings.autoDraw;
     if (app.el.tutorialEnabled) app.el.tutorialEnabled.checked = settings.tutorial !== false;
     if (app.el.stackingEnabled) app.el.stackingEnabled.checked = settings.stacking === true;
+    if (app.el.tooltipsEnabled) app.el.tooltipsEnabled.checked = settings.tooltips === true;
+    if (typeof app.setTooltipsEnabled === 'function') app.setTooltipsEnabled(settings.tooltips === true);
     app.state.tutorialEnabled = settings.tutorial !== false;
     app.state.stackingEnabled = settings.stacking === true;
     applyCardStacking();
@@ -70,6 +74,11 @@
     if (app.el.settingsModal) app.el.settingsModal.classList.add('hidden');
   }
 
+  if (app.el.tooltipsEnabled) {
+    app.el.tooltipsEnabled.addEventListener('change', function () {
+      if (typeof app.setTooltipsEnabled === 'function') app.setTooltipsEnabled(app.el.tooltipsEnabled.checked);
+    });
+  }
   if (app.el.stackingEnabled) {
     app.el.stackingEnabled.addEventListener('change', function () {
       app.state.stackingEnabled = app.el.stackingEnabled.checked;
@@ -93,7 +102,9 @@
       app.state.animationsEnabled = settings.animations;
       app.state.autoDrawEnabled = settings.autoDraw;
       app.state.stackingEnabled = settings.stacking;
+      app.state.tooltipsEnabled = settings.tooltips;
       if (typeof app.applyCardStacking === 'function') app.applyCardStacking();
+      if (typeof app.setTooltipsEnabled === 'function') app.setTooltipsEnabled(settings.tooltips);
       closeSettings();
     });
   }

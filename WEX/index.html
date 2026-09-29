@@ -37,7 +37,7 @@
         </h1>
       </div>
           <!-- Turn timer sits under the menu row rather than floating over the feed. -->
-      <div class="header-meta">
+      <div class="header-meta hidden" id="headerMeta">
         <div class="header-timer hidden" id="timerDisplay">
           <span class="timer-dot"></span>
           <span class="timer" id="timer">05:00</span>
@@ -88,6 +88,12 @@
               <input type="checkbox" id="stackingEnabled">
             </label>
             <p class="settings-hint">Off by default. With stacking off, the market and your hand lay the cards out in a row and the panels scroll instead.</p>
+            <h3>Tooltips</h3>
+            <label class="settings-row" for="tooltipsEnabled">
+              <span>Show tooltips on cards and panels</span>
+              <input type="checkbox" id="tooltipsEnabled">
+            </label>
+            <p class="settings-hint">Off by default. Tooltips explain a card's type, a route's requirements and what a control does. The lightbulb in the top bar toggles the same thing.</p>
             <h3>Guidance</h3>
             <label class="settings-row" for="tutorialEnabled">
               <span>Show the tutorial on new runs</span>

@@ -1151,7 +1151,10 @@
   justify-self: end;
   align-self: center;
   display: flex;
-  align-items: center;
+  /* stretch, not center: the timer, the Players button and the tooltip toggle are a
+     matched set and were rendering at three different heights. The row takes its
+     height from the tallest child and the rest fill it. */
+  align-items: stretch;
   gap: 0.6rem;
 }
 
@@ -1196,9 +1199,9 @@
 }
 
 .header-timer {
-  /* Floated right on the same row as the wordmark. */
+  /* Floated right on the same row as the wordmark. align-self is left unset so the
+     row can stretch it to match the other controls. */
   justify-self: end;
-  align-self: center;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
