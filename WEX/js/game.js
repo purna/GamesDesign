@@ -24,7 +24,7 @@ window.RTTR = {
   getSettings() {
     try {
       const s = JSON.parse(localStorage.getItem(this.SETTINGS_KEY) || '{}');
-      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true, tutorial: s.tutorial !== undefined ? s.tutorial : true };
+      return { sound: s.sound !== undefined ? s.sound : true, animations: s.animations !== undefined ? s.animations : true, autoDraw: s.autoDraw !== undefined ? s.autoDraw : true, tutorial: s.tutorial !== undefined ? s.tutorial : true, stacking: s.stacking !== undefined ? !!s.stacking : false };
     } catch (e) { return { sound: true, animations: true, autoDraw: true }; }
   },
   saveSettings(s) { try { localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(s)); } catch (e) {} },
@@ -67,7 +67,6 @@ const el = {
   hand: $('hand'), handCount: $('handCount'),
   setBuilderStatus: $('setBuilderStatus'),
   returnBtn: $('returnBtn'), bankBtn: $('bankBtn'),
-  swapMarketBtn: $('swapMarketBtn'),
   applyBtn: $('applyBtn'), endBtn: $('endBtn'),
   sets: $('sets'),
   bankedSets: $('bankedSets'), bankedSetProgress: $('bankedSetProgress'),
@@ -86,6 +85,7 @@ const el = {
   drawerCloseBtn: $('drawerCloseBtn'),
   drawerScrim: $('drawerScrim'),
   replayTutorial: $('replayTutorial'),
+  learnTutorialBtn: $('learnTutorialBtn'),
   helperToggle: $('helperToggle'),
 };
 
@@ -227,7 +227,7 @@ function setupResumeButton() {
     state.market = cleanPile(state.market);
     [state.player, ...(state.rivals || [])].forEach((agent) => { agent.hand = cleanPile(agent.hand); });
     state.freeTurn = !!state.freeTurn;
-    state.player.quizPrizeWon = !!state.player.quizPrizeWon;
+    state.player.quizDone = !!state.player.quizDone;
     state.player.returnsThisRound = state.player.returnsThisRound || 0;
     state.player.marketPicksThisRound = state.player.marketPicksThisRound || 0;
     state.player.marketSwapsThisRound = state.player.marketSwapsThisRound || 0;
@@ -436,17 +436,18 @@ function draw(n) {
 }
 
 function redrawHandCards(agent, count, success = true) {
-  const deselectable = agent.hand.slice();
-  if (success && deselectable.length > count) {
-    const shuffled = [...deselectable].sort(() => Math.random() - 0.5);
-    const removed = shuffled.slice(0, count);
-    agent.hand = agent.hand.filter((c) => !removed.some((r) => r.uid === c.uid));
-    agent.hand.push(...draw(count));
-    selectedHandUids = new Set();
-  } else if (success) {
-    const fresh = draw(Math.min(count, HAND_CAP - agent.hand.length));
-    agent.hand.push(...fresh);
-  }
+  if (!success || !agent.hand.length) return 0;
+  const amount = Math.min(count, agent.hand.length);
+  const shuffled = [...agent.hand].sort(() => Math.random() - 0.5);
+  const removed = shuffled.slice(0, amount);
+  agent.hand = agent.hand.filter((c) => !removed.some((r) => r.uid === c.uid));
+  // Draw before recycling the exchanged cards so the redraw gives fresh cards
+  // even when the draw pile was empty.
+  const fresh = draw(amount);
+  agent.hand.push(...fresh);
+  state.deck = shuffle([...state.deck, ...removed]);
+  if (agent === state.player) selectedHandUids = new Set();
+  return fresh.length;
 }
 
 function refillMarket() {
@@ -467,34 +468,17 @@ function refreshMarketForRound() {
 }
 
 function swapMarketCard(index, agent) {
-  if (!state || state.winner) return;
-  if (index < 0 || index >= state.market.length) return;
-  const swapped = state.market.splice(index, 1);
-  state.discard.push(...swapped);
+  if (!state || state.winner || index < 0 || index >= state.market.length) return null;
   const [fresh] = draw(1);
-  if (fresh) state.market.splice(index, 0, fresh);
-  if (agent === state.player) {
-    addLog(`You swapped a market card for a fresh draw.`);
-  } else {
-    addLog(`${agent.name} swapped a market card.`);
-  }
-}
-
-function doMarketSwap() {
-  if (state.winner || state.player.marketSwapsThisRound >= MAX_MARKET_SWAPS_PER_ROUND) {
-    toast(`You can swap ${MAX_MARKET_SWAPS_PER_ROUND} market cards per round.`);
-    return;
-  }
-  const available = state.market.length;
-  if (!available) return toast('No market cards to swap.');
-  const count = Math.min(MAX_MARKET_SWAPS_PER_ROUND - state.player.marketSwapsThisRound, available);
-  const indices = [];
-  for (let i = 0; i < available && indices.length < count; i++) indices.push(i);
-  indices.sort(() => Math.random() - 0.5);
-  indices.slice(0, count).forEach((i) => swapMarketCard(i, state.player));
-  state.player.marketSwapsThisRound += count;
-  render();
-  persist();
+  if (!fresh) return null;
+  const replaced = state.market[index];
+  if (replaced && Number.isInteger(replaced._slot)) fresh._slot = replaced._slot;
+  if (replaced && Number.isInteger(replaced._z)) fresh._z = replaced._z;
+  state.market.splice(index, 1, fresh);
+  if (replaced) state.discard.push(replaced);
+  if (agent === state.player) addLog(`You replaced ${replaced.name} in the market with ${fresh.name}.`);
+  else addLog(`${agent.displayName || agent.name} replaced a market card with ${fresh.name}.`);
+  return { replaced, fresh };
 }
 
 /* ============================== Agents ================================== */
@@ -502,7 +486,7 @@ function doMarketSwap() {
 function newAgent(name, strategy) {
   return {
     name, strategy, isPlayer: strategy == null,
-    energy: START_ENERGY, hand: [], banked: [], skills: [], freeTurn: false, quizPrizeWon: false,
+    energy: START_ENERGY, hand: [], banked: [], skills: [], freeTurn: false, quizDone: false,
     evidence: 0, reliability: 0, references: 0, distinctions: 0,
     applied: false, actionPenalty: 0,
     marketPicksThisRound: 0, returnsThisRound: 0, marketSwapsThisRound: 0,
@@ -673,7 +657,12 @@ function bankSet(agent, targetSet, used) {
   }
   if (!strong) evidenceGain = Math.max(1, evidenceGain - 1);
 
-  agent.banked.push({ set: targetSet, round: state.round, strong });
+  agent.banked.push({
+    set: targetSet,
+    round: state.round,
+    strong,
+    cards: used.map((card) => ({ id: card.id, name: card.name, category: card.category, art: card.art, set: card.set })),
+  });
   agent.evidence += evidenceGain;
 
   // Every skill card in a banked set counts. Using find() here granted only the first
@@ -757,25 +746,26 @@ function toggleHandSelect(uid) {
   renderControls();
 }
 
-function returnCardsToDeck(uids) {
+function returnCardsToMarket(uids) {
   if (state.winner) return;
   const uniqueUids = [...new Set(uids)];
   if (!uniqueUids.length) return toast('Select at least one hand card to return.');
   const remaining = MAX_RETURNS_PER_ROUND - state.player.returnsThisRound;
-  if (uniqueUids.length > remaining) return toast(`You can return ${remaining} more card(s) this round.`);
+  if (uniqueUids.length > remaining) return toast(`You can return ${remaining} more card(s) to the market this round.`);
   const returned = state.player.hand.filter((card) => uniqueUids.includes(card.uid));
   if (!returned.length) return;
   state.player.hand = state.player.hand.filter((card) => !uniqueUids.includes(card.uid));
-  state.deck = shuffle([...state.deck, ...returned]);
+  returned.forEach((card) => { delete card._slot; delete card._z; });
+  state.market.push(...returned);
   state.player.returnsThisRound += returned.length;
   selectedHandUids = new Set();
-  addLog(`You returned ${returned.length} card(s) to the deck.`);
+  addLog(`You returned ${returned.length} card(s) to the community market.`);
   closePreview();
   afterPlayerAction();
 }
 
 function doReturnSelected() {
-  returnCardsToDeck([...selectedHandUids]);
+  returnCardsToMarket([...selectedHandUids]);
 }
 
 function doBank() {
@@ -949,7 +939,6 @@ function finishRivalPhase() {
     return;
   }
   state.round += 1;
-  if (state.round % 3 === 0) triggerEvent();
   state.player.energy = Math.min(START_ENERGY, state.player.energy + 1);
   state.player.marketPicksThisRound = 0;
   state.player.returnsThisRound = 0;
@@ -962,7 +951,14 @@ function finishRivalPhase() {
   startTurnTimer();
   render();
   persist();
-  if (!state.winner) endRoundQuiz();
+  if (!state.winner) {
+    if (state.round % 3 === 0) {
+      state.pendingRoundQuiz = true;
+      triggerEvent();
+    } else {
+      endRoundQuiz();
+    }
+  }
 }
 
 /* ============================== Events ==================================== */
@@ -1000,19 +996,10 @@ const EVENTS = [
       { label: 'Draw two new Opportunity cards', run: (a) => { const fresh = draw(Math.min(2, Math.max(0, HAND_CAP - a.hand.length))); a.hand.push(...fresh); addLog(`You drew ${fresh.length} new opportunity card(s).`); } },
     ],
   },
-  {
-    title: 'Bonus Mini-Challenge',
-    body: 'A quick skills challenge pops up in the student portal. Nail it and you can redraw some cards.',
-    choices: [
-      { label: 'Give it a go (redraw 2 cards)', run: (a) => { redrawHandCards(a, 2, true); addLog('You nailed the challenge and redrew 2 cards from your hand.'); } },
-      { label: 'Not today', run: () => { addLog('You skip the challenge and keep your current hand.'); } },
-    ],
-  },
 ];
 
-// End-of-round knowledge check. A correct answer awards a random prize; a wrong one
-// awards nothing but explains the reasoning, since the teaching matters more than
-// the reward.
+// End-of-round knowledge check. Every correct answer lets the player exchange up
+// to two hand cards for new draws; wrong answers explain the lesson and can retry.
 const ROUND_QUESTIONS = [
   {
     q: 'You have finished a work placement. What turns it into strong CV evidence?',
@@ -1094,28 +1081,38 @@ const ROUND_QUESTIONS = [
   },
 ];
 
-// Prizes are applied to the round that is about to start.
-const ROUND_PRIZES = [
-  { id: 'extra-go', label: 'Extra go', apply: () => { state.actionsLeft += 1; return 'You get an extra action this round.'; } },
-  { id: 'free-turn', label: 'Free turn', apply: () => { state.freeTurn = true; return 'The rivals skip their next turn \u2014 it is your move.'; } },
-  { id: 'double-turns', label: 'Double turns', apply: () => { state.actionsLeft *= 2; return `Your actions double to ${state.actionsLeft}.`; } },
-  { id: 'draw-one', label: 'Draw a card', apply: () => { const f = draw(1); state.player.hand.push(...f); return f.length ? 'You draw 1 card.' : 'The deck is empty, so no card.'; } },
-  { id: 'draw-two', label: 'Draw 2 cards', apply: () => { const f = draw(2); state.player.hand.push(...f); return f.length ? `You draw ${f.length} cards.` : 'The deck is empty, so no cards.'; } },
-  { id: 'new-deck', label: 'New deck', apply: () => { state.deck = buildDeck(); return 'A fresh supply of opportunity cards arrives.'; } },
-];
-
 function endRoundQuiz() {
   if (!state || state.winner) return;
+  // Once per game: the first round offers the quiz, later rounds skip it.
+  if (state.player.quizDone) return;
+  state.player.quizDone = true;
+
   const ch = ROUND_QUESTIONS[Math.floor(Math.random() * ROUND_QUESTIONS.length)];
+  let answered = false;
+  let timer = null;
+
+  // Closes the modal and releases the auto-close timer. Idempotent, so the
+  // timeout firing after a manual close is harmless.
+  const close = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+    if (window.closeModal) closeModal();
+  };
+
   openModal(`
     <div class="round-quiz">
-      <div class="eyebrow">END OF ROUND ${state.round} \u00b7 KNOWLEDGE CHECK</div>
-      <h2>Round Quiz</h2>
+      <button type="button" class="quiz-close" id="quizCloseBtn" aria-label="Close quiz">&times;</button>
+      <div class="eyebrow">BONUS ROUND \u00b7 ROUND ${state.round}</div>
+      <h2>Answer correctly to redraw</h2>
       <p class="challenge-q">${escapeHtml(ch.q)}</p>
-      ${state.player.quizPrizeWon ? '<p class="quiz-note">A knowledge check runs at the end of every round. You have already won a quiz prize this run, so this one is for the explanation only.</p>' : ''}
       <div class="modal-actions challenge-options" id="quizOptions"></div>
+      <div class="quiz-footer">
+        <p class="quiz-note">A correct answer lets you exchange up to two cards in your hand for new cards. This quiz is offered once per run.</p>
+        <button type="button" class="btn btn-secondary" id="quizDoneBtn">Close</button>
+      </div>
     </div>
   `);
+
   const wrap = $('quizOptions');
   const fb = document.createElement('div');
   fb.className = 'challenge-feedback';
@@ -1127,35 +1124,37 @@ function endRoundQuiz() {
     btn.className = 'btn';
     btn.textContent = text;
     btn.addEventListener('click', () => {
+      answered = true;
+      if (timer) { clearTimeout(timer); timer = null; }
       if (i === ch.answer) {
-        wrap.querySelectorAll('button').forEach((b) => { b.disabled = true; });
-        // The knowledge check runs every round, but a prize is only awarded once
-        // per game. After that it is still worth answering, for the explanation.
-        if (state.player.quizPrizeWon) {
-          fb.innerHTML = '<p class="prize-none">Correct \u2014 you have already claimed a quiz prize this run, so there is nothing left to win.</p>';
-          addLog('Round quiz answered correctly \u2014 no prize, already claimed this run.');
-          render();
-          persist();
-          return;
-        }
-        state.player.quizPrizeWon = true;
-        const prize = ROUND_PRIZES[Math.floor(Math.random() * ROUND_PRIZES.length)];
-        const msg = prize.apply();
-        fb.innerHTML = `<p class="prize-win">Correct \u2014 prize: <b>${escapeHtml(prize.label)}</b>. ${escapeHtml(msg)}</p>`;
-        addLog(`Round quiz answered correctly \u2014 prize "${prize.label}".`);
+        wrap.querySelectorAll('button').forEach((b) => { if (b.tagName === 'BUTTON' && b.parentNode === wrap) b.disabled = true; });
+        const count = redrawHandCards(state.player, 2, true);
+        const msg = count ? `You exchanged ${count} card${count === 1 ? '' : 's'} for new draws.` : 'Your hand is empty, so there were no cards to exchange.';
+        fb.innerHTML = `<p class="prize-win">Correct \u2014 bonus redraw! ${escapeHtml(msg)}</p>`;
+        addLog(`Round quiz answered correctly \u2014 redrew ${count} card(s).`);
         render();
         persist();
       } else {
         btn.classList.add('wrong');
         btn.disabled = true;
         fb.innerHTML = `<p class="wrong-note">Not quite. ${escapeHtml(ch.why)}</p>`
-          + '<p class="wrong-hint">Try another answer \u2014 a correct answer still earns a prize.</p>';
+          + '<p class="wrong-hint">Try another answer \u2014 a correct answer earns a two-card redraw.</p>';
       }
     });
     wrap.appendChild(btn);
   });
-}
 
+  const closeBtn = $('quizCloseBtn');
+  const doneBtn = $('quizDoneBtn');
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  if (doneBtn) doneBtn.addEventListener('click', close);
+
+  // Auto-close so the round can continue even if it is ignored.
+  timer = setTimeout(() => {
+    if (!answered) addLog('Round quiz closed without an answer.');
+    close();
+  }, 20000);
+}
 function triggerEvent() {
   const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
   openModal(`
@@ -1173,6 +1172,10 @@ function triggerEvent() {
       closeModal();
       render();
       persist();
+      if (state.pendingRoundQuiz) {
+        state.pendingRoundQuiz = false;
+        endRoundQuiz();
+      }
     });
     wrap.appendChild(btn);
   });
@@ -1249,6 +1252,9 @@ function openModal(html) {
   el.modalBack.classList.add('show');
 }
 function closeModal() {
+  // During the round-three event, the modal is a required step before the bonus
+  // question. Clicking the backdrop must not silently discard that question.
+  if (state && state.pendingRoundQuiz && $('eventChoices')) return;
   el.modalBack.classList.remove('show');
 }
 function closeHallOfFame() {
@@ -1461,24 +1467,37 @@ function showRivalSets(index) {
   const rival = state.rivals[index];
   if (!rival) return;
   const banked = rival.banked || [];
-  if (!banked.length) return toast('This rival has not completed any sets yet.');
   const rows = banked.map((b) => {
     const meta = setMeta(b.set);
     const name = meta ? meta.name : b.set;
-    const round = b.round;
-    const strong = b.strong ? 'with proof' : 'weaker';
-    return `<div class="rival-banked-row"><strong>${escapeHtml(name)}</strong><small>Round ${round} · ${strong}</small></div>`;
+    const round = b.round || '—';
+    const strong = b.strong ? 'strong evidence' : 'basic evidence';
+    const cards = Array.isArray(b.cards) && b.cards.length
+      ? `<div class="rival-action-cards">${b.cards.map((card) => rivalCardMarkup(card, card.category, b.set)).join('')}</div>`
+      : '<small>Card details were not saved for this older game.</small>';
+    return `<div class="rival-banked-row"><strong>${escapeHtml(name)}</strong><small>Round ${escapeHtml(round)} · ${strong}</small>${cards}</div>`;
   }).join('');
-  const usedSets = new Set(banked.map((b) => b.set));
-  const remainingInfo = DATA.sets.map((s) => {
-    const taken = usedSets.has(s.id) ? 'taken' : 'available';
-    return `<span class="rival-banked-set ${taken}">${escapeHtml(s.name)}: ${taken}</span>`;
+  const cardsAvailable = [...state.market, ...state.deck, ...state.discard];
+  const cardsHeld = [state.player, ...state.rivals].flatMap((agent) => agent.hand || []);
+  const remainingInfo = DATA.sets.map((set) => {
+    const categories = set.requiredCategories || ['Setup', 'Action', 'Proof'];
+    const categoryCounts = categories.map((category) => {
+      const exact = cardsAvailable.filter((card) => card.set === set.id && card.category === category).length;
+      const flexible = cardsAvailable.filter((card) => card.set === 'any' && card.category === category).length;
+      const wild = cardsAvailable.filter((card) => card.category === 'Wildcard').length;
+      const usable = exact + flexible + wild;
+      const held = cardsHeld.filter((card) => card.category === 'Wildcard'
+        || (card.category === category && (card.set === set.id || card.set === 'any'))).length;
+      return `<span><b>${escapeHtml(category)}</b>: ${usable} in market/deck <small>(${exact} route · ${flexible} any route${wild ? ` · ${wild} wildcard` : ''}) · ${held} currently held</small></span>`;
+    }).join('');
+    return `<div class="rival-banked-set"><strong>${escapeHtml(set.name)}</strong>${categoryCounts}</div>`;
   }).join('');
   openModal(`
-    <h2>${escapeHtml(rival.displayName || rival.name)}'s Completed Sets</h2>
-    <p>Banked experience sets:</p>
-    <div class="rival-banked-list">${rows}</div>
-    <p style="margin-top:1rem">Community card availability:</p>
+    <h2>${escapeHtml(rival.displayName || rival.name)}'s Experience</h2>
+    <p>Completed sets and the cards used:</p>
+    <div class="rival-banked-list">${rows || '<p>This rival has not completed a set yet.</p>'}</div>
+    <h3 style="margin-top:1rem">Cards still available to collect</h3>
+    <p>Counts include the market and shared draw/recycle piles. “Currently held” counts cards in players’ hands; they are not available until returned. A wildcard can fill any one slot, so its count appears under each eligible card type but cannot be used more than once in a set.</p>
     <div class="rival-set-tags">${remainingInfo}</div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">Close</button>
@@ -1633,16 +1652,16 @@ function openPreview(where, card) {
   let actionHtml = '';
   if (where === 'market') {
     const marketIndex = state.market.findIndex((c) => c.uid === card.uid);
-    const canSwap = marketIndex !== -1 && state.player.marketSwapsThisRound < MAX_MARKET_SWAPS_PER_ROUND && !state.winner;
+    const swapsLeft = MAX_MARKET_SWAPS_PER_ROUND - state.player.marketSwapsThisRound;
     actionHtml = `
       <button class="btn primary-btn" onclick="takePreviewCard()" ${state.actionsLeft < 1 || state.winner || state.player.hand.length >= HAND_CAP || state.player.marketPicksThisRound >= MAX_MARKET_PICKS_PER_ROUND ? 'disabled' : ''}>Take this card (1 action)</button>
-      <button class="btn btn-secondary" onclick="swapPreviewCard()" ${!canSwap ? 'disabled' : ''}>Swap this card</button>
+      <button class="btn btn-secondary" onclick="swapPreviewCard()" ${marketIndex < 0 || swapsLeft < 1 || state.winner ? 'disabled' : ''}>Replace with a new card (${swapsLeft} left)</button>
       <button class="btn btn-secondary" onclick="closePreview()">Done</button>
     `;
   } else {
     actionHtml = `
       <button class="btn ${isSelected ? 'btn-secondary' : 'primary-btn'}" onclick="togglePreviewSelect()">${isSelected ? 'Remove from set' : 'Add to set'}</button>
-      <button class="btn btn-secondary" onclick="returnPreviewCard()" ${state.winner || state.player.returnsThisRound >= MAX_RETURNS_PER_ROUND ? 'disabled' : ''}>Return to deck</button>
+      <button class="btn btn-secondary" onclick="returnPreviewCard()" ${state.winner || state.player.returnsThisRound >= MAX_RETURNS_PER_ROUND ? 'disabled' : ''}>Return to market</button>
       <button class="btn btn-secondary" onclick="closePreview()">Done</button>
     `;
   }
@@ -1701,18 +1720,17 @@ function takePreviewCard() {
 function swapPreviewCard() {
   if (!previewState || previewState.where !== 'market' || state.winner) return;
   if (state.player.marketSwapsThisRound >= MAX_MARKET_SWAPS_PER_ROUND) {
-    toast(`You can swap ${MAX_MARKET_SWAPS_PER_ROUND} market cards per round.`);
+    toast(`You can replace up to ${MAX_MARKET_SWAPS_PER_ROUND} market cards each round.`);
     return;
   }
-  const uid = previewState.card.uid;
-  const marketIndex = state.market.findIndex((c) => c.uid === uid);
-  if (marketIndex === -1) return;
-  swapMarketCard(marketIndex, state.player);
+  const index = state.market.findIndex((card) => card.uid === previewState.card.uid);
+  if (index < 0) return;
+  const swapped = swapMarketCard(index, state.player);
+  if (!swapped) return toast('There are no new cards available to draw.');
   state.player.marketSwapsThisRound += 1;
-  renderMarket();
-  renderControls();
-  persist();
   closePreview();
+  render();
+  persist();
 }
 
 function togglePreviewSelect() {
@@ -1732,13 +1750,35 @@ function togglePreviewSelect() {
 
 function returnPreviewCard() {
   if (!previewState || previewState.where !== 'hand') return;
-  returnCardsToDeck([previewState.card.uid]);
+  returnCardsToMarket([previewState.card.uid]);
 }
 
 // The market is a surface of slots. Cards live in one of MARKET_SLOTS columns, and
 // any number of cards can share a slot, in which case they are drawn as a stack with
 // the most recently placed card on top. Dragging a card moves it to the slot you
 // drop on, and dropping it directly over a card joins that card's stack.
+// Card stacking is opt-in. When it is off, the market and hand lay the cards out
+// as an ordinary row and the panels scroll, which is easier to scan once the row
+// is taller than the space available.
+function cardStackingEnabled() {
+  if (window.app && typeof app.state !== 'undefined' && app.state.stackingEnabled !== undefined) {
+    return !!app.state.stackingEnabled;
+  }
+  try {
+    var s = JSON.parse(localStorage.getItem('rttr-settings') || '{}');
+    return s.stacking === true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function applyCardStacking() {
+  if (document.documentElement) {
+    document.documentElement.classList.toggle('stacking-on', cardStackingEnabled());
+  }
+  if (state) renderMarket();
+}
+
 const MARKET_SLOTS = 6;
 const STACK_COVER = 0.5;  // each stacked card covers half of the one below it
 const STACK_DROP = 3;     // px of vertical stagger, so the pile reads as a stack
@@ -1793,12 +1833,31 @@ function moveMarketCardToSlot(uid, slot, stackIndex) {
   persist();
 }
 
+function reorderMarketCard(draggedUid, targetUid, placeAfter) {
+  if (draggedUid === targetUid) return;
+  const from = state.market.findIndex((card) => card.uid === draggedUid);
+  if (from < 0) return;
+  const [moved] = state.market.splice(from, 1);
+  let to = targetUid ? state.market.findIndex((card) => card.uid === targetUid) : state.market.length;
+  if (to < 0) to = state.market.length;
+  if (placeAfter && targetUid) to += 1;
+  state.market.splice(Math.min(to, state.market.length), 0, moved);
+  state.market.forEach((card) => { delete card._slot; delete card._z; });
+  if (cardStackingEnabled()) assignMarketSlots();
+  renderMarket();
+  persist();
+}
+
 // Which slot is this clientX over? Six even columns across the panel.
 function marketSlotAt(clientX) {
   const box = el.market.getBoundingClientRect();
   if (box.width <= 0) return 0;
-  const rel = clientX - box.left;
-  const slot = Math.floor((rel / box.width) * MARKET_SLOTS);
+  const styles = window.getComputedStyle ? window.getComputedStyle(el.market) : null;
+  const padL = styles ? parseFloat(styles.paddingLeft) || 0 : 0;
+  const padR = styles ? parseFloat(styles.paddingRight) || 0 : 0;
+  const inner = Math.max(1, box.width - padL - padR);
+  const rel = clientX - box.left - padL;
+  const slot = Math.floor((rel / inner) * MARKET_SLOTS);
   return Math.max(0, Math.min(MARKET_SLOTS - 1, slot));
 }
 
@@ -1806,9 +1865,29 @@ function renderMarket() {
   if (!el.market) return;
   el.market.innerHTML = '';
   assignMarketSlots();
+  if (!cardStackingEnabled()) {
+    // Plain row: no absolute positioning, no slots, no overlap. The panel scrolls.
+    el.market.classList.remove('is-stacked-market');
+    state.market.forEach((c) => {
+      const card = cardEl(c, {
+        onClick: () => openPreview('market', c),
+        onInspect: (cardToOpen) => openPreview('market', cardToOpen),
+        dragSource: 'market',
+      });
+      el.market.appendChild(card);
+    });
+    return;
+  }
+  el.market.classList.add('is-stacked-market');
   const stacks = marketStacks();
   const box = el.market.getBoundingClientRect();
-  const width = box.width || el.market.clientWidth || MARKET_SLOTS * 150;
+  // Absolutely positioned cards resolve against the padding box, so measure the
+  // content area and start from the padding edge, otherwise the first and last
+  // cards sit flush against the panel border.
+  const styles = window.getComputedStyle ? window.getComputedStyle(el.market) : null;
+  const padL = styles ? parseFloat(styles.paddingLeft) || 0 : 0;
+  const padR = styles ? parseFloat(styles.paddingRight) || 0 : 0;
+  const width = Math.max(0, (box.width || el.market.clientWidth || MARKET_SLOTS * 150) - padL - padR);
   const slotW = width / MARKET_SLOTS;
 
   stacks.forEach(([slot, list]) => {
@@ -1818,8 +1897,10 @@ function renderMarket() {
     // whatever would push it past the panel edge. Without this, overflow cards
     // (which land on the last column) spill well outside the market.
     const spread = (list.length - 1) * offset + cardW;
-    const baseX = slot * slotW;
-    const shift = Math.max(0, baseX + spread - width);
+    const baseX = padL + slot * slotW;
+    // baseX is measured from the border box, so the limit is the inner right edge
+    // (left padding + content width), not the content width on its own.
+    const shift = Math.max(0, baseX + spread - (padL + width));
 
     list.forEach((c, depth) => {
       const top = depth === list.length - 1;
@@ -1863,7 +1944,7 @@ function renderHand() {
     card.addEventListener('dblclick', () => openPreview('hand', c));
     el.hand.appendChild(card);
   });
-  if (el.handCount) el.handCount.textContent = `${state.player.hand.length}/${HAND_CAP} cards · returned ${state.player.returnsThisRound}/${MAX_RETURNS_PER_ROUND} · picked ${state.player.marketPicksThisRound}/${MAX_MARKET_PICKS_PER_ROUND} this round`;
+  if (el.handCount) el.handCount.textContent = `${state.player.hand.length}/${HAND_CAP} cards · returned ${state.player.returnsThisRound}/${MAX_RETURNS_PER_ROUND} · picked ${state.player.marketPicksThisRound}/${MAX_MARKET_PICKS_PER_ROUND} · market swaps ${state.player.marketSwapsThisRound}/${MAX_MARKET_SWAPS_PER_ROUND}`;
 }
 
 function renderSets() {
@@ -1944,15 +2025,9 @@ function renderControls() {
   const returnsLeft = MAX_RETURNS_PER_ROUND - state.player.returnsThisRound;
   el.returnBtn.disabled = !returnCount || returnCount > returnsLeft || !!state.winner;
   el.returnBtn.textContent = returnCount
-    ? `↩ Return ${returnCount} to deck`
-    : `↩ Return selected to deck (${returnsLeft} left this round)`;
-   el.returnBtn.title = 'Select up to two cards in your hand and return them to the deck, or drag one to the return area. Returns are free, up to two each round.';
-  const swapsLeft = MAX_MARKET_SWAPS_PER_ROUND - state.player.marketSwapsThisRound;
-  el.swapMarketBtn.textContent = `↻ Swaps left: ${swapsLeft}/${MAX_MARKET_SWAPS_PER_ROUND}`;
-  el.swapMarketBtn.title = 'Swap market cards by clicking a card in the market and using "Swap this card" in the preview. Free, up to 2 per round.';
-  el.swapMarketBtn.disabled = true;
-  el.swapMarketBtn.style.cursor = 'default';
-  el.swapMarketBtn.style.opacity = '0.7';
+    ? `↩ Return ${returnCount} to market`
+    : `↩ Return selected to market (${returnsLeft} left this round)`;
+  el.returnBtn.title = 'Select up to two cards in your hand and return them to the community market, or drag hand cards onto the market. Returns are free, up to two each round.';
   const selectedCards = state.player.hand.filter((card) => selectedHandUids.has(card.uid));
   const route = selectedRoute(selectedCards);
   const requiredCount = route ? requiredCategories(route).length : 0;
@@ -2061,7 +2136,7 @@ const LEARN_STEPS = [
   },
   {
     title: 'Take or return cards',
-    body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the deck. Returns are free; taking each market card costs 1 action. You can also swap up to 2 market cards at the start of your turn. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. You can also drag market cards into your hand and drag hand cards to the market or return area.',
+    body: 'Each round you may take up to 2 cards from the market and return up to 2 cards from your hand to the community market. You may also replace up to 2 market cards with fresh cards from the deck. Returning and replacing are free; taking each market card costs 1 action. Click hand cards to select them for banking (selected cards get a border highlight). Double-click a card to preview it. Drag market cards to your hand, drag hand cards onto the market, and drag market cards to reorder them.',
     visual: `
       <div class="learn-visual">
         <div class="learn-flow">
@@ -2188,6 +2263,7 @@ function closeLearn() {
 }
 
 app.openLearn = openLearn;
+app.applyCardStacking = applyCardStacking;
 app.showRailTab = showRailTab;
 app.isRailTabVisible = isRailTabVisible;
 app.toast = toast;
@@ -2201,6 +2277,15 @@ el.learnNextBtn.addEventListener('click', () => {
 });
 
 if (el.learnCloseBtn) el.learnCloseBtn.addEventListener('click', closeLearn);
+if (el.learnTutorialBtn) {
+  el.learnTutorialBtn.addEventListener('click', () => {
+    closeLearn();
+    if (!window.Tutorial) return;
+    Tutorial.reset();
+    if (state && !state.winner) Tutorial.start();
+    else toast('Start a career run first, then replay the tutorial.');
+  });
+}
 if (el.learnBackdrop) {
   el.learnBackdrop.addEventListener('click', (e) => { if (e.target === el.learnBackdrop) closeLearn(); });
 }
@@ -2226,16 +2311,19 @@ function setupDragAndDrop() {
     });
   }
   attach(el.hand, 'market', onMarketCardClick);
-  attach(el.market, 'hand', (uid) => returnCardsToDeck([uid]));
+  attach(el.market, 'hand', (uid) => returnCardsToMarket([uid]));
   attachHandReorder();
   attachMarketStack();
 }
 
-// Lets a market card be dragged to a new slot, or dropped onto a card to join that
-// card's stack. The hand is untouched: its reorder handler already owns it.
+// Handles market-card dragging in both layouts: reordering the flat row or moving
+// cards between slots/stacks when stacking is enabled. Hand drops use attach().
 function attachMarketStack() {
   const market = el.market;
   if (!market) return;
+  // Dropping a card onto another to build a stack only makes sense while stacking
+  // is on; without it the market is a plain scrolling row.
+  if (!cardStackingEnabled()) return;
 
   const cardUnder = (x, y) => {
     const cards = [...market.querySelectorAll('.card')].filter((n) => n.dataset.uid);
@@ -2258,7 +2346,7 @@ function attachMarketStack() {
     const over = cardUnder(event.clientX, event.clientY);
     market.querySelectorAll('.drop-target').forEach((n) => n.classList.remove('drop-target'));
     if (over) over.classList.add('drop-target');
-    market.classList.add('stacking');
+    if (cardStackingEnabled()) market.classList.add('stacking');
   });
 
   market.addEventListener('dragleave', (event) => {
@@ -2278,6 +2366,11 @@ function attachMarketStack() {
     const over = cardUnder(event.clientX, event.clientY);
     market.classList.remove('stacking');
     market.querySelectorAll('.drop-target').forEach((n) => n.classList.remove('drop-target'));
+    if (!cardStackingEnabled()) {
+      if (!over) return reorderMarketCard(uid, null, false);
+      const box = over.getBoundingClientRect();
+      return reorderMarketCard(uid, over.dataset.uid, event.clientX > box.left + box.width / 2);
+    }
     if (over) {
       // Dropped onto a card: join that card's stack, just underneath it.
       const slot = Number(over.dataset.marketSlot);
@@ -2575,6 +2668,7 @@ if (el.signInBtn) {
   // Tooltip listeners are delegated from document, so binding once is enough for
   // markup that is added later.
   if (window.Tooltip && typeof Tooltip.attach === 'function') Tooltip.attach();
+  applyCardStacking();
 })();
 
 // Registered here rather than in js/app.js, which index.html does not load. A worker

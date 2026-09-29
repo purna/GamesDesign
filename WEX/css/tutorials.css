@@ -267,12 +267,11 @@
 #tutorial-container.is-open { display: block; }
 
 /* The dim is a separate child so the spotlight can sit above it. */
-#tutorial-dim {
-    position: absolute;
-    inset: 0;
-    background: rgba(6, 7, 14, 0.66);
-    pointer-events: none;
-}
+/* No full-screen scrim. A scrim covers the highlighted element too, so the very
+ * thing being pointed at ended up behind two dark layers and was hard to read.
+ * The spotlight's oversized box-shadow darkens everything OUTSIDE the target
+ * instead, which leaves the target itself completely untouched. */
+#tutorial-dim { display: none; }
 
 /* The spotlight is a ring around the target. The oversized box-shadow is what
  * darkens everything outside it, which avoids needing a clip-path. */
@@ -280,7 +279,7 @@
     position: absolute;
     border: 2px solid var(--accent-primary);
     border-radius: var(--radius, 10px);
-    box-shadow: 0 0 0 9999px rgba(6, 7, 14, 0.66), 0 0 22px var(--accent-primary);
+    box-shadow: 0 0 0 9999px rgba(6, 7, 14, 0.55), 0 0 0 3px color-mix(in srgb, var(--accent-primary), transparent 55%), 0 0 22px color-mix(in srgb, var(--accent-primary), transparent 40%);
     pointer-events: none;
     transition: top 0.2s ease, left 0.2s ease, width 0.2s ease, height 0.2s ease;
 }

@@ -54,7 +54,7 @@ const TUTORIAL_CONFIG = {
       id: 'market',
       target: '#market',
       title: 'The market',
-      body: 'Cards you can take come from here. Taking a card costs 1 action, and you may take 2 per round.\n\nYou can swap market cards for fresh ones, and preview any card to see what it does.',
+      body: 'Cards you can take come from here. Taking a card costs 1 action, and you may take 2 per round. Replace up to 2 market cards with new cards from the deck, or drag cards to rearrange the market. Click a card to preview it.',
       placement: 'top',
       allowSkip: true
     },
@@ -102,7 +102,7 @@ const TUTORIAL_CONFIG = {
       id: 'controls',
       target: '#returnBtn',
       title: 'Your other moves',
-      body: 'Return up to 2 selected cards per round for free, and swap market cards for a fresher market.\n\nEnding your turn is End turn, at the bottom of the left rail. The rivals move after you.',
+      body: 'Return up to 2 selected cards per round for free by pressing the button or dragging them onto the market.\n\nEnding your turn is End turn, at the bottom of the left rail. The rivals move after you.',
       placement: 'top',
       allowSkip: true
     },
@@ -110,7 +110,7 @@ const TUTORIAL_CONFIG = {
       id: 'skills',
       target: '#skillsRequired',
       title: 'Skills',
-      body: 'Every skill you can gain, with the one your job needs marked "needed". Hover any of them to see which routes and cards will get it.\n\nAt the end of each round a knowledge check appears — answer correctly and you win a random prize.',
+      body: 'Every skill you can gain, with the one your job needs marked "needed". Hover any of them to see which routes and cards will get it.\n\nAt the end of each round a bonus knowledge check appears — answer correctly to redraw up to two cards.',
       placement: 'right',
       allowSkip: true,
       tab: 'skills'

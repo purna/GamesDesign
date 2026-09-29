@@ -8,48 +8,6 @@
  * Load order: game.js → ai.js → settings.js → accessibility.js
  */
 
-/* ===================== Market Swap Heuristics ===================== */
-
-function canSwapMarket(agent) {
-  if (state.market.length === 0) return false;
-  const useful = state.market.some((c) => {
-    const score = rateMarketCard(agent, c);
-    return score > 0;
-  });
-  return !useful;
-}
-
-function findWorstMarketCard(agent) {
-  let worstIdx = -1;
-  let worstScore = Infinity;
-  state.market.forEach((c, i) => {
-    const score = rateMarketCard(agent, c);
-    if (score < worstScore) {
-      worstScore = score;
-      worstIdx = i;
-    }
-  });
-  return worstIdx;
-}
-
-function rateMarketCard(agent, card) {
-  const order = targetSetOrder(agent, state.job);
-  const recommended = jobSetOptions(state.job);
-  let score = 0;
-  const rank = order.indexOf(card.set);
-  if (rank >= 0) score += Math.max(1, 7 - rank);
-  if (recommended.has(card.set)) score += 4;
-  if (agent.strategy && card.set === agent.strategy) score += 2;
-  if (card.category === 'Wildcard') score += 2;
-  // pickMarketCardFor values flexible cards highly; rateMarketCard scored them 0,
-  // so canSwapMarket read a full market of them as useless and swapped it away.
-  if (card.set === 'any' && card.category !== 'Wildcard') {
-    const usefulRoute = order.find((setId) => !agent.hand.some((held) => held.category === card.category && (held.set === setId || held.set === 'any')));
-    if (usefulRoute) score += 5 + Math.max(0, 2 - order.indexOf(usefulRoute));
-  }
-  return score;
-}
-
 /* ====================== Set Targeting ====================== */
 
 function targetSetOrder(agent, job) {
@@ -79,6 +37,34 @@ function setProgress(agent, setId) {
   if (!meta) return 0;
   const categories = new Set(agent.hand.filter((c) => (c.set === setId || c.set === 'any') && c.category !== 'Wildcard').map((c) => c.category));
   return categories.size;
+}
+
+function rateMarketCard(agent, card) {
+  if (card.category === 'Wildcard') return 4;
+  let score = card.set === 'any' ? 3 : jobSetOptions(state.job).has(card.set) ? 5 : 2;
+  const duplicates = agent.hand.some((held) => held.category === card.category
+    && (held.set === card.set || held.set === 'any' || card.set === 'any'));
+  if (duplicates) score -= 5;
+  else if (card.set !== 'any') score += Math.min(3, setProgress(agent, card.set));
+  return score;
+}
+
+function replaceWeakMarketCards(agent) {
+  const replaced = [];
+  const justAdded = new Set();
+  agent.marketSwapsThisRound = 0;
+  while (agent.marketSwapsThisRound < MAX_MARKET_SWAPS_PER_ROUND && state.market.length) {
+    const ranked = state.market.map((card, index) => ({ card, index, score: rateMarketCard(agent, card) }))
+      .filter((entry) => !justAdded.has(entry.card.uid))
+      .sort((a, b) => a.score - b.score);
+    if (!ranked.length || ranked[0].score > 1) break;
+    const swap = swapMarketCard(ranked[0].index, agent);
+    if (!swap) break;
+    agent.marketSwapsThisRound += 1;
+    justAdded.add(swap.fresh.uid);
+    replaced.push({ oldCard: swap.replaced, newCard: swap.fresh });
+  }
+  return replaced;
 }
 
 /* ====================== Market Card Selection ====================== */
@@ -164,19 +150,10 @@ function runRivalTurn(agent) {
   agent.energy = Math.min(START_ENERGY, agent.energy + 1);
   agent.marketPicksThisRound = 0;
   agent.returnsThisRound = 0;
-  agent.marketSwapsThisRound = 0;
-  if (agent.hand.length < HAND_CAP && canSwapMarket(agent)) {
-    const swapCount = Math.min(MAX_MARKET_SWAPS_PER_ROUND, state.market.length);
-    for (let i = 0; i < swapCount; i++) {
-      const worstIdx = findWorstMarketCard(agent);
-      if (worstIdx === -1) break;
-      swapMarketCard(worstIdx, agent);
-    }
-    if (swapCount > 0) {
-      summary.actions.push({ type: 'swap', count: swapCount });
-      agent.marketSwapsThisRound = swapCount;
-    }
-  }
+  const swaps = replaceWeakMarketCards(agent);
+  swaps.forEach(({ oldCard, newCard }) => {
+    summary.actions.push({ type: 'swap', oldCard, newCard });
+  });
   let actions = ACTIONS_PER_TURN;
   agent.actionPenalty = 0;
 
@@ -200,10 +177,10 @@ function runRivalTurn(agent) {
       const returns = leastUsefulCards(agent, state.job, wanted);
       agent.hand = agent.hand.filter((card) => !returns.some((item) => item.uid === card.uid));
       agent.returnsThisRound += returns.length;
-      state.deck = shuffle([...state.deck, ...returns]);
+      state.market.push(...returns);
       summary.returned.push(...returns.map((card) => ({ name: card.name, category: card.category, art: card.art })));
       summary.actions.push({ type: 'return', cards: returns.map((card) => ({ name: card.name, category: card.category, art: card.art })), reason: 'making room for useful cards' });
-      addLog(`${agent.displayName || agent.name} returned ${returns.length} card(s) to the deck.`);
+      addLog(`${agent.displayName || agent.name} returned ${returns.length} card(s) to the community market.`);
       continue;
     }
 
@@ -253,11 +230,14 @@ function showRivalTurnPopup() {
   if (!summary) { finishRivalPhase(); return; }
   const last = state.rivalTurnIndex === state.rivalTurnSummaries.length - 1;
   const turnNo = state.rivalTurnIndex + 1;
-  const actionRows = summary.actions.map((action, i) => {
-    if (action.type === 'pick') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Picked from the market</b><p>${escapeHtml(action.reason)}</p></div>${rivalCardMarkup(action.card, 'Picked')}</div>`;
-    if (action.type === 'return') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Returned to the deck</b><p>${escapeHtml(action.reason)}</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Returned')).join('')}</div></div>`;
-    if (action.type === 'bank') return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>Completed ${escapeHtml(action.title)}</b><p>Added ${action.evidence} CV evidence and the ${escapeHtml(action.skill)} skill.</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Banked', action.title)).join('')}</div></div>`;
-    return `<div class="rival-action-row"><span class="rival-action-number">${i + 1}</span><div><b>${escapeHtml(action.title)}</b><p>No move available.</p></div></div>`;
+  let actionNumber = 0;
+  const actionRows = summary.actions.map((action) => {
+    const number = action.type === 'swap' ? '↻' : action.type === 'return' ? '↩' : ++actionNumber;
+    if (action.type === 'swap') return `<div class="rival-action-row"><span class="rival-action-number">${number}</span><div><b>Free market replacement</b><p>Added a fresh card from the deck to the community market.</p></div><div class="rival-action-cards">${rivalCardMarkup(action.oldCard, 'Replaced')}${rivalCardMarkup(action.newCard, 'New card')}</div></div>`;
+    if (action.type === 'pick') return `<div class="rival-action-row"><span class="rival-action-number">${number}</span><div><b>Picked from the market</b><p>${escapeHtml(action.reason)}</p></div>${rivalCardMarkup(action.card, 'Picked')}</div>`;
+    if (action.type === 'return') return `<div class="rival-action-row"><span class="rival-action-number">${number}</span><div><b>Returned to the community market</b><p>${escapeHtml(action.reason)}</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Returned')).join('')}</div></div>`;
+    if (action.type === 'bank') return `<div class="rival-action-row"><span class="rival-action-number">${number}</span><div><b>Completed ${escapeHtml(action.title)}</b><p>Added ${action.evidence} CV evidence and the ${escapeHtml(action.skill)} skill.</p></div><div class="rival-action-cards">${action.cards.map((c) => rivalCardMarkup(c, 'Banked', action.title)).join('')}</div></div>`;
+    return `<div class="rival-action-row"><span class="rival-action-number">${number}</span><div><b>${escapeHtml(action.title)}</b><p>No move available.</p></div></div>`;
   }).join('');
   const applied = summary.applied ? `<p class="rival-win-callout">${escapeHtml(summary.name)} now meets the role requirements and has applied!</p>` : '';
   openModal(`<div class="rival-turn-modal"><div class="eyebrow">RIVAL TURN ${turnNo} OF ${state.rivalTurnSummaries.length} · ROUND ${state.round}</div><h2>${escapeHtml(summary.name)} is making a move</h2><p class="rival-modal-plan"><b>${escapeHtml(summary.strategy)}</b> · ${escapeHtml(summary.plan)}</p><div class="rival-turn-actions">${actionRows}</div>${applied}<div class="modal-actions"><button class="btn primary-btn" id="nextRivalBtn">${last ? (state.winner ? 'See result' : 'Start next round') : 'Next competitor'} →</button></div></div>`);

@@ -10,8 +10,8 @@
  * - Bump CACHE_NAME whenever the shell changes. Old caches are deleted on activate.
  */
 
-const CACHE_NAME = 'race-to-the-role-v4';
-const DATA_CACHE = 'race-to-the-role-data-v4';
+const CACHE_NAME = 'race-to-the-role-v5';
+const DATA_CACHE = 'race-to-the-role-data-v5';
 
 // Loaded with the page. Keep this list accurate: a missing entry is precached as a
 // silent no-op, so a stale list fails quietly rather than erroring.

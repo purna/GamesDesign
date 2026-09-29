@@ -1,6 +1,5 @@
 .DS_Store
-WEX/.firebase/logs/vsce-debug.log
-/WEX/.firebase
-/WEX/.firebase
 *.log
-WEX/.firebase/logs/vsce-debug.log
+
+# Firebase tooling caches and logs (the Firebase config files themselves are kept)
+WEX/.firebase/

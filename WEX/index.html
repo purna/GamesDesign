@@ -82,6 +82,12 @@
             </label>
           </div>
           <div class="settings-section">
+            <h3>Card layout</h3>
+            <label class="settings-row" for="stackingEnabled">
+              <span>Stack cards in the market and hand</span>
+              <input type="checkbox" id="stackingEnabled">
+            </label>
+            <p class="settings-hint">Off by default. With stacking off, the market and your hand lay the cards out in a row and the panels scroll instead.</p>
             <h3>Guidance</h3>
             <label class="settings-row" for="tutorialEnabled">
               <span>Show the tutorial on new runs</span>
@@ -176,6 +182,10 @@
         <p class="learn-progress"><span id="learnStepNum">1</span> / 5</p>
       </div>
       <div class="learn-content" id="learnContent"></div>
+      <div class="learn-replay">
+        <button class="btn btn-secondary" id="learnTutorialBtn">Replay the board tutorial</button>
+        <p class="learn-hint">A spotlight walkthrough of the market, your hand and the action buttons.</p>
+      </div>
       <div class="navigation">
         <button class="btn btn-secondary" id="learnPrevBtn">Previous</button>
         <button class="btn" id="learnNextBtn">Next</button>
@@ -214,12 +224,12 @@
               <h3>Experience sets</h3>
               <div class="set-list" id="sets"></div>
               <h3 class="rail-subhead card-types-head">Card types</h3>
-              <div class="legend legend-compact">
-                <span><i class="dot dot-square" style="background:var(--cyan)"></i>Setup</span>
-                <span><i class="dot dot-triangle" style="background:var(--pink)"></i>Do the work</span>
-                <span><i class="dot dot-plain" style="background:var(--gold)"></i>Proof</span>
-                <span><i class="dot dot-diamond" style="background:var(--orange)"></i>Impact</span>
-                <span><i class="dot dot-star" style="background:var(--lime)"></i>Wildcard</span>
+              <div class="legend legend-compact legend-shapes">
+                <span><i class="dot dot-square"></i>Setup</span>
+                <span><i class="dot dot-triangle"></i>Do the work</span>
+                <span><i class="dot dot-plain"></i>Proof</span>
+                <span><i class="dot dot-diamond"></i>Impact</span>
+                <span><i class="dot dot-star"></i>Wildcard</span>
               </div>
               <p class="legend-note">A card takes the colour of its <b>route</b>, so it matches the list above. The small shape in the corner shows the <b>type</b>.</p>
             </div>
@@ -260,9 +270,9 @@
           <div class="tables">
             <section class="table">
               <div class="section-head">
-                <h3 data-tip="Cards you can take from here. 2 per round, 1 action each.">Market</h3>
+                <h3 data-tip="Take up to 2 cards per round (1 action each), replace up to 2 cards with fresh deck draws, or drag cards to reorder the market.">Market</h3>
               </div>
-              <div class="panel market" id="market" data-tip="Border colours show which experience route a card belongs to. Wildcards can fill any set slot. Drag a card to your hand to take it, or click it to preview."></div>
+              <div class="panel market" id="market" data-tip="Border colours show each card's experience route. Drag a market card onto your hand to take it, drag hand cards here to return them, and drag market cards to reorder. Click a card to preview it."></div>
             </section>
 
             <section class="table">
@@ -270,7 +280,7 @@
                 <h3 data-tip="Your six cards. Click to select them into a set.">Your hand</h3>
                 <span class="hand-count" id="handCount"></span>
               </div>
-              <div class="panel hand" id="hand" data-tip="Each round you can return up to 2 cards for free and take up to 2 cards at 1 action each. Click to select for a set, drag to reorder. Hand limit: 6."></div>
+              <div class="panel hand" id="hand" data-tip="Each round you can return up to 2 cards to the market for free and take up to 2 cards at 1 action each. Click to select for a set, drag to reorder. Hand limit: 6."></div>
             </section>
           </div>
 
@@ -278,8 +288,7 @@
 
           <div class="controls">
             <div class="left-actions">
-              <button class="quiet-btn" id="returnBtn" data-tip="Return up to 2 selected cards to the deck each round, for free.">&larr; Return selected to deck</button>
-              <button class="quiet-btn" id="swapMarketBtn" data-tip="Swap up to 2 market cards for a fresh draw. Costs no action, but you only get 2 per round.">&#8635; Swap market cards</button>
+              <button class="quiet-btn" id="returnBtn" data-tip="Return up to 2 selected cards to the community market each round, for free.">&larr; Return selected to market</button>
             </div>
 
           </div>

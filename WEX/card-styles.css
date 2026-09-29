@@ -631,7 +631,7 @@
   background: color-mix(in srgb, var(--surface), var(--bg) 50%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1rem;
+  padding: 10px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -728,7 +728,10 @@
 
 .card:hover {
   transform: translateY(-5px) rotate(-1deg) scale(1.025);
-  border-color: var(--card-glow);
+  /* Darken the SAME route colour rather than switching channel. Reading
+     --card-glow only worked because it happens to alias --card-route, which is
+     the kind of implicit coupling that let the border rules drift apart. */
+  border-color: color-mix(in srgb, var(--card-route), var(--ink) 18%);
   box-shadow: var(--shadow), 0 0 18px color-mix(in srgb, var(--card-glow), transparent 68%), inset 0 0 0 3px var(--surface), inset 0 0 0 4px color-mix(in srgb, var(--border), var(--ink) 24%);
 }
 
@@ -738,15 +741,17 @@
 }
 
 .card.selected {
-  /* Deliberately leaves --card-glow alone: the outline, lift and ring signal
-     selection without the border disagreeing with the card's own colour. */
-  outline: 2px solid var(--accent);
+  /* A neutral, not a colour: any hue here reads as one of the five route
+     colours. Black by day, white at night. Deliberately leaves --card-glow alone
+     so the card still shows its own route. */
+  outline: 2px solid var(--select);
   outline-offset: 2px;
-  box-shadow: 0 0 0 5px var(--accent-soft), var(--shadow), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--accent);
+  box-shadow: 0 0 0 5px var(--select-soft), var(--shadow), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--select);
   transform: translateY(-4px);
 }
 
-/* Colored top accent bar for category visibility (like guide) */
+/* Top accent band. Reads --card-glow, which aliases the card's route colour, so the
+   band, the border and the fill all agree. It used to be coloured by card type. */
 .card::after {
   content: "";
   position: absolute;
@@ -759,42 +764,39 @@
   border-radius: 12px 12px 0 0;
 }
 
-.card.cat-cyan .card-type-dot,
-.card.tone-setup .card-type-dot {
-  background: var(--cyan);
-  /* Setup: a square. It is the foundation of a set, and the plainest shape. */
-  border-radius: 2px;
-}
+/* Card type is carried by shape alone. These five hues are also used for the
+   experience routes, so a coloured marker would read as a route. */
+.card-type-dot { background: color-mix(in srgb, var(--ink), transparent 35%); }
 
+/* Setup: a square. It is the foundation of a set, and the plainest shape. */
+.card.cat-cyan .card-type-dot,
+.card.tone-setup .card-type-dot { border-radius: 2px; }
+
+/* Action: a triangle, pointing the way you have to go. */
 .card.cat-pink .card-type-dot,
 .card.tone-action .card-type-dot {
-  background: var(--pink);
-  /* Action: a triangle, pointing the way you have to go. */
   clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
   border-radius: 0;
 }
 
+/* Proof: a plain dot, the simplest marker. */
 .card.cat-gold .card-type-dot,
 .card.tone-proof .card-type-dot {
-  background: var(--gold);
-  /* Proof: a plain dot, the simplest marker. */
   border-radius: 50%;
   clip-path: none;
 }
 
+/* Impact: a diamond, the punchiest shape here. */
 .card.cat-orange .card-type-dot,
 .card.tone-impact .card-type-dot {
-  background: var(--orange);
-  /* Impact: a diamond, the punchiest shape here. */
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   border-radius: 0;
 }
 
+/* Wildcard: a star, sized up a little because a star at the same box as the
+   other shapes reads thinner than they do. */
 .card.cat-lime .card-type-dot,
 .card.tone-wild .card-type-dot {
-  background: var(--lime);
-  /* Wildcard: a star. It gets a size bump because a star at the same box as the
-     other shapes reads thinner than they do. */
   clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   border-radius: 0;
   width: 0.92rem;
@@ -839,23 +841,18 @@
   --card-glow: #e66b98;
 }
 
-.card[class*="set-"] {
-  border-color: var(--card-route);
-}
-
 .set-row[class*="set-"] {
   border-left: 4px solid var(--card-glow);
   padding-left: 0.45rem;
   background: color-mix(in srgb, var(--surface), var(--card-glow) 8%);
 }
 
-/* Wildcards are lime like every other type, so the card keeps one colour. The
-   "fills any slot" fact is carried by the card's text and its tooltip rather than
-   by a rainbow border, which was a second, competing colour signal. */
+/* Wildcards fit any route, so they carry no route colour. --card-cat matches
+   --card-route so the fill, the top band and the border all agree; setting it to a
+   near-white surface made the top band invisible. */
 .card.wildcard-card {
-  /* A wildcard fits any route, so it carries no route colour. */
-  --card-cat: var(--surface);
-  --card-route: color-mix(in srgb, var(--border), var(--ink) 18%);
+  --card-route: color-mix(in srgb, var(--border), var(--ink) 22%);
+  --card-cat: color-mix(in srgb, var(--surface), var(--ink) 6%);
 }
 
 .card.wildcard-card::before {
@@ -1520,7 +1517,9 @@
 }
 
 .card-preview {
-  --card-glow: var(--cyan);
+  /* Deliberately does NOT re-declare --card-glow. Doing so pinned the top band to
+     cyan while the border resolved from --card-route, so the band and the frame
+     disagreed. Inheriting the base chain keeps both on the route colour. */
   width: 100%;
   min-height: min(420px, calc(100vh - 2rem));
   max-height: calc(100vh - 2rem);
@@ -1537,22 +1536,6 @@
   align-items: center;
   text-align: center;
   gap: 0.35rem;
-}
-
-.card-preview.tone-setup {
-  --card-glow: var(--cyan);
-}
-
-.card-preview.tone-action {
-  --card-glow: var(--pink);
-}
-
-.card-preview.tone-proof {
-  --card-glow: var(--gold);
-}
-
-.card-preview.tone-wild {
-  --card-glow: var(--lime);
 }
 
 .card-preview .card-art {
@@ -1810,12 +1793,18 @@
   }
 }
 
-/* Route-flexible (Any route) cards get a distinct border so they stand out from route-specific cards. */
+/* Any-route cards belong to no route, so they must not borrow a route colour.
+   --accent reads as a brown that sits next to the Live Project Brief orange, and
+   it was only setting the border, leaving these cards with a coloured fill and a
+   differently coloured edge. Both channels now go neutral, matching wildcards,
+   and they are marked by a dashed edge instead of a hue. */
 .card.route-flexible-card {
-  --card-route: var(--accent);
-  border-color: var(--accent);
+  --card-route: color-mix(in srgb, var(--border), var(--ink) 22%);
+  --card-cat: color-mix(in srgb, var(--surface), var(--ink) 6%);
+  border-color: var(--card-route);
+  border-style: dashed;
   border-width: 2px;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 40%);
+  box-shadow: none;
 }
 
 .card .any-route {
@@ -1864,9 +1853,10 @@
 
 .rival-banked-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.3rem 0.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.55rem 0.5rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1881,15 +1871,28 @@
 
 .rival-set-tags {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
 .rival-banked-set {
-  padding: 0.15rem 0.4rem;
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.45rem 0.55rem;
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
   background: color-mix(in srgb, var(--accent), transparent 70%);
+}
+
+.rival-banked-set > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.35rem;
+  align-items: baseline;
+}
+
+.rival-banked-set small {
+  color: var(--ink-soft);
 }
 
 .rival-banked-set.taken {
@@ -2050,12 +2053,11 @@
   color: var(--gold) !important;
 }
 
-/* "Needed for this role" recolours the border only, so the card keeps showing its
-   type colour in the fill. */
+/* "Needed for this role" is marked with a gold ring, NOT a border colour. This rule
+   has the same specificity as the .card.set-* rules but comes later in the file, so
+   setting border-color here would beat every route colour. */
 .card.card-key-skill {
-  /* Ring only: recolouring would lose the route, which is now the card's colour. */
   box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold), transparent 55%);
-  border-color: var(--gold);
 }
 
 .preview-rolefit.key {
@@ -2689,6 +2691,10 @@ body {
 .tables .market {
   position: relative;
   min-height: 178px;
+  /* The market's cards are absolutely positioned and resolve against the padding
+     box, so this inset is what keeps the outer cards off the border. The panel
+     already contributes 10px; this is the extra the absolute layout needs. */
+  padding: 10px;
 }
 .tables .market.stacking { cursor: copying; }
 .tables .market .card { cursor: grab; }
@@ -3072,3 +3078,119 @@ body {
    .rail-subhead is shared with the other rail sections. */
 html[data-theme="light"] .card-types-head,
 .card-types-head { color: #000; font-weight: 700; }
+
+/* ===== Card stacking (opt-in) =====
+ * Stacking is off by default: the market and hand lay the cards out in an
+ * ordinary row and the panels scroll. The stacking rules below only apply once
+ * the setting is switched on, which adds .stacking-on to <html>.
+ */
+
+/* Off: the market and hand are single non-wrapping rows. Six cards fill the
+   width; any beyond that extend past the panel, which then scrolls sideways
+   rather than clipping them or stacking them. */
+html:not(.stacking-on) .tables .market,
+html:not(.stacking-on) .tables .hand {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 1rem;
+  min-height: 0;
+  /* The stacking rule adds an inset for absolutely positioned cards; the plain row
+     only needs the panel's own padding, so the extra is dropped here. */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.35rem;
+}
+html:not(.stacking-on) .tables .market .card,
+html:not(.stacking-on) .tables .hand .card {
+  position: relative;
+  flex: 0 0 auto;
+  /* FIXED: Gap in formula (1rem) now exactly matches the parent's gap property */
+  width: min(calc((100% - 5 * 1rem) / 6), 186px);
+  min-width: 0;
+  scroll-snap-align: start;
+  /* FIXED: Box-sizing ensures padding/borders don't alter the math */
+  box-sizing: border-box; 
+  margin: 10px 0;
+}
+
+html:not(.stacking-on) .tables .hand .card:nth-child(n + 7) {
+  margin-left: 0;
+  margin-top: 0;
+  z-index: auto;
+}
+/* With stacking off, both card panels scroll rather than compressing. */
+html:not(.stacking-on) .tables .panel {
+  overflow-y: auto;
+}
+
+/* Horizontal scrollbar, matching the rail's. */
+html:not(.stacking-on) .tables .market,
+html:not(.stacking-on) .tables .hand {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink-soft), transparent 45%) transparent;
+}
+html:not(.stacking-on) .tables .market::-webkit-scrollbar,
+html:not(.stacking-on) .tables .hand::-webkit-scrollbar { height: 9px; }
+html:not(.stacking-on) .tables .market::-webkit-scrollbar-track,
+html:not(.stacking-on) .tables .hand::-webkit-scrollbar-track { background: transparent; }
+html:not(.stacking-on) .tables .market::-webkit-scrollbar-thumb,
+html:not(.stacking-on) .tables .hand::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink-soft), transparent 50%);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+/* Tutorial replay, inside the How to Play modal */
+.learn-replay {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.learn-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* The Card types key is shape-only. Its markers are grey: a card's colour already
+   means "route", and five different hues here read as a second colour scheme. */
+.legend-shapes .dot {
+  background: color-mix(in srgb, var(--ink), transparent 35%);
+}
+
+/* End-of-round quiz: close control, footer note and a Close button. */
+.round-quiz { position: relative; padding-right: 2rem; }
+.quiz-close {
+  position: absolute;
+  top: -0.35rem;
+  right: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.quiz-close:hover { color: var(--accent); border-color: var(--accent); }
+.quiz-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.quiz-footer .quiz-note { margin: 0; }
+.quiz-footer .btn { align-self: flex-start; }

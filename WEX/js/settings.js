@@ -36,8 +36,10 @@
       sound: app.el.soundEnabled ? !app.el.soundEnabled.checked : true,
       animations: app.el.animationsEnabled ? !app.el.animationsEnabled.checked : false,
       autoDraw: app.el.autoDrawEnabled ? !app.el.autoDrawEnabled.checked : true,
-      // Not inverted: this box is ticked when the tutorial is switched on.
+      // Not inverted: these boxes are ticked when the feature is switched on.
       tutorial: app.el.tutorialEnabled ? app.el.tutorialEnabled.checked : true,
+      // Stacking is opt-in: off by default.
+      stacking: app.el.stackingEnabled ? app.el.stackingEnabled.checked : false,
     };
   }
 
@@ -51,7 +53,10 @@
     if (app.el.animationsEnabled) app.el.animationsEnabled.checked = !settings.animations;
     if (app.el.autoDrawEnabled) app.el.autoDrawEnabled.checked = !settings.autoDraw;
     if (app.el.tutorialEnabled) app.el.tutorialEnabled.checked = settings.tutorial !== false;
+    if (app.el.stackingEnabled) app.el.stackingEnabled.checked = settings.stacking === true;
     app.state.tutorialEnabled = settings.tutorial !== false;
+    app.state.stackingEnabled = settings.stacking === true;
+    applyCardStacking();
     app.state.soundEnabled = settings.sound;
     app.state.animationsEnabled = settings.animations;
     app.state.autoDrawEnabled = settings.autoDraw;
@@ -65,6 +70,12 @@
     if (app.el.settingsModal) app.el.settingsModal.classList.add('hidden');
   }
 
+  if (app.el.stackingEnabled) {
+    app.el.stackingEnabled.addEventListener('change', function () {
+      app.state.stackingEnabled = app.el.stackingEnabled.checked;
+      if (typeof app.applyCardStacking === 'function') app.applyCardStacking();
+    });
+  }
   if (app.el.settingsBtn) app.el.settingsBtn.addEventListener('click', openSettings);
   if (app.el.closeSettings) app.el.closeSettings.addEventListener('click', closeSettings);
   if (app.el.cancelSettings) app.el.cancelSettings.addEventListener('click', closeSettings);
@@ -81,6 +92,8 @@
       app.state.soundEnabled = settings.sound;
       app.state.animationsEnabled = settings.animations;
       app.state.autoDrawEnabled = settings.autoDraw;
+      app.state.stackingEnabled = settings.stacking;
+      if (typeof app.applyCardStacking === 'function') app.applyCardStacking();
       closeSettings();
     });
   }
