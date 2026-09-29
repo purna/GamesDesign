@@ -313,3 +313,19 @@
     .tutorial-btn,
     #tutorial-close { transition: none; }
 }
+
+/* A step that advances when its target is clicked says so, so the player knows the
+   click is the answer and not just an incidental interaction. */
+#tutorial-container[data-advance-on-click="true"] .tutorial-btn.primary {
+  background: color-mix(in srgb, var(--accent-primary), transparent 82%);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+#tutorial-container[data-advance-on-click="true"]::after {
+  content: "or click the highlighted item";
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: center;
+}

@@ -64,6 +64,7 @@
     app.state.soundEnabled = settings.sound;
     app.state.animationsEnabled = settings.animations;
     app.state.autoDrawEnabled = settings.autoDraw;
+    if (typeof app.applyCardAnimations === 'function') app.applyCardAnimations();
   };
 
   function openSettings() {

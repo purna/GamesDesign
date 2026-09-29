@@ -1063,11 +1063,6 @@
   font-size: 0.85rem;
 }
 
-.cv-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
 
 .cv-row strong {
   text-align: right;
@@ -2336,6 +2331,8 @@
    card. Pinning this to height:100% is what made the rows shorter than a card. */
 html,
 body {
+  /* min-height, not height: the page must still scroll when the board is taller
+     than the viewport. The rail is height-capped on its own instead. */
   min-height: 100%;
 }
 
@@ -2343,21 +2340,32 @@ body {
   display: flex;
   flex-direction: column;
 }
+/* Only the game locks the page scroll. The industry picker and setup screens are
+   normal flow and must still scroll if they are taller than the viewport. */
+body.game-active {
+  /* Scroll is allowed, so the board can extend below the fold. */
+  overflow: visible;
+}
 
 .container {
   display: flex;
   flex-direction: column;
   flex: 1;
+  /* min-height:0 lets the board shrink below its content, which is what keeps the
+     pinned action bar on screen on a short viewport. */
+  min-height: 0;
 }
 
 .game:not(.hidden) {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .board {
   flex: 1;
+  min-height: 0;
   display: grid;
   /* The right rail is a pull-out drawer, so the board is two columns and the
      play area gets the space it used to. */
@@ -2370,6 +2378,19 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  /* Never wider than its grid track, and never wider than this. */
+  max-width: 260px;
+  /* Sticky, so the rail stays in view while the page scrolls and the tabs, body and
+     action bar never separate.
+     A fixed height, not a max-height: with max-height the rail shrank to fit short
+     tabs, so the action bar sat at different heights depending on which tab was
+     open. .rail-body (flex:1) then scrolls between the tabs and the pinned bar. */
+  position: sticky;
+  top: 0;
+  /* Adjustable via --app-chrome in styles.css. Everything above the rail
+     (header plus page padding) is subtracted from the viewport. */
+  height: calc(100vh - var(--app-chrome, 10rem));
+  height: calc(100dvh - var(--app-chrome, 10rem));
   background: color-mix(in srgb, var(--surface), var(--bg) 50%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -2414,14 +2435,10 @@ body {
   outline-offset: -2px;
 }
 
-.rail-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
 
 .rail-panel {
   padding: 0.8rem 0.85rem 1rem;
+  min-height: 0;
 }
 
 .rail-panel[hidden] {
@@ -2464,10 +2481,12 @@ body {
   height: 100%;
 }
 
+/* No inner scroller: the Feed tab scrolls as one area, so the career log and the
+   completed-roles history below it are both reachable by scrolling the tab. */
 .rail-panel-feed .log {
   max-height: none;
-  height: 100%;
-  overflow-y: auto;
+  height: auto;
+  overflow: visible;
 }
 
 /* ============================================= */
@@ -2478,6 +2497,11 @@ body {
   top: 0;
   right: 0;
   bottom: 0;
+  /* Full height. It shares the .rail base, which now sets a height for the side
+     panel; on a fixed element an explicit height beats top/bottom, so without this
+     the drawer would stop short of the bottom of the screen. */
+  height: 100vh;
+  height: 100dvh;
   width: min(320px, 86vw);
   z-index: 260;
   border-radius: 0;
@@ -2557,6 +2581,7 @@ body {
 .board-main {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: 0.6rem;
 }
 
@@ -2677,7 +2702,7 @@ body {
    left over their neighbour instead. */
 .tables .hand {
   --card-gap: 0.5rem;
-  --card-max: 186px;
+  --card-max: 172px;
   /* One expression for the card width, used for both the card and its stack
      offset. A percentage in margin-left resolves against the same containing
      block as width, so the overlap stays exactly half the rendered card even
@@ -2793,19 +2818,45 @@ body {
   }
 }
 
-@media (max-width: 1000px) {
+@media (min-width: 1001px) {
+  /* Wide enough for both columns, so the toggle that opens the left rail as a drawer
+     is meaningless and is hidden. */
+  .rail-toggle { display: none; }
+}
 
-  /* Below this the two columns stop fitting, so stack and let the page scroll. */
+@media (max-width: 1000px) {
+  /* Below this the board is height-locked, so a stacked left rail would sit above the
+     fold with no way to reach it. It becomes a drawer instead, opened from the
+     header, mirroring the right-hand drawer. */
   .board {
     grid-template-columns: 1fr;
   }
 
-  .rail {
-   /* max-height: 340px;*/
+  .rail-left {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(320px, 88vw);
+    z-index: 270;
+    border-radius: 0;
+    border-left: 0;
+    border-top: 0;
+    border-bottom: 0;
+    box-shadow: 14px 0 40px rgba(0, 0, 0, 0.4);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.24s ease, visibility 0.24s ease;
+    /* The drawer is its own height, so the action bar is always reachable. */
+    max-height: 100dvh;
+  }
+  .rail-left.is-open {
+    transform: translateX(0);
+    visibility: visible;
   }
 
   .board-main {
-    min-height: 620px;
+    min-height: 0;
   }
 }
 
@@ -2907,8 +2958,8 @@ body {
    the page scrolls, without detaching from the panel it belongs to. */
 .rail-actions {
   flex: 0 0 auto;
-  position: sticky;
-  bottom: 0;
+  /* In normal flow: the rail above is already sticky, so this rides along with it. */
+  position: static;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -2925,8 +2976,32 @@ body {
 /* Custom scrollbar for the rail body, so the scroll affordance is visible and
    does not overlap the pinned bar. */
 .rail-body {
+  /* The single scroll area for every tab in this rail. overflow-x is hidden
+     explicitly: with overflow-y set, a visible overflow-x computes to auto and the
+     rail grew a sideways scrollbar instead of wrapping. */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--ink-soft), transparent 45%) transparent;
+}
+.rail-body::-webkit-scrollbar { width: 10px; }
+.rail-body::-webkit-scrollbar-track { background: transparent; }
+.rail-body::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink-soft), transparent 50%);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+.rail-body::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ink-soft), transparent 25%);
+  background-clip: content-box;
+}
+/* Rails sit side by side, so only the one under the pointer needs a visible bar. */
+.rail-body:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink-soft), transparent 45%);
+  background-clip: content-box;
 }
 
 .rail-body::-webkit-scrollbar {
@@ -3093,10 +3168,15 @@ html[data-theme="light"] .card-types-head,
    rather than clipping them or stacking them. */
 html:not(.stacking-on) .tables .market,
 html:not(.stacking-on) .tables .hand {
+  /* The gap lives in a variable because the card width formula below depends on it.
+     They were defined separately, drifted apart, and six cards overflowed. */
+  --card-gap: 1rem;
+  --card-count: 6;
+  --card-max: 172px;
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
-  gap: 1rem;
+  gap: var(--card-gap);
   min-height: 0;
   /* The stacking rule adds an inset for absolutely positioned cards; the plain row
      only needs the panel's own padding, so the extra is dropped here. */
@@ -3112,12 +3192,17 @@ html:not(.stacking-on) .tables .market .card,
 html:not(.stacking-on) .tables .hand .card {
   position: relative;
   flex: 0 0 auto;
-  /* FIXED: Gap in formula (1rem) now exactly matches the parent's gap property */
-  width: min(calc((100% - 5 * 1rem) / 6), 186px);
+  /* Six across: subtract the gaps between them, then cap so cards stay a sensible
+     size on a wide monitor instead of stretching. Derived from the same variables
+     the row uses, so the two can never disagree again. */
+  width: min(
+    calc((100% - (var(--card-count) - 1) * var(--card-gap)) / var(--card-count)),
+    var(--card-max)
+  );
   min-width: 0;
   scroll-snap-align: start;
-  /* FIXED: Box-sizing ensures padding/borders don't alter the math */
-  box-sizing: border-box; 
+  /* box-sizing so padding and borders cannot alter the width maths */
+  box-sizing: border-box;
   margin: 10px 0;
 }
 
@@ -3197,3 +3282,152 @@ html:not(.stacking-on) .tables .hand::-webkit-scrollbar-thumb {
 }
 .quiz-footer .quiz-note { margin: 0; }
 .quiz-footer .btn { align-self: flex-start; }
+
+/* Close control added by openModal(). Absolutely positioned so it clears whatever
+   content a modal renders, and given a real hit area for touch. */
+.modal-content { position: relative; }
+.modal-dismiss {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  z-index: 5;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.modal-dismiss:hover { color: var(--accent); border-color: var(--accent); }
+.modal-dismiss:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ============================================= */
+/* Card rows on narrow screens                     */
+/* ============================================= */
+/* Between 380px and 1280px the market and hand wrap into rows instead of scrolling
+   sideways, because a single scrolling row on a phone hides most of the hand.
+   Cards per row rises with the available width: 2, then 3, then 4. */
+@media (max-width: 1280px) {
+  html:not(.stacking-on) .tables .market,
+  html:not(.stacking-on) .tables .hand {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    overflow-y: auto;
+    row-gap: 0.35rem;
+  }
+  html:not(.stacking-on) .tables .market .card,
+  html:not(.stacking-on) .tables .hand .card {
+    width: calc((100% - 1rem) / 2);
+    max-width: none;
+  }
+}
+@media (min-width: 761px) and (max-width: 1280px) {
+  html:not(.stacking-on) .tables .market .card,
+  html:not(.stacking-on) .tables .hand .card {
+    width: calc((100% - 2rem) / 3);
+  }
+}
+@media (min-width: 1101px) and (max-width: 1280px) {
+  html:not(.stacking-on) .tables .market .card,
+  html:not(.stacking-on) .tables .hand .card {
+    width: calc((100% - 3rem) / 4);
+  }
+}
+@media (max-width: 380px) {
+  /* One card per row on the narrowest phones, so nothing is clipped. */
+  html:not(.stacking-on) .tables .market .card,
+  html:not(.stacking-on) .tables .hand .card {
+    width: 100%;
+  }
+}
+
+/* ============================================= */
+/* Left rail: nothing may force a sideways scroll */
+/* ============================================= */
+.rail,
+.rail-body,
+.rail-panel,
+.rail-panel * {
+  min-width: 0;
+  max-width: 100%;
+}
+.rail-body {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* Long identifiers can still push a flex row wide without this. */
+.rail-panel .set-row > *,
+.rail-panel .skill-line > *,
+.rail-panel .cv-row > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* Route and skill names wrap instead of being cut off. */
+.rail-panel .set-name,
+.rail-panel .skill-name,
+.rail-panel .skill-routes {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* ============================================= */
+/* Dealing animation                              */
+/* ============================================= */
+/* Cards arrive one at a time rather than appearing all at once. The delay comes from
+   --i, set per card by dealCards(), so there is no JS timer per card. */
+@keyframes dealIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.9) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dealInFromSide {
+  from {
+    opacity: 0;
+    transform: translateX(26px) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.market.is-dealing > .card {
+  animation: dealInFromSide 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+.hand.is-dealing > .card {
+  animation: dealIn 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  animation-delay: calc(500ms + var(--i, 0) * 55ms);
+}
+
+/* The hand is dealt after the market so the market reads as the source. */
+.hand.is-dealing > .card { animation-delay: calc(320ms + var(--i, 0) * 55ms); }
+
+/* Respect both the in-game toggle and the OS preference. */
+html.card-animations-off .market.is-dealing > .card,
+html.card-animations-off .hand.is-dealing > .card {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .market.is-dealing > .card,
+  .hand.is-dealing > .card {
+    animation: none;
+  }
+}
+
+/* The left rail's close control only appears when the rail is a drawer. */
+.rail-drawer-head { display: none; }
+@media (max-width: 1000px) {
+  .rail-drawer-head { display: flex; }
+}

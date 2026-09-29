@@ -70,17 +70,28 @@ const TUTORIAL_CONFIG = {
       id: 'set-status',
       target: '#setBuilderStatus',
       title: 'Building a set',
-      body: 'A set needs one card of EVERY required type, and all from the same route.\n\nBlock Placement needs 4 cards. Employer Visit needs 2. If your selection does not match, this panel tells you exactly what is missing.',
+      body: 'A set needs one card of EVERY required type, and all from the same route.\n\nThe Routes tab on the left is now open, listing what each one needs. If your selection does not match, this panel tells you exactly what is missing.',
       placement: 'top',
-      allowSkip: true
+      allowSkip: true,
+      tab: 'routes'
     },
     {
       id: 'rail-tabs',
       target: '#tabbtn-skills',
       title: 'The left rail',
-      body: 'Everything about the role lives here behind four tabs: Needs, Skills, Routes and CV.\n\nThe rail scrolls, but Bank, Apply and End stay pinned at the bottom so they can never be scrolled away.',
+      body: 'Everything about the role lives here behind four tabs: Needs, Skills, Routes and CV. Click through them as you go.\n\nThe rail scrolls, but Bank, Apply and End stay pinned at the bottom so they can never be scrolled away.',
       placement: 'right',
-      allowSkip: true
+      allowSkip: true,
+      advanceOnClick: true
+    },
+    {
+      id: 'open-routes',
+      target: '#tabbtn-routes',
+      title: 'Open the routes',
+      body: 'Click the Routes tab to see the Experience sets.\n\nEach one lists the card types it needs and how many. That is the list you build against for the rest of the round.',
+      placement: 'right',
+      allowSkip: true,
+      advanceOnClick: true
     },
     {
       id: 'players',

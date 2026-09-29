@@ -1,5 +1,18 @@
 /* ===== Tokens ===== */
 :root {
+  /* ---- RAIL HEIGHT KNOB ----
+   * The left rail is this tall, and its Bank / Apply / End turn buttons sit at the
+   * bottom of it, so they stay put when you switch tabs.
+   *
+   * To make the rail shorter or taller, change ONLY the value below. 100dvh is the
+   * full viewport height; --app-chrome is everything above the rail (header plus
+   * page padding), which is what the rail has to subtract.
+   *
+   * Shorter rail:  --app-chrome: 12rem;   (or any larger value)
+   * Taller rail:   --app-chrome: 8rem;
+   */
+  --app-chrome: 10rem;
+
   --bg: #101118;
   --surface: #191b26;
   --surface-raised: #202331;
@@ -2837,33 +2850,15 @@ body.simple-mode .settings-hint {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  max-height: 50vh;
-  overflow-y: auto;
-  /* Room for the thumb so it never sits on top of a row. */
+  /* No max-height or overflow here on purpose: .rail-body is the single scroll area
+     for every tab. A second scroller on this list gave nested scrollbars and made
+     the tab heights inconsistent with the CV and Routes tabs. */
   padding-right: 0.35rem;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--ink-soft), transparent 45%) transparent;
 }
 
-.skills-list::-webkit-scrollbar {
-  width: 10px;
-}
 
-.skills-list::-webkit-scrollbar-track {
-  background: transparent;
-}
 
-.skills-list::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--ink-soft), transparent 50%);
-  border: 3px solid transparent;
-  background-clip: content-box;
-  border-radius: 999px;
-}
 
-.skills-list::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--ink-soft), transparent 25%);
-  background-clip: content-box;
-}
 
 .skill-item {
   display: flex;
@@ -3101,21 +3096,54 @@ html.tooltips-off .rttr-tooltip {
  * visible text. These sit under their value rather than in a hover layer.
  */
 
-/* --- CV rows --- */
+/* --- CV rows: a compact line with an info toggle for the detail --- */
 .cv-row {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  gap: 0.2rem 0.5rem;
+  /* label, value, info button. The note spans all three on a row of its own below. */
+  grid-template-columns: 1fr auto auto;
+  justify-items: start;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border), transparent 45%);
 }
-.cv-row strong { text-align: right; }
+.cv-row:last-child { border-bottom: none; }
+.cv-row strong { text-align: right; font-variant-numeric: tabular-nums; }
+/* Shared info toggle, used by the CV rows and the Skills accordion. One style so the
+   two never drift; .cv-info and .skill-toggle remain as the JS hooks. */
+.info-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0.2rem;
+  cursor: pointer;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  opacity: 0.6;
+  transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.info-btn:hover { color: var(--accent); opacity: 1; }
+.info-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.info-btn.is-open,
+.info-btn[aria-expanded="true"] {
+  color: var(--accent);
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent), transparent 88%);
+}
 .cv-note {
   grid-column: 1 / -1;
-  margin: 0 0 0.15rem;
+  margin: 0.15rem 0 0.4rem;
   font-size: 0.62rem;
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--ink-soft);
+  padding-left: 0.5rem;
+  border-left: 2px solid color-mix(in srgb, var(--accent), transparent 55%);
 }
+.cv-note[hidden] { display: none; }
 
 /* --- Skill rows --- */
 .skills-list { gap: 0.5rem; }
@@ -3172,3 +3200,20 @@ html.tooltips-off .rttr-tooltip {
   letter-spacing: 0.04em;
 }
 .skill-detail-more { margin: 0.25rem 0 0; font-size: 0.6rem; color: var(--ink-soft); }
+
+/* --- Skills accordion ---
+ * One skill's route breakdown open at a time. The detail is hidden by default,
+ * so the tab is a short scannable list until the player asks for detail. */
+.skills-list .skill-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.skills-list .skill-line .skill-name { flex: 1; min-width: 0; }
+.skill-detail-wrap { margin-top: 0.35rem; }
+.skill-detail-wrap[hidden] { display: none; }
+.skills-list .skill-item.is-open { border-color: var(--accent); }
+.skills-list .skill-item.is-open .skill-detail-wrap {
+  border-left: 2px solid color-mix(in srgb, var(--accent), transparent 55%);
+  padding-left: 0.5rem;
+}

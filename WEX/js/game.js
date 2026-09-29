@@ -86,6 +86,16 @@ const el = {
   drawerCloseBtn: $('drawerCloseBtn'),
   drawerScrim: $('drawerScrim'),
   replayTutorial: $('replayTutorial'),
+  tutorialEnabled: $('tutorialEnabled'),
+  stackingEnabled: $('stackingEnabled'),
+  hallOfFame: $('hallOfFame'),
+  hofList: $('hofList'),
+  hofBackBtn: $('hofBackBtn'),
+  hofClearBtn: $('hofClearBtn'),
+  leftRail: $('leftRail'),
+  railBody: $('railBody'),
+  railToggle: $('railToggle'),
+  railCloseBtn: $('railCloseBtn'),
   tooltipsEnabled: $('tooltipsEnabled'),
   learnTutorialBtn: $('learnTutorialBtn'),
   helperToggle: $('helperToggle'),
@@ -582,6 +592,7 @@ function newGame(jobId) {
   startTurnTimer();
   render();
   persist();
+  dealCards();
   // The tutorial spotlights board elements, so it can only run once they exist.
   // maybeStart() is a no-op for anyone who has already seen this version.
   if (window.Tutorial && typeof Tutorial.maybeStart === 'function') Tutorial.maybeStart();
@@ -1247,9 +1258,25 @@ function endGame(winnerAgent) {
 
 /* ============================== Modal / toast ============================= */
 
-function openModal(html) {
+// Any modal can opt out of the built-in close control with { dismissible: false }.
+// Use that where the modal forces a decision (the hand limit) or already carries
+// its own (the round quiz).
+function openModal(html, opts) {
+  var dismissible = !(opts && opts.dismissible === false);
+  modalDismissible = dismissible;
   el.modalBody.innerHTML = html;
+  var closeBtn = null;
+  if (dismissible) {
+    closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'modal-dismiss';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    closeBtn.addEventListener('click', closeModal);
+    el.modalBody.appendChild(closeBtn);
+  }
   el.modalBack.classList.add('show');
+  if (closeBtn) closeBtn.focus();
 }
 function closeModal() {
   // During the round-three event, the modal is a required step before the bonus
@@ -1270,7 +1297,8 @@ if (el.cardPreview) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (el.rightRail && el.rightRail.classList.contains('is-open')) setDrawerOpen(false);
+  if (el.leftRail && el.leftRail.classList.contains('is-open')) { setRailOpen(false); return; }
+    if (el.rightRail && el.rightRail.classList.contains('is-open')) setDrawerOpen(false);
   else if (el.learnScreen && !el.learnScreen.classList.contains('hidden')) closeLearn();
   else closePreview();
 });
@@ -1371,7 +1399,7 @@ function renderSkills() {
     .sort();
   const allSkills = [req.skill, ...others.filter((s) => s !== req.skill)];
 
-  el.skillsRequired.innerHTML = allSkills.map((skill) => {
+  el.skillsRequired.innerHTML = allSkills.map((skill, i) => {
     const has = playerSkills.includes(skill);
     const isRequired = skill === req.skill;
     const cls = isRequired ? (has ? 'owned required' : 'needed required') : (has ? 'owned' : 'needed');
@@ -1399,14 +1427,50 @@ function renderSkills() {
       detail = `<p class="skill-detail-head">Get it by banking a set</p><ul class="skill-routes">${items.join('')}</ul>${more}`;
     }
 
+    // Collapsed by default: with every route breakdown open the tab was an
+    // overwhelming wall of text. One at a time, and only when asked for.
+    const detailId = 'skill-detail-' + i;
     return `<div class="skill-item ${cls}">
       <div class="skill-line">
         <span class="skill-check">${has ? '\u2713' : '\u25cb'}</span>
         <span class="skill-name">${escapeHtml(skill)}${isRequired ? ' <b class="required-tag">needed</b>' : ''}</span>
+        <button type="button" class="info-btn skill-toggle" aria-expanded="false" aria-controls="${detailId}"
+                aria-label="How do I get ${escapeHtml(skill)}?" title="How do I get ${escapeHtml(skill)}?">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        </button>
       </div>
-      ${detail}
+      <div class="skill-detail-wrap" id="${detailId}" hidden>${detail}</div>
     </div>`;
   }).join('');
+}
+
+// Accordion: opening one skill closes whichever was open, so the tab only ever
+// shows a single route breakdown. Delegated, because the list is re-rendered on
+// every render.
+function initSkillToggles() {
+  if (!el.skillsRequired || el.skillsRequired.dataset.togglesWired) return;
+  el.skillsRequired.dataset.togglesWired = '1';
+  el.skillsRequired.addEventListener('click', (event) => {
+    const btn = event.target.closest('.skill-toggle');
+    if (!btn) return;
+    const wrap = document.getElementById(btn.getAttribute('aria-controls'));
+    if (!wrap) return;
+    const open = wrap.hasAttribute('hidden');
+    // Close any other open skill first.
+    el.skillsRequired.querySelectorAll('.skill-detail-wrap').forEach((n) => {
+      if (n === wrap) return;
+      n.setAttribute('hidden', '');
+      const other = n.closest('.skill-item');
+      if (other) other.classList.remove('is-open');
+      const otherBtn = other && other.querySelector('.skill-toggle');
+      if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+    });
+    if (open) wrap.removeAttribute('hidden');
+    else wrap.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', String(open));
+    const item = btn.closest('.skill-item');
+    if (item) item.classList.toggle('is-open', open);
+  });
 }
 function renderJobNeeds() {
   const req = state.job.requirements;
@@ -2005,13 +2069,43 @@ function renderCV() {
       'An employer reference only comes from sustained work with an employer, so bank a Block Placement to earn one.'],
   ];
   // Built as elements rather than one HTML string, so each note is escaped on its own.
+  // The explanation is behind an info button rather than always-on text: with five
+  // rows of multi-line notes the tab became far too tall.
   el.cvStats.innerHTML = '';
-  rows.forEach(([label, value, note]) => {
-    const row = document.createElement('div');
-    row.className = 'cv-row';
-    row.innerHTML = '<span>' + escapeHtml(label) + '</span><strong>' + value + '</strong>'
-      + '<p class="cv-note">' + escapeHtml(note) + '</p>';
-    el.cvStats.appendChild(row);
+  rows.forEach(function (row, i) {
+    var label = row[0], value = row[1], note = row[2];
+    var noteId = 'cv-note-' + i;
+    var d = document.createElement('div');
+    d.className = 'cv-row';
+    d.innerHTML = '<span>' + escapeHtml(label) + '</span>'
+      + '<strong>' + value + '</strong>'
+      + '<button type="button" class="info-btn cv-info" aria-expanded="false" aria-controls="' + noteId + '"'
+      + ' aria-label="What does ' + escapeHtml(label) + ' mean?"'
+      + ' title="What does ' + escapeHtml(label) + ' mean?">'
+      + '<i class="fa-solid fa-circle-info" aria-hidden="true"></i></button>'
+      + '<p class="cv-note" id="' + noteId + '" hidden>' + escapeHtml(note) + '</p>';
+    el.cvStats.appendChild(d);
+  });
+}
+
+// Revealed by a click, not a hover: tooltips are off by default, so anything that
+// relies on hovering would be invisible to most players. Delegated once, because
+// renderControls rebuilds these rows on every render.
+function initCvInfo() {
+  if (!el.cvStats || el.cvStats.dataset.infoWired) return;
+  el.cvStats.dataset.infoWired = '1';
+  el.cvStats.addEventListener('click', function (event) {
+    var btn = event.target.closest ? event.target.closest('.cv-info') : null;
+    if (!btn) return;
+    var note = document.getElementById(btn.getAttribute('aria-controls'));
+    if (!note) return;
+    var open = note.hasAttribute('hidden');
+    if (open) note.removeAttribute('hidden');
+    else note.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', String(open));
+    btn.classList.toggle('is-open', open);
+    var row = btn.closest('.cv-row');
+    if (row) row.classList.toggle('is-open', open);
   });
 }
 
@@ -2257,6 +2351,77 @@ function closeLearn() {
   else showOnlyPanel(el.game);
 }
 
+// Applies the saved theme. settings.js calls this through app.
+function applyTheme(theme) {
+  if (document.documentElement) {
+    document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
+  }
+  if (el.themeToggle) {
+    el.themeToggle.setAttribute('aria-label', theme === 'light' ? 'Switch to night mode' : 'Switch to day mode');
+    el.themeToggle.title = theme === 'light' ? 'Switch to night mode' : 'Switch to day mode';
+  }
+}
+
+function initTheme() {
+  var s = window.RTTR ? RTTR.getSettings() : {};
+  applyTheme(s.theme === 'light' ? 'light' : 'dark');
+  if (el.themeToggle) {
+    el.themeToggle.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      var s2 = window.RTTR ? RTTR.getSettings() : {};
+      s2.theme = current;
+      if (window.RTTR) RTTR.saveSettings(s2);
+      applyTheme(current);
+    });
+  }
+}
+
+// Card animations follow the in-game setting AND the OS preference.
+function cardAnimationsEnabled() {
+  if (window.app && app.state && app.state.animationsEnabled === false) return false;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  return true;
+}
+
+function applyCardAnimations() {
+  if (document.documentElement) {
+    document.documentElement.classList.toggle('card-animations-off', !cardAnimationsEnabled());
+  }
+}
+
+
+// Deals the opening cards: the market arrives first, then the hand, one card at a
+// time. The stagger is CSS (--i per card) rather than a timer per card, so a slow
+// or backgrounded tab cannot leave cards stuck mid-animation.
+function dealCards(options) {
+  var opts = options || {};
+  if (!cardAnimationsEnabled()) return;
+
+  var panels = [];
+  if (opts.market !== false && el.market) panels.push(el.market);
+  if (opts.hand !== false && el.hand) panels.push(el.hand);
+
+  panels.forEach(function (panel) {
+    var cards = Array.prototype.slice.call(panel.querySelectorAll(':scope > .card'));
+    cards.forEach(function (card, i) { card.style.setProperty('--i', String(i)); });
+    panel.classList.add('is-dealing');
+  });
+  if (!panels.length) return;
+
+  var last = panels[panels.length - 1];
+  var count = last.querySelectorAll(':scope > .card').length;
+  var settle = 320 + count * 55 + 400;
+  if (dealCards._t) clearTimeout(dealCards._t);
+  dealCards._t = setTimeout(function () {
+    panels.forEach(function (p) { p.classList.remove('is-dealing'); });
+  }, settle);
+}
+
+app.applyTheme = applyTheme;
+app.initTheme = initTheme;
+app.applyCardAnimations = applyCardAnimations;
+app.dealCards = dealCards;
+app.openRail = setRailOpen;
 app.openLearn = openLearn;
 app.applyCardStacking = applyCardStacking;
 app.setTooltipsEnabled = setHelperHintsVisible;
@@ -2464,7 +2629,9 @@ function showOnlyPanel(panel) {
   if (el.learnScreen) el.learnScreen.classList.remove('open');
   document.body.classList.remove('modal-open');
   if (panel) panel.classList.remove('hidden');
-  setHeaderMetaVisible(panel === el.game);
+  var inGame = panel === el.game;
+  setHeaderMetaVisible(inGame);
+  if (!inGame) setRailOpen(false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2506,7 +2673,28 @@ function setDrawerOpen(open) {
   drawerReturnFocus = open;
 }
 
+// Below 1000px the left rail becomes a drawer, because the board is height-locked
+// and a stacked column would put the rail above the fold with no way to reach it.
+function setRailOpen(open) {
+  var rail = el.leftRail;
+  if (!rail) return;
+  rail.classList.toggle('is-open', open);
+  if (el.railToggle) {
+    el.railToggle.setAttribute('aria-expanded', String(open));
+    var label = open ? 'Hide job information' : 'Show job information';
+    el.railToggle.setAttribute('aria-label', label);
+    el.railToggle.title = label;
+  }
+  if (open && el.railBody) el.railBody.scrollTop = 0;
+}
+
 function initDrawer() {
+  if (el.railToggle) {
+    el.railToggle.addEventListener('click', function () {
+      setRailOpen(!el.leftRail.classList.contains('is-open'));
+    });
+  }
+  if (el.railCloseBtn) el.railCloseBtn.addEventListener('click', function () { setRailOpen(false); });
   if (el.drawerBtn) el.drawerBtn.addEventListener('click', () => setDrawerOpen(!el.rightRail.classList.contains('is-open')));
   if (el.drawerCloseBtn) el.drawerCloseBtn.addEventListener('click', () => setDrawerOpen(false));
   if (el.drawerScrim) el.drawerScrim.addEventListener('click', () => setDrawerOpen(false));
@@ -2687,6 +2875,8 @@ if (el.signInBtn) {
   // markup that is added later.
   if (window.Tooltip && typeof Tooltip.attach === 'function') Tooltip.attach();
   applyCardStacking();
+  initCvInfo();
+  initSkillToggles();
 })();
 
 // Registered here rather than in js/app.js, which index.html does not load. A worker

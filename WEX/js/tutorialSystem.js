@@ -87,6 +87,20 @@
       parts.dots.appendChild(dot);
     });
 
+    // advanceOnClick was documented in the config but never wired up. This runs in
+    // the capture phase so it sees the click before the target's own handler, then
+    // defers the advance so the element still performs its own action (opening a
+    // tab, for instance) before the tutorial moves on.
+    document.addEventListener('click', function (e) {
+      if (!active) return;
+      var step = currentStep();
+      if (!step || !step.advanceOnClick || !step.target) return;
+      var el;
+      try { el = document.querySelector(step.target); } catch (err) { return; }
+      if (!el || !(e.target === el || el.contains(e.target))) return;
+      setTimeout(function () { if (active) go(1); }, 0);
+    }, true);
+
     root.addEventListener('click', function (e) {
       if (e.target.hasAttribute && e.target.hasAttribute('data-tutorial-skip')) { end(true); return; }
       if (e.target.hasAttribute && e.target.hasAttribute('data-tutorial-back')) { go(-1); return; }
@@ -229,7 +243,14 @@
 
     var last = index === steps.length - 1;
     if (parts.back) parts.back.disabled = index === 0;
-    if (parts.next) parts.next.textContent = last ? 'Start playing' : 'Next';
+    // Flagged so the stylesheet can tell the player that clicking the target is the
+    // intended way forward.
+    panel.setAttribute('data-advance-on-click', step.advanceOnClick ? 'true' : 'false');
+    if (parts.next) {
+      parts.next.textContent = step.advanceOnClick
+        ? 'Skip this step'
+        : (last ? 'Start playing' : 'Next');
+    }
     // A step that refuses Skip hides the close button too, or it would leak.
     var close = panel.querySelector('#tutorial-close');
     if (close) close.hidden = step.allowSkip === false;
