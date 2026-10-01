@@ -1475,17 +1475,45 @@ function initSkillToggles() {
 function renderJobNeeds() {
   const req = state.job.requirements;
   const cv = agentCV(state.player);
-  const line = (ok, text, subtext, extraClass) => `<span class="need ${ok ? 'met' : ''} ${extraClass || ''}">${ok ? '✓' : '•'} ${text}${subtext ? '<small>' + subtext + '</small>' : ''}</span>`;
   const hasSkill = state.player.skills.includes(req.skill);
   const skillCards = DATA.cards.filter((c) => cardGrantsAny(c, (s) => s === req.skill));
   const skillHint = hasSkill ? '' : skillCards.length ? `Includes: ${skillCards.slice(0, 3).map((c) => `"${c.name}"`).join(', ')}` : '';
-  const skillClass = hasSkill ? 'met' : 'skill-needed';
-  el.jobNeeds.innerHTML = [
-    line(cv.experience >= minimumExperienceForJob(state.job), `${cv.experience}/${minimumExperienceForJob(state.job)} completed sets`),
-    line(completedJobSetTypes(state.player, state.job).size >= REQUIRED_SET_VARIETY, `${completedJobSetTypes(state.player, state.job).size}/${REQUIRED_SET_VARIETY} role-fit set types`),
-    line(cv.evidence >= req.evidence, `${req.evidence} evidence`),
-    line(hasSkill, `★ Skill: ${req.skill}`, skillHint, skillClass),
-  ].join('');
+  const fitTypes = completedJobSetTypes(state.player, state.job).size;
+  const fitTypesNeeded = REQUIRED_SET_VARIETY;
+  const setsDone = cv.experience;
+  const setsNeeded = minimumExperienceForJob(state.job);
+  const evidenceDone = cv.evidence;
+  const evidenceNeeded = req.evidence;
+
+  const pill = (label, done, needed, met, subtext, tooltip) => {
+    const pct = Math.min(100, Math.round((done / needed) * 100));
+    const tip = tooltip ? ` data-tip="${tooltip}"` : '';
+    return `
+      <div class="need-pill${met ? ' met' : ''}"${tip}>
+        <span class="pill-label">${label}</span>
+        <div class="pill-bar">
+          <div class="pill-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="pill-count">${done}/${needed}</span>
+        ${subtext ? `<small class="pill-sub">${subtext}</small>` : ''}
+      </div>
+    `;
+  };
+
+  const setsTooltip = 'Complete experience sets by banking cards. Each set gives you CV experience and evidence.';
+  const routesTooltip = 'Your target job recommends specific experience routes (e.g., Placement, Brief). Only completed sets from those routes count. You need ' + REQUIRED_SET_VARIETY + ' different routes.';
+  const evidenceTooltip = 'Evidence comes from completing sets and Proof cards. You need ' + evidenceNeeded + ' total.';
+  const skillTooltip = hasSkill ? 'You have this skill!' : 'Get this skill by completing a set that grants it. ' + skillHint;
+
+  el.jobNeeds.innerHTML = `
+    <div class="need-pills">
+      ${pill('Completed Sets', setsDone, setsNeeded, setsDone >= setsNeeded, '', setsTooltip)}
+      ${pill('Experience Routes', fitTypes, fitTypesNeeded, fitTypes >= fitTypesNeeded, '', routesTooltip)}
+      ${pill('Evidence', evidenceDone, evidenceNeeded, evidenceDone >= evidenceNeeded, '', evidenceTooltip)}
+      ${pill(`Skill: ${req.skill}`, hasSkill ? 1 : 0, 1, hasSkill, skillHint, skillTooltip)}
+    </div>
+  `;
+  if (window.Tooltip) window.Tooltip.scan(el.jobNeeds);
 }
 
 function renderTurnBar() {

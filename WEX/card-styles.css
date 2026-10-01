@@ -444,8 +444,85 @@
   color: var(--ink-soft);
   font-size: 0.62rem;
   font-weight: 400;
+  font-weight: 400;
   display: block;
   margin-top: 0.15rem;
+}
+
+/* Pill-shaped requirement indicators */
+.need-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+.need-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.need-pill.met {
+  border-color: var(--good);
+  background: color-mix(in srgb, var(--good), transparent 92%);
+}
+.need-pill[data-tip] { cursor: help; }
+.pill-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.pill-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.pill-count {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.need-pill.met .pill-count {
+  color: var(--good);
+}
+.pill-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.pill-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.need-pill.met .pill-fill {
+  background: var(--good);
+}
+.pill-sub {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.6rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+@media (max-width: 600px) {
+  .pill-label { font-size: 0.6rem; }
+  .pill-count { font-size: 0.6rem; }
+  .pill-sub { font-size: 0.55rem; }
 }
 
 .guide {
@@ -2636,14 +2713,25 @@ body.game-active {
 /* Market and hand sit side by side so the play area is one screen tall. */
 .tables {
   flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   /* Rows, not columns: one column so the market sits above your hand, with each
      spanning the full play-area width. */
   grid-template-columns: minmax(0, 1fr);
-  /* Rows are at least as tall as the cards they hold, and share any spare
-     height. This is what makes the container match the cards inside it. */
-  grid-template-rows: minmax(auto, 1fr) minmax(auto, 1fr);
+  /* Rows fit the cards they hold rather than absorbing every spare pixel, which on
+     a tall display stretched the panels and the cards inside them. */
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.6rem;
+}
+
+/* Cards never grow past a natural size, however much room the row has, but they
+ * still stretch to the tallest card in their row. align-self:start here would size
+ * each card to its own text, so the market and hand cards would end up different
+ * heights. */
+.tables .panel .card,
+.tables .card {
+  max-height: var(--card-max-height, 15rem);
+  align-self: stretch;
 }
 
 .tables .table {
@@ -2754,7 +2842,6 @@ body.game-active {
      monitor, and the clamp stops them going below the six-across size. */
   width: var(--hand-card-w);
   min-width: 0;
-  min-height: 150px;
   align-self: stretch;
 }
 
@@ -3173,6 +3260,7 @@ html:not(.stacking-on) .tables .hand {
   --card-gap: 1rem;
   --card-count: 6;
   --card-max: 172px;
+  --card-max-wide: 172px;
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
@@ -3430,4 +3518,43 @@ html.card-animations-off .hand.is-dealing > .card {
 .rail-drawer-head { display: none; }
 @media (max-width: 1000px) {
   .rail-drawer-head { display: flex; }
+}
+
+/* ============================================= */
+/* Large displays                                    */
+/* ============================================= */
+/* On a 4K screen there is far more room than six cards need, so rather than
+ * stretching one row of cards to fill it, each container is given room for two
+ * rows. The cards themselves keep their natural size (see --card-max-height). */
+@media (min-width: 1800px), (min-height: 1100px) {
+  :root {
+    --card-max-height: 17rem;
+  }
+  .tables {
+    /* Two card rows per container, plus the gap, so 12 cards would sit comfortably
+     without the row growing the cards. */
+    grid-auto-rows: auto;
+    align-content: start;
+  }
+  .tables .table {
+    min-height: calc(2 * var(--card-max-height) + 3rem);
+  }
+  .tables .panel {
+    align-content: start;
+  }
+}
+
+/* On a very large board the six-across cap leaves the row mostly empty, so let the
+ * cards grow with the extra width. Adjust --card-max-wide to taste. */
+@media (min-width: 1900px) {
+  html:not(.stacking-on) .tables .market,
+  html:not(.stacking-on) .tables .hand { --card-max: 210px; }
+}
+@media (min-width: 2400px) {
+  html:not(.stacking-on) .tables .market,
+  html:not(.stacking-on) .tables .hand { --card-max: 250px; }
+}
+@media (min-width: 3000px) {
+  html:not(.stacking-on) .tables .market,
+  html:not(.stacking-on) .tables .hand { --card-max: 300px; }
 }

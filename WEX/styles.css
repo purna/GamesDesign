@@ -1,4 +1,13 @@
 /* ===== Tokens ===== */
+/* ---- PAGE WIDTH ----
+ * The page is capped so the board stays readable on a laptop. On a large display
+ * that cap would leave a narrow column in the middle of the screen, so it steps up
+ * with the viewport. Widen these values if you want the board to grow faster.
+ */
+@media (min-width: 1900px) { .container { max-width: 1900px; } }
+@media (min-width: 2400px) { .container { max-width: 2400px; } }
+@media (min-width: 3000px) { .container { max-width: 3000px; } }
+
 :root {
   /* ---- RAIL HEIGHT KNOB ----
    * The left rail is this tall, and its Bank / Apply / End turn buttons sit at the
