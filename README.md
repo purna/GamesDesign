@@ -64,7 +64,7 @@ For reflection outcomes, retain evidence of a next step being acted on, not just
 
 - [Last Man Standing repository](https://github.com/purna/last-man-standing/) and [hosted app](https://last-man-standing-71958.web.app).
 - [Last Man Standing Firebase console](https://console.firebase.google.com/project/last-man-standing-71958/overview) — staff administration; requires authorised access.
-- [Voxel Forge — previously listed hosted resource](https://purna.github.io/GamesDesign/voxel-forge/) — its source folder is not present in this checkout; retained as an external/legacy link rather than a current local resource.
+- [Voxel Forge](https://purna.github.io/Voxel-Forge/) — external hosted resource.
 
 ## Maintainer notes
 
