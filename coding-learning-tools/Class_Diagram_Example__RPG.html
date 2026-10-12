@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Class Diagram Example · RPG Character</title>
+<style>
+:root{--bg:#0B0F1A;--card:#151B2E;--bd:#2c3552;--cy:#00E5FF;--pk:#FF2E88;--li:#B6FF3B;--am:#FFC83D;--mu:#9AA4BF;--tx:#DDE3F2;--hd:#fff;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);font-size:100%}
+:root[data-theme=day]{--bg:#f8fafc;--card:#fff;--bd:#94a3b8;--cy:#0e7490;--pk:#be185d;--li:#4d7c0f;--am:#b45309;--mu:#475569;--tx:#0f172a;--hd:#0f172a;color-scheme:light}
+:root[data-theme=contrast]{--bg:#000;--card:#000;--bd:#ff0;--cy:#ff0;--pk:#f6c;--li:#0f6;--am:#ff0;--mu:#ff0;--tx:#fff;--hd:#fff}
+*{box-sizing:border-box}html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--tx);font:1rem/1.45 Calibri,Arial,sans-serif}
+body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS",Verdana,sans-serif!important}
+:focus-visible{outline:3px solid var(--am)!important;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:var(--cy);color:var(--bg);padding:10px 16px;z-index:9;font-weight:700}.skip:focus{left:8px;top:8px}
+.a11y{background:var(--card);border-bottom:2px solid var(--bd);padding:8px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.a11y span{font-size:.75rem;letter-spacing:2px;font-weight:700;color:var(--mu);text-transform:uppercase}
+button{font:700 .9375rem "Trebuchet MS",Arial,sans-serif;border:1.5px solid var(--cy);border-radius:6px;padding:6px 12px;min-height:2.75rem;cursor:pointer;background:transparent;color:var(--cy);text-align:left}
+.a11y button{min-height:2rem;font-size:.8125rem;padding:2px 10px;color:var(--tx);border-color:var(--bd)}
+button[aria-pressed=true]{background:var(--cy);color:var(--bg);border-color:var(--cy)}
+header,main{max-width:1000px;margin:0 auto;padding:0 20px}header{padding-top:20px}main{padding-bottom:40px}
+.tag{display:inline-block;background:var(--li);color:var(--bg);font-weight:700;letter-spacing:2px;font-size:.75rem;padding:4px 12px}
+h1{font:700 1.875rem "Trebuchet MS",Arial,sans-serif;color:var(--hd);margin:10px 0 2px}.sub{color:var(--mu);font-style:italic;margin:0 0 12px}
+h2{font:700 1.25rem "Trebuchet MS",Arial,sans-serif;color:var(--hd);margin:0 0 6px}
+.panel{background:var(--card);border:1.5px solid var(--bd);border-left:6px solid var(--li);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media(min-width:820px){.wrap{grid-template-columns:230px minmax(0,1fr)}}
+.list{display:flex;flex-direction:column;gap:8px}.list button[aria-pressed=true]{background:var(--am);border-color:var(--am)}
+.dia{overflow-x:auto}svg{width:100%;min-width:560px;height:auto;display:block}
+svg rect.b{fill:var(--bg);stroke:var(--cy);stroke-width:2}svg rect.h{fill:var(--cy)}
+svg text{fill:var(--tx);font:13px Consolas,"Courier New",monospace}svg text.n{fill:var(--bg);font:700 14px "Trebuchet MS",Arial,sans-serif}
+svg line.s{stroke:var(--cy);stroke-width:1.5}
+svg .ln{stroke:var(--tx);stroke-width:2;fill:none}svg .fill{fill:var(--tx);stroke:var(--tx);stroke-width:2}svg .hol{fill:var(--card);stroke:var(--tx);stroke-width:2}
+svg text.m{fill:var(--pk);font-weight:700}
+svg .hl.ln,svg .hl.fill,svg .hl.hol{stroke:var(--am);stroke-width:4}svg .hl.fill{fill:var(--am)}
+svg text.hl{fill:var(--am);font-weight:700}svg rect.b.hl{stroke:var(--am);stroke-width:4}svg rect.h.hl{fill:var(--am)}
+#live{min-height:1.5em;color:var(--li);font-weight:700;margin:8px 0 0}
+ul{margin:6px 0 0;padding-left:1.2rem}li{margin:3px 0}
+.sel{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}.sel button{min-height:2.25rem;padding:2px 10px;font-size:.8125rem}.sel button[aria-pressed=true]{background:var(--li);border-color:var(--li)}
+#code{background:var(--bg);border:1.5px solid var(--bd);border-radius:6px;padding:8px 0;overflow-x:auto}
+.cl{display:block;width:100%;min-height:0;border:0;border-radius:0;padding:0 12px;font:13px/1.6 Consolas,"Courier New",monospace;color:var(--tx);white-space:pre;text-align:left;background:transparent}
+div.cl{color:var(--mu)}button.cl:hover{background:var(--bd)}.cl.hl,button.cl.hl{background:var(--am);color:var(--bg)}
+.cp{margin-top:10px;min-height:2rem;font-size:.8125rem}#ec{margin:10px 0 0;border-top:1px dashed var(--bd);padding-top:8px}#ec b{color:var(--li)}
+.tools select{font:inherit;background:var(--card);color:var(--tx);border:1.5px solid var(--bd);border-radius:6px;padding:8px;max-width:100%;min-height:2.75rem}.tools label{align-self:center}button:disabled{opacity:.55;cursor:default}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}.add{min-height:2rem;font-size:.8125rem;padding:2px 10px}
+.bgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}@media(min-width:900px){.bgrid{grid-template-columns:minmax(0,370px) minmax(0,1fr)}}
+.bc{border:1.5px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:10px;background:var(--bg)}
+.bc h3{font:700 .75rem "Trebuchet MS",Arial,sans-serif;letter-spacing:1px;color:var(--mu);text-transform:uppercase;margin:10px 0 2px}
+.r{display:grid;grid-template-columns:5.2rem minmax(0,1fr) minmax(0,.7fr) 2.25rem;gap:4px;margin:4px 0}.r.l{grid-template-columns:7.5rem minmax(0,1fr) 4.2rem 2.25rem}.r.h{grid-template-columns:minmax(0,1fr) 2.25rem}
+.bc select,.bc input{font:.875rem Consolas,"Courier New",monospace;background:var(--card);color:var(--tx);border:1.5px solid var(--bd);border-radius:6px;min-height:2.25rem;padding:2px 6px;min-width:0;width:100%}
+.bc input:first-child{font-weight:700}.x{min-height:2.25rem;padding:0;text-align:center;color:var(--pk);border-color:var(--bd)}
+#bcode{background:var(--bg);border:1.5px solid var(--bd);border-radius:6px;padding:8px 12px;overflow:auto;font:13px/1.6 Consolas,"Courier New",monospace;margin:0;max-height:420px;color:var(--tx)}
+#bchk li{margin:4px 0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.reflection textarea{display:block;width:100%;min-height:120px;padding:12px;font:inherit;background:var(--bg);color:var(--tx);border:1.5px solid var(--bd);border-radius:8px}.reflection .starters{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.reflection.sw{border-left-color:var(--pk)}.reflection.nw{border-left-color:var(--li)}.reflection{border-left-color:var(--cy)}
+.lesson-menu{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.lesson-menu a{color:var(--tx);padding:10px;border:1px solid var(--bd);border-radius:8px;text-decoration:none}.lesson-menu a[aria-current=step]{border-color:var(--cy)}.lesson-menu a.done{border-color:var(--li)}
+.method{border:1px solid var(--bd);border-radius:8px;padding:8px;margin:8px 0}.method label{display:block;font-size:.85rem;color:var(--mu)}.method-head{display:grid;grid-template-columns:1fr 2fr;gap:8px}.parameter{display:grid;grid-template-columns:1fr 1fr 2.25rem;gap:6px;margin:6px 0}.method small{display:block;color:var(--mu);margin:6px 0}.step-complete{display:flex;align-items:center;gap:12px;margin:14px 0 20px;padding:16px 18px;background:var(--card);border:2px solid var(--bd);border-radius:10px;font-weight:700;line-height:1.5;cursor:pointer;min-height:60px}.step-complete:hover{border-color:var(--cy)}.step-complete:focus-within{outline:3px solid var(--am);outline-offset:3px}.step-complete:has(input:checked){border-color:var(--li);background:color-mix(in srgb,var(--li) 12%,var(--card))}.step-complete input{flex:0 0 24px;width:24px;height:24px;margin:0;accent-color:var(--li);cursor:pointer}section[hidden]{display:none} .lesson-actions{display:flex;gap:8px;margin-bottom:18px}
+.topic-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px}.info-button{border-radius:50%;padding:0;text-align:center;font-family:Georgia,serif;font-style:italic;font-size:1.2rem}.topic-row button[aria-pressed=true]{background:var(--am);border-color:var(--am);color:var(--bg)}dialog{width:min(640px,calc(100% - 32px));max-height:85vh;overflow:auto;background:var(--card);color:var(--tx);border:2px solid var(--cy);border-radius:14px;padding:24px}dialog::backdrop{background:rgb(0 0 0 / .65)}dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);padding:14px;border:1px solid var(--bd);border-radius:8px}dialog a{color:var(--cy)}.help-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+ #diagram-name,#diagram-switch,#diagram-download{display:block;width:100%;font:inherit;margin:8px 0 14px;padding:10px;background:var(--bg);color:var(--tx);border:1.5px solid var(--bd);border-radius:6px}</style></head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="a11y" role="toolbar" aria-label="Accessibility options"><span>Accessibility</span>
+<button type="button" id="th-day" aria-pressed="false">Day</button><button type="button" id="th-night" aria-pressed="false">Night</button><button type="button" id="th-contrast" aria-pressed="false">Contrast</button>
+<button type="button" id="fm" aria-label="Decrease text size">A-</button><button type="button" id="fp" aria-label="Increase text size">A+</button>
+<button type="button" id="dys" aria-pressed="false">Dyslexic font</button></div>
+<header><span class="tag">WORKED EXAMPLE · LESSON 6 · CLASS DIAGRAMS</span><h1>Class Diagram: RPG Character</h1><p class="sub">Pick a part from the list. It lights up in the diagram and in the C# code, and is explained below.</p></header>
+<main id="main" tabindex="-1">
+<nav class="lesson-menu" id="lesson-menu" aria-label="Your lesson steps"></nav>
+<p id="lesson-progress" role="status"></p>
+<section id="step-learn"><h2>1. Explore the worked example</h2><div class="wrap">
+ <nav class="list" id="list" aria-label="Parts of a class diagram"></nav>
+ <div>
+  <div class="panel dia"><svg id="svg" viewBox="0 0 720 500" role="img" aria-labelledby="st"><title id="st">UML class diagram. Party has Characters. Character owns an Inventory, which owns Items. Weapon and Equipment inherit from Item.</title></svg></div>
+  <div class="panel" aria-live="polite"><h2 id="eh">Start here</h2><p id="et">Choose "A class" to begin. Each class is a box with three parts: name, attributes (data) and methods (actions).</p><p id="ec"></p></div>
+  <div class="panel"><h2>The same diagram as C# code</h2><p class="sub" style="margin:0">Pick a class, then click any line of code to see which part of the diagram it comes from.</p><div class="sel" id="sel" role="group" aria-label="Choose a class"></div><div id="code" role="group" aria-label="C# code"></div><button type="button" class="cp" id="cp">Copy C#</button></div>
+ </div>
+</div>
+<label class="step-complete"><input type="checkbox" data-step="learn"> I have explored the diagram and its C# code</label></section>
+<section id="step-build"><div class="panel" id="build"><h2>Build your own class diagram</h2>
+<p>Start with + Add class, or choose an example from the list and select Create example. Add classes, then give each one attributes, methods and links. The diagram and the C# update as you type. Ask yourself: <b>is</b> a Goblin a Monster? Then inherit (is-a). Does a Player <b>have</b> Health? Then link it with composition (has-a).</p>
+<div class="panel"><label for="diagram-name">Diagram name</label><input id="diagram-name" maxlength="80"><label for="diagram-switch">Your saved diagrams</label><select id="diagram-switch"></select><button id="new-diagram" type="button">+ New diagram</button><p class="sub">Add as many classes as you need within each diagram. Each named diagram saves separately on this device.</p></div><div class="tools"><button type="button" class="add" id="b-add">+ Add class</button><label for="b-example">Start from an example</label><select id="b-example"><option value="">Choose an example…</option><option value="monster">Monster + variants · inheritance</option><option value="player">Player + components · composition and aggregation</option><option value="simple">Character · attributes, returns and parameters</option></select><button type="button" class="add" id="b-load-example" disabled>Create example</button><button type="button" class="add" id="b-clr">Clear all</button><button type="button" class="add" id="b-cp">Copy C#</button></div>
+<div class="bgrid"><div id="bed" role="group" aria-label="Class editor"></div>
+<div><div class="dia"><svg id="bsvg" viewBox="0 0 720 300" role="img" aria-label="Your class diagram"></svg></div>
+<h2 style="margin-top:12px">Checks</h2><ul id="bchk"></ul>
+<h2 style="margin-top:12px">Your C# code</h2><pre id="bcode" tabindex="0" aria-label="Generated C# code"></pre></div></div>
+<datalist id="types"></datalist></div>
+<label class="step-complete"><input type="checkbox" data-step="build"> I have built my classes, attributes, methods and links</label></section>
+<section id="step-review"><div class="panel"><h2>3. Review your own game (30 mins)</h2>
+<p>Use the builder above to draw a class diagram for your own game, for example a Player with Movement and Health, or a Monster with variants.</p>
+<ul><li>Give your Character class 4 to 6 attributes with types and visibility.</li><li>Add 2 to 3 methods, for example Move(), Attack(), Die().</li><li>Link it to at least one other class (Inventory, Weapon, Party...) and label the multiplicity.</li><li>Write the C# for your class: fields, a constructor if you used composition, and method stubs.</li><li>Check: did you use inheritance, and composition or aggregation, in the right place?</li></ul></div>
+<div class="panel"><h2>Download your work</h2><label for="diagram-download">Choose a diagram or all diagrams</label><select id="diagram-download"></select><div class="tools"><button data-download="svg">Download diagrams (SVG)</button><button data-download="html">Download illustrated report (HTML)</button><button data-download="md">Download Markdown</button><button data-download="json">Download editable backup</button></div><p class="sub">The illustrated report includes diagrams, C# code and reflection. SVG contains the diagrams; Markdown includes the diagrams as inline SVG along with code and reflection.</p><label for="diagram-import">Open an editable backup</label><input id="diagram-import" type="file" accept=".json"></div><button type="button" onclick="document.getElementById('b-cp').click()">Copy my C# code</button> <button type="button" onclick="document.getElementById('lesson-menu').querySelector('[data-index="1"]').click()">Return to my diagram</button><br><label class="step-complete"><input type="checkbox" data-step="review"> I have checked my diagram and copied my C# code</label></section>
+<section id="step-reflect"><h2>4. Reflect</h2><p>What? So What? Now What? Three questions, one next step. Write one to three sentences for each.</p><div id="reflection-fields"></div><p class="sub">Based on Borton, T. (1970) Reach, Touch and Teach; developed by Rolfe, Freshwater and Jasper (2001).</p><label class="step-complete"><input type="checkbox" data-step="reflect"> I have reflected on my work and chosen my next step</label></section>
+<div class="lesson-actions"><button type="button" id="lesson-prev">Previous step</button><button type="button" id="lesson-next">Next step</button></div>
+<div id="live" role="status" aria-live="polite"></div>
+</main>
+<dialog id="topic-help" aria-labelledby="topic-help-title"><div class="help-heading"><h2 id="topic-help-title"></h2><button type="button" id="topic-help-close">Close</button></div><p id="topic-help-meaning"></p><h3>Example</h3><pre id="topic-help-example"></pre><p id="topic-help-note"></p><h3>Learn more</h3><div id="topic-help-links"></div></dialog>
+<script>
+const $=id=>document.getElementById(id),NS="http://www.w3.org/2000/svg";
+const PARTS=[
+{k:"class",t:"A class",x:"A class is a blueprint for one kind of thing in your game. The box has a name at the top, attributes in the middle and methods at the bottom."},
+{k:"attr",t:"Attributes",x:"Attributes are the data a class holds, written as name: type. Character has name, hp, mp, level and inventory. Types here are string, int and Inventory."},
+{k:"meth",t:"Methods",x:"Methods are what the class can do, written as Name(): returnType. Character can Move(), Attack() and Die(). Return type void means it returns nothing."},
+{k:"vis",t:"Visibility + and -",x:"+ means public: other classes can use it. - means private: only this class can. Die() is private because the game, not another class, decides when a Character dies."},
+{k:"inh",t:"Inheritance",x:"A hollow triangle points to the parent class. Weapon and Equipment are kinds of Item, so they inherit price, rarity, EquipItem() and DropItem() and add their own."},
+{k:"comp",t:"Composition",x:"A filled diamond sits next to the owner. A Character owns its Inventory, and an Inventory owns its Items. Delete the owner and the parts go with it."},
+{k:"agg",t:"Aggregation",x:"An open diamond means a weaker 'has a'. A Party has Characters, but a Character still exists if the Party is disbanded."},
+{k:"mult",t:"Multiplicity",x:"Numbers on a line say how many. 1 is exactly one. 0..* is zero or more. 1..* is one or more. A Party has 1..* Characters, and an Inventory holds 0..* Items."}];
+const svg=$("svg");
+function el(n,a,txt,cls){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(cls)e.setAttribute("class",cls);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e}
+function box(x,y,w,name,at,me){let h=28+at.length*20+10+me.length*20+10;
+ el("rect",{x,y,width:w,height:h},null,"b k-class");el("rect",{x,y,width:w,height:28},null,"h k-class");
+ el("text",{x:x+w/2,y:y+19,"text-anchor":"middle"},name,"n");
+ let yy=y+28+20;at.forEach(r=>{el("text",{x:x+8,y:yy},r,"k-attr k-vis");yy+=20});
+ const ly=y+28+at.length*20+10;el("line",{x1:x,x2:x+w,y1:ly,y2:ly},null,"s");
+ yy=ly+20;me.forEach(r=>{el("text",{x:x+8,y:yy},r,"k-meth k-vis");yy+=20});return h}
+const MD=[
+{n:"Party",x:20,y:10,w:210,at:["-members: Character[]"],me:["+EnterParty(): bool"]},
+{n:"Character",x:20,y:150,w:230,at:["-name: string","-hp: int","-mp: int","-level: int","-inventory: Inventory"],me:["+Move(): void","+Attack(): void","-Die(): void"]},
+{n:"Weapon",p:"Item",x:300,y:10,w:180,at:["-range: int","-interval: int"],me:["+UpgradeWeapon(): bool"]},
+{n:"Equipment",p:"Item",x:520,y:10,w:180,at:["-type: string","-armor: int"],me:["+UpgradeEquipment(): bool"]},
+{n:"Item",x:470,y:170,w:220,at:["-price: int","-rarity: int"],me:["+EquipItem(): bool","+DropItem(): void"]},
+{n:"Inventory",x:470,y:360,w:220,at:["-items: Item[]","-size: int"],me:["+GetItem(): Item","+PutItem(): void"]}];
+MD.forEach(c=>box(c.x,c.y,c.w,c.n,c.at,c.me));
+/* inheritance */
+el("path",{d:"M390,118 V144 H610 V118 M580,144 V170"},null,"ln k-inh");
+el("polygon",{points:"580,170 572,154 588,154"},null,"hol k-inh");
+/* composition Item-Inventory, Character-Inventory */
+el("path",{d:"M580,298 V332"},null,"ln k-comp");el("polygon",{points:"580,360 572,346 580,332 588,346"},null,"fill k-comp");
+el("path",{d:"M272,320 H300 V424 H470"},null,"ln k-comp");el("polygon",{points:"250,320 261,313 272,320 261,327"},null,"fill k-comp");
+/* aggregation Party-Character */
+el("path",{d:"M120,126 V150"},null,"ln k-agg");el("polygon",{points:"120,98 112,112 120,126 128,112"},null,"hol k-agg");
+/* multiplicities */
+[["1",276,312],["1",444,418],["0..*",592,318],["1",592,354],["1",132,114],["1..*",132,144]].forEach(m=>el("text",{x:m[1],y:m[2]},m[0],"m k-mult"));
+const list=$("list");let on=null;
+const HELP={
+class:{example:'class Character {\n    private int health;\n}\nCharacter hero = new Character();',note:"Character is the blueprint; hero is one object made from it.",path:"fundamentals/types/classes",title:"Microsoft Learn: classes"},
+attr:{example:'UML: -health: int\nC#: private int health;\n\nUML: -name: string\nC#: private string name;',note:"Attributes describe the data an object stores. A type tells you what kind of value it holds. UML attributes become fields here; C# also uses the word attribute for a different feature.",path:"programming-guide/classes-and-structs/fields",title:"Microsoft Learn: fields"},
+meth:{example:'public int AddScore(int current, int bonus) {\n    return current + bonus;\n}\n\npublic void Move(int distance) {\n    Console.WriteLine(distance);\n}',note:"Parameters are inputs. int returns a whole number; void returns no value. Calling AddScore(5, 3) returns 8.",path:"programming-guide/classes-and-structs/methods",title:"Microsoft Learn: methods"},
+vis:{example:'+Attack(): void  → public void Attack()\n-health: int     → private int health\n#health: int     → protected int health',note:"Public members can be accessed from other code. Private members are accessible within their class. Protected members are also accessible in derived classes.",path:"programming-guide/classes-and-structs/access-modifiers",title:"Microsoft Learn: access modifiers"},
+inh:{example:'class Monster {\n    protected int health;\n}\nclass Goblin : Monster { }',note:"A Goblin is a Monster. In UML, the hollow triangle points to the parent class. Inheritance shares the parent's accessible members.",path:"fundamentals/object-oriented/inheritance",title:"Microsoft Learn: inheritance"},
+comp:{example:'class Character {\n    private Inventory inventory = new Inventory();\n}',note:"The filled diamond sits at the whole (Character). This design gives each character its own inventory. Composition models exclusive ownership of parts; a C# field alone does not enforce the UML lifetime rules.",uml:true},
+agg:{example:'class Party {\n    private List<Character> members;\n    public Party(List<Character> characters) {\n        members = characters;\n    }\n}',note:"The open diamond sits at Party. Characters are created elsewhere and can exist independently of the party. This is a shared has-a relationship.",uml:true},
+mult:{example:'1     exactly one\n0..1  optional: zero or one\n0..*  zero or more\n1..*  one or more\n\nInventory → Item: 0..*\nC#: List<Item> items;',note:"Read the number at an end as how many objects at that end can be linked to one object at the opposite end. List<T> permits many entries, but minimum counts need validation in your code.",uml:true}
+};
+PARTS.forEach(p=>{const row=document.createElement("div");row.className="topic-row";const b=document.createElement("button");b.type="button";b.textContent=p.t;b.dataset.topic=p.k;b.setAttribute("aria-pressed","false");b.onclick=()=>pick(p.k);const info=document.createElement("button");info.type="button";info.className="info-button";info.textContent="i";info.setAttribute("aria-label","About "+p.t);info.setAttribute("aria-haspopup","dialog");info.onclick=()=>{const h=HELP[p.k];$("topic-help-title").textContent=p.t;$("topic-help-meaning").textContent=p.x;$("topic-help-example").textContent=h.example;$("topic-help-note").textContent=h.note;const url=h.uml?"https://www.sparxsystems.eu/languages/uml/diagrams/classdiagram/":"https://learn.microsoft.com/en-us/dotnet/csharp/"+h.path;$("topic-help-links").innerHTML=`<a href="${url}" target="_blank" rel="noopener noreferrer">${h.title||"Sparx Systems: UML class diagrams"} (opens a new tab)</a>`;$("topic-help").showModal()};row.append(b,info);list.appendChild(row)});
+$("topic-help-close").onclick=()=>$("topic-help").close();
+const CS={class:"each box becomes a class. The name goes after the word class, and the attributes and methods go inside { }.",
+attr:"each attribute becomes a field. The type comes first: name: string becomes string name;",
+meth:"each method becomes a method with a body. The return type comes first: Move(): void becomes void Move(). A void method prints a message. A method with a return type returns a simple example value. Parameters are values passed into the method.",
+vis:"+ becomes public and - becomes private. Private fields can only be changed by the class's own methods.",
+inh:"inheritance uses a colon: class Weapon : Item. Weapon gets Item's members. Careful: private members are hidden from child classes, so use protected if Weapon needs them.",
+comp:"composition is a field, and the owner creates the part in its constructor (inventory = new Inventory();). The part never exists without its owner.",
+agg:"aggregation is also a field or list, but the objects are made elsewhere and added. They can outlive the Party.",
+mult:"1 is a single field. 0..* or 1..* becomes a List<T> (a collection of many)."};
+const REL={members:["agg mult","aggregation, 1..*"],inventory:["comp","composition"],items:["comp mult","composition, 0..*"]},PRI=["inh","comp","agg","mult","meth","attr","class","vis"];
+const parse=s=>{const m=s.match(/^([+-])(\w+)(\(\))?: (.+)$/);return{v:m[1]=="+"?"public":"private",n:m[2],t:m[4].replace(/(\w+)\[\]/,"List<$1>")}};
+function gen(c){const L=[],a=(t,k)=>L.push({t,k:k||""}),comp=[];
+ a("class "+c.n+(c.p?" : "+c.p:"")+" {",c.p?"class inh":"class");
+ c.at.map(parse).forEach(f=>{const r=REL[f.n]||["",""];a("    "+f.v+" "+f.t+" "+f.n+";"+(r[1]?" // "+r[1]:""),"attr vis "+r[0]);if(r[0].includes("comp"))comp.push(f)});
+ if(comp.length){a("");a("    public "+c.n+"() {","comp");comp.forEach(f=>a("        "+f.n+" = new "+f.t+"();","comp"));a("    }","comp")}
+ c.me.map(parse).forEach(m=>{a("");a("    "+m.v+" "+m.t+" "+m.n+"() {","meth vis");a("        "+methodBody(m.t,[]),"meth");a("    }","meth")});
+ a("}","class");return L}
+function methodBody(t,params){
+ if(t.endsWith("[]"))return "return new "+t.slice(0,-2)+"[0];";
+ if(t==="void")return 'Console.WriteLine("Method called.");';
+ const nums=params.filter(p=>p.t===t&&/^[A-Za-z_][A-Za-z0-9_]*$/.test(p.n));
+ if(["int","float","double","decimal","long"].includes(t)&&nums.length>=2)return "return "+nums.map(p=>p.n).join(" + ")+";";
+ const values={int:"0",float:"0f",double:"0.0",decimal:"0m",long:"0L",string:'"Example"',bool:"true"};
+ return "return "+(values[t]||"default("+t+")")+";";
+}
+let cur="Character",txt="";const sel=$("sel");
+[...MD.map(c=>c.n),"All"].forEach(n=>{const b=document.createElement("button");b.type="button";b.textContent=n;b.setAttribute("aria-pressed",n===cur);b.onclick=()=>{cur=n;[...sel.children].forEach(x=>x.setAttribute("aria-pressed",x===b));render()};sel.appendChild(b)});
+function render(){const code=$("code");code.textContent="";
+ let L=[{t:"using System;"},{t:"using System.Collections.Generic;"},{t:""}];
+ (cur=="All"?MD:MD.filter(c=>c.n==cur)).forEach((c,i)=>{if(i)L.push({t:""});L=L.concat(gen(c))});
+ txt=L.map(l=>l.t).join("\n");
+ L.forEach(l=>{let e;if(l.k){e=document.createElement("button");e.type="button";e.dataset.k=l.k;e.onclick=()=>pick(PRI.find(x=>l.k.split(" ").includes(x)))}else e=document.createElement("div");
+  e.className="cl";e.textContent=l.t||"\u00a0";code.appendChild(e)});shade()}
+function shade(){document.querySelectorAll("#code .cl").forEach(e=>e.classList.toggle("hl",!!on&&(e.dataset.k||"").split(" ").includes(on)))}
+function pick(k){on=k;const p=PARTS.find(x=>x.k===k);list.querySelectorAll("[data-topic]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.topic===k));
+ svg.querySelectorAll(".hl").forEach(e=>e.classList.remove("hl"));svg.querySelectorAll(".k-"+k).forEach(e=>e.classList.add("hl"));
+ $("eh").textContent=p.t;$("et").textContent=p.x;$("ec").innerHTML="<b>In C#:</b> "+CS[k];shade()}
+$("cp").onclick=()=>{const ok=()=>$("live").textContent="C# copied to the clipboard.",no=()=>$("live").textContent="Copy is not available here. Select the code and copy it by hand.";try{navigator.clipboard.writeText(txt).then(ok,no)}catch(e){no()}};
+render();
+/* builder */
+const BK="cdeB",V={"+":"public","-":"private","#":"protected"};let uid=1,B=[],bt="",libraryReady=false,diagrams=[],activeDiagram="";
+const nid=()=>"c"+(uid++),ps=s=>{const m=s.match(/^([+#-])(.+?): (.+)$/);return{v:m[1],n:m[2],t:m[3]}};
+const T1=[["Monster",null,["#name: string","#hp: int","#damage: int"],["+Attack(): void","+TakeDamage(int amount): void"]],["Goblin",0,["-stealChance: float"],["+Steal(): void"]],["Dragon",0,["-fireRange: int"],["+BreatheFire(): void"]],["Slime",0,["-splitCount: int"],["+Split(): void"]]];
+const T2=[["Player",null,["-name: string","-level: int"],["+Update(): void"],[["comp",1,"1"],["comp",2,"1"],["agg",3,"0..*"]]],["Movement",null,["-speed: float","-jumpHeight: float"],["+Move(): void","+Jump(): void"]],["Health",null,["-hp: int","-maxHp: int"],["+TakeDamage(int amount): void","+Heal(int amount): void"]],["Weapon",null,["-damage: int"],["+Use(): void"]]];
+function mk(sp){const ids=sp.map(()=>nid());B=sp.map((r,i)=>({id:ids[i],n:r[0],p:r[1]==null?null:ids[r[1]],at:r[2].map(ps),me:r[3].map(ps),rel:(r[4]||[]).map(l=>({k:l[0],to:ids[l[1]],m:l[2]}))}))}
+try{const d=JSON.parse(localStorage.getItem(BK));if(d&&Array.isArray(d.B)){B=d.B;uid=d.u||100}}catch(e){B=[]}
+const E=$("bed"),find=id=>B.find(c=>c.id===id),nm=c=>(c.n||"").replace(/\W/g,"")||"Class",sig=m=>(m.n||"Method").replace(/\W/g,"")+"("+(m.params||[]).map(p=>(p.t||"int")+" "+(p.n||"value").replace(/\W/g,"")).join(", ")+")";
+function migrateMethods(){B.forEach(c=>c.me.forEach(m=>{if(!Array.isArray(m.params)){const match=m.n.match(/^(\w+)\((.*)\)$/);m.params=match&&match[2].trim()?match[2].split(",").map(x=>{const bits=x.trim().split(/\s+/);return {t:bits[0],n:bits[1]||"value"}}):[];if(match)m.n=match[1]}}))}
+migrateMethods();
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const opt=(sl,p)=>p.map(([v,t])=>`<option value="${esc(v)}"${v===sl?" selected":""}>${esc(t)}</option>`).join("");
+const basicTypes=["int","float","bool","double","string"];
+function typeOptions(current,allowVoid=false){const names=[...new Set(basicTypes.concat(["decimal","long"],B.map(nm)))];const choices=(allowVoid?["void"]:[]).concat(names,names.map(t=>t+"[]"));if(current&&!choices.includes(current))choices.push(current);return opt(current|| (allowVoid?"void":"int"),choices.map(t=>[t,t.endsWith("[]")?t+" (array)":t]));}
+const hh=c=>48+Math.max(c.at.length,1)*20+Math.max(c.me.length,1)*20;
+function rlist(c){return c.rel.map(r=>{const o=find(r.to);if(!o)return null;const many=r.m.endsWith("*"),n=nm(o);return{r,o,f:n[0].toLowerCase()+n.slice(1)+(many?"s":""),ty:many?"List<"+n+">":n}}).filter(Boolean)}
+function buildEd(){E.innerHTML=B.map(c=>{const d=`data-c="${c.id}"`,oth=B.filter(x=>x!==c).map(x=>[x.id,nm(x)]);
+ const row=(g,i,r,ph)=>`<div class="r"><select aria-label="Visibility" ${d} data-g="${g}" data-i="${i}" data-f="v">${opt(r.v,[["+","+ pub"],["-","- priv"],["#","# prot"]])}</select><input aria-label="${ph[0]}" placeholder="${ph[1]}" ${d} data-g="${g}" data-i="${i}" data-f="n" value="${esc(r.n)}"><select aria-label="${ph[2]}" ${d} data-g="${g}" data-i="${i}" data-f="t">${typeOptions(r.t)}</select><button type="button" class="x" aria-label="Remove" data-act="del${g}" ${d} data-i="${i}">×</button></div>`;
+ const rel=(r,i)=>`<div class="r l"><select aria-label="Link type" ${d} data-g="rel" data-i="${i}" data-f="k">${opt(r.k,[["comp","◆ composition"],["agg","◇ aggregation"]])}</select><select aria-label="Linked class" ${d} data-g="rel" data-i="${i}" data-f="to">${opt(r.to,oth)}</select><select aria-label="Multiplicity" ${d} data-g="rel" data-i="${i}" data-f="m">${opt(r.m,["1","0..1","0..*","1..*"].map(x=>[x,x]))}</select><button type="button" class="x" aria-label="Remove link" data-act="delrel" ${d} data-i="${i}">×</button></div>`;
+ return `<div class="bc" role="group" aria-label="Class ${esc(nm(c))}"><div class="r h"><input aria-label="Class name" ${d} data-f="n" value="${esc(c.n)}"><button type="button" class="x" aria-label="Delete class" data-act="del" ${d}>×</button></div>
+<h3>Inherits from (is-a)</h3><select aria-label="Parent class" ${d} data-f="p">${opt(c.p||"",[["","None"]].concat(oth))}</select>
+<h3>Attributes (data)</h3>${c.at.map((r,i)=>row("at",i,r,["Attribute name","hp","Attribute type","int"])).join("")}<button type="button" class="add" data-act="addat" ${d}>+ Attribute</button>
+<h3>Methods (actions)</h3>${c.me.map((r,i)=>`<div class="method"><div class="method-head"><label>Visibility<select ${d} data-g="me" data-i="${i}" data-f="v">${opt(r.v,[["+","Public (+)"],["-","Private (-)"],["#","Protected (#)"]])}</select></label><label>Method name<input ${d} data-g="me" data-i="${i}" data-f="n" value="${esc(r.n)}" placeholder="CalculateDamage"></label></div><label>Return type<select ${d} data-g="me" data-i="${i}" data-f="t">${typeOptions(r.t,true)}</select></label><small>Choose void for a message, or a data type for a returned value. Types ending in [] return an array.</small><h3>Parameters (values passed in)</h3>${r.params.map((p,j)=>`<div class="parameter"><label>Type<select ${d} data-g="me" data-i="${i}" data-param="${j}" data-f="t">${typeOptions(p.t)}</select></label><label>Name<input ${d} data-g="me" data-i="${i}" data-param="${j}" data-f="n" value="${esc(p.n)}"></label><button type="button" class="x" aria-label="Remove parameter" ${d} data-act="delparam" data-i="${i}" data-param="${j}">×</button></div>`).join("")}<button type="button" class="add" ${d} data-act="addparam" data-i="${i}">+ Parameter</button> <button type="button" class="add" ${d} data-act="delme" data-i="${i}">Remove method</button></div>`).join("")}<button type="button" class="add" data-act="addme" ${d}>+ Method</button>
+<h3>Links (has-a)</h3>${c.rel.map(rel).join("")}<button type="button" class="add" data-act="addrel" ${d}>+ Link</button></div>`}).join("")}
+E.addEventListener("input",e=>{const t=e.target,f=t.dataset.f;if(!f)return;const c=find(t.dataset.c),g=t.dataset.g;
+ if(t.dataset.param!==undefined)c.me[+t.dataset.i].params[+t.dataset.param][f]=t.value;else if(g)c[g][+t.dataset.i][f]=t.value;else c[f]=f=="p"?t.value||null:t.value;
+ if(f=="n"&&!g)E.querySelectorAll('option[value="'+c.id+'"]').forEach(o=>o.textContent=nm(c));redraw()});
+E.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!b.dataset.act)return;const a=b.dataset.act,c=find(b.dataset.c),i=+b.dataset.i;
+ if(a=="addat")c.at.push({v:"-",n:"",t:"int"});else if(a=="addme")c.me.push({v:"+",n:"",t:"void",params:[]});
+ else if(a=="addparam")c.me[i].params.push({t:"int",n:"value"+(c.me[i].params.length+1)});else if(a=="delparam")c.me[i].params.splice(+b.dataset.param,1);
+ else if(a=="addrel"){const o=B.find(x=>x!==c);if(!o){$("live").textContent="Add a second class first.";return}c.rel.push({k:"comp",to:o.id,m:"1"})}
+ else if(a=="delat")c.at.splice(i,1);else if(a=="delme")c.me.splice(i,1);else if(a=="delrel")c.rel.splice(i,1);
+ else if(a=="del"){B=B.filter(x=>x!==c);B.forEach(x=>{if(x.p===c.id)x.p=null;x.rel=x.rel.filter(r=>r.to!==c.id)})}
+ buildEd();redraw()});
+const mkEl=(p,n,a,txt,cls)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(cls)e.setAttribute("class",cls);if(txt!=null)e.textContent=txt;p.appendChild(e);return e},cut=x=>x.length>28?x.slice(0,27)+"…":x;
+function edge(s,a,b,k,m){const ca=[a.x+a.w/2,a.y+a.h/2],cb=[b.x+b.w/2,b.y+b.h/2],dx=cb[0]-ca[0],dy=cb[1]-ca[1];if(!dx&&!dy)return;
+ const q=r=>Math.min(dx?r.w/2/Math.abs(dx):1e9,dy?r.h/2/Math.abs(dy):1e9),p1=[ca[0]+dx*q(a),ca[1]+dy*q(a)],p2=[cb[0]-dx*q(b),cb[1]-dy*q(b)],an=Math.atan2(dy,dx),dg=an*180/Math.PI,u=[Math.cos(an),Math.sin(an)],pp=[-u[1],u[0]];
+ mkEl(s,"line",{x1:p1[0],y1:p1[1],x2:p2[0],y2:p2[1]},null,"ln");
+ if(k=="inh")mkEl(s,"polygon",{points:"0,0 -16,-8 -16,8",transform:`translate(${p2}) rotate(${dg})`},null,"hol");
+ else{mkEl(s,"polygon",{points:"0,0 -12,-7 -24,0 -12,7",transform:`translate(${p1}) rotate(${dg+180})`},null,k=="comp"?"fill":"hol");
+  mkEl(s,"text",{x:p2[0]-u[0]*26+pp[0]*14,y:p2[1]-u[1]*26+pp[1]*14,"text-anchor":"middle"},m,"m");
+  mkEl(s,"text",{x:p1[0]+u[0]*34+pp[0]*14,y:p1[1]+u[1]*34+pp[1]*14,"text-anchor":"middle"},"1","m")}}
+function drawB(){const s=$("bsvg");s.textContent="";s.setAttribute("aria-label","UML class diagram of "+(B.map(nm).join(", ")||"no classes"));
+ if(!B.length){s.setAttribute("viewBox","0 0 720 80");mkEl(s,"text",{x:20,y:44},"Your diagram is empty. Add a class or choose an example.");return}
+ const W=230,G=50,cols=Math.min(3,B.length),R=[];let y=10;
+ for(let r=0;r*cols<B.length;r++){const row=B.slice(r*cols,r*cols+cols),hs=row.map(hh);row.forEach((c,i)=>R.push({c,x:10+i*(W+G),y,w:W,h:hs[i]}));y+=Math.max(...hs)+G}
+ s.setAttribute("viewBox","0 0 "+(cols*W+(cols-1)*G+20)+" "+(y-G+10));
+ R.forEach(({c,x,y,w,h})=>{mkEl(s,"rect",{x,y,width:w,height:h},null,"b");mkEl(s,"rect",{x,y,width:w,height:28},null,"h");mkEl(s,"text",{x:x+w/2,y:y+19,"text-anchor":"middle"},cut(nm(c)),"n");
+  let yy=y+48;c.at.forEach(a=>{mkEl(s,"text",{x:x+8,y:yy},cut(a.v+(a.n||"?")+": "+(a.t||"?")));yy+=20});
+  const ly=y+38+Math.max(c.at.length,1)*20;mkEl(s,"line",{x1:x,x2:x+w,y1:ly,y2:ly},null,"s");yy=ly+20;c.me.forEach(m=>{mkEl(s,"text",{x:x+8,y:yy},cut(m.v+sig(m)+": "+(m.t||"void")));yy+=20})});
+ const at=c=>R.find(r=>r.c===c);
+ B.forEach(c=>{const P=find(c.p);if(P&&P!==c)edge(s,at(c),at(P),"inh");rlist(c).forEach(o=>{if(o.o!==c)edge(s,at(c),at(o.o),o.r.k,o.r.m)})})}
+function genB(c){const L=[],P=find(c.p),rl=rlist(c),cp=rl.filter(o=>o.r.k=="comp");
+ L.push("class "+nm(c)+(P&&P!==c?" : "+nm(P):"")+" {");
+ c.at.forEach(a=>L.push("    "+V[a.v]+" "+(a.t||"int")+" "+(a.n||"field").replace(/\W/g,"")+";"));
+ rl.forEach(o=>L.push("    private "+o.ty+" "+o.f+"; // "+(o.r.k=="comp"?"composition":"aggregation")+" ("+o.r.m+")"));
+ if(cp.length){L.push("","    public "+nm(c)+"() {");cp.forEach(o=>L.push("        "+o.f+" = new "+o.ty+"();"));L.push("    }")}
+ c.me.forEach(m=>{const t=m.t||"void";L.push("","    "+V[m.v]+" "+t+" "+sig(m)+" {","        "+methodBody(t,m.params||[]),"    }")});
+ L.push("}");return L.join("\n")}
+function chk(){const o=[],n=B.map(nm),d=n.find((x,i)=>n.indexOf(x)!=i);
+ if(d)o.push("Two classes are both called "+d+". Give each class its own name.");
+ B.forEach(c=>{let p=c,k=0;while(p&&k++<50){p=find(p.p);if(p===c){o.push(nm(c)+" inherits from itself in a loop. Inheritance must be a tree.");break}}});
+ B.forEach(c=>{if(B.some(k=>k.p===c.id)&&c.at.some(a=>a.v=="-"))o.push(nm(c)+" has child classes but private (-) attributes. Children cannot use private fields in C#. Use # (protected) if they need them.")});
+ const e=B.find(c=>!c.me.length);if(e)o.push(nm(e)+" has no methods yet. What can it do?");
+ if(B.length>1&&!B.some(c=>c.p||c.rel.length))o.push("No links yet. Use inheritance (is-a) or a link (has-a) to connect your classes.");
+ if(!B.length)o.push("Add your first class to begin.");
+ return o.length?o:["Looks good! Every class has data and actions, and your links make sense."]}
+function redraw(){drawB();bt="using System;\nusing System.Collections.Generic;\n\n"+B.map(genB).join("\n\n");$("bcode").textContent=bt;
+ $("bchk").innerHTML=chk().map(x=>"<li>"+esc(x)+"</li>").join("");
+ $("types").innerHTML=["int","float","string","bool","void","Vector3"].concat(B.map(nm)).map(x=>`<option value="${esc(x)}">`).join("");
+ try{localStorage.setItem(BK,JSON.stringify({u:uid,B}))}catch(e){}if(libraryReady)saveDiagram();}
+$("b-add").onclick=()=>{B.push({id:nid(),n:"Class"+(B.length+1),p:null,at:[],me:[],rel:[]});buildEd();redraw()};
+$("b-example").onchange=()=>{$("b-load-example").disabled=!$("b-example").value};
+$("b-load-example").onclick=()=>{const examples={monster:T1,player:T2,simple:[["Character",null,["-name: string","-health: int"],["+Move(int distance): void","+AddScore(int current, int bonus): int","+GetName(): string"]]]},chosen=examples[$("b-example").value];if(!chosen)return;if(B.length&&!confirm("Replace your current diagram with this example?"))return;mk(chosen);migrateMethods();buildEd();redraw();$("live").textContent="Example created. Edit it to make it your own."};$("b-clr").onclick=()=>{B=[];buildEd();redraw()};
+$("b-cp").onclick=()=>{const ok=()=>$("live").textContent="C# copied to the clipboard.",no=()=>$("live").textContent="Copy is not available here. Select the code and copy it by hand.";try{navigator.clipboard.writeText(bt).then(ok,no)}catch(e){no()}};
+buildEd();redraw();
+const REFLECT = {title:"Reflect", icon:"comments", fb:"💬", reflect:true,
+  intro:"What? So What? Now What? Three questions, one next step. Write one to three sentences for each.",
+  cite:"Based on Borton, T. (1970) Reach, Touch and Teach; developed by Rolfe, Freshwater and Jasper (2001).",
+  fields:[
+    {k:"ref_what",   cls:"",   label:"WHAT? Describe it",      hint:"What happened? Facts only: what did you do, see, hear or make? Start with: I noticed...", rows:4, starters:["I noticed that...", "First I...", "The part I spent most time on was...", "Someone told me...", "What I made or wrote was..."]},
+    {k:"ref_sowhat", cls:"sw", label:"SO WHAT? Make sense of it", hint:"Why does it matter? What did you learn, find hard or find surprising? Start with: This matters because...", rows:4, starters:["This matters because...", "I found it hard to...", "I was surprised that...", "This shows me that...", "The evidence for this is..."]},
+    {k:"ref_nowwhat",cls:"nw", label:"NOW WHAT? Act on it",    hint:"What will you do next? One clear action. Start with: Next I will...", rows:4, starters:["Next I will...", "To fix this I will...", "My first step is...", "I will ask for feedback on...", "By the next lesson I will have..."]}]};
+let reflectionAnswers={};try{reflectionAnswers=JSON.parse(localStorage.getItem("cdeReflectionV1"))||{}}catch(e){}
+$("reflection-fields").innerHTML=REFLECT.fields.map(f=>`<div class="panel reflection ${f.cls}"><h2><label for="${f.k}">${f.label}</label></h2><p id="${f.k}-hint">${f.hint}</p><div class="starters" role="group" aria-label="Sentence starters for ${f.label}">${f.starters.map((v,i)=>`<button type="button" data-ref="${f.k}" data-starter="${i}">${esc(v)}</button>`).join("")}</div><textarea id="${f.k}" rows="${f.rows}" aria-describedby="${f.k}-hint">${esc(reflectionAnswers[f.k]||"")}</textarea></div>`).join("");
+function saveReflection(){if(libraryReady)saveDiagram();try{localStorage.setItem("cdeReflectionV1",JSON.stringify(reflectionAnswers))}catch(e){$("live").textContent="Saving is unavailable on this device. Copy your answers before leaving."}}
+$("reflection-fields").addEventListener("input",e=>{if(e.target.tagName==="TEXTAREA"){reflectionAnswers[e.target.id]=e.target.value;saveReflection()}});
+$("reflection-fields").addEventListener("click",e=>{const b=e.target.closest("button[data-ref]");if(!b)return;const f=REFLECT.fields.find(f=>f.k===b.dataset.ref),box=$(f.k);box.value+=(box.value.trim()?"\n":"")+f.starters[+b.dataset.starter]+" ";reflectionAnswers[f.k]=box.value;saveReflection();box.focus()});
+/* student lesson navigation */
+const steps=[["learn","Explore the example"],["build","Build your diagram"],["review","Check your work"],["reflect","Reflect"]];let lessonIndex=0,completed={};
+try{completed=JSON.parse(localStorage.getItem("cdeLessonDone"))||{}}catch(e){}
+function lessonShow(i){lessonIndex=Math.max(0,Math.min(steps.length-1,i));steps.forEach(([k],j)=>$("step-"+k).hidden=j!==lessonIndex);lessonNav();}
+function lessonNav(){$("lesson-menu").innerHTML=steps.map(([k,t],i)=>`<a href="#step-${k}" data-index="${i}" class="${completed[k]?"done":""}" ${i===lessonIndex?'aria-current="step"':''}>${completed[k]?"✓ Completed · ":""}${i+1}. ${t}</a>`).join("");$("lesson-progress").textContent=steps.filter(([k])=>completed[k]).length+" of "+steps.length+" steps completed. Tick each step when you have finished it.";$("lesson-prev").disabled=lessonIndex===0;$("lesson-next").disabled=lessonIndex===steps.length-1;}
+$("lesson-menu").onclick=e=>{const a=e.target.closest("a");if(a){e.preventDefault();lessonShow(+a.dataset.index)}};
+document.querySelectorAll("[data-step]").forEach(el=>{el.checked=!!completed[el.dataset.step];el.onchange=()=>{completed[el.dataset.step]=el.checked;try{localStorage.setItem("cdeLessonDone",JSON.stringify(completed))}catch(e){}lessonNav();if(libraryReady)saveDiagram()}});
+$("lesson-prev").onclick=()=>lessonShow(lessonIndex-1);$("lesson-next").onclick=()=>lessonShow(lessonIndex+1);lessonShow(0);
+
+/* Named diagrams and exports */
+function diagramSVG(){const original=$('bsvg'),clone=original.cloneNode(true);const props=['fill','stroke','stroke-width','font-family','font-size','font-weight'];const originals=[original,...original.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];originals.forEach((el,i)=>{const style=getComputedStyle(el);props.forEach(prop=>copies[i].style.setProperty(prop,style.getPropertyValue(prop)))});clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.removeAttribute('id');clone.style.width='100%';clone.style.height='auto';return new XMLSerializer().serializeToString(clone)}
+function saveDiagram(){if(!libraryReady)return;const d=diagrams.find(d=>d.id===activeDiagram);if(!d)return;Object.assign(d,{B:JSON.parse(JSON.stringify(B)),uid,code:bt,svg:diagramSVG(),reflection:{...reflectionAnswers},completed:{...completed}});try{localStorage.setItem('cdeDiagramLibraryV1',JSON.stringify({active:activeDiagram,diagrams}))}catch(e){$('live').textContent='Saving is unavailable. Download your work before leaving.'}}
+function diagramMenus(){const active=diagrams.find(d=>d.id===activeDiagram);$('diagram-name').value=active.name;$('diagram-switch').innerHTML=diagrams.map(d=>`<option value="${esc(d.id)}" ${d.id===activeDiagram?'selected':''}>${esc(d.name)}</option>`).join('');const selected=$('diagram-download').value||activeDiagram;$('diagram-download').innerHTML='<option value="all">All diagrams</option>'+diagrams.map(d=>`<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('');$('diagram-download').value=selected==='all'||diagrams.some(d=>d.id===selected)?selected:activeDiagram}
+function openDiagram(id){saveDiagram();activeDiagram=id;const d=diagrams.find(d=>d.id===id);B=JSON.parse(JSON.stringify(d.B||[]));uid=d.uid||100;reflectionAnswers={...(d.reflection||{})};completed={...(d.completed||{})};migrateMethods();REFLECT.fields.forEach(f=>$(f.k).value=reflectionAnswers[f.k]||'');document.querySelectorAll('[data-step]').forEach(c=>c.checked=!!completed[c.dataset.step]);buildEd();redraw();lessonNav();diagramMenus()}
+try{const stored=JSON.parse(localStorage.getItem('cdeDiagramLibraryV1'));if(stored&&Array.isArray(stored.diagrams)&&stored.diagrams.length){diagrams=stored.diagrams;activeDiagram=diagrams.some(d=>d.id===stored.active)?stored.active:diagrams[0].id}}catch(e){}
+if(!diagrams.length){activeDiagram='diagram'+Date.now();diagrams=[{id:activeDiagram,name:'My game classes',B,uid,reflection:reflectionAnswers,completed}]}
+libraryReady=true;const initial=diagrams.find(d=>d.id===activeDiagram);B=JSON.parse(JSON.stringify(initial.B||[]));uid=initial.uid||100;reflectionAnswers={...(initial.reflection||{})};completed={...(initial.completed||{})};migrateMethods();buildEd();redraw();REFLECT.fields.forEach(f=>$(f.k).value=reflectionAnswers[f.k]||'');document.querySelectorAll('[data-step]').forEach(c=>c.checked=!!completed[c.dataset.step]);lessonNav();diagramMenus();
+$('diagram-name').oninput=e=>{diagrams.find(d=>d.id===activeDiagram).name=e.target.value.trim()||'Untitled diagram';saveDiagram();const option=$('diagram-switch').querySelector('option[value="'+activeDiagram+'"]');if(option)option.textContent=e.target.value.trim()||'Untitled diagram';const downloadOption=$('diagram-download').querySelector('option[value="'+activeDiagram+'"]');if(downloadOption)downloadOption.textContent=e.target.value.trim()||'Untitled diagram'};
+$('diagram-switch').onchange=e=>openDiagram(e.target.value);$('new-diagram').onclick=()=>{saveDiagram();const id='diagram'+Date.now();diagrams.push({id,name:'Diagram '+(diagrams.length+1),B:[],uid:1,reflection:{},completed:{}});openDiagram(id);$('diagram-name').focus();$('diagram-name').select()};
+function downloadDiagram(name,text,type){const u=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function diagramReport(d){return `<section><h1>${esc(d.name)}</h1>${d.svg||''}<h2>C# code</h2><pre>${esc(d.code||'')}</pre><h2>Reflection</h2>${REFLECT.fields.map(f=>`<h3>${esc(f.label)}</h3><p>${esc(d.reflection?.[f.k]||'Not answered')}</p>`).join('')}</section>`}
+function diagramsSVG(selected){let y=0;const parts=selected.map(d=>{const svg=d.svg||'',view=svg.match(/viewBox="([^"]+)"/),dims=view?view[1].split(/\s+/).map(Number):[0,0,720,80],height=720*(dims[3]||80)/(dims[2]||720);const part=`<text x="16" y="${y+30}" font-family="Arial" font-size="22" fill="black">${esc(d.name)}</text>`+svg.replace('<svg ',`<svg x="0" y="${y+50}" width="720" height="${height}" `).replace(/style="[^"]*"/, '');y+=height+90;return part});return `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="${y}" viewBox="0 0 720 ${y}">${parts.join('')}</svg>`}
+document.querySelectorAll('[data-download]').forEach(b=>b.onclick=()=>{saveDiagram();const choice=$('diagram-download').value,selected=choice==='all'?diagrams:diagrams.filter(d=>d.id===choice),name=choice==='all'?'all-class-diagrams':(selected[0].name.replace(/[^a-z0-9_-]+/gi,'-')||'class-diagram'),kind=b.dataset.download;if(kind==='svg')downloadDiagram(name+'.svg',diagramsSVG(selected),'image/svg+xml');if(kind==='html')downloadDiagram(name+'.html','<!doctype html><html lang="en"><meta charset="utf-8"><title>Class diagram report</title><style>body{max-width:1000px;margin:30px auto;padding:20px;font:16px Arial;background:#f8fafc;color:#0f172a}section{page-break-after:always}svg{max-width:100%;height:auto}pre{white-space:pre-wrap;background:#e2e8f0;padding:16px}p{white-space:pre-wrap}</style>'+selected.map(diagramReport).join('')+'</html>','text/html');if(kind==='md')downloadDiagram(name+'.md',selected.map(d=>'# '+d.name+'\n\n'+(d.svg||'')+'\n\n## C# code\n\n```csharp\n'+d.code+'\n```\n\n## Reflection\n\n'+REFLECT.fields.map(f=>'### '+f.label+'\n\n'+(d.reflection?.[f.k]||'Not answered')).join('\n\n')).join('\n\n---\n\n'),'text/markdown');if(kind==='json')downloadDiagram(name+'.json',JSON.stringify({v:1,diagrams:selected},null,2),'application/json')});
+$('diagram-import').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;const data=JSON.parse(await file.text());if(data.v!==1||!Array.isArray(data.diagrams)||!data.diagrams.length||data.diagrams.some(d=>!Array.isArray(d.B)||d.B.some(c=>typeof c.id!=='string'||typeof c.n!=='string'||!Array.isArray(c.at)||!Array.isArray(c.me)||!Array.isArray(c.rel))))throw Error();saveDiagram();const imported=data.diagrams.map((d,i)=>({id:'import'+Date.now()+i,name:String(d.name||'Imported diagram'),B:d.B,uid:d.uid||100,reflection:d.reflection||{},completed:d.completed||{}}));diagrams.push(...imported);openDiagram(imported[0].id);$('live').textContent='Opened '+imported.length+' diagrams.'}catch(e){$('live').textContent='Choose an editable backup downloaded from this activity.'}};
+/* accessibility controls */
+const store=(k,v)=>{try{localStorage.setItem("cde"+k,v)}catch(e){}},load=k=>{try{return localStorage.getItem("cde"+k)}catch(e){return null}};
+const TH=["day","night","contrast"],FS=[90,100,110,120,130];let fp=+load("F")||100;if(!FS.includes(fp))fp=100;
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);TH.forEach(x=>$("th-"+x).setAttribute("aria-pressed",x===t));store("T",t)}
+TH.forEach(t=>$("th-"+t).onclick=()=>setTheme(t));
+function font(d){const i=FS.indexOf(fp)+d;if(i<0||i>=FS.length)return;fp=FS[i];document.documentElement.style.fontSize=fp+"%";store("F",fp)}
+$("fm").onclick=()=>font(-1);$("fp").onclick=()=>font(1);document.documentElement.style.fontSize=fp+"%";
+function dys(v){document.body.classList.toggle("dys",v);$("dys").setAttribute("aria-pressed",v);store("D",v)}
+$("dys").onclick=()=>dys($("dys").getAttribute("aria-pressed")!=="true");dys(load("D")==="true");
+let t=load("T");if(!TH.includes(t))t=matchMedia("(prefers-color-scheme: light)").matches?"day":"night";setTheme(t);
+</script></body></html>

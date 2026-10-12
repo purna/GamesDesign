@@ -1,0 +1,849 @@
+// Synced from Activity_05_Parallel_Design_-_Home_Screen_Sprint.html; library scope isolates DOM, callbacks and timers.
+window.RESEARCH_TASKS["parallel-design"] = function(scope){
+const window=scope.window, document=scope.document;
+const addEventListener=scope.addEventListener;
+const {setTimeout,clearTimeout,setInterval,clearInterval}=scope;
+
+const CFG = {pfx:"research-v3-parallel-design-",file:"parallel-design-login",title:"Parallel Design: Login Page Sprint",kicker:"UX METHODS · PARALLEL LOGIN DESIGN",sub:"Pick a page layout, review login wireframe options, choose one concept, apply up to 2 changes per round across two rounds, and review feedback.",version:7};
+const APP_TABS = [
+  {title:"Tutorial",icon:"circle-play",fb:"▶",widget:"tutorial",intro:"Follow the method in four steps, with a login sprint example and key reading.",fields:[]},
+  {title:"Learn",icon:"book-open",fb:"📖",widget:"learn",intro:"Read the key idea, then explain authentication parallel design in your own words.",fields:[
+    {k:"own_def",label:"Parallel login design in your own words",hint:"One or two sentences. Start with: Parallel login design is...",rows:3,starters:["Parallel login design is...","Testing multiple wireframes lets us...","The iterative rounds help..."]}]},
+  {title:"Shared requirements",icon:"clipboard-check",fb:"✅",intro:"Establish user and security requirements before wireframing.",fields:[
+    {"k":"login_reqs","label":"Audience, security constraints, and tasks","hint":"Define target users, accessibility requirements, and authentication criteria.","rows":4,"starters":["The target users are...","Security constraints require...","Primary tasks include..."]}
+  ]},
+  {title:"Wireframes & Feedback",icon:"eye",fb:"🖥️",widget:"wireframes",intro:"Pick a page layout, review the three parallel login concepts, then choose your preferred concept to begin two rounds of changes (max 2 additions per round).",fields:[{k:"loginstate",hidden:true}]},
+  {title:"Combined design",icon:"code-merge",fb:"🔀",intro:"Synthesize findings and configure your final integrated login layout.",fields:[
+    {"k":"login_keep","label":"What elements we kept and why","hint":"Explain which wireframe elements and security features made it into your final build.","rows":4,"starters":["We kept... because...","We integrated security features like..."]},
+    {"k":"login_test","label":"What security or UX to test next","hint":"State what your final login design still needs to test with real users.","rows":3,"starters":["We will test user friction on...","Remaining security testing includes..."]}
+  ]},
+  {title:"Writeup & Feedback Summary",icon:"pen-to-square",fb:"📝",widget:"summary",intro:"Review audit feedback summary of your changes across both sprint rounds, and document final outcomes.",fields:[
+    {"k":"login_eval","label":"Final Sprint Evaluation & Writeup","hint":"Summarize success or failure of modifications across iteration rounds.","rows":5,"starters":["The iterative changes were successful because...","Round 1 and 2 modifications achieved...","One remaining challenge or vulnerability is..."]}
+  ]},
+  {title:"Sort the practice",icon:"sort",fb:"🗂️",widget:"game",intro:"Ten statements. Sort each into good research practice or a risky authentication shortcut.",fields:[{k:"gm",hidden:true}]}
+];
+
+const REFLECT = {title:"Reflect", icon:"comments", fb:"💬", reflect:true,
+  intro:"What? So What? Now What? Three questions, one next step. Write one to three sentences for each.",
+  cite:"Based on Borton, T. (1970) Reach, Touch and Teach; developed by Rolfe, Freshwater and Jasper (2001).",
+  fields:[
+    {k:"ref_what",   cls:"",   label:"WHAT? Describe it",      hint:"What happened? Facts only: what did you do, see, hear or make? Start with: I noticed...", rows:4, starters:["I noticed that...", "First I...", "The part I spent most time on was...", "Someone told me...", "What I made or wrote was..."]},
+    {k:"ref_sowhat", cls:"sw", label:"SO WHAT? Make sense of it", hint:"Why does it matter? What did you learn, find hard or find surprising? Start with: This matters because...", rows:4, starters:["This matters because...", "I found it hard to...", "I was surprised that...", "This shows me that...", "The evidence for this is..."]},
+    {k:"ref_nowwhat",cls:"nw", label:"NOW WHAT? Act on it",    hint:"What will you do next? One clear action. Start with: Next I will...", rows:4, starters:["Next I will...", "To fix this I will...", "My first step is...", "I will ask for feedback on...", "By the next lesson I will have..."]}]};
+const TABS = APP_TABS.concat(REFLECT);
+
+
+const $ = id => document.getElementById(id);
+const qa = (r, s) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = (k, v) => { try { localStorage.setItem(CFG.pfx + k, v) } catch (e) {} };
+const load  = k => { try { return localStorage.getItem(CFG.pfx + k) } catch (e) { return null } };
+const say = m => { const l = $("live"); l.textContent = ""; setTimeout(() => l.textContent = m, 30) };
+const ic = (f, b) => `<i class="fa-solid fa-${f}" data-fb="${b}" aria-hidden="true"></i>`;
+
+const THEMES = ["day","night","contrast"], FONTS = [90,100,110,120,130];
+const FIELDS = TABS.flatMap(t => t.fields);
+let theme = load("Theme"), fp = +load("Font") || 100, dys = load("Dys") === "true";
+let data = {}, cur = 0, spd = 1, dl = null;
+if (!THEMES.includes(theme)) theme = null;
+if (!FONTS.includes(fp)) fp = 100;
+
+const g = k => String(data[k] || "").trim();
+const started = () => FIELDS.some(f => g(f.k));
+const persist = () => { store("Data", JSON.stringify({v: CFG.version, data})); try { store("Report", JSON.stringify(model())); } catch {} if (typeof updXP === "function") updXP(); scope.notifySaved(); };
+
+function setTheme(t){
+  theme = t; document.documentElement.setAttribute("data-theme", t);
+  THEMES.forEach(x => { $("th-"+x).classList.toggle("on", x === t); $("th-"+x).setAttribute("aria-pressed", x === t) });
+  store("Theme", t);
+}
+function applyFont(){ document.documentElement.style.fontSize = fp + "%"; $("fsd").textContent = fp + "%" }
+function setFont(d){ const i = FONTS.indexOf(fp) + d; if (i < 0 || i >= FONTS.length) return; fp = FONTS[i]; applyFont(); store("Font", fp); say("Text size " + fp + " percent") }
+function setDys(v){ dys = v; document.body.classList.toggle("dys", v); $("dys").classList.toggle("on", v); $("dys").setAttribute("aria-pressed", v); store("Dys", v) }
+
+function drawTabs(){
+  $("tabs").innerHTML = TABS.map((t, i) =>
+    `<button type="button" role="tab" id="t${i}" aria-controls="panel" aria-selected="${i === cur}" tabindex="${i === cur ? 0 : -1}">${ic(t.icon, t.fb)}${esc(t.title)}</button>`).join("");
+  TABS.forEach((t, i) => {
+    const b = $("t" + i);
+    b.onclick = () => openTab(i);
+    b.onkeydown = e => {
+      const n = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? TABS.length - 1 : null;
+      if (n === null) return; e.preventDefault(); openTab((n + TABS.length) % TABS.length, true);
+    };
+  });
+}
+function openTab(i, focus){ stopMic(); stopTTS(); cur = i; store("Tab", i); drawTabs(); drawPanel(); if (focus) $("t" + i).focus() }
+function field(f){
+  if (f.hidden) return "";
+  const id = "f-" + f.k, d = `id="${id}" data-k="${f.k}" aria-describedby="h-${f.k}"`;
+  const chips = f.starters ? `<div class="sel"><label for="s-${f.k}">Add a starter (keyboard: arrows to browse, Enter to add)</label><select id="s-${f.k}" data-s="${f.k}"><option value="">Choose a starter…</option>${f.starters.map((t, i) => `<option value="${i}">${esc(t)}</option>`).join("")}</select></div>` : "";
+  return `<label class="f" for="${id}">${esc(f.label)}<span class="hint" id="h-${f.k}">${esc(f.hint || "")}</span></label>` + chips +
+    (f.rows ? `<textarea ${d} rows="${f.rows}">${esc(data[f.k])}</textarea>` : `<input type="text" ${d} value="${esc(data[f.k])}">`);
+}
+function drawPanel(){
+  const t = TABS[cur];
+  $("panel").setAttribute("aria-labelledby", "t" + cur);
+  $("panel").innerHTML = `<h2>${esc(t.title)}</h2><p>${esc(t.intro)}</p>` + (t.reflect
+    ? `<div class="ref">${t.fields.map(f => `<div class="rc ${f.cls}">${field(f)}</div>`).join("")}</div><p class="hint cite">${esc(t.cite)}</p>`
+    : t.fields.map(field).join(""));
+  qa($("panel"), "[data-k]").forEach(el => { el.oninput = () => { data[el.dataset.k] = el.value; persist() } });
+  qa($("panel"), "select[data-s]").forEach(sel => {
+    const add = () => { if (sel.value === "") return; insertStarter($("f-" + sel.dataset.s), FIELDS.find(x => x.k === sel.dataset.s).starters[+sel.value]); sel.value = ""; sel._nav = false };
+    sel.onpointerdown = () => { sel._nav = false };
+    sel.onkeydown = e => { if (["ArrowUp","ArrowDown","Home","End","PageUp","PageDown"].includes(e.key)) sel._nav = true; else if (e.key === "Enter"){ e.preventDefault(); add() } };
+    sel.onchange = () => { if (!sel._nav) add() };
+    sel.onblur = () => { sel._nav = false; sel.value = "" };
+  });
+  widgetHook(); addMics();
+}
+
+function insertStarter(el, t){
+  const v = el.value, sep = v && !/\s$/.test(v) ? " " : "";
+  el.value = v + sep + t + " "; el.focus(); el.setSelectionRange(el.value.length, el.value.length);
+  el.dispatchEvent(new Event("input")); say("Added: " + t.replace(/\.+$/, ""));
+}
+
+const hasTTS = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+function readText(){
+  const t = TABS[cur];
+  return [t.title, t.intro, t.widget && $("wg") ? $("wg").innerText : ""].concat(t.fields.filter(f => !f.hidden).map(f => f.label + ". " + (g(f.k) || "empty"))).filter(Boolean).map(x => /[.?!]$/.test(x) ? x : x + ".").join(" ");
+}
+function speak(txt){
+  if (!hasTTS) return say("Read aloud is not available in this browser.");
+  speechSynthesis.cancel(); $("pst").textContent = "Pause";
+  const u = new SpeechSynthesisUtterance(txt); u.rate = spd; u.lang = document.documentElement.lang || "en-GB";
+  speechSynthesis.speak(u);
+}
+function stopTTS(){ if (hasTTS) speechSynthesis.cancel(); $("pst").textContent = "Pause" }
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recBtn = null;
+const micIdle = b => { b.setAttribute("aria-pressed", "false"); b.querySelector("span").textContent = "Dictate" };
+function stopMic(){ if (rec){ const r = rec; rec = null; try { r.stop() } catch (e) {} } if (recBtn){ micIdle(recBtn); recBtn = null } }
+const labelOf = el => { const l = document.querySelector(`label[for="${el.id}"]`); return l ? l.childNodes[0].textContent : "this field" };
+function toggleMic(el, b){
+  if (recBtn === b){ stopMic(); return say("Stopped listening") }
+  stopMic();
+  const r = new SR(), base = el.value, sep = base && !/\s$/.test(base) ? " " : "";
+  r.lang = navigator.language || "en-GB"; r.interimResults = true; r.continuous = false;
+  r.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; el.value = base + sep + t; el.dispatchEvent(new Event("input")) };
+  r.onerror = e => say("Dictation stopped.");
+  r.onend = () => { if (rec === r){ rec = null; recBtn = null } micIdle(b) };
+  try { r.start() } catch (e) { return say("Dictation could not start.") }
+  rec = r; recBtn = b; b.setAttribute("aria-pressed", "true"); b.querySelector("span").textContent = "Stop";
+  say("Listening. Speak now.");
+}
+function addMics(r){
+  if (!SR) return;
+  qa(r || $("panel"), "textarea,input[type=text]").forEach(el => {
+    if (el.dataset.nomic) return;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "alt mic"; b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", "Dictate into " + labelOf(el));
+    b.innerHTML = ic("microphone", "🎤") + "<span>Dictate</span>";
+    const w = document.createElement("div"); w.className = "ig";
+    el.parentNode.insertBefore(w, el); w.append(el, b); b.onclick = () => toggleMic(el, b);
+  });
+}
+
+function model(){
+  const gm = getGame();
+  return {title: g("name") || CFG.title,
+    sections: TABS.filter(t => t.fields.some(f => !f.hidden)).map(t => ({h: t.title, rows: t.fields.filter(f => !f.hidden).map(f => [f.label, g(f.k) || "(empty)"])}))
+      .concat(sprintSection()).concat([{h: "Practice sorter", rows: [["Score", gm.done ? gm.s + " / " + GAME.length + " correct" : "(not finished)"]]}])};
+}
+const stamp = () => new Date().toISOString().slice(0, 10);
+const fileName = ext => `${CFG.file}-${stamp()}.${ext}`;
+
+function md(){ const m = model(); return "# " + m.title + "\n\n" + m.sections.map(s => "## " + s.h + "\n\n" + s.rows.map(r => "**" + r[0] + "**\n\n" + r[1]).join("\n\n")).join("\n\n") + "\n" }
+const cell = v => { v = String(v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"' };
+function csv(){ const m = model(), o = [["Section","Field","Value"].map(cell).join(",")]; m.sections.forEach(s => s.rows.forEach(r => o.push([s.h, r[0], r[1]].map(cell).join(",")))); return "\uFEFF" + o.join("\r\n") + "\r\n" }
+
+const CRC = (() => { const t = []; for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0 } return t })();
+const crc32 = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0 };
+function zipBlob(files, mime){
+  const enc = new TextEncoder(), parts = [], cd = []; let off = 0;
+  files.forEach(f => {
+    const name = enc.encode(f[0]), d = enc.encode(f[1]), crc = crc32(d);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true);
+    h.setUint32(14, crc, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, name.length, true);
+    parts.push(h.buffer, name, d);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true);
+    c.setUint32(16, crc, true); c.setUint32(20, d.length, true); c.setUint32(24, d.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    cd.push(c.buffer, name); off += 30 + name.length + d.length;
+  });
+  let len = 0; cd.forEach(b => len += b.byteLength);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, len, true); e.setUint32(16, off, true);
+  return new Blob(parts.concat(cd, [e.buffer]), {type: mime});
+}
+const xe = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+const wp = (t, o = {}) => String(t).split(/\r?\n/).map(l => `<w:p><w:r><w:rPr>${o.b ? "<w:b/>" : ""}${o.c ? `<w:color w:val="${o.c}"/>` : ""}<w:sz w:val="${o.sz || 22}"/></w:rPr><w:t xml:space="preserve">${xe(l)}</w:t></w:r></w:p>`).join("");
+const wt = rows => `<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/><w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(b => `<w:${b} w:val="single" w:sz="4" w:color="94A3B8"/>`).join("")}</w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="2400"/><w:gridCol w:w="6600"/></w:tblGrid>${rows.map(r => `<w:tr>${r.map((c, i) => `<w:tc><w:tcPr><w:tcW w:w="${i ? 6600 : 2400}" w:type="dxa"/></w:tcPr>${wp(c, {b: !i})}</w:tc>`).join("")}</w:tr>`).join("")}</w:tbl>`;
+function docx(){
+  const m = model(), X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const body = wp(m.title, {b: 1, sz: 44}) + m.sections.map(s => wp(s.h, {b: 1, sz: 30, c: "0E7490"}) + wt(s.rows) + wp("")).join("");
+  return zipBlob([
+    ["[Content_Types].xml", X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'],
+    ["_rels/.rels", X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+    ["word/document.xml", X + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + body + '</w:body></w:document>']
+  ], "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+}
+
+function pptx(){
+  const m = model(), p = new PptxGenJS(); p.layout = "LAYOUT_WIDE";
+  const H = t => ({text: t, options: {bold: true, color: "FFFFFF", fill: {color: "0E7490"}}});
+  const t = p.addSlide(); t.background = {color: "0B0F1A"};
+  t.addText(m.title, {x: .6, y: 2.4, w: 12, h: 1, fontSize: 40, bold: true, color: "FFFFFF", fontFace: "Calibri"});
+  t.addText(CFG.title, {x: .6, y: 3.5, w: 12, h: .8, fontSize: 20, color: "00E5FF", fontFace: "Calibri"});
+  m.sections.forEach(s => {
+    const a = p.addSlide();
+    a.addText(s.h, {x: .5, y: .25, w: 12.3, h: .7, fontSize: 26, bold: true, color: "0F172A", fontFace: "Calibri"});
+    a.addTable([[H("Field"), H("Response")]].concat(s.rows.map(r => [{text: r[0], options: {bold: true}}, {text: r[1]}])),
+      {x: .5, y: 1.1, w: 12.3, colW: [2.8, 9.5], fontSize: 12, fontFace: "Calibri", color: "0F172A", border: {type: "solid", color: "94A3B8", pt: 1}, valign: "top", autoPage: true});
+  });
+  return p.write({outputType: "blob"});
+}
+
+function pdf(){
+  const m = model(), d = new window.jspdf.jsPDF({unit: "mm", format: "a4"}), L = 15, W = 180; let y = 20;
+  const room = h => { if (y + h > 282){ d.addPage(); y = 20 } };
+  d.setFont("helvetica", "bold"); d.setFontSize(20); d.setTextColor(14, 116, 144);
+  d.splitTextToSize(m.title, W).forEach(l => { room(9); d.text(l, L, y); y += 9 }); y += 4;
+  m.sections.forEach(s => {
+    room(14); d.setFont("helvetica", "bold"); d.setFontSize(14); d.setTextColor(14, 116, 144); d.text(s.h, L, y); y += 8;
+    s.rows.forEach(r => {
+      d.setFontSize(11); d.setTextColor(30); d.setFont("helvetica", "bold"); room(6); d.text(r[0], L, y); y += 5.5;
+      d.setFont("helvetica", "normal"); d.splitTextToSize(r[1], W).forEach(l => { room(5.5); d.text(l, L, y); y += 5.5 }); y += 2;
+    }); y += 4;
+  });
+  return d.output("blob");
+}
+
+const EXPORTS = [
+  {id:"pptx", label:"PowerPoint (.pptx)", desc:"Title slide and one slide per section", ic:"file-powerpoint", fb:"▦", lib:() => window.PptxGenJS, build:pptx},
+  {id:"docx", label:"Word (.docx)",       desc:"Report with a table per section",       ic:"file-word",       fb:"📝", build:docx},
+  {id:"pdf",  label:"PDF (.pdf)",         desc:"Ready to print or share",               ic:"file-pdf",        fb:"📕", lib:() => window.jspdf, build:pdf},
+  {id:"csv",  label:"CSV (.csv)",         desc:"Opens in Excel or Google Sheets",       ic:"file-csv",        fb:"▤",  build:() => new Blob([csv()], {type:"text/csv;charset=utf-8"})},
+  {id:"md",   label:"Markdown (.md)",     desc:"Plain text with headings",              ic:"file-lines",      fb:"📄", build:() => new Blob([md()], {type:"text/markdown;charset=utf-8"})}
+];
+
+function save(name, body){
+  if (dl) return dl.save({filename: name, data: body}).then(() => say("Saved " + name), e => say(e && e.code === "declined" ? "Save cancelled." : "This view could not save the file."));
+  try {
+    const b = body instanceof Blob ? body : new Blob([body], {type: "text/plain;charset=utf-8"}), a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000); say("Saved " + name);
+  } catch (e) { say("This view could not save the file.") }
+}
+function runExport(x){
+  if (!started()) return say("Fill in part of the form first.");
+  if (x.lib && !x.lib()) return say(x.label + " is still loading or blocked.");
+  Promise.resolve().then(x.build).then(b => save(fileName(x.id), b)).catch(e => { console.warn(e); say("Could not build the file.") });
+}
+function copyText(){
+  if (!started()) return say("Fill in part of the form first.");
+  if (navigator.clipboard) navigator.clipboard.writeText(md()).then(() => say("Copied to clipboard"), () => say("Could not copy"));
+  else say("Copy not available.");
+}
+
+function backup(){
+  if (!started()) return say("Nothing to back up yet.");
+  save(`${CFG.file}-backup-${stamp()}.json`, new Blob([JSON.stringify({app: CFG.pfx, version: CFG.version, saved: new Date().toISOString(), data, prefs: {theme, font: fp, dys}}, null, 2)], {type: "application/json;charset=utf-8"}));
+}
+function importBackup(f){
+  if (!f) return;
+  if (f.size > 2e6) return say("File too large.");
+  const r = new FileReader(); r.onerror = () => say("File could not be read.");
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d || d.app !== CFG.pfx || typeof d.data !== "object") throw 0;
+      if (started() && !confirm("Replace what is on this device with the backup?")) return say("Import cancelled.");
+      data = {}; FIELDS.forEach(fl => { if (typeof d.data[fl.k] === "string") data[fl.k] = d.data[fl.k].slice(0, 5000) });
+      persist(); drawPanel(); say("Backup imported.");
+    } catch (e) { say("Invalid backup file.") }
+  };
+  r.readAsText(f);
+}
+
+let opener = null; const BG = ["header", "main"];
+const mEls = () => qa($("mdl"), "button").filter(b => !b.disabled);
+function openM(){
+  const n = started(); opener = document.activeElement;
+  $("mc").textContent = n ? "Your work is ready to export. Choose a format:" : "Fill in part of the form first.";
+  qa($("mo"), "button").forEach(b => b.disabled = !n); $("bks").disabled = !n;
+  $("mdl").hidden = false; BG.forEach(q => document.querySelector(q).inert = true);
+  (mEls()[0] || $("xcl")).focus();
+}
+function closeM(){ $("mdl").hidden = true; BG.forEach(q => document.querySelector(q).inert = false); if (opener && opener.focus) opener.focus() }
+
+function openConceptModal() {
+  $("concept-modal").hidden = false;
+  { const lay = getLoginState().layout; qa($("concept-modal"), "button[data-choose-concept]").forEach(b => { const t = b.querySelector(".cm-thumb"); if (t) t.innerHTML = wfSvg(b.dataset.chooseConcept, new Set(), lay, { thumb: true }) }) }
+  qa($("concept-modal"), "button[data-choose-concept]").forEach(b => {
+    b.onclick = () => {
+      const st = getLoginState();
+      st.chosenConcept = b.dataset.chooseConcept;
+      st.round1Added = 0;
+      st.round2Added = 0;
+      sj("loginstate", st);
+      $("concept-modal").hidden = true;
+      say("Concept " + st.chosenConcept + " selected for your sprint.");
+      wgDraw();
+    };
+  });
+}
+
+function boot(){
+  try {const saved=JSON.parse(load("Data")||"null");if(saved?.data && saved.v<=CFG.version){data=Object.fromEntries(Object.entries(saved.data).filter(([,value])=>typeof value==="string"&&value.length<=1500000));}} catch {}
+
+  try { const s = JSON.parse(load("Data") || "null"); if (s && s.data && s.v <= CFG.version) FIELDS.forEach(f => { if (typeof s.data[f.k] === "string") data[f.k] = s.data[f.k] }) } catch (e) {}
+   $("kick").textContent = CFG.kicker; $("ttl").textContent = CFG.title; $("sub").textContent = CFG.sub;
+
+
+  $("rd").onclick = () => speak(readText());
+  $("ps").onclick = () => { if (!hasTTS) return; if (speechSynthesis.paused){ speechSynthesis.resume(); $("pst").textContent = "Pause" } else if (speechSynthesis.speaking){ speechSynthesis.pause(); $("pst").textContent = "Resume" } };
+  $("st").onclick = stopTTS;
+  $("sp").onchange = () => { spd = +$("sp").value };
+  addEventListener("pagehide", () => { stopTTS(); stopMic() });
+  $("dh").textContent = SR ? "Tip: tap Dictate under any box and speak." : "Dictation not supported in this browser.";
+  $("mo").innerHTML = EXPORTS.map(x => `<button type="button" class="alt opt" id="x-${x.id}">${ic(x.ic, x.fb)}<span>${esc(x.label)}<small>${esc(x.desc)}</small></span></button>`).join("");
+  EXPORTS.forEach(x => $("x-" + x.id).onclick = () => { closeM(); runExport(x) });
+  $("xopen").onclick = openM; $("xcl").onclick = closeM; $("xcp").onclick = copyText; $("xpr").onclick = () => window.print();
+  $("bks").onclick = () => { closeM(); backup() };
+  $("bki").onclick = () => $("bkf").click();
+  $("bkf").onchange = function(){ closeM(); importBackup(this.files[0]); this.value = "" };
+  $("mdl").onclick = e => { if (e.target === $("mdl")) closeM() };
+  $("mdl").onkeydown = e => {
+    if (e.key === "Escape"){ e.preventDefault(); closeM(); return }
+    if (e.key !== "Tab") return;
+    const f = mEls(); if (!f.length) return; const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0){ e.preventDefault(); f[f.length - 1].focus() } else if (!e.shiftKey && i === f.length - 1){ e.preventDefault(); f[0].focus() }
+  };
+  $("clr").onclick = () => { if (!confirm("Clear everything?")) return; data = {}; persist(); openTab(0); say("Cleared") };
+
+  
+  { const lt = load("Tab"), n = lt === null ? NaN : +lt; cur = load("Seen") !== "1" ? 1 : (Number.isInteger(n) && n >= 0 && n < TABS.length ? n : 0); }
+  drawTabs(); drawPanel(); tutPrompt();
+  if (window.claude && claude.use) claude.use("downloads").then(d => { if (d) dl = d }, () => {});
+}
+
+const TUT_STEPS = [
+  {"t":"Define Login Requirements","d":"Establish audience, security policies, and authentication constraints."},
+  {"t":"Review Parallel Options","d":"Pick a page layout, then inspect the 3 parallel login wireframes, pros, and cons in the Wireframes tab."},
+  {"t":"Two Iteration Rounds (Max 2 Additions/Round)","d":"Choose a concept, then select up to 2 feature additions per round."},
+  {"t":"Audit & Synthesis","d":"Review automated feedback reports and document success/failure outcomes."}
+];
+const TUT_EX = [
+  "Requirements: Secure enterprise portal, quick consumer access, and support for multi-factor authentication.",
+  "Reviewed Concept A, B, and C options in the Wireframe tab.",
+  "Selected Concept B and added 2 features in Round 1, followed by 2 features in Round 2."
+];
+const READING = {"title":"Designing Secure and Usable Authentication Flows","url":"https://www.nngroup.com/articles/parallel-design/","summary":"Exploring parallel design alternatives for authentication pages allows teams to balance strict security mechanisms (MFA, CAPTCHA, strict password validation) with frictionless user entry points (SSO, show password toggles)."};
+const WATCH = "Over-complicating login pages with too many security gates on first view can cause high abandonment rates. Use staged progressive disclosure.";
+
+const GAME = [
+  ["Require a CAPTCHA on every single login attempt including successful ones","risk","Excessive CAPTCHAs frustrate legitimate users and hurt usability."],
+  ["Provide a show/hide password toggle button","good","Reduces login failure rates caused by typing typos."],
+  ["Hide error specifics (e.g. 'Invalid username or password' instead of 'User not found')","good","Prevents account enumeration attacks by malicious actors."],
+  ["Force users to change complex passwords every 30 days without reason","risk","Frequent forced resets often lead users to write down passwords or use predictable variations."],
+  ["Integrate Single Sign-On (SSO) options like Google and Apple","good","Accelerates onboarding and reduces password fatigue."],
+  ["Lock accounts permanently on the first failed login attempt","risk","Creates severe denial-of-service vectors for user harassment."],
+  ["Include inline validation error messaging on username and password fields","good","Helps users correct syntax mistakes immediately before submission."],
+  ["Store user passwords in plain text in client-side storage","risk","Exposes credentials instantly if the browser session or storage is compromised."],
+  ["Support Passkeys and WebAuthn for passwordless authentication","good","Enhances security while significantly streamlining the login friction."],
+  ["Bypass HTTPS encryption on login forms for internal staging","risk","Leaves credentials completely vulnerable to man-in-the-middle sniffing."]
+];
+const LEVELS = [["Newcomer 🐣",0],["Security Analyst 🔒",25],["Authentication Architect 🏅",60]];
+const GAME_TITLE = "Login Design & Security";
+
+const pj = (k, d) => { try { const v = JSON.parse(data[k] || "null"); return Array.isArray(d) ? (Array.isArray(v) ? v : d) : (v && typeof v === "object" && !Array.isArray(v) ? v : d) } catch (e) { return d } };
+const sj = (k, v) => { const e = (Array.isArray(v) && !v.length) || (v && typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length); if (e) delete data[k]; else data[k] = JSON.stringify(v); persist() };
+const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
+
+const getGame = () => {
+  const g0 = pj("gm", {});
+  const ok = g0.o && Array.isArray(g0.o) && g0.o.length === GAME.length && g0.o.every(n => Number.isInteger(n) && n >= 0 && n < GAME.length);
+  return { o: ok ? g0.o : shuf(GAME.map((_, i) => i)), i: Math.min(+g0.i || 0, GAME.length - 1), s: Math.min(Math.max(+g0.s || 0, 0), GAME.length), done: g0.done ? 1 : 0, picks: g0.picks && typeof g0.picks === "object" && !Array.isArray(g0.picks) ? g0.picks : {} };
+};
+
+function updXP(){
+  const el = $("xp"); if (!el) return;
+  const total = FIELDS.filter(f => !f.hidden).length, txt = FIELDS.filter(f => !f.hidden && g(f.k)).length, gm = getGame();
+  const xp = txt * 5 + gm.s * 10, lv = LEVELS.filter(l => xp >= l[1]).pop() || LEVELS[0];
+  el.innerHTML = `<b>⭐ ${xp} XP</b><span>Rank: ${esc(lv[0])}</span><span class="bdg${gm.done ? " on" : ""}">🎯 Sorter ${gm.done ? "complete" : "locked"}</span><span class="bdg${txt >= total ? " on" : ""}">📝 Notes ${txt >= total ? "complete" : txt + " / " + total}</span>`;
+  updTicks();
+}
+function tabDone(i){
+  const t = TABS[i], w = t.widget;
+  if (w === "tutorial") return load("TutDone") === "1";
+  if (w === "game") return getGame().done === 1;
+  return t.fields.some(f => !f.hidden && g(f.k));
+}
+function updTicks(){
+  TABS.forEach((t, i) => {
+    const b = $("t" + i); if (!b) return;
+    const d = tabDone(i), s = b.querySelector(".dn");
+    if (d && !s) b.insertAdjacentHTML("beforeend", '<span class="dn"><span aria-hidden="true">✓</span><span class="sr"> done</span></span>');
+    else if (!d && s) s.remove();
+  });
+}
+function navBar(){
+  const p = $("panel"); if (!p) return;
+  const pr = TABS[cur - 1], nx = TABS[cur + 1];
+  p.insertAdjacentHTML("beforeend", `<div class="row pnav">${pr ? `<button type="button" class="alt" data-nav="-1"><span aria-hidden="true">←</span> Back: ${esc(pr.title)}</button>` : "<span></span>"}${nx ? `<button type="button" class="alt" data-nav="1">Next: ${esc(nx.title)} <span aria-hidden="true">→</span></button>` : `<button type="button" class="alt" data-nav="x">Done: export your work…</button>`}</div>`);
+  qa(p, "[data-nav]").forEach(b => b.onclick = () => { if (b.dataset.nav === "x") return $("xopen").click(); openTab(cur + +b.dataset.nav, true); if ($("tabs").scrollIntoView) $("tabs").scrollIntoView({ block: "start" }) });
+}
+function tutPrompt(){
+  const el = $("tp"); if (!el || load("Seen") === "1") return;
+  el.innerHTML = `<div class="tp" role="region" aria-label="Welcome"><p><b>New here?</b> Take the 2-minute tutorial first. It guides you through reviewing parallel options and running sprints.</p><div class="row"><button type="button" id="tpy">Take the tutorial</button><button type="button" class="alt" id="tpn">Skip for now</button></div></div>`;
+  const close = m => { store("Seen", "1"); el.innerHTML = ""; say(m) };
+  $("tpy").onclick = () => { close("Starting tutorial."); openTab(0, true) };
+  $("tpn").onclick = () => close("Skipped tutorial.");
+}
+
+function widgetHook(){ updXP(); navBar(); if (!TABS[cur].widget) return; $("panel").querySelector("p").insertAdjacentHTML("afterend", '<div id="wg" class="wg"></div>'); wgDraw() }
+function wgDraw(){
+  const el = $("wg"); if (!el || !TABS[cur].widget) return;
+  el.innerHTML = ({ tutorial: wTut, learn: wLearn, wireframes: wWireframes, summary: wSummary, game: wGame })[TABS[cur].widget]();
+  el.onclick = e => { const b = e.target.closest("button[data-a]"); if (b) act(b.dataset.a, b.dataset.v) };
+  updXP();
+}
+
+function wTut(){
+  const done = load("TutDone") === "1";
+  return `<h3 class="wh">How the Login Sprint Works</h3>` +
+    `<ol class="steps">${TUT_STEPS.map((s, i) => `<li><b>${i + 1}. ${esc(s.t)}</b> —${esc(s.d)}</li>`).join("")}</ol>` +
+    `<h3 class="wh">Sprint Example</h3><ul class="ex">${TUT_EX.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` +
+    `<h3 class="wh">Key Reading</h3><p><b>${esc(READING.title)}</b></p><p><a href="${esc(READING.url)}" target="_blank" rel="noopener">${esc(READING.url)}</a></p><p class="hint">${esc(READING.summary)}</p>` +
+    `<div class="watch"><b>Watch for:</b> ${esc(WATCH)}</div>` +
+    `<div class="row"><button type="button" data-a="td">${done ? "Tutorial completed ✓" : "Mark tutorial as read"}</button></div>`;
+}
+
+function wLearn(){
+  return `<h3 class="wh">The Core Principle</h3><p>${esc(READING.summary)}</p>` +
+    `<div class="watch"><b>Watch for:</b> ${esc(WATCH)}</div>` +
+    `<p class="hint">Explain authentication parallel design in your own words below.</p>`;
+}
+
+/* Wireframe definitions & SVG generation engine */
+/* ===== Wireframe definitions, layouts & SVG generation engine =====
+   One form builder (wfForm) is placed inside one of five page layouts (wfSvg). The same code draws the
+   full live preview (with text) and the small selection thumbnails (grey "skeleton" bars, no text). */
+const LOGIN_WIREFRAMES = [
+  { id: 'A', name: 'Concept A: Minimalist Direct Auth', rating: '★★★☆☆ (3/5)', layout: 'Direct email & password inputs with primary CTA.', pros: ['Clean, fast loading', 'Zero clutter for returning users'], cons: ['Lacks password recovery', 'No security bot protection'] },
+  { id: 'B', name: 'Concept B: Social & SSO First', rating: '★★★★☆ (4/5)', layout: 'Prominent SSO buttons at top with email fallback.', pros: ['Extremely fast consumer onboarding', 'Reduces password fatigue'], cons: ['Enterprise users may miss routing', 'Cluttered button stack'] },
+  { id: 'C', name: 'Concept C: Enterprise Security-Hardened', rating: '★★★☆☆ (3/5)', layout: 'Corporate routing, MFA, CAPTCHA, and robust rules.', pros: ['Robust fraud prevention', 'Comprehensive account recovery'], cons: ['High cognitive load on first visitors', 'Form feels intimidating'] }
+];
+
+/* Page layouts: original, simplified sketches of the common patterns in Figma's login page template collection. */
+const LAYOUTS = [
+  { id: 'card',      name: 'Centred card',               from: 'Standard, Simple and Elegant login pages', desc: 'One form card in the middle of a plain page.',               good: 'Familiar and quick to build',     watch: 'Lots of empty space on wide screens' },
+  { id: 'split-img', name: 'Split screen: image',        from: 'Image-forward login pages',                desc: 'A large hero image on the left, the form on the right.',     good: 'Strong brand feel',               watch: 'Heavy image; hide it on small screens' },
+  { id: 'split-ill', name: 'Split screen: illustration', from: 'Illustration login page',                  desc: 'The form on the left, a friendly illustration on the right.', good: 'Friendly and distinctive',        watch: 'Art must not distract from the form' },
+  { id: 'glass',     name: 'Glass card on gradient',     from: 'Gradient and Glass-effect login pages',    desc: 'A see-through card floating over a colourful gradient.',      good: 'Modern and eye-catching',         watch: 'Check text contrast on the background' },
+  { id: 'mobile',    name: 'Mobile screen',              from: 'Desktop and Mobile login pages',           desc: 'A single narrow column designed for a phone first.',          good: 'Thumb-friendly, simple order',    watch: 'Little room for extra security steps' }
+];
+
+/* Form options a learner can add. `short` is the plain name used in lists, reports and exports. */
+const FEATURES = [
+  { k: 'show_pwd',      label: 'Show/Hide password toggle 👁',   short: 'Show/hide password toggle' },
+  { k: 'strong_pwd',    label: 'Strong password validation 🔒',  short: 'Strong password validation' },
+  { k: 'remember',      label: 'Remember me checkbox ✓',         short: 'Remember me checkbox' },
+  { k: 'mfa',           label: 'Multi-Factor Auth (MFA/2FA) 🔐', short: 'Multi-factor authentication' },
+  { k: 'captcha',       label: 'reCAPTCHA / bot barrier 🤖',     short: 'reCAPTCHA bot barrier' },
+  { k: 'social',        label: 'Social Media SSO login 🌐',      short: 'Social SSO login' },
+  { k: 'register_btn',  label: 'Register / Sign-up button 🆕',   short: 'Register / Sign-up button' },
+  { k: 'register_link', label: 'Register / Sign-up link 🔗',     short: 'Register / Sign-up link' }
+];
+const featName = k => (FEATURES.find(f => f.k === k) || { short: k }).short;
+const getLayout = id => LAYOUTS.find(l => l.id === id) || LAYOUTS[0];
+
+const LS_DEF = () => ({ chosenConcept: null, layout: "card", round: 1, applied: [], round1Added: 0, round2Added: 0 });
+const getLoginState = () => {
+  const o = pj("loginstate", {}), n = x => Number.isInteger(x) && x >= 0 && x <= 2 ? x : 0;
+  return {
+    chosenConcept: LOGIN_WIREFRAMES.some(c => c.id === o.chosenConcept) ? o.chosenConcept : null,
+    layout: LAYOUTS.some(l => l.id === o.layout) ? o.layout : "card",
+    round: o.round === 2 ? 2 : 1,
+    applied: Array.isArray(o.applied) ? o.applied.filter((k, i, a) => FEATURES.some(f => f.k === k) && a.indexOf(k) === i) : [],
+    round1Added: n(o.round1Added), round2Added: n(o.round2Added)
+  };
+};
+
+const WF = { bg0: "#0B0F1A", bg1: "#151B2E", pn: "#1b2440", ln: "#2c3552", mu: "#9AA4BF", tx: "#DDE3F2", cy: "#00E5FF", li: "#B6FF3B", am: "#FFC83D", tl: "#0e7490", ed: "#94a3b8" };
+const f1 = n => Math.round(n * 10) / 10;
+
+/* The login form itself, drawn from (0,0) at width w. Returns {b: svg, h: height, parts: [names]}. thumb = skeleton bars. */
+function wfForm(c, S, w, thumb) {
+  const has = k => S.has(k), narrow = w < 260, parts = [];
+  let y = 0, b = "";
+  const T = (x, yy, s, o) => {
+    o = o || {}; const sz = o.sz || 12, fill = o.fill || WF.tx, an = o.an || "start";
+    if (!thumb) return `<text x="${f1(x)}" y="${f1(yy)}" fill="${fill}" font-family="sans-serif" font-size="${sz}"${o.bold ? ' font-weight="bold"' : ""}${an !== "start" ? ` text-anchor="${an}"` : ""}>${esc(s)}</text>`;
+    const bw = Math.min(w - 16, Math.max(14, s.length * sz * 0.5)), bh = Math.max(4, sz * 0.45), bx = an === "middle" ? x - bw / 2 : an === "end" ? x - bw : x;
+    return `<rect x="${f1(bx)}" y="${f1(yy - bh - 1)}" width="${f1(bw)}" height="${f1(bh)}" rx="${f1(bh / 2)}" fill="${fill}" opacity=".6"/>`;
+  };
+  const inp = (yy, iw, ih, s, st) => `<rect x="0" y="${yy}" width="${iw}" height="${ih}" rx="4" fill="${WF.bg1}" stroke="${st || WF.ed}" stroke-width="1.5"/>` + T(10, yy + ih * 0.65, s, { sz: 12 });
+
+  b += T(w / 2, 16, "Secure Portal Login (" + c + ")", { sz: narrow ? 13 : 16, bold: 1, fill: "#fff", an: "middle" }); y = 34;
+
+  if (c === 'B' || has('social')) {
+    b += `<rect x="0" y="${y}" width="${w}" height="32" rx="4" fill="${WF.tl}"/>` + T(w / 2, y + 21, "Continue with Google / Apple SSO", { sz: narrow ? 11 : 12, fill: "#fff", an: "middle" });
+    y += 42; b += T(w / 2, y, "--- or use email ---", { sz: 10, fill: WF.mu, an: "middle" }); y += 18; parts.push("SSO button");
+  }
+  b += T(0, y + 12, c === 'C' ? "Work email" : "Email or Username", { sz: 11, fill: WF.mu }); y += 18;
+  b += inp(y, w, 34, "user@example.com"); y += 44; parts.push("email field");
+
+  b += T(0, y + 12, "Password", { sz: 11, fill: WF.mu }); y += 18;
+  b += inp(y, has('show_pwd') ? w - 60 : w, 34, "••••••••••••"); parts.push("password field");
+  if (has('show_pwd')) { b += `<rect x="${w - 50}" y="${y}" width="50" height="34" rx="4" fill="${WF.ln}"/>` + T(w - 25, y + 22, "👁", { sz: 11, fill: WF.cy, an: "middle" }); parts.push("show password toggle") }
+  y += 42;
+
+  if (has('strong_pwd')) {
+    b += T(0, y + 10, "🔒 Password Strength: Strong", { sz: 10, fill: WF.li }) + `<rect x="0" y="${y + 15}" width="${w}" height="6" rx="3" fill="${WF.ln}"/><rect x="0" y="${y + 15}" width="${f1(w * 0.76)}" height="6" rx="3" fill="${WF.li}"/>`;
+    y += 30; parts.push("password strength meter");
+  }
+
+  b += `<rect x="0" y="${y}" width="14" height="14" rx="2" fill="${has('remember') ? WF.cy : WF.bg1}" stroke="${WF.ed}"/>` + T(20, y + 11, "Remember me", { sz: 11, fill: WF.mu }) + T(w, y + 11, "Forgot Password?", { sz: 11, fill: WF.cy, an: "end" });
+  y += 30; parts.push(has('remember') ? "remember me ticked" : "remember me checkbox", "forgot password link");
+
+  if (has('mfa')) {
+    b += T(0, y + 10, narrow ? "MFA Verification Code" : "MFA Verification Code (SMS / OTP)", { sz: 11, fill: WF.am }); y += 14;
+    b += inp(y, w, 30, "1 2 3 - 4 5 6", WF.am); y += 38; parts.push("MFA code field");
+  }
+  if (has('captcha')) {
+    b += `<rect x="0" y="${y}" width="${w}" height="32" rx="4" fill="${WF.bg1}" stroke="${WF.ed}"/><rect x="10" y="${y + 9}" width="14" height="14" fill="${WF.li}"/>` + T(33, y + 20, narrow ? "I'm not a robot" : "I'm not a robot (reCAPTCHA)", { sz: 11 });
+    y += 40; parts.push("reCAPTCHA");
+  }
+
+  b += `<rect x="0" y="${y}" width="${w}" height="38" rx="6" fill="${WF.cy}"/>` + T(w / 2, y + 24, "SIGN IN", { sz: 13, bold: 1, fill: WF.bg0, an: "middle" });
+  y += 38; parts.push("sign in button");
+
+  if (c === 'C') { y += 18; b += T(w / 2, y, "Sign in with company SSO →", { sz: 11, fill: WF.cy, an: "middle" }); y += 6; parts.push("company SSO link") }
+
+  if (has('register_btn')) {   /* a button: outlined box, so it stays secondary to SIGN IN */
+    y += 12; b += `<rect x="1" y="${y}" width="${w - 2}" height="36" rx="6" fill="none" stroke="${WF.cy}" stroke-width="2"/>` + T(w / 2, y + 23, "CREATE AN ACCOUNT", { sz: 12, bold: 1, fill: WF.cy, an: "middle" });
+    y += 36; parts.push("register button");
+  }
+  if (has('register_link')) {   /* a link: plain underlined text */
+    y += 22;
+    b += thumb ? T(w / 2, y, "New here? Sign up", { sz: 12, fill: WF.mu, an: "middle" })
+      : `<text x="${f1(w / 2)}" y="${y}" font-family="sans-serif" font-size="12" text-anchor="middle"><tspan fill="${WF.mu}">New here? </tspan><tspan fill="${WF.cy}" font-weight="bold" text-decoration="underline">Sign up</tspan></text>`;
+    y += 8; parts.push("sign up link");
+  }
+  return { b, h: y, parts };
+}
+
+let _wfId = 0;
+/* Place the form in a page layout. o: {thumb, minw}. Returns a complete <svg> string. */
+function wfSvg(c, S, layout, o) {
+  o = o || {}; const thumb = !!o.thumb, L = LAYOUTS.some(l => l.id === layout) ? layout : "card", gid = "wfg" + (++_wfId);
+  const w = { card: 290, "split-img": 220, "split-ill": 220, glass: 290, mobile: 200 }[L], fm = wfForm(c, S, w, thumb), CH = 26;
+  let vw = 560, vh, body = "", defs = "";
+  const chrome = `<rect x="0" y="0" width="${vw}" height="${CH}" fill="#0f1424"/>` + [14, 28, 42].map(x => `<circle cx="${x}" cy="13" r="4" fill="${WF.ln}"/>`).join("") + `<rect x="64" y="7" width="${vw - 128}" height="12" rx="6" fill="${WF.bg1}"/>`;
+  const place = (x, y) => `<g transform="translate(${f1(x)} ${f1(y)})">${fm.b}</g>`;
+  const lbl = (x, y, s) => thumb ? "" : `<text x="${x}" y="${y}" fill="${WF.mu}" font-family="sans-serif" font-size="12" text-anchor="middle">${esc(s)}</text>`;
+
+  if (L === "card") {
+    const ch = fm.h + 34, ct = CH + 24, cw = w + 40, cx = (vw - cw) / 2; vh = Math.max(340, ct + ch + 24);
+    body = `<rect width="${vw}" height="${vh}" fill="${WF.bg1}"/>${chrome}<rect x="${cx}" y="${ct}" width="${cw}" height="${ch}" rx="8" fill="${WF.bg0}" stroke="${WF.ln}" stroke-width="2"/>` + place(cx + 20, ct + 14);
+  } else if (L === "split-img") {
+    vh = Math.max(380, CH + fm.h + 64); const my = (CH + vh) / 2;
+    body = `<rect width="${vw}" height="${vh}" fill="${WF.bg0}"/>${chrome}<rect x="0" y="${CH}" width="280" height="${vh - CH}" fill="${WF.pn}"/>` +
+      `<line x1="0" y1="${CH}" x2="280" y2="${vh}" stroke="${WF.ln}" stroke-width="2"/><line x1="280" y1="${CH}" x2="0" y2="${vh}" stroke="${WF.ln}" stroke-width="2"/>` +
+      `<circle cx="205" cy="${my - 30}" r="14" fill="${WF.am}" opacity=".7"/><polygon points="70,${my + 50} 130,${my - 10} 175,${my + 50}" fill="${WF.mu}" opacity=".6"/><polygon points="140,${my + 50} 190,${my + 5} 240,${my + 50}" fill="${WF.mu}" opacity=".4"/>` +
+      lbl(140, my + 78, "Hero image") + place(310, CH + (vh - CH - fm.h) / 2);
+  } else if (L === "split-ill") {
+    vh = Math.max(380, CH + fm.h + 64); const my = (CH + vh) / 2;
+    body = `<rect width="${vw}" height="${vh}" fill="${WF.bg0}"/>${chrome}<rect x="280" y="${CH}" width="280" height="${vh - CH}" fill="${WF.pn}"/>` +
+      `<circle cx="420" cy="${my - 6}" r="78" fill="#24305a"/><circle cx="350" cy="${my - 78}" r="14" fill="${WF.li}" opacity=".6"/><circle cx="498" cy="${my + 66}" r="10" fill="${WF.am}" opacity=".7"/>` +
+      `<rect x="382" y="${my - 4}" width="76" height="48" rx="6" fill="${WF.bg0}" stroke="${WF.cy}" stroke-width="2"/><circle cx="420" cy="${my - 42}" r="13" fill="${WF.mu}"/><rect x="403" y="${my - 27}" width="34" height="28" rx="12" fill="${WF.tl}"/>` +
+      lbl(420, my + 100, "Illustration") + place(30, CH + (vh - CH - fm.h) / 2);
+  } else if (L === "glass") {
+    const ch = fm.h + 34; vh = Math.max(380, CH + 30 + ch + 30); const cx = (vw - (w + 40)) / 2;
+    defs = `<linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490"/><stop offset=".55" stop-color="#4c1d95"/><stop offset="1" stop-color="#9d174d"/></linearGradient>`;
+    body = `<rect width="${vw}" height="${vh}" fill="url(#${gid})"/><circle cx="90" cy="${CH + 90}" r="60" fill="${WF.cy}" opacity=".25"/><circle cx="480" cy="${vh - 70}" r="80" fill="${WF.li}" opacity=".18"/>${chrome}` +
+      `<rect x="${cx}" y="${CH + 30}" width="${w + 40}" height="${ch}" rx="12" fill="#ffffff" fill-opacity=".1" stroke="#ffffff" stroke-opacity=".5" stroke-width="1.5"/>` + place(cx + 20, CH + 44);
+  } else {   /* mobile */
+    vw = 300; vh = 84 + fm.h + 36;
+    body = `<rect width="${vw}" height="${vh}" fill="${WF.bg1}"/><rect x="30" y="10" width="240" height="${vh - 20}" rx="28" fill="${WF.bg0}" stroke="${WF.ln}" stroke-width="3"/><rect x="110" y="20" width="80" height="8" rx="4" fill="${WF.ln}"/>` +
+      `<circle cx="150" cy="56" r="14" fill="none" stroke="${WF.cy}" stroke-width="2"/>` + place(50, 84);
+  }
+  const desc = `Wireframe of a login page, Concept ${c}, ${getLayout(L).name} layout. It contains: ${fm.parts.join(", ")}.`;
+  return `<svg viewBox="0 0 ${vw} ${vh}" width="100%" role="img" aria-label="${esc(desc)}" style="max-width:${vw}px;display:block;margin:0 auto;border-radius:8px;${o.minw ? `min-width:${o.minw}px;` : ""}"><defs>${defs}</defs>${body}</svg>`;
+}
+const generateSvgWireframe = (conceptId, appliedSet, layout) => wfSvg(conceptId, appliedSet, layout, { minw: layout === "mobile" ? 0 : 460 });
+
+function evaluateSelections(applied) {
+  const set = new Set(applied);
+  const count = set.size;
+
+  let score = "Rating: ★★★☆☆ (Moderate Appropriateness)";
+  let summary = "You balanced a few elements, but could refine your security-to-friction ratio.";
+  let goodPoints = [];
+  let badPoints = [];
+
+  if (set.has('show_pwd')) goodPoints.push("Added show/hide password toggle, significantly reducing login typing errors.");
+  if (set.has('strong_pwd')) goodPoints.push("Included strong password verification criteria, preventing weak credentials.");
+  if (set.has('remember')) goodPoints.push("Added 'Remember Me' feature to streamline subsequent sessions on trusted devices.");
+  if (set.has('mfa')) goodPoints.push("Integrated Multi-Factor Authentication (MFA), providing robust secondary account protection.");
+  if (set.has('captcha')) goodPoints.push("Added reCAPTCHA to block automated bot scripting and brute-force IP sweeps.");
+  if (set.has('social')) goodPoints.push("Included Social SSO, ensuring rapid user onboarding and reduced friction.");
+  if (set.has('register_btn')) goodPoints.push("Added a clear Register / Sign-up button, giving first-time visitors an obvious way to create an account.");
+  if (set.has('register_link')) goodPoints.push("Added a Sign-up link under the form, so new users can find registration without competing with SIGN IN.");
+  if (set.has('register_btn') && set.has('register_link')) badPoints.push("Both a Register button and a Sign-up link do the same job. Keep one so the page has a single clear primary action and less clutter.");
+
+  if (count === 0) {
+    score = "Rating: ★☆☆☆☆ (Incomplete Changes)";
+    badPoints.push("No features were selected across the rounds. The wireframe remains bare.");
+  } else if (set.has('captcha') && set.has('mfa') && set.has('strong_pwd') && count >= 4) {
+    score = "Rating: ★★★★★ (Highly Secure & Enterprise-Grade)";
+    summary = "Exceptional configuration! You successfully locked down authentication security while maintaining usability.";
+  } else if (set.has('social') && set.has('show_pwd') && set.has('remember')) {
+    score = "Rating: ★★★★★ (Consumer-Friendly & Frictionless)";
+    summary = "Fantastic UX focus! Your choices prioritize rapid consumer entry and clear form legibility.";
+  } else {
+    if (!set.has('show_pwd') && !set.has('strong_pwd')) badPoints.push("Missing password clarity or verification tools.");
+    if (!set.has('mfa') && !set.has('captcha')) badPoints.push("Lacking automated bot defense or multi-factor options.");
+    if (!set.has('register_btn') && !set.has('register_link')) badPoints.push("No way for new users to register. Add a Register / Sign-up button or link.");
+  }
+
+  return { score, summary, goodPoints, badPoints };
+}
+
+/* Gallery of layout thumbnails: pick one. Buttons (not radios) so they work with the page's click handler. */
+function layoutGallery(st) {
+  return `<div class="lay-grid" role="group" aria-label="Page layout options">` + LAYOUTS.map(l => {
+    const on = st.layout === l.id;
+    return `<button type="button" class="lay${on ? " on" : ""}" data-a="login-layout" data-v="${l.id}" aria-pressed="${on}">` +
+      `<span class="lay-svg" aria-hidden="true">${wfSvg("A", new Set(), l.id, { thumb: true })}</span>` +
+      `<b>${esc(l.name)}${on ? " ✓ Selected" : ""}</b><small>Pattern: ${esc(l.from)}</small><small>${esc(l.desc)}</small>` +
+      `<small><span class="badge-good">Good for:</span> ${esc(l.good)}. <span class="badge-bad">Watch for:</span> ${esc(l.watch)}.</small></button>`;
+  }).join("") + `</div>`;
+}
+
+function wWireframes() {
+  const st = getLoginState(), lay = getLayout(st.layout);
+
+  // If no concept chosen yet, show the layouts and all 3 concepts and prompt the user to read and choose
+  if (!st.chosenConcept) {
+    let html = `<h3 class="wh">Step 1: Review Parallel Login Wireframe Options</h3>` +
+      `<p class="hint">Part A: pick a page layout. Part B: compare the three concepts, previewed in your layout, then choose one to start your two iteration rounds.</p>` +
+      `<h4 class="wh2">A. Pick a page layout</h4>` + layoutGallery(st) +
+      `<p class="hint">These layout patterns are inspired by the categories in <a href="https://www.figma.com/templates/login-page-design/" target="_blank" rel="noopener">Figma's login page templates</a>. The wireframes are original, simplified sketches, not copies.</p>` +
+      `<h4 class="wh2">B. Compare the concepts (shown in the ${esc(lay.name)} layout)</h4><div class="wf-grid">`;
+
+    LOGIN_WIREFRAMES.forEach(wf => {
+      html += `<div class="wf-card">` +
+        `<div>` +
+        `<div class="wf-thumb" aria-hidden="true">${wfSvg(wf.id, new Set(), st.layout, { thumb: true })}</div>` +
+        `<b>${esc(wf.name)}</b> <span style="float:right; color:var(--am);">${esc(wf.rating)}</span>` +
+        `<p class="hint" style="margin:8px 0;">${esc(wf.layout)}</p>` +
+        `<p style="margin:4px 0 2px;"><span class="badge-good">Pros:</span></p>` +
+        `<ul style="margin:0 0 6px; padding-left:16px; font-size:0.85rem;">${wf.pros.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` +
+        `<p style="margin:4px 0 2px;"><span class="badge-bad">Cons:</span></p>` +
+        `<ul style="margin:0 0 6px; padding-left:16px; font-size:0.85rem;">${wf.cons.map(c => `<li>${esc(c)}</li>`).join("")}</ul>` +
+        `</div>` +
+        `<div style="margin-top:12px;"><button type="button" style="width:100%;" data-a="login-choose" data-v="${wf.id}">Choose Concept ${wf.id} to Sprint</button></div>` +
+        `</div>`;
+    });
+
+    html += `</div>`;
+    return html;
+  }
+
+  // Active sprint view for chosen concept
+  const appliedSet = new Set(st.applied);
+  const conceptObj = LOGIN_WIREFRAMES.find(c => c.id === st.chosenConcept) || LOGIN_WIREFRAMES[0];
+  const currentRoundAdded = st.round === 1 ? st.round1Added : st.round2Added;
+
+  let html = `<h3 class="wh">Step 2: Iteration Sprint (${esc(conceptObj.name)})</h3>` +
+    `<p class="hint">Round ${st.round} of 2. You can add up to <b>2 features per round</b> (Added this round: ${currentRoundAdded}/2).</p>` +
+    `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">` +
+    `<span class="bdg on">Active Concept: ${esc(conceptObj.id)}</span>` +
+    `<button type="button" class="alt" style="padding:4px 10px; font-size:0.75rem;" data-task-handler="openConceptModal" data-task-arg="">Switch Concept</button>` +
+    `</div>`;
+
+  if (st.round >= 2 && currentRoundAdded >= 2) {
+    const evalData = evaluateSelections(st.applied);
+    html += `<div class="tp" style="background:var(--card); border-color:var(--li); margin-bottom:16px;">` +
+      `<h3 class="wh" style="margin-top:0; color:var(--li);">Sprint Evaluation & Feedback Report</h3>` +
+      `<p><b>${esc(evalData.score)}</b></p>` +
+      `<p><i>${esc(evalData.summary)}</i></p>`;
+
+    if (evalData.goodPoints.length > 0) {
+      html += `<p style="margin:6px 0 2px;"><span class="badge-good">Appropriate Changes (Pros):</span></p>` +
+        `<ul style="margin:0 0 8px; padding-left:16px; font-size:0.85rem;">${evalData.goodPoints.map(gp => `<li>${esc(gp)}</li>`).join("")}</ul>`;
+    }
+    if (evalData.badPoints.length > 0) {
+      html += `<p style="margin:6px 0 2px;"><span class="badge-bad">Missed Opportunities / Risks (Cons):</span></p>` +
+        `<ul style="margin:0 0 8px; padding-left:16px; font-size:0.85rem;">${evalData.badPoints.map(bp => `<li>${esc(bp)}</li>`).join("")}</ul>`;
+    }
+    html += `<p class="hint">Both rounds completed! Proceed to the <b>Combined Design</b> and <b>Writeup</b> tabs to conclude your sprint.</p>` +
+      `</div>`;
+  }
+
+  html += `<div class="svg-wrap">` +
+    `<h4 style="margin:0 0 8px; color:var(--cy);">Live SVG Wireframe Preview: ${esc(lay.name)}</h4>` +
+    `<div class="row" role="group" aria-label="Page layout" style="margin:0 0 10px; justify-content:center;">` +
+    LAYOUTS.map(l => `<button type="button" class="${st.layout === l.id ? "" : "alt"}" style="padding:4px 10px; min-height:2.75rem; font-size:0.8125rem;" data-a="login-layout" data-v="${l.id}" aria-pressed="${st.layout === l.id}">${st.layout === l.id ? "✓ " : ""}${esc(l.name)}</button>`).join("") +
+    `</div>` +
+    `<div class="wf-scroll" tabindex="0" role="region" aria-label="Wireframe preview. Scrolls sideways on narrow screens.">${generateSvgWireframe(st.chosenConcept, appliedSet, st.layout)}</div>` +
+    `<p class="hint" style="margin-top:8px;"><b>Active Features (${st.applied.length}):</b> ${st.applied.length ? st.applied.map(k => esc(featName(k))).join(', ') : 'None yet'}</p>` +
+    `</div>`;
+
+  html += `<div class="wf-card" style="margin-top:16px;">` +
+    `<div><b>Available Features to Add (Max 2 per round):</b><p class="hint">Select features to incorporate into your SVG wireframe layout. Changing the page layout is free and does not use up your additions.</p></div>` +
+    `<ul class="feedback-list">`;
+
+  FEATURES.forEach(feat => {
+    const isApplied = appliedSet.has(feat.k), builtIn = feat.k === 'social' && conceptObj.id === 'B';
+    const disabled = isApplied || builtIn || currentRoundAdded >= 2 || st.round > 2;
+    html += `<li><span>${esc(feat.label)}</span> <button type="button" style="padding:4px 8px; min-height:2.75rem; font-size:0.75rem;" data-a="login-feat" data-v="${feat.k}" aria-label="${isApplied ? "Added: " : builtIn ? "Already built into Concept B: " : "Add "}${esc(feat.short)}" ${disabled ? 'disabled' : ''}>${isApplied ? 'Added ✓' : builtIn ? 'Built in ✓' : 'Add'}</button></li>`;
+  });
+
+  html += `</ul></div>`;
+
+  html += `<div class="tp" style="margin-top:16px;">` +
+    `<h3 class="wh" style="margin-top:0;">Iteration Round Control — Round ${st.round} of 2</h3>` +
+    `<p class="hint">Round additions used: <b>${currentRoundAdded} / 2</b></p>` +
+    `<div class="row">`;
+
+  if (st.round === 1) {
+    html += `<button type="button" data-a="login-next-round">Advance to Round 2</button>`;
+  } else {
+    html += `<button type="button" data-a="login-next-round" ${currentRoundAdded < 2 ? 'disabled' : ''}>Round 2 Complete (Feedback Ready)</button>`;
+  }
+  html += `<button type="button" class="alt" data-a="login-reset">Reset Sprint & Concept</button></div></div>`;
+
+  return html;
+}
+
+function chooseSpecificConcept(id) {
+  const st = getLoginState();
+  if (!LOGIN_WIREFRAMES.some(c => c.id === id)) return;
+  st.chosenConcept = id;
+  st.round1Added = 0;
+  st.round2Added = 0;
+  st.applied = [];
+  sj("loginstate", st);
+  say("Concept " + id + " selected. You can now start adding features.");
+  wgDraw();
+  const h = $("wg") && $("wg").querySelector("h3"); if (h) { h.setAttribute("tabindex", "-1"); h.focus() }
+}
+
+function sprintSection() {
+  const st = getLoginState(); if (!st.chosenConcept) return [];
+  return [{ h: "Wireframe sprint", rows: [
+    ["Page layout", getLayout(st.layout).name],
+    ["Chosen concept", "Concept " + st.chosenConcept],
+    ["Features added", st.applied.length ? st.applied.map(featName).join(", ") : "(none yet)"],
+    ["Round reached", st.round + " of 2"]
+  ] }];
+}
+
+function wSummary() {
+  const st = getLoginState();
+  const evalData = evaluateSelections(st.applied);
+  return `<h3 class="wh">Audit & Feedback Summary of Changes</h3>` +
+    `<p class="hint">Review structured feedback summary of modifications made across sprint rounds.</p>` +
+    `<div class="stmt">Chosen Concept: Concept ${esc(st.chosenConcept || 'None')} | Page layout: ${esc(getLayout(st.layout).name)} | Round Reached: ${st.round} of 2</div>` +
+    `<div class="stmt">Total Features Integrated: ${st.applied.length ? esc(st.applied.map(featName).join(', ')) : 'None selected'}</div>` +
+    `<div class="fb ok"><b>Automated Design Evaluation:</b><br>` +
+    `• <b>${esc(evalData.score)}</b><br>` +
+    `• <i>${esc(evalData.summary)}</i><br><br>` +
+    `<b>Key Strengths:</b> ${evalData.goodPoints.join(' | ') || 'None highlighted'}<br>` +
+    `<b>Areas for Caution:</b> ${evalData.badPoints.join(' | ') || 'None noted'}</div>` +
+    `<p class="hint">Proceed to the text field below to complete your final success/failure evaluation writeup.</p>`;
+}
+
+function wGame(){
+  const gm = getGame();
+  if (gm.done) return `<h3 class="wh">Results</h3><p><b>${gm.s} out of ${GAME.length}</b> sorted correctly.</p>` +
+    `<p class="hint">${gm.s === GAME.length ? "Full marks! You have mastered secure authentication practices." : "Review your security principles and try another round."}</p>` +
+    `<div class="row"><button type="button" data-a="gr">Shuffle and retake</button></div>`;
+  const idx = gm.o[gm.i], st = GAME[idx], picked = gm.picks[idx];
+  let h = `<h3 class="wh">Sort the practice (${gm.i + 1} of ${GAME.length})</h3>` +
+    `<p class="hint">Is this good authentication design practice or a risky shortcut?</p>` +
+    `<div class="stmt">${esc(st[0])}</div>`;
+  if (picked !== undefined){
+    const ok = picked === st[1];
+    h += `<div class="fb ${ok ? "ok" : "no"}"><b>${ok ? "Correct." : "Not quite."}</b> ${esc(st[2])}</div>` +
+      `<div class="row"><button type="button" data-a="gn">${gm.i >= GAME.length - 1 ? "See results" : "Next statement"}</button></div>`;
+  } else {
+    h += `<div class="sortrow"><button type="button" class="alt" data-a="gp" data-v="good">✓ Good practice</button><button type="button" class="alt" data-a="gp" data-v="risk">✖ Risky shortcut</button></div>`;
+  }
+  return h + `<p class="hint">Score so far: ${gm.s}.</p>`;
+}
+
+function act(a, v){
+  if (a === "td"){ if (load("TutDone") !== "1"){ store("TutDone", "1"); say("Tutorial marked as read.") } wgDraw(); return }
+  if (a === "login-layout") {
+    const l = LAYOUTS.find(x => x.id === v); if (!l) return;
+    const st = getLoginState(); st.layout = l.id; sj("loginstate", st);
+    say(l.name + " layout selected."); wgDraw();
+    const bt = $("wg") && $("wg").querySelector('button[data-a="login-layout"][data-v="' + l.id + '"]'); if (bt) bt.focus();
+    return;
+  }
+  if (a === "login-choose") { chooseSpecificConcept(v); return; }
+  if (a === "login-feat") {
+    const st = getLoginState();
+    const currentAdded = st.round === 1 ? st.round1Added : st.round2Added;
+    if (currentAdded < 2 && !st.applied.includes(v) && FEATURES.some(f => f.k === v) && !(v === "social" && st.chosenConcept === "B")) {
+      st.applied.push(v);
+      if (st.round === 1) st.round1Added++;
+      else st.round2Added++;
+      sj("loginstate", st);
+      say("Feature added to SVG wireframe (" + (st.round === 1 ? st.round1Added : st.round2Added) + "/2 added this round).");
+      wgDraw();
+    } else {
+      say("You have reached the maximum of 2 feature additions for this round.");
+    }
+    return;
+  }
+  if (a === "login-next-round") {
+    const st = getLoginState();
+    if (st.round === 1) {
+      st.round = 2;
+      sj("loginstate", st);
+      say("Advanced to Round 2. Add up to 2 features for this round.");
+      wgDraw();
+    } else {
+      say("Round 2 complete. Feedback report generated.");
+      wgDraw();
+    }
+    return;
+  }
+  if (a === "login-reset") {
+    sj("loginstate", LS_DEF());
+    say("Sprint and concept selection reset.");
+    wgDraw();
+    return;
+  }
+  if (a === "gp"){
+    const gm = getGame(), idx = gm.o[gm.i];
+    if (gm.picks[idx] !== undefined) return;
+    const ok = v === GAME[idx][1];
+    const picks = Object.assign({}, gm.picks); picks[idx] = v;
+    sj("gm", { o: gm.o, i: gm.i, s: gm.s + (ok ? 1 : 0), done: 0, picks });
+    say((ok ? "Correct. " : "Not quite. ") + GAME[idx][2]);
+    wgDraw(); return;
+  }
+  if (a === "gn"){
+    const gm = getGame(), last = gm.i >= GAME.length - 1;
+    sj("gm", { o: gm.o, i: last ? gm.i : gm.i + 1, s: gm.s, done: last ? 1 : 0, picks: gm.picks });
+    if (last) say("Sort complete. Score " + gm.s + " out of " + GAME.length + ".");
+    wgDraw(); return;
+  }
+  if (a === "gr"){ sj("gm", { o: shuf(GAME.map((_, i) => i)), i: 0, s: 0, done: 0, picks: {} }); say("New round shuffled."); wgDraw() }
+}
+
+boot();
+
+return {dispose(){stopMic();stopTTS();scope.dispose();}};
+};

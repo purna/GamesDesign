@@ -1,0 +1,67 @@
+[
+  {
+    "method": "surveys",
+    "source": "research-learning-tools/Activity_01_Online_Surveys_-_Survey_Lab.html",
+    "sha256": "fd2cc7427c96358f30eeab6a357c46048c18948adbc6571b2d00417462b6bb52"
+  },
+  {
+    "method": "task-analysis",
+    "source": "research-learning-tools/Activity_02_Task_Analysis_-_Join_A_Match.html",
+    "sha256": "6b13f3f306868be6e02f3379d6e4fefc4df9233d355d535900ae29d429bbe9a0"
+  },
+  {
+    "method": "prototyping",
+    "source": "research-learning-tools/Activity_03_Prototyping_Lab__Tutorial_Flow.html",
+    "sha256": "a6aa6e799b59a56fd832a98be6099326293a9e0408481e7a11db9fa53ac22303"
+  },
+  {
+    "method": "personas",
+    "source": "research-learning-tools/Activity_04_Persona_Maker__Esports_Event_App.html",
+    "sha256": "eecb9fa7282bf3989620aaf19664dc1ba3fcb70275506435547383c7b3ef1d80"
+  },
+  {
+    "method": "parallel-design",
+    "source": "research-learning-tools/Activity_05_Parallel_Design_-_Home_Screen_Sprint.html",
+    "sha256": "445d16027bfd1baea56a0c83f95fb26302b0ad55e1149947a63d88ea707c6ff3"
+  },
+  {
+    "method": "interviews",
+    "source": "research-learning-tools/Activity_06_Interviews_-_Peer_Experience_Lab.html",
+    "sha256": "00c9be72680e3b45af21827ad602b81b69f3a63966713340bc86fac0f5d6efca"
+  },
+  {
+    "method": "expert-review",
+    "source": "research-learning-tools/Activity_07_Expert_Review_Lab__UI_Audit_Triage.html",
+    "sha256": "7ec327dfdbe15ee8f891c49fefb7d8a43e36d89eb9f54891c87a710f18b282ad"
+  },
+  {
+    "method": "focus-groups",
+    "source": "research-learning-tools/Activity_08_Focus_Groups_-_Classroom_Discussion.html",
+    "sha256": "cba7d4f31b3ee849f4c41cd450ea6a07ffc78439550f766ae24f02e263ec9139"
+  },
+  {
+    "method": "first-click",
+    "source": "research-learning-tools/Activity_09_First_Click_Lab__Neon_Clash_Weekend.html",
+    "sha256": "638afef52c1cf6653a90621847678faa6aaa5bc6afcd7a268d710482045fa81c"
+  },
+  {
+    "method": "card-sorting",
+    "source": "research-learning-tools/Activity_10_Card_Sorting_-_Esports_Event_with_Tutorial.html",
+    "sha256": "fec043a68045ea1cf0c14873d66948b83c81f50567efa85cc41be89011fd47db"
+  },
+  {
+    "method": "contextual-interviews",
+    "source": "research-learning-tools/Activity_11_Contextual_Interviews_-_Study_Session.html",
+    "sha256": "4ad49caf3cea1d01f475e139549e9bd1d851668a4fd9b14a7c2c8c0bc83f419a"
+  },
+  {
+    "method": "usability-testing",
+    "source": "research-learning-tools/Activity_12_Usability_Testing_Lab__Practice_Session.html",
+    "sha256": "240e357cc8aab9b574dfe7b3bbefeb72e8b1755b4e1a518ff4d13fa034f25fe9"
+  },
+  {
+    "method": "use-cases",
+    "source": "research-learning-tools/Activity_13_Use_Case_Arena__Neon_Clash_Weekend.html",
+    "sha256": "8db60f2bb89b9252fc603e1daa6f6c4035f21bad62d7385eee12890a7e351f4a"
+  }
+]

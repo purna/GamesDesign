@@ -1,0 +1,1108 @@
+// Synced from Activity_13_Use_Case_Arena__Neon_Clash_Weekend.html; library scope isolates DOM, callbacks and timers.
+window.RESEARCH_TASKS["use-cases"] = function(scope){
+const window=scope.window, document=scope.document;
+const addEventListener=scope.addEventListener;
+const {setTimeout,clearTimeout,setInterval,clearInterval}=scope;
+/* =============================================================================
+   1. CONFIG + CONTENT.  This is the ONLY section a new app should need to edit.
+   ============================================================================= */
+const CFG = {pfx:"research-v3-use-cases-",file:"use-case-game",title:"Use Case Arena: Neon Clash Weekend",kicker:"RESEARCH METHODS · USE CASES · 50 MIN",sub:"Learn the symbols, play three levels, write a use case, then draw it.",version:1};
+/* Each tab renders a panel. Field: {k: unique key, label, hint, rows?}
+   rows => textarea; no rows => single-line input. Keys are the saved-data schema. */
+const APP_TABS = [
+ {title:"Case file",icon:"folder-open",fb:"📂",widget:"learn",intro:"A use case describes, from the user's side, how someone reaches a goal with your game or app: a main flow of steps, plus what could go wrong. Study this worked example for a fictional event.",fields:[
+  {k:"own_def",label:"A use case in your own words",hint:"One or two sentences. Start with: A use case is...",rows:3,starters:["A use case is...","The main flow is...","An alternative flow is...","It helps a team because..."]}]},
+ {title:"Key elements",short:"Symbols",icon:"shapes",fb:"◇",widget:"guide",intro:"A use case diagram is a picture of who uses a system and what goals it helps them reach. Learn the seven symbols, study a worked example, then draw your own later.",fields:[
+  {k:"dg_own",label:"Include or extend, in your own words",hint:"Use the day pass example. Start with: Include means...",rows:3,starters:["Include means...","Extend means...","The arrow points to... because...","For example, ..."]}]},
+ {title:"Level 1 · Actors",short:"1 · Actors",icon:"user-group",fb:"👥",widget:"l1",intro:"Level 1: set the actors. For each feature, choose who starts it and who else takes part.",fields:[{k:"uc_game",hidden:true}]},
+ {title:"Level 2 · Place",short:"2 · Place",icon:"hand-pointer",fb:"👆",widget:"l2",intro:"Level 2: place the use cases. The actors are set. Drag each card onto the numbered oval it belongs to.",fields:[]},
+ {title:"Level 3 · Fix",short:"3 · Fix",icon:"screwdriver-wrench",fb:"🔧",widget:"l3",intro:"Level 3: fix the diagram. Each picture has one mistake: change the association, switch include or extend, or flip an arrow.",fields:[]},
+ {title:"Create",icon:"pen-ruler",fb:"✎",widget:"create",intro:"Your turn. Pick a feature for Neon Clash Weekend, or invent one, and write its use case. Use the checklist as your success criteria.",fields:[
+  {k:"name",label:"Use case title",hint:"Start with who and a verb, for example: Fan finds the nearest first aid point."},
+  {k:"actor",label:"Actors",hint:"Who does the task? Who else is involved?",rows:2,starters:["Primary actor: ","Secondary actor: "]},
+  {k:"goal",label:"Goal",hint:"What does the user want, in their words?",rows:2,starters:["The user wants to..."]},
+  {k:"pre",label:"Before it starts",hint:"What must already be true?",rows:2,starters:["The user has...","The app is..."]},
+  {k:"main",label:"Main flow",hint:"Number the steps. Alternate between what the user does and how the system responds.",rows:6,starters:["1. The user opens...","2. The system shows...","The goal is reached when..."]},
+  {k:"alt",label:"What could go wrong",hint:"For each risk, write the step and how the system responds.",rows:5,starters:["At step 2, if...","If there is no signal, the system...","If the user makes a mistake, the system..."]},
+  {k:"req",label:"Requirements",hint:"Turn the risks into things the design must do.",rows:4,starters:["Because..., the system shall...","The design must..."]},
+  {k:"uc_chk",hidden:true}]},
+ {title:"Draw",icon:"diagram-project",fb:"🗺",widget:"draw",intro:"Turn your use case into a diagram. Follow the four steps. Your drawing saves on this device and goes into every export.",fields:[{k:"uc_diagram",hidden:true}]}
+];
+/* REFLECT-1: the standard exit task. Appended to every app. Do not edit the
+   wording, order or colours: they mirror the presentation template.
+   cls picks the card colour: "" cyan (What), "sw" pink (So What), "nw" lime (Now What). */
+const REFLECT = {title:"Reflect", icon:"comments", fb:"💬", reflect:true,
+  intro:"What? So What? Now What? Three questions, one next step. Write one to three sentences for each.",
+  cite:"Based on Borton, T. (1970) Reach, Touch and Teach; developed by Rolfe, Freshwater and Jasper (2001).",
+  fields:[
+    {k:"ref_what",   cls:"",   label:"WHAT? Describe it",      hint:"What happened? Facts only: what did you do, see, hear or make? Start with: I noticed...", rows:4, starters:["I noticed that...", "First I...", "The part I spent most time on was...", "Someone told me...", "What I made or wrote was..."]},
+    {k:"ref_sowhat", cls:"sw", label:"SO WHAT? Make sense of it", hint:"Why does it matter? What did you learn, find hard or find surprising? Start with: This matters because...", rows:4, starters:["This matters because...", "I found it hard to...", "I was surprised that...", "This shows me that...", "The evidence for this is..."]},
+    {k:"ref_nowwhat",cls:"nw", label:"NOW WHAT? Act on it",    hint:"What will you do next? One clear action. Start with: Next I will...", rows:4, starters:["Next I will...", "To fix this I will...", "My first step is...", "I will ask for feedback on...", "By the next lesson I will have..."]}]};
+const TABS = APP_TABS.concat(REFLECT);
+
+/* =============================================================================
+   2. CORE HELPERS
+   ============================================================================= */
+
+
+const $ = id => document.getElementById(id);
+const qa = (r, s) => [...r.querySelectorAll(s)];
+/* SEC-1: escape EVERYTHING dynamic before it enters innerHTML */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* DATA-1: storage may be blocked (private mode, sandbox). Never throw. */
+const store = (k, v) => { try { localStorage.setItem(CFG.pfx + k, v) } catch (e) {} };
+const load  = k => { try { return localStorage.getItem(CFG.pfx + k) } catch (e) { return null } };
+/* A11Y-6: clear then set so repeated identical messages are still announced */
+const say = m => { const l = $("live"); l.textContent = ""; setTimeout(() => l.textContent = m, 30) };
+/* A11Y-11: icon with emoji fallback */
+const ic = (f, b) => `<i class="fa-solid fa-${f}" data-fb="${b}" aria-hidden="true"></i>`;
+
+const THEMES = ["day","night","contrast"], FONTS = [90,100,110,120,130];
+const FIELDS = TABS.flatMap(t => t.fields);
+let theme = load("Theme"), fp = +load("Font") || 100, dys = load("Dys") === "true";
+let data = {}, cur = 0, spd = 1, dl = null;
+if (!THEMES.includes(theme)) theme = null;
+if (!FONTS.includes(fp)) fp = 100;
+
+const g = k => String(data[k] || "").trim();
+const started = () => FIELDS.some(f => g(f.k));            // EXP-3
+/* DATA-2: versioned envelope */
+const persist = () => { store("Data", JSON.stringify({v: CFG.version, data})); try { store("Report", JSON.stringify(model())); } catch {} if (typeof updXP === "function") updXP(); scope.notifySaved(); };
+
+/* =============================================================================
+   3. ACCESSIBILITY CONTROLS (A11Y-2)
+   ============================================================================= */
+function setTheme(t){
+  theme = t; document.body.setAttribute("data-theme", t);
+  THEMES.forEach(x => { $("th-"+x).classList.toggle("on", x === t); $("th-"+x).setAttribute("aria-pressed", x === t) });
+  store("Theme", t);
+}
+function applyFont(){ document.documentElement.style.fontSize = fp + "%"; $("fsd").textContent = fp + "%" }
+function setFont(d){ const i = FONTS.indexOf(fp) + d; if (i < 0 || i >= FONTS.length) return; fp = FONTS[i]; applyFont(); store("Font", fp); say("Text size " + fp + " percent") }
+function setDys(v){ dys = v; document.body.classList.toggle("dys", v); $("dys").classList.toggle("on", v); $("dys").setAttribute("aria-pressed", v); store("Dys", v) }
+
+/* =============================================================================
+   4. TABS + PANEL  (A11Y-7, A11Y-5)
+   ============================================================================= */
+function drawTabs(){
+  $("tabs").innerHTML = TABS.map((t, i) =>
+    `<button type="button" role="tab" id="t${i}" aria-controls="panel" aria-selected="${i === cur}" tabindex="${i === cur ? 0 : -1}">${ic(t.icon, t.fb)}${esc(t.short || t.title)}</button>`).join("");
+  TABS.forEach((t, i) => {
+    const b = $("t" + i);
+    b.onclick = () => openTab(i);
+    b.onkeydown = e => {                                    // roving tabindex keys
+      const n = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? TABS.length - 1 : null;
+      if (n === null) return; e.preventDefault(); openTab((n + TABS.length) % TABS.length, true);
+    };
+  });
+}
+function openTab(i, focus){ stopMic(); stopTTS(); cur = i; drawTabs(); drawPanel(); const tb = $("t" + i), tl = $("tabs"); if (tb && tl) tl.scrollLeft = tb.offsetLeft - (tl.clientWidth - tb.offsetWidth) / 2; if (focus) $("t" + i).focus() }
+/* A11Y-5: real <label for>, hint linked with aria-describedby */
+function field(f){
+  if (f.hidden) return "";
+  const id = "f-" + f.k, d = `id="${id}" data-k="${f.k}" aria-describedby="h-${f.k}"`;
+  const chips = f.starters ? `<div class="sel"><label for="s-${f.k}">Add a starter (keyboard: arrows to browse, Enter to add)</label><select id="s-${f.k}" data-s="${f.k}"><option value="">Choose a starter…</option>${f.starters.map((t, i) => `<option value="${i}">${esc(t)}</option>`).join("")}</select></div>` : "";
+  return `<label class="f" for="${id}">${esc(f.label)}<span class="hint" id="h-${f.k}">${esc(f.hint || "")}</span></label>` + chips +
+    (f.rows ? `<textarea ${d} rows="${f.rows}">${esc(data[f.k])}</textarea>` : `<input type="text" ${d} value="${esc(data[f.k])}">`);
+}
+function drawPanel(){
+  const t = TABS[cur];
+  $("panel").setAttribute("aria-labelledby", "t" + cur);
+  $("panel").innerHTML = `<h2>${esc(t.title)}</h2><p>${esc(t.intro)}</p>` + (t.reflect
+    ? `<div class="ref">${t.fields.map(f => `<div class="rc ${f.cls}">${field(f)}</div>`).join("")}</div><p class="hint cite">${esc(t.cite)}</p>`   // colour + words, never colour alone
+    : t.fields.map(field).join(""));
+  qa($("panel"), "[data-k]").forEach(el => { el.oninput = () => { data[el.dataset.k] = el.value; persist() } });
+  qa($("panel"), "select[data-s]").forEach(sel => {
+    const add = () => { if (sel.value === "") return; insertStarter($("f-" + sel.dataset.s), FIELDS.find(x => x.k === sel.dataset.s).starters[+sel.value]); sel.value = ""; sel._nav = false };
+    /* Browsers fire "change" on every arrow press. Ignore those so keyboard users can browse; Enter adds. Mouse/touch picks add on change. */
+    sel.onpointerdown = () => { sel._nav = false };
+    sel.onkeydown = e => { if (["ArrowUp","ArrowDown","Home","End","PageUp","PageDown"].includes(e.key)) sel._nav = true; else if (e.key === "Enter"){ e.preventDefault(); add() } };
+    sel.onchange = () => { if (!sel._nav) add() };
+    sel.onblur = () => { sel._nav = false; sel.value = "" };
+  });
+  widgetHook(); addMics(); drawNav();
+}
+/* ===== BACK / NEXT BETWEEN TABS =====
+   Labels name the destination. Last tab offers Export. Focus moves to the new panel. */
+function drawNav(){
+  const p = cur > 0 ? TABS[cur - 1] : null, n = cur < TABS.length - 1 ? TABS[cur + 1] : null;
+  $("panel").insertAdjacentHTML("beforeend", `<div class="row pnav" id="pnav">` +
+    (p ? `<button type="button" class="alt" data-nav="-1"><span aria-hidden="true">\u2190</span> Back: ${esc(p.title)}</button>` : "<span></span>") +
+    (n ? `<button type="button" data-nav="1">Next: ${esc(n.title)} <span aria-hidden="true">\u2192</span></button>` : `<button type="button" data-nav="x">Done: export your work\u2026</button>`) + `</div>`);
+  qa($("pnav"), "button").forEach(b => b.onclick = () => { if (b.dataset.nav === "x") return $("xopen").click(); stepTab(+b.dataset.nav) });
+}
+function stepTab(d){ openTab(cur + d); $("panel").focus({preventScroll: true}); $("tabs").scrollIntoView({block: "start"}) }
+/* STARTER-1: APPEND a sentence starter (never overwrite), move focus to the box, announce it */
+function insertStarter(el, t){
+  const v = el.value, sep = v && !/\s$/.test(v) ? " " : "";
+  el.value = v + sep + t + " "; el.focus(); el.setSelectionRange(el.value.length, el.value.length);
+  el.dispatchEvent(new Event("input")); say("Added: " + t.replace(/\.+$/, ""));
+}
+
+/* =============================================================================
+   5. READ ALOUD (VOICE-1)  - add custom speech by extending readText()
+   ============================================================================= */
+const hasTTS = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+function readText(){
+  const t = TABS[cur];
+  return [t.title, t.intro, ["learn","card","guide"].includes(t.widget) && $("wg") ? $("wg").innerText : "", t.widget === "draw" ? dText().join(". ") : ""].concat(t.fields.filter(f => !f.hidden).map(f => f.label + ". " + (g(f.k) || "empty"))).filter(Boolean).map(x => /[.?!]$/.test(x) ? x : x + ".").join(" ");   // tidy pauses
+}
+function speak(txt){
+  if (!hasTTS) return say("Read aloud is not available in this browser.");
+  speechSynthesis.cancel(); $("pst").textContent = "Pause";
+  const u = new SpeechSynthesisUtterance(txt); u.rate = spd; u.lang = document.documentElement.lang || "en-GB";
+  speechSynthesis.speak(u);
+}
+function stopTTS(){ if (hasTTS) speechSynthesis.cancel(); $("pst").textContent = "Pause" }
+
+/* =============================================================================
+   6. DICTATION (VOICE-2)  - a mic button is auto-added after every text field.
+      Opt a field out with data-nomic="1".
+   ============================================================================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recBtn = null;
+const micIdle = b => { b.setAttribute("aria-pressed", "false"); b.querySelector("span").textContent = "Dictate" };
+function stopMic(){ if (rec){ const r = rec; rec = null; try { r.stop() } catch (e) {} } if (recBtn){ micIdle(recBtn); recBtn = null } }
+const labelOf = el => { const l = document.querySelector(`label[for="${el.id}"]`); return l ? l.childNodes[0].textContent : "this field" };
+function toggleMic(el, b){
+  if (recBtn === b){ stopMic(); return say("Stopped listening") }
+  stopMic();
+  const r = new SR(), base = el.value, sep = base && !/\s$/.test(base) ? " " : "";
+  r.lang = navigator.language || "en-GB"; r.interimResults = true; r.continuous = false;
+  r.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; el.value = base + sep + t; el.dispatchEvent(new Event("input")) };
+  r.onerror = e => say(e.error === "not-allowed" || e.error === "service-not-allowed" ? "The microphone is blocked here. Allow it in your browser settings, or use the microphone key on your keyboard." : e.error === "no-speech" ? "I did not hear anything. Tap Dictate and try again." : "Dictation stopped (" + e.error + ").");
+  r.onend = () => { if (rec === r){ rec = null; recBtn = null } micIdle(b) };
+  try { r.start() } catch (e) { return say("Dictation could not start.") }
+  rec = r; recBtn = b; b.setAttribute("aria-pressed", "true"); b.querySelector("span").textContent = "Stop";
+  say("Listening. Speak now, then tap Dictate again for more.");
+}
+function addMics(r){
+  if (!SR) return;
+  qa(r || $("panel"), "textarea,input[type=text]").forEach(el => {
+    if (el.dataset.nomic || el.parentNode.classList.contains("ig")) return;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "alt mic"; b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", "Dictate into " + labelOf(el));
+    b.innerHTML = ic("microphone", "🎤") + "<span>Dictate</span>";
+    const w = document.createElement("div"); w.className = "ig";      // attach button to the field as one group
+    el.parentNode.insertBefore(w, el); w.append(el, b); b.onclick = () => toggleMic(el, b);
+  });
+}
+
+/* =============================================================================
+   7. EXPORT MODEL (EXP-2)  - the ONE shape every exporter reads.
+      {title, sections:[{h, rows:[[label, value], ...]}]}
+   ============================================================================= */
+function model(){
+  return {title: g("name") || CFG.title,
+    sections: TABS.map(t => ({h: t.title, rows: t.fields.map(f => [f.label, g(f.k) || "(empty)"])}))};
+}
+const stamp = () => new Date().toISOString().slice(0, 10);
+const fileName = ext => `${CFG.file}-${stamp()}.${ext}`;           // EXP-4
+
+function md(){ const m = model(); return "# " + m.title + "\n\n" + m.sections.map(s => "## " + s.h + "\n\n" + s.rows.map(r => "**" + r[0] + "**\n\n" + r[1]).join("\n\n")).join("\n\n") + "\n" }
+/* EXP-4: guard against spreadsheet formula injection (=,+,-,@) + UTF-8 BOM for Excel */
+const cell = v => { v = String(v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"' };
+function csv(){ const m = model(), o = [["Section","Field","Value"].map(cell).join(",")]; m.sections.forEach(s => s.rows.forEach(r => o.push([s.h, r[0], r[1]].map(cell).join(",")))); return "\uFEFF" + o.join("\r\n") + "\r\n" }
+
+/* --- DOCX: zero-dependency (own ZIP writer, stored/no compression). Works offline. --- */
+const CRC = (() => { const t = []; for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0 } return t })();
+const crc32 = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0 };
+function zipBlob(files, mime){                                  // files: [[path, text], ...]
+  const enc = new TextEncoder(), parts = [], cd = []; let off = 0;
+  files.forEach(f => {
+    const name = enc.encode(f[0]), d = enc.encode(f[1]), crc = crc32(d);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true);
+    h.setUint32(14, crc, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, name.length, true);
+    parts.push(h.buffer, name, d);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true);
+    c.setUint32(16, crc, true); c.setUint32(20, d.length, true); c.setUint32(24, d.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    cd.push(c.buffer, name); off += 30 + name.length + d.length;
+  });
+  let len = 0; cd.forEach(b => len += b.byteLength);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, len, true); e.setUint32(16, off, true);
+  return new Blob(parts.concat(cd, [e.buffer]), {type: mime});
+}
+const xe = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+const wp = (t, o = {}) => String(t).split(/\r?\n/).map(l => `<w:p><w:r><w:rPr>${o.b ? "<w:b/>" : ""}${o.c ? `<w:color w:val="${o.c}"/>` : ""}<w:sz w:val="${o.sz || 22}"/></w:rPr><w:t xml:space="preserve">${xe(l)}</w:t></w:r></w:p>`).join("");
+const wt = rows => `<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/><w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(b => `<w:${b} w:val="single" w:sz="4" w:color="94A3B8"/>`).join("")}</w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="2400"/><w:gridCol w:w="6600"/></w:tblGrid>${rows.map(r => `<w:tr>${r.map((c, i) => `<w:tc><w:tcPr><w:tcW w:w="${i ? 6600 : 2400}" w:type="dxa"/></w:tcPr>${wp(c, {b: !i})}</w:tc>`).join("")}</w:tr>`).join("")}</w:tbl>`;
+function docx(){
+  const m = model(), X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const body = wp(m.title, {b: 1, sz: 44}) + m.sections.map(s => wp(s.h, {b: 1, sz: 30, c: "0E7490"}) + wt(s.rows) + wp("")).join("");
+  return zipBlob([
+    ["[Content_Types].xml", X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'],
+    ["_rels/.rels", X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+    ["word/document.xml", X + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + body + '</w:body></w:document>']
+  ], "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+}
+
+/* --- PPTX via PptxGenJS (CDN). autoPage splits long tables across slides. --- */
+async function pptx(){
+  const m = model(), p = new PptxGenJS(); p.layout = "LAYOUT_WIDE";
+  const H = t => ({text: t, options: {bold: true, color: "FFFFFF", fill: {color: "0E7490"}}});
+  const t = p.addSlide(); t.background = {color: "0B0F1A"};
+  t.addText(m.title, {x: .6, y: 2.4, w: 12, h: 1, fontSize: 40, bold: true, color: "FFFFFF", fontFace: "Calibri"});
+  t.addText(CFG.title, {x: .6, y: 3.5, w: 12, h: .8, fontSize: 20, color: "00E5FF", fontFace: "Calibri"});
+  m.sections.forEach(s => {
+    const a = p.addSlide();
+    a.addText(s.h, {x: .5, y: .25, w: 12.3, h: .7, fontSize: 26, bold: true, color: "0F172A", fontFace: "Calibri"});
+    a.addTable([[H("Field"), H("Response")]].concat(s.rows.map(r => [{text: r[0], options: {bold: true}}, {text: r[1]}])),
+      {x: .5, y: 1.1, w: 12.3, colW: [2.8, 9.5], fontSize: 12, fontFace: "Calibri", color: "0F172A", border: {type: "solid", color: "94A3B8", pt: 1}, valign: "top", autoPage: true});
+  });
+  if (dHas()){ try { const im = await dPNG(), s = p.addSlide(), k = Math.min(12.3 / im.w, 5.9 / im.h);
+    s.addText("Use case diagram", {x: .5, y: .25, w: 12.3, h: .7, fontSize: 26, bold: true, color: "0F172A", fontFace: "Calibri"});
+    s.addImage({data: im.url, x: .5, y: 1.1, w: im.w * k, h: im.h * k}) } catch (e) { console.warn(e) } }
+  return p.write({outputType: "blob"});
+}
+
+/* --- PDF via jsPDF (CDN). Latin text only. Page break handled by room(). --- */
+async function pdf(){
+  const m = model(), d = new window.jspdf.jsPDF({unit: "mm", format: "a4"}), L = 15, W = 180; let y = 20;
+  const room = h => { if (y + h > 282){ d.addPage(); y = 20 } };
+  d.setFont("helvetica", "bold"); d.setFontSize(20); d.setTextColor(14, 116, 144);
+  d.splitTextToSize(m.title, W).forEach(l => { room(9); d.text(l, L, y); y += 9 }); y += 4;
+  m.sections.forEach(s => {
+    room(14); d.setFont("helvetica", "bold"); d.setFontSize(14); d.setTextColor(14, 116, 144); d.text(s.h, L, y); y += 8;
+    s.rows.forEach(r => {
+      d.setFontSize(11); d.setTextColor(30); d.setFont("helvetica", "bold"); room(6); d.text(r[0], L, y); y += 5.5;
+      d.setFont("helvetica", "normal"); d.splitTextToSize(r[1], W).forEach(l => { room(5.5); d.text(l, L, y); y += 5.5 }); y += 2;
+    }); y += 4;
+  });
+  if (dHas()){ try { const im = await dPNG(); d.addPage(); y = 20; d.setFont("helvetica", "bold"); d.setFontSize(14); d.setTextColor(14, 116, 144); d.text("Use case diagram", L, y); y += 8;
+    const k = Math.min(W / im.w, 240 / im.h); d.addImage(im.url, "PNG", L, y, im.w * k, im.h * k) } catch (e) { console.warn(e) } }
+  return d.output("blob");
+}
+
+/* =============================================================================
+   8. EXPORT PIPELINE (EXP-1, EXP-3, EXP-4, EXP-5)
+      To add a format: add one entry here. The dialog builds itself.
+      lib() = readiness check for CDN-backed formats.
+   ============================================================================= */
+const EXPORTS = [
+  {id:"pptx", label:"PowerPoint (.pptx)", desc:"Title slide and one slide per section", ic:"file-powerpoint", fb:"▦", lib:() => window.PptxGenJS, build:pptx},
+  {id:"docx", label:"Word (.docx)",       desc:"Report with a table per section",       ic:"file-word",       fb:"📝", build:docx},
+  {id:"pdf",  label:"PDF (.pdf)",         desc:"Ready to print or share",               ic:"file-pdf",        fb:"📕", lib:() => window.jspdf, build:pdf},
+  {id:"csv",  label:"CSV (.csv)",         desc:"Opens in Excel or Google Sheets",       ic:"file-csv",        fb:"▤",  build:() => new Blob([csv()], {type:"text/csv;charset=utf-8"})},
+  {id:"md",   label:"Markdown (.md)",     desc:"Plain text with headings",              ic:"file-lines",      fb:"📄", build:() => new Blob([md()], {type:"text/markdown;charset=utf-8"})},
+  {id:"png",  label:"Diagram picture (.png)", desc:"Your use case diagram as an image",     ic:"file-image", fb:"🖼", need:() => dHas(), build:() => dPNG().then(i => u2b(i.url))},
+  {id:"svg",  label:"Diagram drawing (.svg)", desc:"Scalable vector picture of the diagram", ic:"file-code",  fb:"◇",  need:() => dHas(), build:() => new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + dSvgX().svg], {type:"image/svg+xml;charset=utf-8"})}
+];
+/* EXP-5: host "downloads" capability if present (hosted pages), else Blob + <a download> */
+function save(name, body){
+  if (dl) return dl.save({filename: name, data: body}).then(() => say("Saved " + name), e => say(e && e.code === "declined" ? "Save cancelled." : "This view could not save the file."));
+  try {
+    const b = body instanceof Blob ? body : new Blob([body], {type: "text/plain;charset=utf-8"}), a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000); say("Saved " + name);
+  } catch (e) { say("This view could not save the file.") }
+}
+function runExport(x){
+  if (!started()) return say("Fill in part of the form first.");
+  if (x.lib && !x.lib()) return say(x.label + " is still loading or was blocked. Try again, or choose another format.");
+  if (x.need && !x.need()) return say("Draw a diagram in the Draw tab first.");
+  Promise.resolve().then(x.build).then(b => save(fileName(x.id), b)).catch(e => { console.warn(e); say("Could not build the " + x.id.toUpperCase() + " file.") });
+}
+function copyText(){
+  if (!started()) return say("Fill in part of the form first.");
+  if (navigator.clipboard) navigator.clipboard.writeText(md()).then(() => say("Copied to clipboard"), () => say("Could not copy"));
+  else say("Copy is not available in this browser.");
+}
+
+/* --- DATA-4: backup / restore. Validate EVERYTHING that comes in. --- */
+function backup(){
+  if (!started()) return say("Nothing to back up yet.");
+  save(`${CFG.file}-backup-${stamp()}.json`, new Blob([JSON.stringify({app: CFG.pfx, version: CFG.version, saved: new Date().toISOString(), data, prefs: {theme, font: fp, dys}}, null, 2)], {type: "application/json;charset=utf-8"}));
+}
+function importBackup(f){
+  if (!f) return;
+  if (f.size > 2e6) return say("That file is too large to be a backup.");
+  const r = new FileReader(); r.onerror = () => say("That file could not be read.");
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d || d.app !== CFG.pfx || typeof d.data !== "object") throw 0;
+      if (d.version > CFG.version) return say("That backup is from a newer version of this app.");
+      if (started() && !confirm("Replace what is on this device with the backup?")) return say("Import cancelled. Nothing changed.");   // DATA-3
+      data = {}; dLoaded = false; dHist = []; FIELDS.forEach(fl => { if (typeof d.data[fl.k] === "string") data[fl.k] = d.data[fl.k].slice(0, /^uc_/.test(fl.k) ? 70000 : 5000) });                // only known keys, capped
+      persist(); drawPanel(); say("Backup imported.");
+    } catch (e) { say("That does not look like a backup from this app.") }
+  };
+  r.readAsText(f);
+}
+
+/* =============================================================================
+   9. MODAL (A11Y-8): focus in, Tab trapped, background inert, Esc, restore focus
+   ============================================================================= */
+let opener = null; const BG = ["header", "main"];
+const mEls = () => qa($("mdl"), "button").filter(b => !b.disabled);
+function openM(){
+  const n = started(); opener = document.activeElement;
+  $("mc").textContent = n ? "Your work is ready to export. Choose a format:" : "Fill in part of the form first, then come back to export.";
+  qa($("mo"), "button").forEach(b => b.disabled = !n); $("bks").disabled = !n;
+  EXPORTS.forEach(x => { if (x.need){ const ok = x.need(), b = $("x-" + x.id); b.querySelector("small").textContent = ok ? x.desc : "Draw something in the Draw tab first"; if (!ok) b.disabled = true } });                       // EXP-3
+  $("mdl").hidden = false; BG.forEach(q => document.querySelector(q).inert = true);
+  (mEls()[0] || $("xcl")).focus();
+}
+function closeM(){ $("mdl").hidden = true; BG.forEach(q => document.querySelector(q).inert = false); if (opener && opener.focus) opener.focus() }
+
+/* =============================================================================
+   10. BOOT
+   ============================================================================= */
+function boot(){
+  try {const saved=JSON.parse(load("Data")||"null");if(saved?.data && saved.v<=CFG.version){data=Object.fromEntries(Object.entries(saved.data).filter(([,value])=>typeof value==="string"&&value.length<=1500000));}} catch {}
+
+  try {const saved=JSON.parse(load("Data")||"null");if(saved?.data && saved.v<=CFG.version){data=Object.fromEntries(Object.entries(saved.data).filter(([,value])=>typeof value==="string"&&value.length<=1500000));}} catch {}
+
+  try { const s = JSON.parse(load("Data") || "null"); if (s && s.data && s.v <= CFG.version) FIELDS.forEach(f => { if (typeof s.data[f.k] === "string") data[f.k] = s.data[f.k] }) } catch (e) {}
+   $("kick").textContent = CFG.kicker; $("ttl").textContent = CFG.title; $("sub").textContent = CFG.sub;
+  /* accessibility */
+
+
+  /* read aloud */
+  $("rd").onclick = () => speak(readText());
+  $("ps").onclick = () => { if (!hasTTS) return; if (speechSynthesis.paused){ speechSynthesis.resume(); $("pst").textContent = "Pause" } else if (speechSynthesis.speaking){ speechSynthesis.pause(); $("pst").textContent = "Resume" } };
+  $("st").onclick = stopTTS;
+  $("sp").onchange = () => { spd = +$("sp").value };
+  addEventListener("pagehide", () => { stopTTS(); stopMic() });
+  /* dictation notice (VOICE-2) */
+  $("dh").textContent = SR ? "Tip: tap Dictate under a box to speak. Your browser may send audio to a speech service, so keep it impersonal." : "Dictation is not supported in this browser. On a phone, use the microphone key on your keyboard.";
+  /* export dialog */
+  $("mo").innerHTML = EXPORTS.map(x => `<button type="button" class="alt opt" id="x-${x.id}">${ic(x.ic, x.fb)}<span>${esc(x.label)}<small>${esc(x.desc)}</small></span></button>`).join("");
+  EXPORTS.forEach(x => $("x-" + x.id).onclick = () => { closeM(); runExport(x) });
+  $("xopen").onclick = openM; $("xcl").onclick = closeM; $("xcp").onclick = () => { closeM(); copyText() }; $("xpr").onclick = () => { closeM(); window.print() };
+  $("bks").onclick = () => { closeM(); backup() };
+  $("bki").onclick = () => $("bkf").click();
+  $("bkf").onchange = function(){ closeM(); importBackup(this.files[0]); this.value = "" };
+  $("mdl").onclick = e => { if (e.target === $("mdl")) closeM() };
+  $("mdl").onkeydown = e => {
+    if (e.key === "Escape"){ e.preventDefault(); closeM(); return }
+    if (e.key !== "Tab") return;
+    const f = mEls(); if (!f.length) return; const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0){ e.preventDefault(); f[f.length - 1].focus() } else if (!e.shiftKey && i === f.length - 1){ e.preventDefault(); f[0].focus() }
+  };
+  $("clr").onclick = () => { closeM(); if (!confirm("Clear everything you have written? This cannot be undone.")) return; data = {}; dLoaded = false; dHist = []; dSel = null; persist(); openTab(0); say("Everything cleared") };   // DATA-3
+  /* Mark complete: flags the activity as done on this device */
+  const updMc = () => { const d = load("Done") === "1"; $("mcsp").textContent = d ? "Completed ✓" : "Mark complete"; $("mcmp").setAttribute("aria-pressed", String(d)) };
+  $("mcmp").onclick = () => { const d = load("Done") !== "1"; store("Done", d ? "1" : ""); updMc(); say(d ? "Activity marked complete." : "Completion cleared.") };
+  updMc();
+  /* first paint: stored theme, else the OS preference (A11Y-2) */
+
+   drawTabs(); drawPanel();
+  /* hosted-page downloads capability (optional; falls back to <a download>) */
+  if (window.claude && claude.use) claude.use("downloads").then(d => { if (d) dl = d }, () => {});
+}
+/* ===== USE CASE GAME ===== */
+const arr=v=>Array.isArray(v)?v:[];
+const pj=(k,d)=>{try{const v=JSON.parse(data[k]||"null");return Array.isArray(d)?(Array.isArray(v)?v:d):(v&&typeof v==="object"&&!Array.isArray(v)?v:d)}catch(e){return d}};
+const sj=(k,v)=>{data[k]=JSON.stringify(v);persist()};
+const ST=[["Fan opens Tickets and picks Saturday or Sunday","Fan"],["System shows the day pass price and places left","System"],["Fan enters payment details and confirms","Fan"],["System takes the payment and saves a QR ticket on the phone","System"],["Fan shows the QR ticket at the gate","Fan"],["Steward scans it and the system checks it is valid for today","System"],["System marks the ticket as used and the gate opens","System"]];
+const RK=[["The card is declined",3,"Show a clear message, keep the choice and offer another way to pay."],["Saturday sells out while the fan is typing",1,"Check places again before taking money and offer Sunday instead."],["There is no mobile signal at the gate",4,"Save the QR ticket on the phone so it opens offline."],["The fan's phone battery is dead",4,"Let the steward look the booking up by name or print a ticket."],["The ticket is for Sunday but it is Saturday",5,"Show a clear wrong-day message to the steward."],["The gate does not open after a valid scan",6,"Let the steward open it by hand and record the entry."]];
+const PROMPTS=["Fan votes for the match MVP","Player checks in at the player desk","Volunteer reports a lost item","Fan finds the nearest first aid point","Caster gets the match schedule","Parent finds a quiet space","Fan redeems a sponsor giveaway"];
+const CHK=["One clear actor","The goal is from the user's point of view","Steps alternate between the user and the system","Fewer than 10 main steps","At least two things that could go wrong","Each risk says how the system responds"];
+const rank=t=>t>=19?"Champion":t>=13?"Challenger":"Rookie";
+const GV=2;
+const getG=()=>{const r=pj("uc_game",{}),o=r.ver===GV?r:{},
+ ia=(v,n,lo,hi)=>Array.from({length:n},(_,i)=>{const x=arr(v)[i];return Number.isInteger(x)&&x>=lo&&x<=hi?x:-1}),
+ bs=(x,m)=>Number.isInteger(x)&&x>=0&&x<=m?x:0,seen=new Set(),h={};
+ const p2=ia(o.p2,7,-1,9).map(x=>{if(x<0||seen.has(x))return -1;seen.add(x);return x});
+ if(o.h&&typeof o.h==="object")Object.keys(o.h).forEach(k=>{const x=o.h[k];if(/^[123]-\d$/.test(k)&&Number.isInteger(x)&&x>0&&x<=3)h[k]=x});
+ return{ver:GV,a1:ia(o.a1,7,-1,9),s1:ia(o.s1,7,-2,9),k1:o.k1===true,b1:bs(o.b1,7),p2,k2:o.k2===true,b2:bs(o.b2,7),
+  v3:T3.map((t,i)=>{const x=arr(o.v3)[i];return Number.isInteger(x)&&x>=0&&x<=t.max?x:t.init}),k3:o.k3===true,b3:bs(o.b3,7),h}};
+const sg=G=>sj("uc_game",G);
+const hud=G=>{const t=G.b1+G.b2+G.b3;return `<div class="hud"><span>Score ${t} of 21</span><span class="tr" aria-hidden="true"><i style="width:${Math.round(t/21*100)}%"></i></span><span>Rank: ${rank(t)}</span></div>`};
+const UI={h1:false,h2:false,h3:false,h2m:false},hn=G=>Object.values(G.h).reduce((s,x)=>s+x,0);
+let held=-1,l2d=null,l2sup=false;
+function widgetHook(){if(!TABS[cur].widget)return;held=-1;l2msg="";$("panel").querySelector("p").insertAdjacentHTML("afterend",'<div id="wg" class="wg"></div>');wgDraw()}
+function wgDraw(fid){const el=$("wg");if(!el)return;el.innerHTML=({learn:wLearn,l1:wL1,l2:wL2,l3:wL3,create:wCreate,guide:wGuide,draw:wDraw})[TABS[cur].widget]();
+ el.onclick=e=>{if(l2sup)return;const b=e.target.closest("button[data-a],g[data-a]");if(b)act(b.dataset.a,b.dataset.v)};
+ el.onkeydown=e=>{const b=e.target.closest("g[data-a]");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();act(b.dataset.a,b.dataset.v)}};
+ el.onchange=e=>{const b=e.target.closest("select[data-a]");if(b)return act(b.dataset.a,b.value,b.dataset.v,b.id);const c=e.target.closest("input[data-ck]");if(c){const k=arr(pj("uc_chk",[])),a=CHK.map((_,i)=>i===+c.dataset.ck?c.checked:k[i]===true);sj("uc_chk",a);wgDraw(c.id);say(a.filter(Boolean).length+" of 6 checks ticked")}};
+ el.onpointerdown=TABS[cur].widget==="l2"?l2Down:null;
+ if(TABS[cur].widget==="draw")dInit();
+ if(fid&&$(fid))$(fid).focus()}
+function act(a,v,x,id){const G=getG();
+ if(a==="gopen"){if(dLoadTpl(v))openTab(TABS.findIndex(t=>t.widget==="draw"),true);return}
+ if(a==="pr"){data.name=PROMPTS[+v];persist();drawPanel();$("f-name").focus();say("Title set. Now write the actors and goal.");return}
+ if(a==="help"){UI["h"+v]=!UI["h"+v];return wgDraw("hp"+v)}
+ if(a==="hint"){if(!/^[123]-\d$/.test(v))return;const lv=Math.min(3,(G.h[v]||0)+1);G.h[v]=lv;sg(G);wgDraw("hb"+v);return say("Hint "+lv+": "+hintText(v,lv))}
+ /* level 1 */
+ if(a==="p1"){G.a1[+x]=+v;G.k1=false;sg(G);return wgDraw(id)}
+ if(a==="s1"){G.s1[+x]=+v;G.k1=false;sg(G);return wgDraw(id)}
+ if(a==="c1"){const n=FX.filter((f,i)=>ok1(G,i)).length;G.k1=true;G.b1=Math.max(G.b1,n);sg(G);wgDraw("c1b");return say("Level 1: "+n+" of 7 features correct")}
+ if(a==="r1"){G.a1=G.a1.map(()=>-1);G.s1=G.s1.map(()=>-1);G.k1=false;sg(G);return wgDraw("c1b")}
+ /* level 2 */
+ if(a==="card"){const c=+v;held=held===c?-1:c;wgDraw("cb"+c);return say(held>=0?"Holding "+CARDS[held]+". Choose a numbered oval.":"Card put down.")}
+ if(a==="slot"){const s=+v;if(!(s>=0&&s<7))return;
+  if(held>=0)return l2Place(held,s,-1,true);
+  if(G.p2[s]>=0){held=G.p2[s];G.p2[s]=-1;G.k2=false;sg(G);wgDraw("l2s"+s);return say("Picked up "+CARDS[held]+". Choose a numbered oval.")}
+  return say("That placeholder is empty. Choose a card first.")}
+ if(a==="slotsel"){const s=+x,c=+v;if(!(s>=0&&s<7))return;
+  if(c<0){G.p2[s]=-1;G.k2=false;sg(G);return wgDraw(id)}
+  return l2Place(c,s,-1,false,id)}
+ if(a==="c2"){const n=G.p2.filter((c,f)=>c===f).length;G.k2=true;G.b2=Math.max(G.b2,n);sg(G);wgDraw("c2b");return say("Level 2: "+n+" of 7 in the right place")}
+ if(a==="hint2"){let f=SLOT_ORDER.find(s=>G.p2[s]<0);if(f===undefined)f=SLOT_ORDER.find(s=>G.p2[s]!==s);if(f===undefined){l2msg="Every card is in the right place. Press Check.";return wgDraw("hb2all")}const k="2-"+f,lv=Math.min(3,(G.h[k]||0)+1);G.h[k]=lv;sg(G);l2msg="Placeholder "+(SLOT_ORDER.indexOf(f)+1)+", hint "+lv+": "+hintText(k,lv);wgDraw("hb2all");return say(l2msg)}
+ if(a==="r2"){G.p2=G.p2.map(()=>-1);G.k2=false;held=-1;l2msg="";sg(G);return wgDraw("c2b")}
+ /* level 3 */
+ if(a==="t3sel"){const i=+x;if(!T3[i]||!(+v>=0&&+v<=T3[i].max))return;G.v3[i]=+v;G.k3=false;sg(G);return wgDraw(id)}
+ if(a==="t3a"||a==="t3type"){const [i,j]=String(v).split(":").map(Number);if(!T3[i]||!(j>=0&&j<=T3[i].max))return;G.v3[i]=j;G.k3=false;sg(G);wgDraw((a==="t3a"?"t3g":"t3b")+i+"_"+j);return say(t3Model(i,j).reads)}
+ if(a==="t3flip"){const i=+v;if(!T3[i])return;G.v3[i]=1-G.v3[i];G.k3=false;sg(G);wgDraw("t3f"+i);return say("Arrow flipped. "+t3Model(i,G.v3[i]).reads)}
+ if(a==="c3"){const n=T3.filter((t,i)=>G.v3[i]===t.ok).length;G.k3=true;G.b3=Math.max(G.b3,n);sg(G);wgDraw("c3b");return say("Level 3: "+n+" of 7 fixed")}
+ if(a==="r3"){G.v3=T3.map(t=>t.init);G.k3=false;sg(G);return wgDraw("c3b")}}
+const mark=ok=>ok?'<b class="ok">✔ Correct</b>':'<b class="no">✘ Not yet</b>';
+
+function wCreate(){const k=arr(pj("uc_chk",[])),n=CHK.filter((_,i)=>k[i]===true).length,pi=PROMPTS.indexOf(g("name")),db=pi>=0?`<div class="row"><button type="button" data-a="gopen" data-v="o${pi}">Draw this feature as a diagram</button></div>`:"";return `<h3 class="wh">Options map</h3><p>Every oval is a feature you could write a use case for, and the lines show who it is for. Tap an oval to pick it, the same as the buttons below.</p>${dMapSvg()}<h3 class="wh">Pick a feature (or invent your own)</h3><div class="chips">${PROMPTS.map((p,i)=>`<button type="button" class="alt" data-a="pr" data-v="${i}">${esc(p)}</button>`).join("")}</div>${db}<h3 class="wh">Success criteria (${n} of 6)</h3>${CHK.map((c,i)=>`<label class="ck" for="k${i}"><input type="checkbox" id="k${i}" data-ck="${i}"${k[i]===true?" checked":""}> ${esc(c)}</label>`).join("")}`}
+const RD=[["Use Cases (Systems Analysis and Design)","University of Guelph open textbook","https://books.lib.uoguelph.ca/systemsanalysisanddesign/chapter/use-cases/","Describes brief, casual and fully dressed use cases. It numbers alternative flows so readers can see where they branch from the main flow, and says every flow should end in a stable state. Use it to write your Create tab."],
+["Concept: Use Case","OpenUP guidance (hosted by Clemson University)","https://people.computing.clemson.edu/~johnmc/courses/Publish/openup/guidances/concepts/use_case_BB199D1B.html","Explains the basic flow and alternative flows, and advises describing what the system does rather than how it is built. It warns that fixing interface details too early limits design options."]];
+function wLearn(){const xs=[80,160,240,320,400,480,560],lab=["Pick day","Price","Pay","Ticket","Show QR","Scan","Gate"],fan=[0,2,4];
+ return `<div class="rd"><b>UC-04 · Fan buys a day pass and enters the arena</b><br><small>Fictional event: Neon Clash Weekend, 2 days, 16 teams, about 3,000 fans.</small><dl><dt>Actors</dt><dd>Fan (primary), gate steward (secondary)</dd><dt>Goal</dt><dd>Get into the arena for one day with a valid ticket.</dd><dt>Before it starts</dt><dd>The app is installed and the fan is logged in. Day passes are on sale.</dd><dt>Main flow</dt><dd><ol>${ST.map(x=>`<li>${esc(x[1])}: ${esc(x[0])}</li>`).join("")}</ol></dd><dt>What could go wrong</dt><dd><ul>${RK.map(r=>`<li>Step ${r[1]+1}: ${esc(r[0])}. ${esc(r[2])}</li>`).join("")}</ul></dd></dl></div>
+<svg viewBox="0 0 640 215" role="img" aria-label="Flow diagram with a Fan lane and a System lane. Seven numbered steps run left to right. Warning marks sit under steps 2, 4, 5, 6 and 7."><g font-family="Calibri,Arial,sans-serif" font-size="12" fill="var(--tx)"><rect x="4" y="10" width="632" height="80" rx="8" fill="none" stroke="var(--cy)" stroke-width="2"/><rect x="4" y="100" width="632" height="80" rx="8" fill="none" stroke="var(--li)" stroke-width="2"/><text x="12" y="30" font-weight="700" fill="var(--cy)">FAN</text><text x="12" y="120" font-weight="700" fill="var(--li)">SYSTEM</text>${xs.map((x,i)=>{const y=fan.includes(i)?55:145;return (i?`<path d="M${xs[i-1]+18} ${fan.includes(i-1)?55:145}L${x-18} ${y}" stroke="var(--mu)" stroke-width="2" fill="none"/>`:"")+`<circle cx="${x}" cy="${y}" r="18" fill="var(--bg)" stroke="${fan.includes(i)?"var(--cy)":"var(--li)"}" stroke-width="3"/><text x="${x}" y="${y+4}" text-anchor="middle" font-weight="700">${i+1}</text><text x="${x}" y="${y+34}" text-anchor="middle" font-size="11">${lab[i]}</text>`+([1,3,4,5,6].includes(i)?`<text x="${x}" y="205" text-anchor="middle" fill="var(--am)" font-size="15">⚠</text>`:"")}).join("")}<text x="620" y="205" text-anchor="end" font-size="11">⚠ = something could go wrong here</text></g></svg>
+<h3 class="wh">Why teams write use cases</h3><ul><li><b>System behaviour:</b> step by step, from goal to result.</li><li><b>Risk brainstorming:</b> what could go wrong, and the edge cases.</li><li><b>Scope and requirements:</b> a clear list of goals to cost and negotiate.</li></ul>
+<h3 class="wh">Read next (summaries in my own words)</h3>${RD.map(r=>`<div class="rd"><a href="${esc(r[2])}" target="_blank" rel="noopener noreferrer">${esc(r[0])}</a><br><small>${esc(r[1])}</small><p>${esc(r[3])}</p></div>`).join("")}`}
+/* ===== USE CASE DIAGRAMS (guide, options map, Draw editor) =====
+   One diagram model, three uses: the Key elements tab, the Options map in Create, the Draw editor.
+   Model: {n:[{id,t:"actor"|"uc"|"sys",x,y,l,w?,h?}], l:[{t:"assoc"|"include"|"extend"|"general",a,b}]}
+   x,y is the CENTRE of every shape. Saved in data.uc_diagram (versioned with the rest of the app). */
+const DW=800,DH=540,NT={actor:"Actor",uc:"Use case",sys:"System boundary"},
+LT={assoc:"Association",include:"Include",extend:"Extend",general:"Generalization"},
+LV={assoc:"is linked to",include:"includes",extend:"extends",general:"is a kind of"};
+const r1=n=>Math.round(n*10)/10, num=(v,a,b,d)=>{v=parseFloat(v);return Number.isFinite(v)?Math.min(b,Math.max(a,v)):d};
+/* Palettes. On screen we use the theme tokens; exports use fixed light colours (A11Y-3). */
+const DP={bg:"var(--bg)",line:"var(--tx)",actor:"var(--cy)",uc:"var(--li)",ucf:"var(--card)",sys:"var(--am)",sysf:"var(--card)",tx:"var(--hd)",sel:"var(--pk)",on:"var(--bg)"};
+const XP={bg:"#ffffff",line:"#0f172a",actor:"#0e7490",uc:"#4d7c0f",ucf:"#f7fee7",sys:"#b45309",sysf:"#fff7ed",tx:"#0f172a",sel:"#be185d",on:"#ffffff"};
+let D={n:[],l:[]},dLoaded=false,dSel=null,dTool=false,dLinkFrom=null,dHist=[],dTag="",dT=0,dDrag=null;
+const dEns=()=>{if(!dLoaded){dLoaded=true;D=dClean(pj("uc_diagram",{}))}return D};
+const dNode=id=>D.n.find(n=>n.id===id);
+const dRx=n=>n.rx||76, dRy=n=>n.ry||34;
+
+/* ---------- validation (also guards backups and storage) ---------- */
+function dLinkErr(a,b,t){
+  if(!a||!b||a.t==="sys"||b.t==="sys")return "The system boundary is a box, not something you link to.";
+  if(a.id===b.id)return "A shape cannot link to itself.";
+  if(t==="assoc"&&a.t===b.t)return "An association joins one actor and one use case.";
+  if((t==="include"||t==="extend")&&(a.t!=="uc"||b.t!=="uc"))return LT[t]+" only works between two use cases.";
+  if(t==="general"&&a.t!==b.t)return "Generalization joins two actors or two use cases, not one of each.";
+  return "";
+}
+function dClean(o){
+  const ids=new Set(),n=[],l=[],by={};
+  arr(o&&o.n).slice(0,40).forEach(x=>{
+    if(!x||typeof x!=="object"||!NT[x.t]||typeof x.id!=="string"||!/^[aus]\d{1,4}$/.test(x.id)||ids.has(x.id))return;
+    if(x.t==="sys"&&n.some(y=>y.t==="sys"))return;
+    ids.add(x.id);
+    const c={id:x.id,t:x.t,x:num(x.x,0,DW,400),y:num(x.y,0,DH,260),l:String(x.l==null?"":x.l).slice(0,60)};
+    if(x.t==="sys"){c.w=num(x.w,160,780,380);c.h=num(x.h,160,520,460)}
+    n.push(c);by[c.id]=c;
+  });
+  arr(o&&o.l).slice(0,80).forEach(x=>{
+    if(!x||!LT[x.t]||!by[x.a]||!by[x.b])return;
+    if(dLinkErr(by[x.a],by[x.b],x.t))return;
+    if(l.some(y=>y.t===x.t&&((y.a===x.a&&y.b===x.b)||(y.a===x.b&&y.b===x.a))))return;
+    l.push({t:x.t,a:x.a,b:x.b});
+  });
+  return{n,l};
+}
+const dId=t=>{const p={actor:"a",uc:"u",sys:"s"}[t];let i=1;while(D.n.some(n=>n.id===p+i))i++;return p+i};
+const dSave=()=>{if(D.n.length)sj("uc_diagram",D);else{delete data.uc_diagram;persist()}};
+
+/* ---------- geometry ---------- */
+function dBox(n){
+  if(n.t==="actor")return[n.x-40,n.y-52,n.x+40,n.y+70];
+  if(n.t==="uc")return[n.x-dRx(n)-2,n.y-dRy(n)-2,n.x+dRx(n)+2,n.y+dRy(n)+2];
+  return[n.x-n.w/2,n.y-n.h/2,n.x+n.w/2,n.y+n.h/2];
+}
+const dFit=(n,dx,dy)=>{const b=dBox(n);return[Math.max(-b[0],Math.min(DW-b[2],dx)),Math.max(-b[1],Math.min(DH-b[3],dy))]};
+const dIn=(s,n)=>Math.abs(n.x-s.x)<=s.w/2&&Math.abs(n.y-s.y)<=s.h/2;
+const dInside=s=>D.n.filter(n=>n.t!=="sys"&&dIn(s,n));
+function dEdge(n,ux,uy){            // distance from the centre to the outline, along a unit vector
+  if(n.t==="uc")return 1/Math.sqrt((ux/dRx(n))**2+(uy/dRy(n))**2);
+  const a=n.t==="actor"?28:n.w/2,b=n.t==="actor"?46:n.h/2;
+  return Math.min(a/Math.max(Math.abs(ux),1e-9),b/Math.max(Math.abs(uy),1e-9));
+}
+function dSeg(a,b){
+  const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<1)return null;
+  const ux=dx/d,uy=dy/d,s=dEdge(a,ux,uy),e=dEdge(b,-ux,-uy);if(s+e>=d-2)return null;
+  return{x1:a.x+ux*s,y1:a.y+uy*s,x2:b.x-ux*e,y2:b.y-uy*e,ux,uy};
+}
+function dWrap(s,n,max){
+  const w=String(s||"").split(/\s+/).filter(Boolean),L=[];let c="";
+  w.forEach(x=>{if(x.length>n)x=x.slice(0,n-1)+"…";if(c&&(c+" "+x).length>n){L.push(c);c=x}else c=c?c+" "+x:x});
+  if(c)L.push(c);
+  if(L.length>(max||3)){L.length=max||3;L[L.length-1]=L[L.length-1].slice(0,n-1)+"…"}
+  return L;
+}
+
+/* ---------- drawing (one renderer for screen, map, guide and exports) ---------- */
+function dLinkSVG(k,a,b,P){
+  const g=dSeg(a,b);if(!g)return"";
+  const dash=(k==="include"||k==="extend")?' stroke-dasharray="7 5"':"",px=-g.uy,py=g.ux,x2=g.x2,y2=g.y2;
+  let o=`<line x1="${r1(g.x1)}" y1="${r1(g.y1)}" x2="${r1(x2)}" y2="${r1(y2)}" stroke="${P.line}" stroke-width="2"${dash}/>`;
+  if(k==="include"||k==="extend"){
+    const L=13,W=6.5,p=(f,s)=>`${r1(x2-g.ux*L+px*W*s)},${r1(y2-g.uy*L+py*W*s)}`;
+    o+=`<polyline points="${p(0,1)} ${r1(x2)},${r1(y2)} ${p(0,-1)}" fill="none" stroke="${P.line}" stroke-width="2"/>`;
+    const t="«"+k+"»",mx=(g.x1+x2)/2,my=(g.y1+y2)/2,w=t.length*6.6+10;
+    o+=`<rect x="${r1(mx-w/2)}" y="${r1(my-10)}" width="${r1(w)}" height="20" fill="${P.bg}"/><text x="${r1(mx)}" y="${r1(my+4.5)}" text-anchor="middle" font-size="12.5" font-weight="700" fill="${P.tx}">${esc(t)}</text>`;
+  }
+  if(k==="general"){
+    const L=18,W=9,bx=x2-g.ux*L,by=y2-g.uy*L;
+    o+=`<polygon points="${r1(x2)},${r1(y2)} ${r1(bx+px*W)},${r1(by+py*W)} ${r1(bx-px*W)},${r1(by-py*W)}" fill="${P.bg}" stroke="${P.line}" stroke-width="2"/>`;
+  }
+  return o;
+}
+/* attributes that make a shape focusable: editor shapes use data-id, option-map ovals use data-a */
+function dAt(n,ia,label){
+  if(!ia||n.ro)return"";
+  if(n.o!==undefined)return` class="dn" data-a="pr" data-v="${n.o}" role="button" tabindex="0" aria-label="${esc(label)}"`;
+  return` class="dn" data-id="${n.id}" role="button" tabindex="0" aria-label="${esc(label)}"`;
+}
+const dRing=(ia,shape,pad,sel)=>!ia?"":`${shape(pad+4,"fr",'var(--am)',3,"")}${sel?shape(pad,"sr",'var(--pk)',3,' stroke-dasharray="6 4"'):""}`;
+function dUC(n,P,ia){
+  const rx=dRx(n),ry=dRy(n),pre=n.sel?"✔ ":"",L=dWrap(pre+n.l,n.wc||15,3),sel=n.sel,tc=sel?P.on:P.tx;
+  const lab=NT.uc+": "+(n.l||"unnamed")+(dSel===n.id?". Selected":"")+(sel?". Chosen":""),
+    from=ia&&dLinkFrom===n.id,mine=ia&&(dSel===n.id||from);
+  const ell=(p,c,s,w,x)=>`<ellipse class="${c}" cx="${r1(n.x)}" cy="${r1(n.y)}" rx="${rx+p}" ry="${ry+p}" fill="none" stroke="${s}" stroke-width="${w}"${x}/>`;
+  const t=L.map((s,i)=>`<tspan x="${r1(n.x)}" dy="${i?15:0}">${esc(s)}</tspan>`).join("");
+  return`<g${dAt(n,ia,lab)}>${dRing(ia,ell,2,mine)}<ellipse cx="${r1(n.x)}" cy="${r1(n.y)}" rx="${rx}" ry="${ry}" fill="${sel?P.uc:P.ucf}" stroke="${P.uc}" stroke-width="${sel?4:2.5}"/><text x="${r1(n.x)}" y="${r1(n.y-(L.length-1)*7.5+4.5)}" text-anchor="middle" font-size="13" font-weight="700" font-style="italic" fill="${tc}">${t}</text></g>`;
+}
+function dActor(n,P,ia){
+  const x=r1(n.x),y=r1(n.y),L=dWrap(n.l,12,2),lab=NT.actor+": "+(n.l||"unnamed")+(dSel===n.id?". Selected":""),mine=ia&&(dSel===n.id||dLinkFrom===n.id);
+  const rc=(p,c,s,w,e)=>`<rect class="${c}" x="${x-40-p}" y="${y-52-p}" width="${80+2*p}" height="${122+2*p}" rx="10" fill="none" stroke="${s}" stroke-width="${w}"${e}/>`;
+  const t=L.map((s,i)=>`<tspan x="${x}" dy="${i?15:0}">${esc(s)}</tspan>`).join("");
+  return`<g${dAt(n,ia,lab)}>${dRing(ia,rc,0,mine)}<rect x="${x-40}" y="${y-52}" width="80" height="122" fill="transparent"/><circle cx="${x}" cy="${y-38}" r="11" fill="${P.bg}" stroke="${P.actor}" stroke-width="3"/><path d="M${x} ${y-27}V${y+5}M${x-20} ${y-18}H${x+20}M${x} ${y+5}L${x-17} ${y+33}M${x} ${y+5}L${x+17} ${y+33}" fill="none" stroke="${P.actor}" stroke-width="3" stroke-linecap="round"/><text x="${x}" y="${y+52}" text-anchor="middle" font-size="13" font-weight="700" font-style="italic" fill="${P.tx}">${t}</text></g>`;
+}
+function dSys(n,P,ia){
+  const x=r1(n.x-n.w/2),y=r1(n.y-n.h/2),w=n.w,h=n.h,lab=NT.sys+": "+(n.l||"unnamed")+(dSel===n.id?". Selected":""),mine=ia&&dSel===n.id;
+  const rc=(p,c,s,sw,e)=>`<rect class="${c}" x="${x-p}" y="${y-p}" width="${w+2*p}" height="${h+2*p}" rx="${10+p}" fill="none" stroke="${s}" stroke-width="${sw}"${e}/>`;
+  const bar=`M${x} ${y+32}V${y+10}Q${x} ${y} ${x+10} ${y}H${x+w-10}Q${x+w} ${y} ${x+w} ${y+10}V${y+32}Z`;
+  return`<g${dAt(n,ia,lab)}>${dRing(ia,rc,2,mine)}<path d="${bar}" fill="${P.sysf}"/><line x1="${x}" y1="${y+32}" x2="${x+w}" y2="${y+32}" stroke="${P.sys}" stroke-width="2"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="none" stroke="${P.sys}" stroke-width="3" pointer-events="stroke"/><text x="${r1(n.x)}" y="${y+22}" text-anchor="middle" font-size="15" font-weight="700" font-style="italic" fill="${P.tx}">${esc(dWrap(n.l,Math.floor(w/9),1)[0]||"")}</text></g>`;
+}
+function dBody(Dm,P,ia){
+  const by={};Dm.n.forEach(n=>by[n.id]=n);let o="";
+  Dm.n.filter(n=>n.t==="sys").forEach(n=>o+=dSys(n,P,ia));
+  Dm.l.forEach(k=>{if(by[k.a]&&by[k.b])o+=dLinkSVG(k.t,by[k.a],by[k.b],P)});
+  Dm.n.filter(n=>n.t!=="sys").forEach(n=>o+=n.t==="actor"?dActor(n,P,ia):dUC(n,P,ia));
+  return o;
+}
+/* a complete tight-fitting <svg>. o: lab, big (full width), xml (standalone file), bg, pad, role, ia */
+function dSvg(Dm,P,o){
+  o=o||{};let b=[1e9,1e9,-1e9,-1e9];
+  Dm.n.forEach(n=>{const q=dBox(n);b=[Math.min(b[0],q[0]),Math.min(b[1],q[1]),Math.max(b[2],q[2]),Math.max(b[3],q[3])]});
+  if(!Dm.n.length)b=[0,0,300,150];
+  const pad=o.pad==null?8:o.pad,x=Math.floor(b[0]-pad),y=Math.floor(b[1]-pad),w=Math.max(Math.ceil(b[2]-b[0]+2*pad),o.minw||0),h=Math.ceil(b[3]-b[1]+2*pad);
+  const s=`<svg ${o.xml?'xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" ':""}viewBox="${x} ${y} ${w} ${h}"${o.big||o.xml?"":` style="width:${w}px;max-width:100%;height:auto"`} role="${o.role||"img"}" aria-label="${esc(o.lab||"Diagram")}" font-family="Calibri,Arial,sans-serif">${o.bg?`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${P.bg}"/>`:""}${dBody(Dm,P,!!o.ia)}</svg>`;
+  return{svg:s,w,h};
+}
+function dSvgX(){const d=dEns();return dSvg(d,XP,{xml:true,bg:true,pad:24,minw:240,lab:"Use case diagram"})}
+function dPNG(){
+  return new Promise((ok,no)=>{
+    const s=dSvgX(),im=new Image();
+    im.onload=()=>{try{const c=document.createElement("canvas");c.width=s.w*2;c.height=s.h*2;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);ok({url:c.toDataURL("image/png"),w:s.w,h:s.h})}catch(e){no(e)}};
+    im.onerror=()=>no(new Error("The diagram picture could not be built."));
+    im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s.svg);
+  });
+}
+const u2b=u=>{const p=u.split(","),m=/:(.*?);/.exec(p[0])[1],b=atob(p[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new Blob([a],{type:m})};
+const dHas=()=>dEns().n.length>0;
+
+/* ---------- text version (screen readers, read aloud, exports) ---------- */
+function dParts(){
+  const d=dEns(),by={};d.n.forEach(n=>by[n.id]=n);
+  const nm=n=>n.l.trim()||"(unnamed "+NT[n.t].toLowerCase()+")",S=d.n.find(n=>n.t==="sys");
+  return{sys:S?nm(S):"",actors:d.n.filter(n=>n.t==="actor").map(nm),ucs:d.n.filter(n=>n.t==="uc").map(n=>nm(n)+(S?(dIn(S,n)?" (inside the boundary)":" (outside the boundary)"):"")),
+    rels:d.l.map(k=>nm(by[k.a])+" "+LV[k.t]+" "+nm(by[k.b]))};
+}
+function dText(){
+  if(!dHas())return["The diagram is empty."];
+  const p=dParts(),o=[];
+  if(p.sys)o.push("System boundary: "+p.sys);
+  if(p.actors.length)o.push("Actors: "+p.actors.join(", "));
+  if(p.ucs.length)o.push("Use cases: "+p.ucs.join(", "));
+  return o.concat(p.rels);
+}
+function dRows(){
+  const p=dParts();
+  return[["System boundary",p.sys||"(none)"],["Actors",p.actors.join(", ")||"(none)"],["Use cases",p.ucs.join(", ")||"(none)"],["Relationships",p.rels.join("\n")||"(none)"]];
+}
+
+/* ---------- templates: worked examples + one starter per feature option ---------- */
+function dBuild(ns,ls){
+  const K={actor:"a",uc:"u",sys:"s"},ids=ns.map((a,i)=>K[a[0]]+(i+1));
+  return dClean({n:ns.map((a,i)=>({id:ids[i],t:a[0],x:a[1],y:a[2],l:a[3],w:a[4],h:a[5]})),l:ls.map(a=>({t:a[0],a:ids[a[1]],b:ids[a[2]]}))});
+}
+const OPT=[
+ {a:"Fan",u:"Vote for match MVP",i:"Check one vote per fan",x:"Show voting closed"},
+ {a:"Player",b:"Desk staff",u:"Check in at player desk",i:"Check player is registered",x:"Handle missing registration"},
+ {a:"Volunteer",u:"Report lost item",i:"Record item details",x:"Attach a photo"},
+ {a:"Fan",u:"Find first aid point",i:"Get fan location",x:"Show offline map"},
+ {a:"Caster",u:"Get match schedule",i:"Load latest schedule",x:"Send schedule change alert"},
+ {a:"Parent",u:"Find quiet space",i:"Check space is open",x:"Suggest next nearest space"},
+ {a:"Fan",b:"Sponsor staff",u:"Redeem giveaway",i:"Check giveaway is left",x:"Offer another prize"}];
+const DEMOS=[["day","Worked example: Fan buys a day pass"],["lib","Worked example: Library management"]];
+function dTpl(v){
+  if(v==="blank")return{n:[],l:[]};
+  if(v==="lib")return dBuild([["sys",400,270,"Library Management System",540,500],["actor",60,270,"Librarian"],["actor",740,270,"Student"],["uc",290,90,"Search Book"],["uc",290,170,"Add Book"],["uc",290,250,"Update Book"],["uc",290,350,"Request Book"],["uc",290,450,"Issue Book"],["uc",520,210,"Management system"],["uc",520,385,"Check Membership"],["uc",520,470,"Update Management system"]],
+    [["assoc",1,3],["assoc",1,4],["assoc",1,5],["assoc",1,7],["assoc",2,3],["assoc",2,6],["include",4,8],["include",5,8],["include",6,9],["include",6,7],["include",7,10]]);
+  if(v==="day")return dBuild([["sys",400,270,"Neon Clash Weekend app",540,500],["actor",60,200,"Fan"],["actor",740,410,"Gate steward"],["uc",290,110,"Buy day pass"],["uc",520,190,"Take payment"],["uc",520,300,"Pay another way"],["uc",290,300,"Enter arena"],["uc",290,410,"Scan ticket"],["uc",520,470,"Check ticket is valid"]],
+    [["assoc",1,3],["assoc",1,6],["assoc",2,7],["include",3,4],["extend",5,4],["include",6,7],["include",7,8]]);
+  const m=/^o(\d)$/.exec(v);
+  if(m&&OPT[+m[1]]){
+    const o=OPT[+m[1]],ns=[["sys",400,270,"Neon Clash Weekend app",440,420],["actor",70,170,o.a],["uc",350,170,o.u],["uc",350,310,o.i],["uc",530,310,o.x]],ls=[["assoc",1,2],["include",2,3],["extend",4,2]];
+    if(o.b){ns.push(["actor",730,170,o.b]);ls.push(["assoc",5,2])}
+    return dBuild(ns,ls);
+  }
+  return null;
+}
+function dMapD(){
+  const si=PROMPTS.indexOf(g("name")),n=[{id:"m0",t:"sys",ro:1,x:400,y:260,w:440,h:440,l:"Neon Clash Weekend app"}],l=[];
+  const slots=[[0,305,112],[3,305,200],[6,305,288],[1,305,376],[2,495,120],[4,495,250],[5,495,380]];
+  const ac={Fan:[60,200],Player:[60,376],Volunteer:[740,120],Caster:[740,250],Parent:[740,380]},made={};
+  slots.forEach(([o,x,y])=>{
+    n.push({id:"mu"+o,t:"uc",x,y,l:PROMPTS[o],rx:85,ry:34,wc:18,o,sel:o===si});
+    const a=OPT[o].a;if(!made[a]){made[a]=1;n.push({id:"ma"+a,t:"actor",ro:1,x:ac[a][0],y:ac[a][1],l:a})}
+    l.push({t:"assoc",a:"ma"+a,b:"mu"+o});
+  });
+  return{n,l};
+}
+const dMapSvg=()=>`<div class="dcv">${dSvg(dMapD(),DP,{big:true,ia:true,role:"group",pad:10,lab:"Options map: a use case diagram of the seven feature options for Neon Clash Weekend. Each oval is a button that picks that feature."}).svg}</div>`;
+
+/* ===== GAME LEVELS 1-3: actors, place, fix =====
+   All three levels use the same seven features and actors as the Create tab (PROMPTS / OPT). */
+const ROLES=["Caster","Desk staff","Fan","Gate steward","Organiser","Parent","Player","Sponsor staff","The app (the system)","Volunteer"];
+const WHO=["Commentates on the matches.","Run the player desk and sign teams in.","Ticket holder who comes to watch.","Scans tickets at the gate.","Runs the whole event. Not part of these seven features.","Looks after children at the event.","Competes in a team.","Run a sponsor stall and hand out prizes.","The thing you are designing. It is the system, never an actor.","Helps around the venue."];
+const FX=[
+ {ctx:"The match has just finished and the app opens voting for the best player.",clue:"Pick the best player of the match",h:"One kind of visitor is needed. Nobody else has to help for the vote to count.",why:"The Fan starts it and nobody else has to take part, so there is one actor and no second actor."},
+ {ctx:"A team arrives and signs in before its first match. Someone at the desk checks the team is on the list.",clue:"Sign in before the first match",h:"Two roles take part: one wants to get checked in, and one works at the desk.",why:"The Player wants to check in and Desk staff work the desk, so Desk staff are the second actor."},
+ {ctx:"Someone who helps run the venue finds a bag in Hall B and hands it in so the owner can get it back.",clue:"Tell the team about a found bag",h:"Think about who helps run the venue. Nobody else has to take part in the app.",why:"The Volunteer finds and reports the bag. Nobody else is needed, so there is no second actor."},
+ {ctx:"Someone watching the matches feels faint and wants to know where to go for help.",clue:"Get help after feeling faint",h:"Think about who comes to watch. Nobody else has to take part in the app.",why:"The Fan wants help and nobody else has to take part, so there is no second actor."},
+ {ctx:"Someone is getting ready to commentate on the next match and needs the running order.",clue:"See when each match starts",h:"Think about who talks about the matches on the stream.",why:"The Caster wants the schedule and nobody else takes part, so there is no second actor."},
+ {ctx:"The hall is loud. Someone with a young child wants somewhere calm to sit.",clue:"Find a calm place for a child",h:"Think about who is looking after the child.",why:"The Parent wants the calm space and nobody else takes part, so there is no second actor."},
+ {ctx:"A sponsor is giving out prizes. Someone wants to claim a prize and a person at the stall hands it over.",clue:"Claim a prize from a sponsor",h:"Two roles take part: one claims the prize and one works the sponsor stall.",why:"The Fan claims the prize and Sponsor staff hand it over, so Sponsor staff are the second actor."}];
+const CARDS=OPT.map(o=>o.u).concat(["Voting screen","Save to database","Tap the map button"]);
+const CORD=[4,8,1,9,6,0,3,7,5,2];
+const SLOT_ORDER=[0,3,6,1,2,4,5];
+const SP={0:[320,114],3:[320,184],6:[320,254],1:[320,324],2:[320,394],4:[320,464],5:[320,534]};
+const AP={"Fan":[55,184],"Player":[55,324],"Volunteer":[55,454],"Sponsor staff":[585,224],"Desk staff":[585,354],"Caster":[585,484],"Parent":[585,614]};
+const T3P=[[60,80],[60,215],[560,80],[560,215]];
+const T3=[
+ {f:5,k:"assoc",title:"Change the association",cands:["Player","Parent","Caster"],init:0,ok:1,max:2,
+  scene:"A parent with a young child wants somewhere calm. The diagram links the wrong actor to Find quiet space.",
+  task:"Change the association so the line joins the actor who wants a quiet space.",
+  hs:["An association is a plain line joining an actor to a use case they take part in. It has no arrow.","Ask: who in the scene wants a quiet space? Tap that actor, or choose them in the menu.","Answer: link Find quiet space to Parent."],
+  why:"The Parent starts this goal, so the plain line joins Parent to Find quiet space."},
+ {f:1,k:"assoc",title:"Change the association",fix:"Player",cands:["Gate steward","Desk staff","Organiser"],init:0,ok:1,max:2,
+  scene:"A team signs in at the player desk. Player is linked correctly, but the second actor is wrong.",
+  task:"Change the association for the second actor: who works at the player desk and checks the team in?",
+  hs:["A second actor takes part from the other side. Here, someone checks the Player in.","Look at the who's who list in Level 1. Who runs the player desk?","Answer: link Check in at player desk to Desk staff."],
+  why:"Desk staff run the player desk, so they are the second actor. The Gate steward works at the gate, not the desk."},
+ {f:6,k:"assoc",title:"Change the association",fix:"Fan",cands:["Caster","Volunteer","Sponsor staff"],init:1,ok:2,max:2,
+  scene:"A fan claims a sponsor prize. Fan is linked correctly, but the person who hands over the prize is wrong.",
+  task:"Change the association for the second actor: who hands over the prize?",
+  hs:["The second actor is the person on the other side of the exchange.","Who runs the stall where prizes are given out?","Answer: link Redeem giveaway to Sponsor staff."],
+  why:"Sponsor staff run the stall and hand over the prize, so they are the second actor."},
+ {f:0,k:"type",title:"Include or extend?",oth:"i",init:1,ok:0,max:1,
+  scene:"Every time a fan votes, the system checks that the fan has not voted already. The diagram shows this check as «extend».",
+  task:"Does the check ALWAYS happen, or only sometimes? Choose the right relationship.",
+  hs:["Include: the first use case ALWAYS uses the second. Extend: the second is an extra that only SOMETIMES happens.","Ask: does every vote need the one-vote check? If yes, it is an include.","Answer: «include». The arrow then points to Check one vote per fan."],
+  why:"The check happens on every vote, so Vote for match MVP includes Check one vote per fan."},
+ {f:2,k:"type",title:"Include or extend?",oth:"x",init:0,ok:1,max:1,
+  scene:"A volunteer can add a photo of the lost item, but many reports have no photo. The diagram shows the photo as «include».",
+  task:"Does the photo ALWAYS happen, or only sometimes? Choose the right relationship.",
+  hs:["Include: always part of it. Extend: an optional extra that only sometimes happens.","Ask: can a lost item report be finished without a photo? If yes, it is an extend.","Answer: «extend». The arrow then points to Report lost item."],
+  why:"A photo is optional, so Attach a photo extends Report lost item."},
+ {f:3,k:"dir",title:"Flip the extend arrow",oth:"x",rel:"extend",init:0,ok:1,max:1,
+  scene:"With no mobile signal, the app shows an offline map instead. The arrow is labelled «extend» but points the wrong way.",
+  task:"Flip the arrow so it points to the use case being extended (the base).",
+  hs:["An extend arrow starts at the extra use case and points to the base use case it adds to.","Read the sentence under the picture. Does it make sense? The offline map is the extra.","Answer: the arrow starts at Show offline map and points to Find first aid point."],
+  why:"An extend arrow points to the base use case, so Show offline map extends Find first aid point."},
+ {f:4,k:"dir",title:"Flip the include arrow",oth:"i",rel:"include",init:0,ok:1,max:1,
+  scene:"Every time the schedule opens, the latest version is loaded. The arrow is labelled «include» but points the wrong way.",
+  task:"Flip the arrow so it points to the included use case.",
+  hs:["An include arrow starts at the base use case and points to the use case it always uses.","Read the sentence under the picture. Get match schedule is the main goal and Load latest schedule is the part it uses.","Answer: the arrow starts at Get match schedule and points to Load latest schedule."],
+  why:"An include arrow points to the included use case, so Get match schedule includes Load latest schedule."}];
+
+function hintText(k,lv){const [L,i]=k.split("-").map(Number);
+ if(L===1){const o=OPT[i];return["The primary actor starts the use case because they want the goal. A second actor only takes part to help. The app is the system, so it is never an actor.",FX[i].h,"Answer: primary actor "+o.a+(o.b?", second actor "+o.b:", no second actor")+"."][lv-1]}
+ if(L===2){const o=OPT[i];return["Clue: "+FX[i].clue+". Look at who the line comes from, then find a goal that actor would have.","The card starts with the word \""+o.u.split(" ")[0]+"\". A use case starts with a verb.","Answer: "+o.u+"."][lv-1]}
+ return T3[i].hs[lv-1]}
+const hintUI=(G,k)=>{const lv=G.h[k]||0;return `<div class="rw2"><button type="button" class="alt" id="hb${k}" data-a="hint" data-v="${k}"${lv>=3?" disabled":""}>${lv?"Hint "+lv+" of 3 shown":"Hint"}${lv&&lv<3?": show more":""}</button></div>`+(lv?`<ul class="hl3">${Array.from({length:lv},(_,i)=>`<li><b>Hint ${i+1}:</b> ${esc(hintText(k,i+1))}</li>`).join("")}</ul>`:"")};
+const helpBtn=(n,t)=>`<div class="row"><button type="button" class="alt" id="hp${n}" data-a="help" data-v="${n}" aria-expanded="${UI["h"+n]}" aria-controls="hbox${n}">${UI["h"+n]?"Hide":"Show"} ${t}</button></div>`;
+const hbox=(n,h)=>`<div class="hbox" id="hbox${n}"${UI["h"+n]?"":" hidden"}>${h}</div>`;
+const miniD=(ns,ls,lab)=>dSvg({n:ns,l:ls},DP,{lab,pad:6}).svg;
+
+/* ---------- LEVEL 1: set the actors ---------- */
+const ok1p=(G,i)=>G.a1[i]===ROLES.indexOf(OPT[i].a),ok1s=(G,i)=>G.s1[i]===(OPT[i].b?ROLES.indexOf(OPT[i].b):-2),ok1=(G,i)=>ok1p(G,i)&&ok1s(G,i);
+function l1Mini(G,i){const o=OPT[i],a=G.a1[i],s=G.s1[i],A=(id,x,l)=>({id,t:"actor",x,y:60,l}),
+ ns=[A("a1",50,a>=0?ROLES[a]:"?"),{id:"u1",t:"uc",x:250,y:60,l:o.u,rx:85,ry:34,wc:18}],ls=[{t:"assoc",a:"a1",b:"u1"}];
+ if(s!==-2){ns.push(A("a2",450,s>=0?ROLES[s]:"?"));ls.push({t:"assoc",a:"a2",b:"u1"})}
+ return dSvg({n:ns,l:ls},DP,{lab:"Preview: "+(a>=0?ROLES[a]:"unknown actor")+" is linked to "+o.u+(s===-2?".":s>=0?", and "+ROLES[s]+" is linked too.":", and a second actor is not chosen yet."),pad:4}).svg}
+function l1Card(G,i){const o=OPT[i],f=FX[i],rs=G.k1?(ok1(G,i)?`<p>${mark(1)} <span class="hint">${esc(f.why)}</span></p>`:`<p><b class="${ok1p(G,i)?"ok":"no"}">${ok1p(G,i)?"✔ Primary actor":"✘ Primary actor: not yet"}</b> · <b class="${ok1s(G,i)?"ok":"no"}">${ok1s(G,i)?"✔ Second actor":"✘ Second actor: not yet"}</b>${G.a1[i]===8?'<span class="hint"> The app is the system itself, so it is never an actor.</span>':""}</p>`):"";
+ return `<div class="fc${G.k1?(ok1(G,i)?" okc":" noc"):""}"><span class="ct">${i+1}. ${esc(PROMPTS[i])}</span><span class="hint">Scene: ${esc(f.ctx)}</span>${l1Mini(G,i)}
+<div class="dgrid"><div class="sel"><label for="a1_${i}">Primary actor (starts it)</label><select id="a1_${i}" data-a="p1" data-v="${i}"><option value="-1">Choose…</option>${ROLES.map((r,j)=>`<option value="${j}"${G.a1[i]===j?" selected":""}>${esc(r)}</option>`).join("")}</select></div>
+<div class="sel"><label for="s1_${i}">Second actor (helps or is needed)</label><select id="s1_${i}" data-a="s1" data-v="${i}"><option value="-1">Choose…</option><option value="-2"${G.s1[i]===-2?" selected":""}>No second actor</option>${ROLES.map((r,j)=>`<option value="${j}"${G.s1[i]===j?" selected":""}>${esc(r)}</option>`).join("")}</select></div></div>${rs}${hintUI(G,"1-"+i)}</div>`}
+function wL1(){const G=getG(),n=FX.filter((f,i)=>ok1(G,i)).length;
+ return hud(G)+'<p>Read each scene. Choose who starts it, then who else takes part. The picture updates as you choose.</p>'+helpBtn(1,"the who's who and tips")+hbox(1,`<h3 class="wh">Three questions to ask</h3><ol><li><b>Who wants the goal?</b> That is the primary actor.</li><li><b>Who else must take part?</b> Someone who helps from the other side is a second actor. Many features have none.</li><li><b>Is it a role outside the app?</b> If it is the app itself, it is not an actor.</li></ol><div class="tbw"><table class="tb"><caption class="hint">Who's who at Neon Clash Weekend</caption><thead><tr><th scope="col">Role</th><th scope="col">Who they are</th></tr></thead><tbody>${ROLES.map((r,j)=>`<tr><th scope="row">${esc(r)}</th><td>${esc(WHO[j])}</td></tr>`).join("")}</tbody></table></div>`)+FX.map((f,i)=>l1Card(G,i)).join("")+`<div class="row"><button type="button" id="c1b" data-a="c1">Check my actors</button><button type="button" class="alt" data-a="r1">Clear my choices</button></div>`+(G.k1?`<p class="hint">This round: ${n} of 7 features fully correct. Your best counts toward your score.</p>`:"")}
+
+/* ---------- LEVEL 2: drag use cases onto the placeholders ---------- */
+const actorsFor=f=>[OPT[f].a].concat(OPT[f].b?[OPT[f].b]:[]);
+function l2Slot(f,G){const [x,y]=SP[f],c=G.p2[f],n=SLOT_ORDER.indexOf(f)+1,chk=G.k2,ok=c===f,rx=85,ry=34;
+ const lab=`Placeholder ${n}, linked to ${actorsFor(f).join(" and ")}. `+(c>=0?`Holds ${CARDS[c]}.`:"Empty.")+(chk&&c>=0?(ok?" Correct.":" Not yet."):"")+(held>=0?" Press Enter to place the card you are holding.":"");
+ let L,txt;
+ if(c>=0){L=dWrap((chk?(ok?"✔ ":"✘ "):"")+CARDS[c],18,3);txt=`<text x="${x}" y="${r1(y-(L.length-1)*7.5+4.5)}" text-anchor="middle" font-size="13" font-weight="700" font-style="italic" fill="var(--hd)">${L.map((s,i)=>`<tspan x="${x}" dy="${i?15:0}">${esc(s)}</tspan>`).join("")}</text>`}
+ else{L=dWrap(FX[f].clue,26,2);txt=`<text x="${x}" y="${r1(y-(L.length-1)*7+4)}" text-anchor="middle" font-size="11.5" font-style="italic" fill="var(--mu)">${L.map((s,i)=>`<tspan x="${x}" dy="${i?14:0}">${esc(s)}</tspan>`).join("")}</text>`}
+ const el=c>=0?`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="var(--card)" stroke="${chk&&!ok?"var(--am)":"var(--li)"}" stroke-width="${chk?4:2.5}"/>`:`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="none" stroke="var(--mu)" stroke-width="2" stroke-dasharray="6 4"/>`;
+ return `<g class="sl" id="l2s${f}" data-a="slot" data-v="${f}" data-slot="${f}" role="button" tabindex="0" aria-label="${esc(lab)}"><ellipse class="hl" cx="${x}" cy="${y}" rx="${rx+6}" ry="${ry+6}" fill="none" stroke="var(--am)" stroke-width="3"/>${el}${txt}<circle cx="${x-rx+6}" cy="${y-ry+6}" r="12" fill="var(--cy)"/><text x="${x-rx+6}" y="${y-ry+10.5}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--bg)">${n}</text></g>`}
+function l2Svg(G){const P=DP,al=Object.keys(AP),nodes={},sl={};
+ let o=dSys({id:"s",t:"sys",x:320,y:310,w:300,h:560,l:"Neon Clash Weekend app"},P,false);
+ al.forEach(n=>nodes[n]={id:"a:"+n,t:"actor",x:AP[n][0],y:AP[n][1],l:n});
+ SLOT_ORDER.forEach(f=>sl[f]={t:"uc",x:SP[f][0],y:SP[f][1],rx:85,ry:34});
+ OPT.forEach((q,f)=>actorsFor(f).forEach(a=>o+=dLinkSVG("assoc",nodes[a],sl[f],P)));
+ al.forEach(n=>o+=dActor(nodes[n],P,false));
+ SLOT_ORDER.forEach(f=>o+=l2Slot(f,G));
+ return `<svg viewBox="0 20 640 680" role="group" aria-label="Use case diagram for the Neon Clash Weekend app. Seven numbered placeholders sit inside the system box. Actors stand outside, joined to their placeholders by plain lines. The same placeholders are listed below the picture." font-family="Calibri,Arial,sans-serif">${o}</svg>`}
+let l2msg="";
+function wL2(){const G=getG(),pool=CORD.filter(c=>!G.p2.includes(c)),n=G.p2.filter((c,f)=>c===f).length;
+ const rows=SLOT_ORDER.map((f,k)=>{const c=G.p2[f];
+  return `<li class="rw"><b class="ct">${k+1}. Linked to ${esc(actorsFor(f).join(" and "))}</b><span class="hint">Clue: ${esc(FX[f].clue)}</span>
+<div class="rw2"><label class="sr" for="sl${f}">Use case for placeholder ${k+1}</label><select id="sl${f}" data-a="slotsel" data-v="${f}"><option value="-1">Empty</option>${CORD.map(cc=>{const at=G.p2.indexOf(cc);return `<option value="${cc}"${c===cc?" selected":""}>${esc(CARDS[cc])}${at>=0&&at!==f?" (in "+(SLOT_ORDER.indexOf(at)+1)+")":""}</option>`}).join("")}</select>
+${G.k2?(c<0?'<b class="no">✘ Empty</b>':c===f?mark(1):'<b class="no">✘ Not yet</b>'):""}</div>${G.k2&&c>=7?'<span class="hint">That card is a screen, a click or storage. A use case is a goal: a verb and a noun.</span>':""}${hintUI(G,"2-"+f)}</li>`}).join("");
+ return hud(G)+`<div class="row hrow"><button type="button" class="alt" id="hp2" data-a="help" data-v="2" aria-expanded="${UI.h2}" aria-controls="hbox2">${UI.h2?"Hide":"Show"} tips</button><button type="button" class="alt" id="hp2m" data-a="help" data-v="2m" aria-expanded="${UI.h2m}" aria-controls="menus2">${UI.h2m?"Hide":"Show"} menus (no dragging)</button></div>`+hbox(2,`<ol><li>Read the <b>clue</b> in the oval. It says what the actor wants.</li><li>Check which <b>actor</b> the line comes from.</li><li>Pick a card that starts with a <b>verb</b>: Find, Report, Get.</li><li>Screens, button taps and "Save to database" are not goals. Leave them in the list.</li></ol><p class="hint">Stuck? The Options map on the Create tab shows every feature with its actor.</p>`)+
+ `<div class="l2g${held>=0?" holding":""}"><div class="l2p"><h3 class="wh">Cards (${pool.length} left)</h3><p class="hint" id="l2s">${held>=0?"Holding: "+esc(CARDS[held])+". Now tap, or press Enter on, a numbered oval.":"Drag a card onto an oval, or tap a card then an oval."}</p><div class="pool2" role="group" aria-label="Use case cards">${pool.map(c=>`<button type="button" class="alt cdb" id="cb${c}" data-a="card" data-v="${c}" data-card="${c}" aria-pressed="${held===c}">${esc(CARDS[c])}</button>`).join("")}</div><div class="row"><button type="button" class="alt" id="hb2all" data-a="hint2">Hint</button></div><p class="hint" role="status" id="l2h">${esc(l2msg)}</p></div><div class="dcv l2d">${l2Svg(G)}</div></div>`+
+ `<div id="menus2"${UI.h2m?"":" hidden"}><h3 class="wh">Placeholders as a list</h3><p class="hint">Choose a card from each menu instead of dragging.</p><ol class="slotlist">${rows}</ol></div>`+
+ `<div class="row"><button type="button" id="c2b" data-a="c2">Check my placements</button><button type="button" class="alt" data-a="r2">Start again</button></div>`+(G.k2?`<p class="hint">This round: ${n} of 7 in the right place. Your best counts toward your score.</p>`:"")}
+function l2Place(c,s,from,focus,fid){const G=getG(),prev=G.p2[s];
+ G.p2=G.p2.map(x=>x===c?-1:x);G.p2[s]=c;if(from>=0&&from!==s&&prev>=0&&prev!==c)G.p2[from]=prev;
+ G.k2=false;held=-1;sg(G);wgDraw(focus?"l2s"+s:fid);
+ say(CARDS[c]+" placed in placeholder "+(SLOT_ORDER.indexOf(s)+1)+".")}
+function l2Down(e){if(e.button>0)return;
+ const cb=e.target.closest("button[data-card]"),sl=e.target.closest("g[data-slot]");let card=-1,from=-1;
+ if(cb)card=+cb.dataset.card;else if(sl){const f=+sl.dataset.slot;if(getG().p2[f]>=0){from=f;card=getG().p2[f]}}
+ if(card<0)return;
+ l2d={card,from,x:e.clientX,y:e.clientY,on:false,ghost:null,id:e.pointerId};
+ addEventListener("pointermove",l2Move);addEventListener("pointerup",l2Up);addEventListener("pointercancel",l2Cancel)}
+function l2Move(e){if(!l2d||e.pointerId!==l2d.id)return;
+ if(!l2d.on){if(Math.hypot(e.clientX-l2d.x,e.clientY-l2d.y)<8)return;l2d.on=true;const g=document.createElement("div");g.className="ghost";g.textContent=CARDS[l2d.card];document.body.appendChild(g);l2d.ghost=g}
+ l2d.ghost.style.left=e.clientX+"px";l2d.ghost.style.top=e.clientY+"px";
+ qa(document,"g.hot").forEach(x=>x.classList.remove("hot"));
+ const el=document.elementFromPoint(e.clientX,e.clientY),s=el&&el.closest&&el.closest("g[data-slot]");if(s)s.classList.add("hot")}
+function l2End(){if(!l2d)return;removeEventListener("pointermove",l2Move);removeEventListener("pointerup",l2Up);removeEventListener("pointercancel",l2Cancel);if(l2d.ghost)l2d.ghost.remove();qa(document,"g.hot").forEach(x=>x.classList.remove("hot"));l2d=null}
+function l2Cancel(){const on=l2d&&l2d.on;l2End();if(on)wgDraw()}
+function l2Up(e){if(!l2d||e.pointerId!==l2d.id)return;const d=l2d;l2End();if(!d.on)return;
+ l2sup=true;setTimeout(()=>{l2sup=false},80);
+ const el=document.elementFromPoint(e.clientX,e.clientY),s=el&&el.closest&&el.closest("g[data-slot]");
+ if(s)return l2Place(d.card,+s.dataset.slot,d.from,false,null);
+ if(d.from>=0){const G=getG();G.p2[d.from]=-1;G.k2=false;sg(G);held=-1;wgDraw();return say(CARDS[d.card]+" put back in the list.")}
+ wgDraw()}
+
+/* ---------- LEVEL 3: fix the association, include / extend ---------- */
+function t3Model(i,v){const t=T3[i],o=OPT[t.f],P=DP;
+ let body=dSys({id:"s",t:"sys",x:310,y:145,w:280,h:250,l:"Neon Clash Weekend app"},P,false),reads,lab;
+ if(t.k==="assoc"){
+  const uc={id:"u",t:"uc",x:310,y:150,rx:85,ry:34,wc:18,l:o.u},names=(t.fix?[t.fix]:[]).concat(t.cands),off=t.fix?1:0,
+   ns=names.map((nm,k)=>({id:"a"+k,t:"actor",x:T3P[k][0],y:T3P[k][1],l:nm}));
+  if(t.fix)body+=dLinkSVG("assoc",ns[0],uc,P);
+  body+=dLinkSVG("assoc",ns[off+v],uc,P);
+  ns.forEach((n,k)=>{if(k<off)body+=dActor(n,P,false);else{const j=k-off,on=j===v;
+   body+=`<g class="sl" data-a="t3a" data-v="${i}:${j}" id="t3g${i}_${j}" role="button" tabindex="0" aria-pressed="${on}" aria-label="${esc(n.l+(on?": linked to "+o.u:": tap to link to "+o.u))}">${dActor(n,P,false)}<rect class="hl" x="${n.x-46}" y="${n.y-58}" width="92" height="134" rx="12" fill="none" stroke="var(--am)" stroke-width="3"/></g>`}});
+  body+=dUC(uc,P,false);
+  reads=names[off+v]+" is linked to "+o.u+"."+(t.fix?" "+t.fix+" is linked too.":"");
+  lab="Diagram for "+o.u+" with actors "+names.join(", ")+". "+reads;
+ }else{
+  const rel=t.k==="type"?(v?"extend":"include"):t.rel,base={id:"b",t:"uc",x:310,y:100,rx:85,ry:34,wc:18,l:o.u},oth={id:"o",t:"uc",x:310,y:215,rx:85,ry:34,wc:18,l:o[t.oth]},A={id:"a",t:"actor",x:60,y:100,l:o.a};
+  let a,b;
+  if(rel==="include"){a=base;b=oth}else{a=oth;b=base}
+  if(t.k==="dir"&&v===0){const z=a;a=b;b=z}
+  body+=dLinkSVG("assoc",A,base,P)+dLinkSVG(rel,a,b,P)+dActor(A,P,false)+dUC(base,P,false)+dUC(oth,P,false);
+  reads=a.l+" "+LV[rel]+" "+b.l+".";
+  lab="Diagram: "+reads+" "+o.a+" is linked to "+o.u+".";
+ }
+ return{svg:`<svg viewBox="0 0 620 300" role="${t.k==="assoc"?"group":"img"}" aria-label="${esc(lab)}" font-family="Calibri,Arial,sans-serif">${body}</svg>`,reads}}
+function t3Card(G,i){const t=T3[i],v=G.v3[i],ok=v===t.ok,m=t3Model(i,v);let ctl;
+ if(t.k==="assoc")ctl=`<div class="sel"><label for="t3s${i}">${t.fix?esc(t.fix)+" is already linked. Who is the second actor?":"Which actor is linked?"}</label><select id="t3s${i}" data-a="t3sel" data-v="${i}">${t.cands.map((c,j)=>`<option value="${j}"${v===j?" selected":""}>${esc(c)}</option>`).join("")}</select></div><p class="hint">Or tap an actor in the picture.</p>`;
+ else if(t.k==="type")ctl=`<div class="row" role="group" aria-label="Choose the relationship">${[["Always happens → «include»"],["Only sometimes → «extend»"]].map((x,j)=>`<button type="button" class="${v===j?"":"alt"}" id="t3b${i}_${j}" data-a="t3type" data-v="${i}:${j}" aria-pressed="${v===j}">${v===j?"● ":""}${x[0]}</button>`).join("")}</div>`;
+ else ctl=`<div class="row"><button type="button" class="alt" id="t3f${i}" data-a="t3flip" data-v="${i}">Flip the arrow</button></div>`;
+ return `<div class="fc${G.k3?(ok?" okc":" noc"):""}"><h3 class="wh">Task ${i+1} · ${esc(t.title)}</h3><span class="hint">Scene: ${esc(t.scene)}</span><p><b>Your task:</b> ${esc(t.task)}</p><div class="dcv t3d" style="max-width:640px">${m.svg}</div><p class="reads"><b>Reads as:</b> ${esc(m.reads)}</p>${ctl}${G.k3?(ok?`<p>${mark(1)} <span class="hint">${esc(t.why)}</span></p>`:'<p><b class="no">✘ Not yet</b> <span class="hint">Read the sentence above the buttons. Does it make sense? Use a hint if you are stuck.</span></p>'):""}${hintUI(G,"3-"+i)}</div>`}
+function wL3(){const G=getG(),n=T3.filter((t,i)=>G.v3[i]===t.ok).length;
+ const mini=[["Association",miniD([{id:"a1",t:"actor",x:45,y:55,l:"Fan"},{id:"u1",t:"uc",x:200,y:55,l:"Find first aid"}],[{t:"assoc",a:"a1",b:"u1"}],"A plain line joining the actor Fan to the oval Find first aid"),"Plain line, no arrow. Joins an actor to a use case they take part in."],
+ ["Include",miniD([{id:"u1",t:"uc",x:90,y:40,l:"Buy day pass"},{id:"u2",t:"uc",x:90,y:150,l:"Take payment"}],[{t:"include",a:"u1",b:"u2"}],"A dashed arrow labelled include from Buy day pass down to Take payment"),"ALWAYS part of it. The arrow points to the included use case."],
+ ["Extend",miniD([{id:"u1",t:"uc",x:90,y:150,l:"Pay another way"},{id:"u2",t:"uc",x:90,y:40,l:"Take payment"}],[{t:"extend",a:"u1",b:"u2"}],"A dashed arrow labelled extend from Pay another way up to Take payment"),"Only SOMETIMES, an optional extra. The arrow points to the base use case."]];
+ return hud(G)+'<p>Each picture has one mistake. Read the scene, fix the picture, then press Check at the bottom.</p>'+helpBtn(3,"the cheat sheet")+hbox(3,`<h3 class="wh">Cheat sheet</h3><div class="gcards">${mini.map(m=>`<div class="gc"><h4>${m[0]}</h4>${m[1]}<p>${m[2]}</p></div>`).join("")}</div><ul><li><b>Always or sometimes?</b> Always means include. Sometimes means extend.</li><li><b>Read the arrow as a sentence.</b> "Buy day pass includes Take payment" makes sense. "Take payment includes Buy day pass" does not.</li><li><b>Arrow points to:</b> the included use case (include) or the base use case (extend).</li></ul>`)+T3.map((t,i)=>t3Card(G,i)).join("")+`<div class="row"><button type="button" id="c3b" data-a="c3">Check my fixes</button><button type="button" class="alt" data-a="r3">Reset the pictures</button></div>`+(G.k3?`<p class="hint">This round: ${n} of 7 fixed. Your best counts toward your score.</p>`:"")}
+
+/* ---------- KEY ELEMENTS tab ---------- */
+function wGuide(){
+  const mini=(ns,ls,lab)=>dSvg({n:ns,l:ls},DP,{lab,pad:6}).svg;
+  const A=(id,x,y,l)=>({id,t:"actor",x,y,l}),U=(id,x,y,l)=>({id,t:"uc",x,y,l});
+  const els=[
+   ["Actor",mini([A("a1",50,60,"Fan")],[],"A stick figure labelled Fan"),"Someone or something outside the system that takes part: a person in a role, or another system.","Name the role, not the person: Fan, Librarian. Never draw an actor inside the boundary."],
+   ["Use case",mini([U("u1",90,40,"Buy day pass")],[],"An oval labelled Buy day pass"),"One goal an actor gets done with the system. It is an oval with a short name.","Verb first: Buy day pass. A button click or a screen is not a use case."],
+   ["System boundary",mini([A("a1",42,95,"Fan"),{id:"s1",t:"sys",x:215,y:80,w:200,h:150,l:"Neon Clash app"},U("u1",215,110,"Buy day pass")],[{t:"assoc",a:"a1",b:"u1"}],"A box labelled Neon Clash app with the oval Buy day pass inside and the actor Fan outside"),"A box with the system's name. Everything inside is something the system does. Actors stay outside.","If a goal is not part of your system, leave it outside the box."],
+   ["Association",mini([A("a1",45,55,"Fan"),U("u1",200,55,"Find first aid")],[{t:"assoc",a:"a1",b:"u1"}],"A plain line joining the actor Fan to the oval Find first aid"),"A plain line: this actor takes part in this use case.","No arrowheads and no labels needed. One end touches an actor, the other a use case."],
+   ["Include",mini([U("u1",90,40,"Buy day pass"),U("u2",90,150,"Take payment")],[{t:"include",a:"u1",b:"u2"}],"A dashed arrow labelled include from Buy day pass down to Take payment"),"Dashed arrow marked «include». The first use case ALWAYS uses the second as one of its parts.","The arrow points to the included use case. Good for steps shared by several use cases."],
+   ["Extend",mini([U("u1",90,150,"Pay another way"),U("u2",90,40,"Take payment")],[{t:"extend",a:"u1",b:"u2"}],"A dashed arrow labelled extend from Pay another way up to Take payment"),"Dashed arrow marked «extend». An optional or unusual extra that only SOMETIMES adds to the base use case.","The arrow points to the base use case being extended. Risks in your written use case often become extends."],
+   ["Generalization",mini([A("a1",50,40,"Student"),A("a2",50,170,"Staff"),A("a3",200,105,"Library member")],[{t:"general",a:"a1",b:"a3"},{t:"general",a:"a2",b:"a3"}],"Two actors, Student and Staff, with solid lines and hollow triangles pointing to a parent actor, Library member"),"Solid line with a hollow triangle. One actor (or use case) is a special kind of another.","The triangle points to the general one. Keep it for real 'is a kind of' cases."]];
+  const cards=els.map(e=>`<div class="gc"><h4>${esc(e[0])}</h4>${e[1]}<p>${esc(e[2])}</p><p class="hint"><b>Tip:</b> ${esc(e[3])}</p></div>`).join("");
+  const lib=dSvg(dTpl("lib"),DP,{big:true,pad:6,lab:"Library management use case diagram. Actors Librarian and Student sit outside a box called Library Management System. Inside are use cases Search Book, Add Book, Update Book, Request Book, Issue Book, Management system, Check Membership and Update Management system, joined by lines and dashed include arrows."}).svg;
+  return`<p>A use case diagram is a one-page map of <b>who</b> uses a system and <b>what goals</b> it helps them reach. Each oval is one written use case.</p>
+<h3 class="wh">The seven key elements</h3><div class="gcards">${cards}</div>
+<details class="dtxt"><summary>Include or extend? Side by side</summary><div class="tbw"><table class="tb"><caption class="hint">The same two arrows, side by side</caption><thead><tr><th scope="col"></th><th scope="col">Include</th><th scope="col">Extend</th></tr></thead><tbody>
+<tr><th scope="row">How often</th><td>Always: it is part of the base use case</td><td>Sometimes: an optional or unusual extra</td></tr>
+<tr><th scope="row">Arrow points to</th><td>The included use case</td><td>The base use case</td></tr>
+<tr><th scope="row">Day pass example</th><td>Buy day pass includes Take payment</td><td>Pay another way extends Take payment (the card was declined)</td></tr>
+<tr><th scope="row">Ask yourself</th><td>Does the first one always need the second?</td><td>Is this an extra that only happens in some cases?</td></tr></tbody></table></div></details>
+<details class="dtxt"><summary>A worked example: library management</summary><p>Read the diagram, then use the numbered notes.</p><div class="dcv">${lib}</div>
+<ol><li>Two <b>actors</b> sit outside the box: Librarian and Student. They are roles, not people.</li><li>The <b>boundary</b> is the system: Library Management System.</li><li>Each <b>oval</b> is one goal, written as a verb and a noun.</li><li>The <b>plain lines</b> say who takes part. Both actors can Search Book. Only the Librarian can Add, Update or Issue. Only the Student can Request.</li><li>The dashed <b>«include»</b> arrows show parts that always happen. Request Book always includes Check Membership and Issue Book. Add Book and Update Book share Management system.</li><li>There is no <b>«extend»</b> here. Try adding one in the Draw tab, for example Reserve Book extending Search Book when no copy is free.</li></ol>
+<div class="row"><button type="button" data-a="gopen" data-v="lib">Open this example in the Draw tab</button><button type="button" class="alt" data-a="gopen" data-v="day">Open the day pass example instead</button></div></details>
+<h3 class="wh">Five steps to draw your own</h3><ol><li>Name the system and draw the boundary.</li><li>List the actors and place them outside.</li><li>List each actor's goals as verb phrases and place them inside.</li><li>Link each actor to the goals they take part in.</li><li>Look for include and extend. Only add them if they make the picture clearer.</li></ol>
+<h3 class="wh">Common mistakes</h3><ul><li>Drawing steps or screens instead of goals ("Click Pay").</li><li>Putting an actor inside the boundary.</li><li>Using arrowheads on plain actor lines.</li><li>Drawing an extend arrow backwards (it points to the base).</li><li>Using include and extend everywhere. If in doubt, leave them out.</li><li>Vague names such as "Process" or "System".</li></ul>`;
+}
+
+/* ---------- DRAW tab ---------- */
+function wDraw(){
+  const tp=`<option value="blank">A blank diagram</option><optgroup label="Worked examples">${DEMOS.map(d=>`<option value="${d[0]}">${esc(d[1])}</option>`).join("")}</optgroup><optgroup label="Neon Clash features (starter diagrams)">${PROMPTS.map((p,i)=>`<option value="o${i}">${esc(p)}</option>`).join("")}</optgroup>`;
+  const mv=[["l","Left","◀"],["u","Up","▲"],["d","Down","▼"],["r","Right","▶"]].map(m=>`<button type="button" class="alt" data-d="mv" data-v="${m[0]}"><span aria-hidden="true">${m[2]}</span> ${m[1]}</button>`).join("");
+  const sz=[["w+","Wider"],["w-","Narrower"],["h+","Taller"],["h-","Shorter"]].map(m=>`<button type="button" class="alt" data-d="sz" data-v="${m[0]}">${m[1]}</button>`).join("");
+  const seg=[["assoc","Association"],["include","Include"],["extend","Extend"],["general","Generalization"]].map(s=>`<button type="button" class="alt" data-d="rtype" data-v="${s[0]}" aria-pressed="${s[0]==="assoc"}">${s[1]}</button>`).join("");
+  const empty=!dEns().n.length;
+  return`<div class="drw">
+<details class="dtxt" id="d-start"${empty?" open":""}><summary>Start from an example</summary><div class="row dtop"><div class="sel"><label for="d-tpl">Example</label><select id="d-tpl">${tp}</select></div><button type="button" class="alt" data-d="load">Load it</button></div></details>
+<ol class="d4" id="d-steps" aria-label="Drawing steps"></ol>
+<div class="dbar" role="toolbar" aria-label="Diagram tools">
+ <div class="dgp" role="group" aria-label="Add a shape"><span class="dgl" aria-hidden="true">Add</span><button type="button" data-d="add" data-v="sys">${ic("square","▭")}Boundary</button><button type="button" data-d="add" data-v="actor">${ic("person","🧍")}Actor</button><button type="button" data-d="add" data-v="uc">${ic("circle","⬭")}Use case</button></div>
+ <div class="dgp dgu" role="group" aria-label="Undo and clear"><button type="button" class="alt" data-d="undo" id="d-undo" disabled>${ic("rotate-left","↶")}Undo</button><button type="button" class="alt" data-d="clear">${ic("eraser","✖")}Clear</button></div>
+ <div class="dgp" role="group" aria-label="Connect two shapes"><span class="dgl" aria-hidden="true">Connect</span><span class="seg" role="group" aria-label="Relationship type">${seg}</span><button type="button" class="alt" id="d-tool" data-d="tool" aria-pressed="false">${ic("link","🔗")}<span>Connect mode: off</span></button></div>
+</div>
+<p class="hint" id="d-th"></p>
+<p class="dmsg" id="d-msg"></p>
+<div class="dcv" id="d-cv"><svg id="d-svg" viewBox="0 0 ${DW} ${DH}" role="group" aria-label="Use case diagram canvas" aria-describedby="d-help" font-family="Calibri,Arial,sans-serif"></svg></div>
+<p class="hint" id="d-help">Drag a shape to move it. Keyboard: Tab to a shape, Enter to select, arrow keys to move (Shift for bigger steps), Delete to remove.</p><p class="hint mob">On a phone, swipe the canvas sideways to see all of it.</p>
+<div class="dsel" id="d-sel" role="group" aria-labelledby="d-selh"><h3 class="wh" id="d-selh">Selected shape</h3><p id="d-selt" aria-live="off"></p>
+ <div id="d-selc" hidden><div class="dnm"><div class="sel"><label for="d-lbl">Name<span class="hint" id="d-lblh"></span></label><input type="text" id="d-lbl" maxlength="60" aria-describedby="d-lblh" autocomplete="off"></div><button type="button" class="alt" data-d="del">${ic("trash","🗑")}Delete</button></div>
+ <details class="dtxt"><summary>Move or resize with buttons</summary><div class="row" role="group" aria-label="Move the selected shape">${mv}</div><div class="row" id="d-size" role="group" aria-label="Resize the system boundary" hidden>${sz}</div></details></div></div>
+<h3 class="wh" id="d-lh" tabindex="-1">Relationships</h3>
+<ul class="dl" id="d-links" aria-label="Relationships in the diagram"></ul>
+<details class="dtxt"><summary>Add a relationship with menus</summary><div class="dgrid"><div class="sel"><label for="d-from">From</label><select id="d-from"></select></div><div class="sel"><label for="d-type">Relationship</label><select id="d-type"><option value="assoc">Association (plain line)</option><option value="include">Include («include» dashed arrow)</option><option value="extend">Extend («extend» dashed arrow)</option><option value="general">Generalization (hollow triangle)</option></select></div><div class="sel"><label for="d-to">To</label><select id="d-to"></select></div><button type="button" data-d="addlink">Add relationship</button></div></details>
+<div class="row"><button type="button" data-d="check">${ic("list-check","✔")}Check my diagram</button></div><div id="d-chk"></div>
+<details class="dtxt"><summary>Text version of this diagram</summary><ul id="d-txt"></ul></details></div>`;
+}
+
+const dMsg=m=>{const e=$("d-msg");if(e)e.textContent=m;say(m)};
+function dSnap(tag){
+  const now=Date.now();if(tag&&tag===dTag&&now-dT<1500){dT=now;return}
+  dTag=tag||"";dT=now;dHist.push(JSON.stringify(D));if(dHist.length>40)dHist.shift();
+}
+const DGRID='<defs><pattern id="dgp" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="var(--bd)"/></pattern></defs><rect x="0" y="0" width="'+DW+'" height="'+DH+'" fill="url(#dgp)" pointer-events="none"/>';
+function dSteps(){
+  const e=$("d-steps");if(!e)return;
+  const A=D.n.filter(n=>n.t==="actor"),U=D.n.filter(n=>n.t==="uc"),S=D.n.find(n=>n.t==="sys");
+  const st=[["Draw the system box",!!S],["Add actors outside the box",A.length>0&&(!S||A.every(a=>!dIn(S,a)))],["Add use cases inside the box",U.length>0&&(!S||U.every(u=>dIn(S,u)))],["Link actors to use cases",A.length>0&&A.every(a=>D.l.some(k=>k.a===a.id||k.b===a.id))]];
+  const now=st.findIndex(x=>!x[1]);
+  const h=st.map((x,i)=>`<li class="${x[1]?"done":i===now?"now":""}"${i===now?' aria-current="step"':""}><span class="dn2" aria-hidden="true">${x[1]?"✔":i+1}</span><span class="stx">${esc(x[0])}</span>${x[1]?'<span class="sr"> (done)</span>':""}</li>`).join("");
+  if(e.dataset.h!==h){e.dataset.h=h;e.innerHTML=h}
+}
+function dDraw(f){
+  const s=$("d-svg");if(!s)return;
+  s.innerHTML=DGRID+dBody(D,DP,true)+(D.n.length?"":`<text x="28" y="${DH/2-30}" font-size="20" font-weight="700" fill="var(--mu)">Empty canvas</text><text x="28" y="${DH/2}" font-size="16" fill="var(--mu)">Start with the Boundary button,</text><text x="28" y="${DH/2+24}" font-size="16" fill="var(--mu)">or open "Start from an example".</text>`);
+  s.parentNode.classList.toggle("tool-on",dTool);
+  if(f){const e=s.querySelector(`[data-id="${f}"]`);if(e)e.focus({preventScroll:true})}
+  dSelUI();dSteps();
+}
+function dSetType(v){
+  if(!LT[v])return;
+  $("d-type").value=v;
+  qa($("wg"),"button[data-d=rtype]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));
+  $("d-th").textContent=dTypeHelp[v];
+}
+function dSetTool(on){
+  dTool=on;dLinkFrom=null;const b=$("d-tool");b.setAttribute("aria-pressed",on);b.querySelector("span").textContent="Connect mode: "+(on?"on":"off");
+  dDraw();dMsg(on?"Connect mode on. Tap the first shape, then the second.":"Connect mode off.");
+}
+function dFill(){
+  const f=$("d-from"),t=$("d-to");if(!f)return;
+  const pf=f.value,pt=t.value,o='<option value="">Choose a shape…</option>'+D.n.filter(n=>n.t!=="sys").map(n=>`<option value="${n.id}">${esc(NT[n.t]+": "+(n.l||"(unnamed)"))}</option>`).join("");
+  f.innerHTML=o;t.innerHTML=o;
+  if(D.n.some(n=>n.id===pf))f.value=pf;if(D.n.some(n=>n.id===pt))t.value=pt;
+}
+function dLists(){
+  if(!$("d-links"))return;
+  dFill();
+  const by={};D.n.forEach(n=>by[n.id]=n);const nm=n=>esc(n.l||"(unnamed)");
+  $("d-links").innerHTML=D.l.length?D.l.map((k,i)=>{const a=by[k.a],b=by[k.b],lab=`${a.l||"unnamed"} ${LV[k.t]} ${b.l||"unnamed"}`;
+    return`<li><span>${nm(a)} <b>${LV[k.t]}</b> ${nm(b)}</span>${k.t==="assoc"?"":`<button type="button" class="alt" data-d="swap" data-v="${i}" aria-label="Swap direction: ${esc(lab)}">Swap</button>`}<button type="button" class="alt" data-d="rm" data-v="${i}" aria-label="Remove relationship: ${esc(lab)}">Remove</button></li>`}).join(""):'<li><span class="hint">No relationships yet. Choose two shapes above, or use the link tool.</span></li>';
+  $("d-txt").innerHTML=dText().map(x=>`<li>${esc(x)}</li>`).join("");
+  $("d-undo").disabled=!dHist.length;
+  $("d-chk").innerHTML="";
+}
+const dHelp={actor:"Name the role, not the person: Fan, Librarian.",uc:"Start with a verb: Buy day pass.",sys:"Name the whole system or app."};
+const dTypeHelp={assoc:"Association: an actor takes part in a use case. Plain line, no arrow.",include:"Include: the first use case ALWAYS uses the second. The arrow points to the included one.",extend:"Extend: the first use case SOMETIMES adds to the second (the base). The arrow points to the base.",general:"Generalization: the first is a special kind of the second. The triangle points to the general one."};
+function dSelUI(){
+  if(!$("d-selc"))return;
+  const n=dSel&&dNode(dSel);if(dSel&&!n)dSel=null;
+  $("d-selc").hidden=!n;
+  $("d-selt").textContent=n?`${NT[n.t]} selected: ${n.l||"(unnamed)"}`:"Nothing selected. Tap a shape to rename or move it.";
+  $("d-sel").classList.toggle("has",!!n);
+  if(!n)return;
+  const i=$("d-lbl");if(document.activeElement!==i)i.value=n.l;
+  $("d-lblh").textContent=dHelp[n.t];$("d-size").hidden=n.t!=="sys";
+  if(n.t!=="sys"&&document.activeElement!==$("d-from")&&!dTool)$("d-from").value=n.id;
+}
+function dPick(id,focus,quiet){
+  if(id===dSel&&!focus)return;
+  dSel=id;dDraw(focus?id:null);
+  const n=id&&dNode(id);if(n&&!quiet)say(`${NT[n.t]} selected: ${n.l||"unnamed"}`);
+}
+function dAdd(t){
+  const ex=D.n.find(n=>n.t==="sys");
+  if(t==="sys"&&ex){dPick(ex.id);return dMsg("There is already a system boundary. It is selected, so you can move or resize it.")}
+  if(D.n.length>=40)return dMsg("That is the most shapes this editor holds. Remove one first.");
+  dSnap();
+  const c=D.n.filter(n=>n.t===t).length,n={id:dId(t),t,l:{actor:"Actor",uc:"New use case",sys:"System name"}[t]};
+  if(t==="actor"){n.x=c%2?730:70;n.y=100+((c>>1)%3)*150}
+  else if(t==="uc"){n.x=315+(Math.floor(c/5)%2)*170;n.y=125+(c%5)*80}
+  else{n.x=400;n.y=270;n.w=400;n.h=480}
+  D.n.push(n);dSave();dSel=n.id;dDraw();dLists();
+  dMsg(`${NT[t]} added. Type its name.`);
+  const i=$("d-lbl");i.focus();i.select();
+}
+function dDel(id){
+  const n=id&&dNode(id);if(!n)return;
+  dSnap();D.n=D.n.filter(x=>x.id!==id);D.l=D.l.filter(k=>k.a!==id&&k.b!==id);
+  if(dLinkFrom===id)dLinkFrom=null;dSel=null;dSave();dDraw();dLists();
+  dMsg(`${NT[n.t]} "${n.l||"unnamed"}" deleted, with its relationships.`);
+  const b=document.querySelector('[data-d="add"][data-v="uc"]');if(b)b.focus();
+}
+function dMoveBy(id,dx,dy){
+  const n=dNode(id);if(!n)return;dSnap("m"+id);
+  const f=dFit(n,dx,dy),m=n.t==="sys"?dInside(n):[];
+  n.x+=f[0];n.y+=f[1];m.forEach(q=>{q.x+=f[0];q.y+=f[1]});
+  dSave();dDraw(id);
+}
+function dLink(ai,bi,t){
+  let a=dNode(ai),b=dNode(bi);const e=dLinkErr(a,b,t);
+  if(e){dMsg(e);return false}
+  if(t==="assoc"&&a.t==="uc")[a,b]=[b,a];
+  if(D.l.some(x=>x.t===t&&((x.a===a.id&&x.b===b.id)||(x.a===b.id&&x.b===a.id)))){dMsg("Those two shapes already have that relationship.");return false}
+  dSnap();D.l.push({t,a:a.id,b:b.id});dSave();dDraw();dLists();
+  dMsg(`Added: ${a.l||"unnamed"} ${LV[t]} ${b.l||"unnamed"}.`);return true;
+}
+function dToolHit(id){
+  const n=dNode(id);
+  if(!dLinkFrom){dLinkFrom=id;dDraw();return dMsg(`From: ${n.l||"unnamed"}. Now choose the shape to link to.`)}
+  if(dLinkFrom===id){dLinkFrom=null;dDraw();return dMsg("Link cancelled.")}
+  dLink(dLinkFrom,id,$("d-type").value);dLinkFrom=null;dDraw();
+}
+function dUndo(){
+  if(!dHist.length)return dMsg("Nothing to undo.");
+  D=dClean(JSON.parse(dHist.pop()));dTag="";if(dSel&&!dNode(dSel))dSel=null;
+  const i=$("d-lbl");if(i)i.blur();
+  dSave();dDraw();dLists();dMsg("Undone.");
+}
+function dLoadTpl(v){
+  dEns();const t=dTpl(v);if(!t)return false;
+  if(D.n.length&&!confirm("Replace the diagram you have now? You can press Undo afterwards."))return false;      // DATA-3
+  dSnap();D=t;dSel=null;dLinkFrom=null;dSave();
+  if($("d-svg")){dDraw();dLists();dMsg(v==="blank"?"Blank diagram.":"Diagram loaded. Move and rename the shapes to make it yours.")}
+  return true;
+}
+function dChecks(){
+  const A=D.n.filter(n=>n.t==="actor"),U=D.n.filter(n=>n.t==="uc"),S=D.n.find(n=>n.t==="sys"),out=[];
+  const add=(ok,p,f)=>out.push({ok,t:ok?p:f}),nm=a=>a.slice(0,4).map(n=>`"${n.l||"unnamed"}"`).join(", ")+(a.length>4?` and ${a.length-4} more`:"");
+  add(A.length>0&&U.length>0,"You have at least one actor and one use case.","Add at least one actor and one use case.");
+  add(!!S,"There is a system boundary.","Add a system boundary (a box) so it is clear what the system is.");
+  if(S){const o=U.filter(u=>!dIn(S,u)),i=A.filter(a=>dIn(S,a));
+    add(!o.length,"Every use case is inside the boundary.","Move inside the boundary: "+nm(o)+".");
+    add(!i.length,"Every actor is outside the boundary.","Move outside the boundary: "+nm(i)+".")}
+  const dflt=D.n.filter(n=>!n.l.trim()||/^(Actor|New use case|System name)$/i.test(n.l.trim()));
+  add(!dflt.length,"Every shape has its own name.","Give these shapes a real name: "+nm(dflt)+".");
+  const sole=A.filter(a=>!D.l.some(k=>k.a===a.id||k.b===a.id));
+  add(!sole.length,"Every actor is linked to something.","Link these actors to a use case: "+nm(sole)+".");
+  const lost=U.filter(u=>!D.l.some(k=>(k.t==="assoc"&&k.b===u.id)||(k.t==="include"&&k.b===u.id)||(k.t==="extend"&&k.a===u.id)||(k.t==="general"&&(k.a===u.id||k.b===u.id))));
+  add(!lost.length,"Every use case has an actor, or is included or extending another.","No actor starts these and nothing includes them: "+nm(lost)+". Who starts each one?");
+  const long=U.filter(u=>u.l.trim().split(/\s+/).length>6);
+  add(!long.length,"Use case names are short (6 words or fewer).","Shorten these names: "+nm(long)+".");
+  const seen={},dup=U.filter(u=>{const k=u.l.trim().toLowerCase();if(!k)return false;if(seen[k])return true;seen[k]=1;return false});
+  add(!dup.length,"No two use cases have the same name.","These names appear twice: "+nm(dup)+".");
+  return out;
+}
+function dCheck(){
+  if(!D.n.length)return dMsg("Draw something first, then check it.");
+  const c=dChecks(),ok=c.filter(x=>x.ok).length;
+  $("d-chk").innerHTML=`<p><b>${ok} of ${c.length} checks passed.</b></p><ul class="chk">${c.map(x=>`<li class="${x.ok?"ok":"no"}"><b>${x.ok?"✔ Pass":"✘ Fix"}:</b> ${esc(x.t)}</li>`).join("")}</ul>`+(ok===c.length?"<p>Well done. Now compare it with your written use case: does every goal you wrote appear as an oval?</p>":"");
+  say(`${ok} of ${c.length} checks passed.`);
+}
+function dClick(e){
+  const b=e.target.closest("button[data-d]");if(!b)return;const a=b.dataset.d,v=b.dataset.v;
+  if(a==="add")dAdd(v);
+  else if(a==="undo")dUndo();
+  else if(a==="clear"){if(!D.n.length)return dMsg("The diagram is already empty.");if(!confirm("Clear the whole diagram? You can press Undo afterwards."))return;dSnap();D={n:[],l:[]};dSel=null;dLinkFrom=null;dSave();dDraw();dLists();dMsg("Diagram cleared.")}
+  else if(a==="load"){dLoadTpl($("d-tpl").value)}
+  else if(a==="del")dDel(dSel);
+  else if(a==="mv"){if(dSel)dMoveBy(dSel,{l:-20,r:20,u:0,d:0}[v],{u:-20,d:20,l:0,r:0}[v])}
+  else if(a==="sz"){const n=dSel&&dNode(dSel);if(!n||n.t!=="sys")return;dSnap("s"+n.id);
+    if(v[0]==="w")n.w=num(n.w+(v[1]==="+"?40:-40),160,780,n.w);else n.h=num(n.h+(v[1]==="+"?40:-40),160,520,n.h);
+    const f=dFit(n,0,0);n.x+=f[0];n.y+=f[1];dSave();dDraw();dMsg(`Boundary is now ${n.w} by ${n.h}.`)}
+  else if(a==="tool")dSetTool(!dTool);
+  else if(a==="rtype"){dSetType(v);if(!dTool)dSetTool(true);else{dLinkFrom=null;dDraw();dMsg(LT[v]+" chosen. Tap two shapes to join them.")}}
+  else if(a==="addlink"){const f=$("d-from").value,t=$("d-to").value;if(!f||!t)return dMsg("Choose both shapes first.");dLink(f,t,$("d-type").value)}
+  else if(a==="swap"){const k=D.l[+v];if(!k)return;dSnap();[k.a,k.b]=[k.b,k.a];dSave();dDraw();dLists();dMsg("Direction swapped.")}
+  else if(a==="rm"){const k=D.l[+v];if(!k)return;dSnap();D.l.splice(+v,1);dSave();dDraw();dLists();dMsg("Relationship removed.");$("d-lh").focus()}
+  else if(a==="check")dCheck();
+}
+function dInput(e){
+  if(e.target.id!=="d-lbl"||!dSel)return;const n=dNode(dSel);if(!n)return;
+  dSnap("l"+n.id);n.l=e.target.value.slice(0,60);dSave();dDraw();dLists();
+  $("d-selt").textContent=`${NT[n.t]} selected: ${n.l||"(unnamed)"}`;
+}
+const dPt=e=>{const s=$("d-svg"),p=s.createSVGPoint(),m=s.getScreenCTM();if(!m)return{x:0,y:0};p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(m.inverse());return{x:q.x,y:q.y}};
+function dDown(e){
+  if(e.button>0)return;
+  const g=e.target.closest(".dn");
+  if(!g){if(dLinkFrom){dLinkFrom=null;dDraw()}dPick(null);return}
+  const id=g.dataset.id;
+  if(dTool){e.preventDefault();dToolHit(id);return}
+  dPick(id,false);
+  const n=dNode(id),p=dPt(e);
+  dDrag={id,ox:n.x-p.x,oy:n.y-p.y,moved:false,mates:n.t==="sys"?dInside(n):[]};
+  try{$("d-svg").setPointerCapture(e.pointerId)}catch(x){}
+}
+function dMove(e){
+  if(!dDrag)return;const n=dNode(dDrag.id);if(!n){dDrag=null;return}
+  const p=dPt(e);let dx=p.x+dDrag.ox-n.x,dy=p.y+dDrag.oy-n.y;
+  if(!dDrag.moved){if(Math.hypot(dx,dy)<3)return;dSnap();dDrag.moved=true}
+  [dx,dy]=dFit(n,dx,dy);n.x+=dx;n.y+=dy;dDrag.mates.forEach(m=>{m.x+=dx;m.y+=dy});dDraw();
+}
+function dUp(e){
+  if(!dDrag)return;
+  if(dDrag.moved){dSave();dLists()}
+  try{$("d-svg").releasePointerCapture(e.pointerId)}catch(x){}
+  dDrag=null;
+}
+function dKey(e){
+  const g=e.target.closest(".dn");if(!g)return;const id=g.dataset.id;
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();if(dTool)dToolHit(id);else dPick(id,true);return}
+  if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();dDel(id);return}
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+  if(d){e.preventDefault();const s=e.shiftKey?40:10;dSel=id;dMoveBy(id,d[0]*s,d[1]*s)}
+}
+function dInit(){
+  dEns();dTool=false;dLinkFrom=null;
+  const w=$("wg"),s=$("d-svg");
+  w.addEventListener("click",dClick);w.addEventListener("input",dInput);
+  $("d-type").onchange=()=>dSetType($("d-type").value);dSetType("assoc");
+  s.addEventListener("pointerdown",dDown);s.addEventListener("pointermove",dMove);s.addEventListener("pointerup",dUp);s.addEventListener("pointercancel",dUp);s.addEventListener("keydown",dKey);
+  dDraw();dLists();addMics(w);
+}
+
+model=function(){const G=getG(),t=G.b1+G.b2+G.b3,m={title:g("name")||CFG.title,sections:TABS.map(x=>({h:x.title,rows:x.fields.filter(f=>!f.hidden).map(f=>[f.label,g(f.k)||"(empty)"])})).filter(x=>x.rows.length)};
+ if(dHas())m.sections.splice(Math.max(m.sections.length-1,0),0,{h:"Use case diagram",rows:dRows()});
+ m.sections.splice(Math.max(m.sections.length-1,0),0,{h:"Game results",rows:[["Level 1: Actors",G.b1+" of 7"],["Level 2: Place",G.b2+" of 7"],["Level 3: Fix",G.b3+" of 7"],["Total",t+" of 21 ("+rank(t)+")"],["Hints used",String(hn(G))]]});return m};
+
+boot();
+
+
+THEMES.forEach(t => $("th-"+t).onclick=()=>setTheme(t));
+$("fm").onclick=()=>setFont(-1);$("fp").onclick=()=>setFont(1);$("dys").onclick=()=>setDys(!dys);
+setTheme(theme || (matchMedia('(prefers-color-scheme: light)').matches?'day':'night'));applyFont();setDys(dys);document.title=CFG.title;
+
+return {dispose(){stopMic();stopTTS();scope.dispose();}};
+};
