@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unity 2D Platformer: C# Coding Lesson</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mut:#5b6475;--ac:#5b4ae0;--bd:#dde1ea;--code:#161a26;--codetx:#e6e9f2;--task:#fff6dc;--tasktx:#4a3a00}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10131b;--card:#181c27;--tx:#e8ebf3;--mut:#9aa3b5;--ac:#9a8dff;--bd:#2a3042;--code:#0b0d14;--task:#2e2810;--tasktx:#f3e2a0}}
+:root[data-theme="dark"]{--bg:#10131b;--card:#181c27;--tx:#e8ebf3;--mut:#9aa3b5;--ac:#9a8dff;--bd:#2a3042;--code:#0b0d14;--task:#2e2810;--tasktx:#f3e2a0}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--card);z-index:10}
+header{padding:20px 16px 8px;max-width:820px;margin:auto}
+h1{font-size:1.6rem;margin:0 0 4px}header p{margin:0;color:var(--mut)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--card);border-bottom:1px solid var(--bd);display:flex;gap:6px;overflow-x:auto;padding:8px 12px}
+nav a{white-space:nowrap;text-decoration:none;color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:4px 12px;font-size:.85rem}
+nav a:hover{border-color:var(--ac);color:var(--ac)}
+main{max-width:820px;margin:auto;padding:8px 16px 48px}
+section{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:16px 0}
+h2{margin:0 0 8px;font-size:1.25rem}h2 span{color:var(--ac)}
+h3{margin:16px 0 6px;font-size:1rem}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+p code,li code{background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.88em}
+pre{background:var(--code);color:var(--codetx);border-radius:10px;padding:12px;overflow-x:auto;margin:6px 0;font-size:.8rem;line-height:1.45}
+.tabs{display:flex;gap:6px;margin-top:8px}
+.tabs button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:8px 8px 0 0;padding:6px 12px;cursor:pointer;font:inherit;font-size:.85rem}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.task{background:var(--task);color:var(--tasktx);border-radius:10px;padding:10px 14px;margin-top:12px}
+.task b{display:block;margin-bottom:4px}
+.task label{display:block;cursor:pointer;padding:2px 0}
+.obj{color:var(--mut);font-size:.9rem}
+ul{padding-left:20px;margin:6px 0}
+</style></head><body>
+<header><h1>🎮 Unity 2D Platformer: C# Coding</h1>
+<p>Build a complete platformer step by step: movement, health, lives, animation and scenes.</p></header>
+<nav id="nav"></nav><main id="main"></main>
+<script>
+const S=[
+{t:"Setup & GameManager",i:`<p>Create a 2D project. Make a <code>Player</code> (Rigidbody2D + CapsuleCollider2D, tag <b>Player</b>), a <code>Ground</code> layer, and an empty object called <code>GameManager</code>. Your <code>GameManager</code> is the one place that knows the score, lives and scene flow.</p><ul><li>Use a <b>singleton</b> (<code>static Instance</code>) so any script can call <code>GameManager.Instance</code>.</li><li><code>public</code> fields appear in the Inspector; keep other fields <code>private</code>.</li></ul>`,
+b:[{h:"GameManager.cs",c:`using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager Instance;
+    public int coins;
+    public int lives = 3;
+    public TMP_Text coinText;
+    public Transform spawnPoint;
+
+    void Awake() { Instance = this; }
+    void Start() { coinText.text = "Coins: " + coins; }
+
+    public void AddCoin(int amount = 1)
+    {
+        coins += amount;
+        coinText.text = "Coins: " + coins;
+    }
+}`}],k:["Create the GameManager object and script","Add a TextMeshPro coin counter to a Canvas","Drag the text into Coin Text in the Inspector"]},
+
+{t:"Player Movement",i:`<p>Walk, run (hold Shift) and jump with a <b>double jump</b>. Physics goes in <code>FixedUpdate</code>, input is read in <code>Update</code>. A small circle under the feet (<code>groundCheck</code>) tells us if we are grounded.</p><p class="obj">Unity 6 renamed <code>rb.velocity</code> to <code>rb.linearVelocity</code>. Use whichever your version shows.</p>`,
+b:[{h:"PlayerMovement.cs: pick an input system",tabs:[
+{n:"Old Input Manager",c:`using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float walkSpeed = 5f, runSpeed = 8f, jumpForce = 10f;
+    public Rigidbody2D rb;
+    public SpriteRenderer sr;
+    public Transform groundCheck;
+    public float checkRadius = 0.2f;
+    public LayerMask groundLayer;
+
+    float h;
+    bool grounded, canDoubleJump;
+
+    void Update()
+    {
+        h = Input.GetAxisRaw("Horizontal");
+        if (h != 0) sr.flipX = h < 0;
+
+        grounded = Physics2D.OverlapCircle(
+            groundCheck.position, checkRadius, groundLayer);
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (grounded) { Jump(); canDoubleJump = true; }
+            else if (canDoubleJump) { Jump(); canDoubleJump = false; }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        float speed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
+        rb.velocity = new Vector2(h * speed, rb.velocity.y);
+    }
+
+    void Jump() { rb.velocity = new Vector2(rb.velocity.x, jumpForce); }
+}`},
+{n:"New Input System",c:`using UnityEngine;
+using UnityEngine.InputSystem;   // install the Input System package
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float walkSpeed = 5f, runSpeed = 8f, jumpForce = 10f;
+    public Rigidbody2D rb;
+    public SpriteRenderer sr;
+    public Transform groundCheck;
+    public float checkRadius = 0.2f;
+    public LayerMask groundLayer;
+
+    // Drag actions from your Input Actions asset
+    public InputActionReference moveAction, jumpAction, runAction;
+
+    float h;
+    bool grounded, canDoubleJump;
+
+    void OnEnable()
+    {
+        moveAction.action.Enable();
+        runAction.action.Enable();
+        jumpAction.action.Enable();
+        jumpAction.action.performed += OnJump;
+    }
+    void OnDisable() { jumpAction.action.performed -= OnJump; }
+
+    void Update()
+    {
+        h = moveAction.action.ReadValue<Vector2>().x;
+        if (h != 0) sr.flipX = h < 0;
+        grounded = Physics2D.OverlapCircle(
+            groundCheck.position, checkRadius, groundLayer);
+    }
+
+    void OnJump(InputAction.CallbackContext ctx)
+    {
+        if (grounded) { Jump(); canDoubleJump = true; }
+        else if (canDoubleJump) { Jump(); canDoubleJump = false; }
+    }
+
+    void FixedUpdate()
+    {
+        float speed = runAction.action.IsPressed() ? runSpeed : walkSpeed;
+        rb.velocity = new Vector2(h * speed, rb.velocity.y);
+    }
+
+    void Jump() { rb.velocity = new Vector2(rb.velocity.x, jumpForce); }
+}`}]}],
+x:`<h3>Which input system?</h3><ul><li><b>Old (Input Manager):</b> <code>Input.GetAxisRaw</code>, <code>GetButtonDown</code>. Quick to learn.</li><li><b>New (Input System):</b> actions and bindings, so keyboard, gamepad and touch share one setup. Create an <i>Input Actions</i> asset with Move (Vector2 / WASD + arrows), Jump (Space) and Run (Left Shift).</li><li>Switch under <b>Project Settings → Player → Active Input Handling</b>.</li></ul>`,
+k:["Add a groundCheck child object under the feet","Set the Ground layer on your platforms","Walk, run and jump with the old system","Rebuild it with the new Input System","Test the double jump: it must reset on landing"]},
+
+{t:"Collecting Objects",i:`<p>Make a coin with a <b>CircleCollider2D</b> and tick <b>Is Trigger</b>. Triggers detect overlap without blocking movement. The coin tells the GameManager, then removes itself.</p>`,
+b:[{h:"Coin.cs",c:`using UnityEngine;
+
+public class Coin : MonoBehaviour
+{
+    public int value = 1;
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            GameManager.Instance.AddCoin(value);
+            Destroy(gameObject);
+        }
+    }
+}`}],k:["Create a coin prefab with a trigger collider","Place 10 coins around the level","Watch the counter go up"]},
+
+{t:"2D Colliders & Tilemaps",i:`<ul><li><b>BoxCollider2D</b>: platforms, crates. <b>CircleCollider2D</b>: coins, balls. <b>CapsuleCollider2D</b>: characters (smooth over tile edges).</li><li><b>PolygonCollider2D</b> traces a sprite. <b>EdgeCollider2D</b> is a line, good for slopes.</li><li><b>Solid</b> colliders use <code>OnCollisionEnter2D</code>. <b>Triggers</b> use <code>OnTriggerEnter2D</code>. Movement needs a <b>Rigidbody2D</b> on at least one object.</li></ul><h3>Tilemaps</h3><ul><li><b>GameObject → 2D Object → Tilemap → Rectangular</b> creates a Grid with a Tilemap child.</li><li>Open <b>Window → 2D → Tile Palette</b>, drag sprites in to make tiles.</li><li>Add <b>Tilemap Collider 2D</b>, then <b>Composite Collider 2D</b> (tick <i>Used By Composite</i>, Rigidbody2D set to Static) to merge tiles into one smooth shape.</li><li><b>Rule Tiles</b> choose the right sprite automatically (corners, edges, centre) from neighbour rules.</li></ul>`,
+b:[],tk:"Mini task: paint a level",k:["Make a Tile Palette and paint a ground layer","Put platforms on their own Tilemap with a collider","Create a Rule Tile: centre, top edge, left and right corners","Paint with the Rule Tile and check the corners join up","Walk your player across it: no snagging on tile joins"]},
+
+{t:"HealthSystem (Player & Enemy)",i:`<p>Player and enemies both need health. Write the logic <b>once</b> in a reusable class (OOP). Concepts: fields, a <b>constructor</b>, methods, and <b>encapsulation</b> (health is private and changed only through methods).</p>`,
+b:[{h:"HealthSystem.cs",c:`public class HealthSystem
+{
+    int maxHealth;
+    int currentHealth;
+
+    public HealthSystem(int max)        // constructor
+    {
+        maxHealth = max;
+        currentHealth = max;
+    }
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth < 0) currentHealth = 0;
+    }
+
+    public void Heal(int amount)
+    {
+        currentHealth += amount;
+        if (currentHealth > maxHealth) currentHealth = maxHealth;
+    }
+
+    public int GetHealth() { return currentHealth; }
+    public bool IsDead() { return currentHealth <= 0; }
+    public float GetHealthPercent() { return (float)currentHealth / maxHealth; }
+}`},{h:"Enemy.cs and Player damage",c:`using UnityEngine;
+
+public class Enemy : MonoBehaviour
+{
+    public int maxHealth = 30;
+    HealthSystem health;
+
+    void Awake() { health = new HealthSystem(maxHealth); }
+
+    public void TakeHit(int dmg)
+    {
+        health.TakeDamage(dmg);
+        if (health.IsDead()) Destroy(gameObject);
+    }
+}
+
+// In PlayerMovement.cs
+public int maxHealth = 100;
+HealthSystem health;
+void Awake() { health = new HealthSystem(maxHealth); }
+
+void OnCollisionEnter2D(Collision2D col)
+{
+    if (col.gameObject.CompareTag("Enemy"))
+    {
+        health.TakeDamage(25);
+        if (health.IsDead())
+        {
+            health = new HealthSystem(maxHealth);
+            GameManager.Instance.LoseLife();
+        }
+    }
+}`}],k:["Write HealthSystem and explain the constructor in your notes","Explain TakeDamage, Heal, GetHealth and IsDead","Give the Player and Enemy different max health","Challenge: add a health bar using GetHealthPercent()"]},
+
+{t:"Moving Platforms",i:`<p>A player standing on a moving platform slides off because the platform moves and the player does not. Fix: <b>make the player a child of the platform</b> while they touch it, so they inherit its movement.</p>`,
+b:[{h:"MovingPlatform.cs",c:`using UnityEngine;
+
+public class MovingPlatform : MonoBehaviour
+{
+    public Transform pointA, pointB;
+    public float speed = 2f;
+    Vector3 target;
+
+    void Start() { target = pointB.position; }
+
+    void Update()
+    {
+        transform.position = Vector3.MoveTowards(
+            transform.position, target, speed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, target) < 0.05f)
+            target = (target == pointA.position) ? pointB.position : pointA.position;
+    }
+
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+            col.transform.SetParent(transform);
+    }
+
+    void OnCollisionExit2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+            col.transform.SetParent(null);
+    }
+}`}],x:`<p class="obj">Tip: keep PointA and PointB <i>outside</i> the platform (not children), or they move with it. We flip with <code>sr.flipX</code> rather than scale so a parent never distorts the player.</p>`,k:["Build a platform with a Box Collider and two empty point objects","Stand on it: you should ride along, not slide","Jump off: check you are un-parented in the Hierarchy"]},
+
+{t:"Lives & UI",i:`<p>Design the UI first: a <b>Canvas</b> (Scale With Screen Size) with a <b>Panel</b> anchored top-left, a <b>Horizontal Layout Group</b>, and three heart <b>Images</b> as children. Then script it.</p>`,
+b:[{h:"Add to GameManager.cs",c:`public GameObject[] hearts;   // drag the 3 heart images in
+
+public void LoseLife()
+{
+    lives--;
+    UpdateLivesUI();
+
+    if (lives <= 0)
+        SceneManager.LoadScene("LoseScreen");
+    else
+        FindObjectOfType<PlayerMovement>().transform.position =
+            spawnPoint.position;   // respawn
+}
+
+void UpdateLivesUI()
+{
+    for (int i = 0; i < hearts.Length; i++)
+        hearts[i].SetActive(i < lives);
+}`}],k:["Create the heart panel with anchors set to top-left","Fill the hearts array in the Inspector","Test by losing all lives: do the hearts vanish one at a time?","Extension: add a fall zone trigger that calls LoseLife()"]},
+
+{t:"Animation Controller",i:`<ol><li>Create sprite clips: <b>Idle, Run, Jump</b> (select sprites → drag onto the player).</li><li>In the <b>Animator</b> window, add parameters: <code>Speed</code> (float), <code>IsGrounded</code> (bool).</li><li>Transitions: Idle → Run when <code>Speed &gt; 0.1</code>; Run → Idle when <code>Speed &lt; 0.1</code>; Any State → Jump when <code>IsGrounded</code> is false. Untick <b>Has Exit Time</b> so they react instantly.</li></ol>`,
+b:[{h:"Add to PlayerMovement.cs",c:`public Animator anim;
+
+void Update()
+{
+    // ...existing input code...
+    anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+    anim.SetBool("IsGrounded", grounded);
+}`}],k:["Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check each transition has Has Exit Time unticked","Add the code and watch the parameters change at runtime"]},
+
+{t:"Scene Management",i:`<p>Make three scenes: <b>Game</b>, <b>WinScreen</b>, <b>LoseScreen</b> (plus an optional <b>Start</b> menu). Add them all in <b>File → Build Profiles / Build Settings</b>, otherwise <code>LoadScene</code> cannot find them.</p>`,
+b:[{h:"SceneLoader.cs: put on a UI button",c:`using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class SceneLoader : MonoBehaviour
+{
+    public void LoadByName(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+    public void Quit() { Application.Quit(); }
+}`},{h:"Win trigger: flag at the end of the level",c:`void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.CompareTag("Player"))
+        SceneManager.LoadScene("WinScreen");
+}`}],x:`<p>On each button set <b>OnClick()</b> → drag in the SceneLoader → choose <code>LoadByName</code> and type the scene name (e.g. “Game”).</p>`,k:["Create Start, Win and Lose scenes with a title and a button","Add every scene to Build Settings","Wire the Play Again and Quit buttons","Play through: start → win, then start → lose"]}
+];
+const nav=document.getElementById("nav"),main=document.getElementById("main");
+S.forEach((s,n)=>{
+  const id="s"+n;
+  const a=document.createElement("a");a.href="#"+id;a.textContent=(n+1)+". "+s.t;nav.append(a);
+  const sec=document.createElement("section");sec.id=id;
+  sec.innerHTML=`<h2><span>${n+1}.</span> ${s.t}</h2>${s.i||""}`;
+  s.b.forEach(b=>{
+    const h=document.createElement("h3");h.textContent=b.h;sec.append(h);
+    const mk=c=>{const p=document.createElement("pre"),e=document.createElement("code");e.textContent=c;p.append(e);return p};
+    if(b.tabs){
+      const bar=document.createElement("div");bar.className="tabs";
+      const pres=b.tabs.map(t=>mk(t.c));
+      b.tabs.forEach((t,j)=>{
+        const bt=document.createElement("button");bt.textContent=t.n;
+        bt.onclick=()=>{[...bar.children].forEach((x,m)=>{x.classList.toggle("on",m==j);pres[m].hidden=m!=j})};
+        bar.append(bt)});
+      sec.append(bar,...pres);bar.children[0].click();
+    }else sec.append(mk(b.c));
+  });
+  if(s.x)sec.insertAdjacentHTML("beforeend",s.x);
+  const t=document.createElement("div");t.className="task";
+  t.innerHTML=`<b>✅ ${s.tk||"Task checklist"}</b>`+s.k.map(k=>`<label><input type="checkbox"> ${k}</label>`).join("");
+  sec.append(t);main.append(sec);
+});
+</script></body></html>
