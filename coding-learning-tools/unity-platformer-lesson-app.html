@@ -86,6 +86,63 @@ i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.
 #dv{font-size:.8125rem;color:var(--tx)}
 @media print{#demo{display:none!important}}
 
+[hidden]{display:none!important}
+/* ---- teaching widgets (tile painter + animator state machine) ---- */
+.wg{margin:14px 0;border:1.5px solid var(--bd);border-radius:10px;background:var(--bg);padding:12px 14px}
+.wg h3{margin:0 0 2px}
+.wg .hint{margin:2px 0 8px}
+.wg [hidden]{display:none!important}
+.wg button{min-height:2.5rem;padding:5px 12px;font-size:.8125rem}
+.wg button[aria-pressed=true]{background:var(--cy);color:var(--bg);border-color:var(--cy)}
+.wg label.chk{display:flex;align-items:center;gap:8px;min-height:2.5rem;font-weight:700;cursor:pointer;font-size:.875rem;color:var(--tx)}
+.wg input[type=checkbox]{width:1.3rem;height:1.3rem}
+.wg select{min-height:2.5rem;font-size:.875rem;padding:4px 8px}
+.wbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.wg .lbl{font-size:.75rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--mu)}
+.hier{background:var(--card);border:1.5px solid var(--bd);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:.875rem}
+.hier .hl{font-weight:700;color:var(--hd);margin-bottom:4px}
+.lay{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-left:14px;padding:3px 0 3px 10px;border-left:2px solid var(--bd)}
+.cmp{color:var(--mu);font-size:.8125rem}
+.pal{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.pal button{padding:4px 6px;min-height:3.4rem;min-width:3.6rem;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.6875rem;background:var(--card);color:var(--tx);border:2px solid var(--bd)}
+.pal button[aria-pressed=true]{background:var(--card);color:var(--tx);border-color:var(--am);box-shadow:0 0 0 2px var(--am)}
+.pal canvas{width:32px;height:32px;image-rendering:pixelated;border-radius:3px}
+.tmcv{display:block;width:100%;max-width:640px;height:auto;aspect-ratio:20/11;image-rendering:pixelated;background:#5ec8f2;border:2px solid var(--bd);border-radius:6px;touch-action:none;cursor:crosshair;margin:4px 0}
+.stat{font:.8125rem/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--card);border:1.5px solid var(--bd);border-radius:8px;padding:8px 10px;margin:8px 0;color:var(--tx)}
+.stat div{overflow-wrap:anywhere}
+.fmrow{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;margin:8px 0}
+.prm{flex:1 1 260px;display:flex;flex-direction:column;gap:6px}
+.prow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:2.5rem}
+.prow .pt{font-size:.6875rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--bg);background:var(--am);padding:2px 6px;border-radius:4px;min-width:4.4rem;text-align:center}
+.prow label{font-weight:700;color:var(--hd)}
+.prow input[type=range]{flex:1 1 120px;min-width:100px;accent-color:var(--cy)}
+.prow output{min-width:2.4em;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.875rem}
+.dot{display:inline-block;width:1.1rem;height:1.1rem;border-radius:50%;border:2px solid var(--mu)}
+.dot.on{background:var(--am);border-color:var(--am)}
+.fmcv{flex:0 0 auto;width:min(100%,240px);height:auto;aspect-ratio:5/3;image-rendering:pixelated;border:2px solid var(--bd);border-radius:6px;background:#5ec8f2}
+.fmwrap{overflow-x:auto;border:1.5px solid var(--bd);border-radius:8px;background:var(--card);margin:8px 0}
+.fmsvg{display:block;min-width:560px;width:100%;height:auto}
+.fmsvg .nd{fill:var(--card);stroke:var(--bd);stroke-width:2}
+.fmsvg .any .nd{stroke:var(--cy)}
+.fmsvg .entry .nd{stroke:var(--li)}
+.fmsvg .def .nd{stroke:var(--am);stroke-width:3}
+.fmsvg .on .nd{fill:var(--cy);stroke:var(--cy)}
+.fmsvg .nsel .nd{stroke:var(--pk);stroke-width:4}
+.fmsvg .nt{fill:var(--hd);font:700 14px "Trebuchet MS",Arial,sans-serif}
+.fmsvg .on .nt{fill:var(--bg)}
+.fmsvg .pb{fill:var(--bg)}
+.fmsvg .ng{cursor:pointer}
+.fmsvg .ed{fill:none;stroke:var(--mu);stroke-width:2;marker-end:url(#fm-an)}
+.fmsvg .ed.def{stroke:var(--am);marker-end:url(#fm-aa)}
+.fmsvg .ed.wait{stroke:var(--pk);stroke-dasharray:6 4;marker-end:url(#fm-ap)}
+.fmsvg .ed.sel{stroke:var(--cy);stroke-width:3;marker-end:url(#fm-as)}
+.fmsvg .ed.fire{stroke:var(--li);stroke-width:4;marker-end:url(#fm-ag)}
+.fmsvg .hit{fill:none;stroke:transparent;stroke-width:18;cursor:pointer;pointer-events:stroke}
+.fmsvg .el{fill:var(--tx);font:12px Calibri,Arial,sans-serif}
+.insp{background:var(--card);border:1.5px solid var(--bd);border-left:5px solid var(--cy);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:.9375rem}
+.insp p{margin:4px 0}.insp ul{margin:4px 0 4px 1.2rem;padding:0}
+.flog{margin:4px 0 0 1.2rem;padding:0;font-size:.875rem;color:var(--tx)}
+@media print{.wg{display:none!important}}
 </style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" crossorigin="anonymous"></script>
@@ -132,6 +189,10 @@ i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.
     <div class="drow">
       <label id="dcw" hidden><input type="checkbox" id="dc"> Show colliders</label>
       <label id="dpw" hidden><input type="checkbox" id="dp" checked> Parent player to platform (SetParent)</label>
+    </div>
+    <div class="drow" id="daw" hidden>
+      <label>Wait at each waypoint <input type="range" id="dww" min="0" max="3" step="0.5" value="1"> <output id="dwo">1s</output></label>
+      <label>Enemy speed <input type="range" id="dws" min="0.4" max="2" step="0.1" value="0.8"> <output id="dso">0.8</output></label>
     </div>
     <p class="hint">Variables in your scripts right now:</p><code id="dv"></code>
   </section>
@@ -340,6 +401,105 @@ void OnCollisionEnter2D(Collision2D col)
         }
     }
 }`,
+tm:`using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public class TilemapDemo : MonoBehaviour
+{
+    public Tilemap ground;       // the Ground Tilemap (has the collider)
+    public Tilemap decoration;   // the Decoration Tilemap (no collider)
+    public TileBase grassTile, flowerTile;
+
+    void Start()
+    {
+        // Cells use whole numbers (Vector3Int), not world units
+        Vector3Int cell = new Vector3Int(3, 0, 0);
+
+        ground.SetTile(cell, grassTile);                        // paint
+        decoration.SetTile(cell + Vector3Int.up, flowerTile);   // flower on top
+
+        TileBase t = ground.GetTile(cell);                      // read
+        Debug.Log(t != null ? "Ground tile here" : "Empty");
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 world = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int c = ground.WorldToCell(world);           // world position -> cell
+            ground.SetTile(c, null);                            // null erases: break the tile
+        }
+    }
+}`,
+anim2:`// The four kinds of Animator parameter
+anim.SetFloat("Speed", 3.5f);        // Float: any number
+anim.SetInteger("WeaponType", 2);    // Int: a whole number
+anim.SetBool("IsGrounded", true);    // Bool: stays on or off until you change it
+anim.SetTrigger("Attack");           // Trigger: on until a transition uses it, then resets itself
+
+// Example: attack when J is pressed (in PlayerMovement.cs, inside Update)
+if (Input.GetKeyDown(KeyCode.J))
+    anim.SetTrigger("Attack");`,
+patrol:`using UnityEngine;
+using System.Collections;
+
+public class EnemyPatrol : MonoBehaviour
+{
+    public Transform[] waypoints;   // drag empty objects in, in order
+    public float speed = 2f;
+    public float waitTime = 1f;     // pause at each waypoint
+
+    int index = 0;
+    int direction = 1;              // 1 = forward, -1 = back
+    bool waiting;
+    SpriteRenderer sr;
+
+    void Awake() { sr = GetComponent<SpriteRenderer>(); }
+
+    void Update()
+    {
+        if (waiting) return;
+
+        Vector2 target = new Vector2(waypoints[index].position.x, transform.position.y);
+        sr.flipX = target.x < transform.position.x;   // face the way we walk
+        transform.position = Vector2.MoveTowards(
+            transform.position, target, speed * Time.deltaTime);
+
+        if (Mathf.Abs(transform.position.x - target.x) < 0.05f)
+            StartCoroutine(WaitThenNext());
+    }
+
+    IEnumerator WaitThenNext()
+    {
+        waiting = true;
+        yield return new WaitForSeconds(waitTime);
+
+        if (index + direction < 0 || index + direction >= waypoints.Length)
+            direction = -direction;   // turn around at either end
+        index += direction;
+        waiting = false;
+    }
+}`,
+pat2:`// Timer version: no coroutine needed
+float waitTimer;
+
+void Update()
+{
+    if (waitTimer > 0)            // still pausing
+    {
+        waitTimer -= Time.deltaTime;
+        return;
+    }
+
+    // ...move towards waypoints[index] as before...
+
+    if (arrived)
+    {
+        waitTimer = waitTime;     // start the pause
+        NextWaypoint();           // same ping-pong code as above
+    }
+}`,
 plat:`using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
@@ -433,11 +593,11 @@ const APP_TABS=[
  code:[{h:"Coin.cs",c:"coin"}],
  task:["Create a coin prefab with a trigger collider","Place 10 coins around the level","Watch the counter go up"],
  fields:[{k:"s2",label:"Trigger or collision?",hint:"When do you use OnTriggerEnter2D, and when OnCollisionEnter2D?",rows:3}]},
-{title:"Colliders & Tilemaps",icon:"border-all",fb:"▦",intro:"Learn the 2D collider types, then build a level with Tilemaps and a Rule Tile.",
+{title:"Colliders & Tilemaps",icon:"border-all",fb:"▦",intro:"Learn the 2D collider types, then paint your own Tilemap layers and build a level with a Rule Tile.",
  body:`<h3>2D colliders</h3><ul><li><b>BoxCollider2D</b>: platforms, crates. <b>CircleCollider2D</b>: coins, balls. <b>CapsuleCollider2D</b>: characters, smooth over tile edges.</li><li><b>PolygonCollider2D</b> traces a sprite. <b>EdgeCollider2D</b> is a line, good for slopes.</li><li><b>Solid</b> colliders use <code>OnCollisionEnter2D</code>. <b>Triggers</b> use <code>OnTriggerEnter2D</code>. At least one object needs a <b>Rigidbody2D</b>.</li></ul><h3>Tilemaps</h3><ul><li><b>GameObject → 2D Object → Tilemap → Rectangular</b> makes a Grid with a Tilemap child.</li><li>Open <b>Window → 2D → Tile Palette</b> and drag sprites in to make tiles.</li><li>Add <b>Tilemap Collider 2D</b>, then <b>Composite Collider 2D</b> (tick <i>Used By Composite</i>, Rigidbody2D Static) to merge tiles into one shape.</li><li><b>Rule Tiles</b> pick the right sprite (corner, edge, centre) from neighbour rules.</li></ul>`,
- code:[],taskTitle:"Mini task: paint a level",
- task:["Make a Tile Palette and paint a ground layer","Put platforms on their own Tilemap with a collider","Create a Rule Tile: centre, top edge, left and right corners","Paint with the Rule Tile and check the corners join up","Walk your player across it with no snagging on joins"],
- fields:[{k:"s3",label:"What does a Rule Tile do?",hint:"Explain it to someone who has only painted tiles by hand.",rows:3}]},
+ widget:"tiles",code:[{h:"Paint and read tiles from code",c:"tm"}],taskTitle:"Mini task: paint a level",
+ task:["Make a Tile Palette and paint a ground layer","Put platforms on their own Tilemap with a collider","Create a Rule Tile: centre, top edge, left and right corners","Paint with the Rule Tile and check the corners join up","Walk your player across it with no snagging on joins","Practice first: use the tile painter to fill the Ground layer, then add flowers and bushes on the Decoration layer","Turn on Show colliders: which layer has one, and what does the Composite Collider change?"],
+ fields:[{k:"s3",label:"What does a Rule Tile do?",hint:"Explain it to someone who has only painted tiles by hand.",rows:3},{k:"s3b",label:"Why use two Tilemaps instead of one?",hint:"Which layer has the collider and which does not? What happens to your player when they touch each one?",rows:3}]},
 {title:"Health",icon:"heart-pulse",fb:"❤",intro:"Write health logic once in a HealthSystem class and reuse it for the player and enemies.",
  body:`<p>Concepts: fields, a <b>constructor</b>, methods, and <b>encapsulation</b> (health is private and changed only through methods). Fix a bug here once and every user of the class benefits.</p>`,
  code:[{h:"HealthSystem.cs",c:"hs"},{h:"Enemy.cs and Player damage",c:"en"}],
@@ -453,12 +613,18 @@ const APP_TABS=[
  code:[{h:"Lives code",c:"lives"}],
  task:["Create the heart panel with anchors set to top-left","Fill the hearts array in the Inspector","Lose all lives: do the hearts vanish one at a time?","Extension: a fall zone trigger that calls LoseLife()"],
  fields:[{k:"s6",label:"Describe your lives UI",hint:"Where is it, why, and how does the code update it?",rows:4}]},
-{title:"Animation",icon:"film",fb:"🎞",intro:"Use the Animator Controller to switch between Idle, Run and Jump.",
- body:`<ol><li>Create clips: <b>Idle, Run, Jump</b>.</li><li>In the Animator add parameters <code>Speed</code> (float) and <code>IsGrounded</code> (bool).</li><li>Idle → Run when <code>Speed &gt; 0.1</code>. Run → Idle when <code>Speed &lt; 0.1</code>. Any State → Jump when <code>IsGrounded</code> is false.</li><li>Untick <b>Has Exit Time</b> so transitions react instantly.</li></ol>`,
- code:[{h:"Drive the Animator from code",c:"anim"}],
- task:["Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check Has Exit Time is unticked on each","Add the code and watch the parameters at runtime"],
- fields:[{k:"s7",label:"How does code control an animation?",hint:"What are parameters, and what are transitions?",rows:4}]},
-{title:"Scenes",icon:"layer-group",fb:"▤",intro:"Add start, win and lose screens and move between them with SceneManager.",
+{title:"Animation",icon:"film",fb:"🎞",intro:"Use the Animator Controller, a state machine, to switch between Idle, Run, Jump and Attack. Try one in the playground first.",
+ body:`<ol><li>Create clips: <b>Idle, Run, Jump</b>.</li><li>In the Animator add parameters <code>Speed</code> (float) and <code>IsGrounded</code> (bool).</li><li>Idle → Run when <code>Speed &gt; 0.1</code>. Run → Idle when <code>Speed &lt; 0.1</code>. Any State → Jump when <code>IsGrounded</code> is false.</li><li>Untick <b>Has Exit Time</b> so transitions react instantly.</li></ol><h3>State machine vocabulary</h3><ul><li><b>State</b>: one animation that is playing (Idle, Run, Jump).</li><li><b>Transition</b>: an arrow from one state to another. It fires when its <b>conditions</b> are true.</li><li><b>Parameters</b>: values your code sets. There are four kinds: <b>Float</b>, <b>Int</b>, <b>Bool</b> and <b>Trigger</b>.</li><li><b>Entry</b> and the orange <b>Default State</b>: where the machine starts. <b>Any State</b>: a transition from here can fire from every state.</li><li><b>Has Exit Time</b>: wait until the clip has played to a chosen point before leaving.</li></ul>`,
+ widget:"fsm",
+ code:[{h:"Drive the Animator from code",c:"anim"},{h:"Parameter types and a Trigger",c:"anim2"}],
+ task:["Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check Has Exit Time is unticked on each","Add the code and watch the parameters at runtime","Playground: make the character go Idle, Run, then Jump using only the parameters","Playground: tick Has Exit Time on Idle and Run and describe the delay you see","Extension: add an Attack state that uses a Trigger and leaves by Exit Time"],
+ fields:[{k:"s7",label:"How does code control an animation?",hint:"What are parameters, and what are transitions?",rows:4},{k:"s7b",label:"What do Has Exit Time and a Trigger do?",hint:"Use the playground. Which setting made the character slow to react? What happens to a Trigger once a transition has used it?",rows:4}]},
+{title:"Enemy AI",tk:10,icon:"route",fb:"➜",intro:"Teach the enemy to patrol between waypoints and pause at each one.",
+ body:`<p>Instead of bouncing between two fixed numbers, give the enemy a list of <b>waypoints</b> (empty GameObjects). It walks to waypoint 1, pauses, walks to the next, and turns around at the ends (ping-pong).</p><ul><li>Create empty objects <code>WP1</code>, <code>WP2</code>, <code>WP3</code> along a platform. Keep them <b>outside</b> the enemy so they do not move with it.</li><li><code>Vector2.MoveTowards</code> takes a fixed step each frame. <code>Time.deltaTime</code> keeps the speed the same on every computer.</li><li>A <b>coroutine</b> with <code>WaitForSeconds</code> pauses the enemy without freezing the game. A <code>waitTimer</code> counting down in <code>Update</code> does the same job.</li></ul><p>Try it in the preview: use the sliders to change the wait time and speed, and watch <code>enemy</code> in the variables line.</p>`,
+ code:[{h:"EnemyPatrol.cs",c:"patrol"},{h:"Alternative: a timer instead of a coroutine",c:"pat2"}],
+ task:["Create three waypoint objects along a platform","Add EnemyPatrol and drag the waypoints into the array in order","Set Wait Time to 2 and check the enemy pauses at every waypoint","Make the enemy turn around at both ends (ping-pong)","Challenge: add a 4th waypoint, then make the enemy chase the player when close"],
+ fields:[{k:"s9",label:"How does the pause work?",hint:"Explain what WaitForSeconds does, or how your timer counts down.",rows:3}]},
+{title:"Scenes",tk:8,icon:"layer-group",fb:"▤",intro:"Add start, win and lose screens and move between them with SceneManager.",
  body:`<p>Make scenes <b>Game</b>, <b>WinScreen</b>, <b>LoseScreen</b> and an optional <b>Start</b> menu. Add them all in <b>Build Settings</b>, otherwise <code>LoadScene</code> cannot find them. On each UI button set <b>OnClick()</b>, drag in the SceneLoader and pick <code>LoadByName</code>.</p>`,
  code:[{h:"SceneLoader.cs",c:"sl"},{h:"Win trigger",c:"win"}],
  task:["Create Start, Win and Lose scenes with a title and a button","Add every scene to Build Settings","Wire the Play Again and Quit buttons","Play through: start to win, then start to lose"],
@@ -511,6 +677,7 @@ function field(f){
 /* Lesson content block: body HTML, code listings (with tab switch), tick-off task list */
 function lesson(t,ti){
   let h=t.body||"";
+  if(t.widget)h+=`<div class="wg" data-w="${t.widget}"></div>`;
   (t.code||[]).forEach((b,bi)=>{
     h+=`<h3>${esc(b.h)}</h3>`;
     if(b.tabs){
@@ -518,7 +685,7 @@ function lesson(t,ti){
          b.tabs.map((x,j)=>`<pre tabindex="0" data-cp="${bi}-${j}"${j?" hidden":""}><code>${esc(CODE[x[1]])}</code></pre>`).join("");
     }else h+=`<pre tabindex="0"><code>${esc(CODE[b.c])}</code></pre>`;
   });
-  if(t.task)h+=`<div class="task" role="group" aria-label="Task checklist"><b>${esc(t.taskTitle||"Task checklist")}</b>`+t.task.map((x,j)=>{const k="c"+ti+"_"+j;return `<label><input type="checkbox" data-c="${k}"${data[k]?" checked":""}><span>${esc(x)}</span></label>`}).join("")+`</div>`;
+  if(t.task)h+=`<div class="task" role="group" aria-label="Task checklist"><b>${esc(t.taskTitle||"Task checklist")}</b>`+t.task.map((x,j)=>{const k="c"+(t.tk===undefined?ti:t.tk)+"_"+j;return `<label><input type="checkbox" data-c="${k}"${data[k]?" checked":""}><span>${esc(x)}</span></label>`}).join("")+`</div>`;
   return h;
 }
 function drawPanel(){
@@ -539,6 +706,7 @@ function drawPanel(){
     sel.onchange=()=>{if(!sel._nav)add()};
     sel.onblur=()=>{sel._nav=false;sel.value=""};
   });
+  qa($("panel"),".wg[data-w]").forEach(el=>{const f=WIDGETS[el.dataset.w];if(f)f(el)});
   addMics();drawNav();
 }
 function drawNav(){
@@ -589,7 +757,7 @@ function addMics(){
 function model(){
   return {title:g("name")?g("name")+": "+CFG.title:CFG.title,
     sections:TABS.map((t,ti)=>{const rows=t.fields.map(f=>[f.label,g(f.k)||"(empty)"]);
-      if(t.task){const d=t.task.filter((x,j)=>data["c"+ti+"_"+j]).length;rows.unshift(["Tasks completed",d+" of "+t.task.length])}
+      if(t.task){const d=t.task.filter((x,j)=>data["c"+(t.tk===undefined?ti:t.tk)+"_"+j]).length;rows.unshift(["Tasks completed",d+" of "+t.task.length])}
       return {h:t.title,rows}})};
 }
 const stamp=()=>new Date().toISOString().slice(0,10);
@@ -717,6 +885,414 @@ function openM(){
 }
 function closeM(){$("mdl").hidden=true;BG.forEach(q=>document.querySelector(q).inert=false);if(opener&&opener.focus)opener.focus()}
 
+/* ===== 9b. TEACHING WIDGETS: mounted into any tab that has widget:"name" ===== */
+const WIDGETS={};
+function hero(cx,x,y,f,pose,t,p){
+  x=Math.round(x);y=Math.round(y);let leg=0;
+  const r=(a,b,w,h,c)=>{cx.fillStyle=c;cx.fillRect(a,b,w,h)};
+  if(pose==="run")leg=((t/6)|0)%2?1:2;else if(pose==="jump")leg=3;else if(pose==="idle"&&((t/30)|0)%2)y+=1;
+  r(x+1,y+1,8,6,"#f2c9a0");r(x,y,10,3,"#c0392b");r(f>0?x+7:x-1,y+2,4,2,"#c0392b");r(f>0?x+6:x+3,y+4,1,2,"#111");r(x+1,y+7,8,4,"#2f6fe0");
+  if(leg===0){r(x+1,y+11,3,3,"#222");r(x+6,y+11,3,3,"#222")}
+  else if(leg===1){r(x,y+11,3,3,"#222");r(x+6,y+12,3,2,"#222")}
+  else if(leg===2){r(x+1,y+12,3,2,"#222");r(x+7,y+11,3,3,"#222")}
+  else r(x+2,y+11,6,2,"#222");
+  if(pose==="attack"){
+    if(p<.4)r(f>0?x+9:x-1,y-6,2,9,"#e8ecf5");
+    else{r(f>0?x+10:x-10,y+6,10,2,"#e8ecf5");if(p>.5&&p<.9)r(f>0?x+13:x-13,y+1,2,10,"#fff")}
+  }
+}
+
+/* ---------- Tile painter: two Tilemap layers (Ground + Decoration) ---------- */
+(function(){
+const C=20,R=11,T=16,W=C*T,H=R*T,N=C*R,PW=10,PH=14;
+const GT=[null,"Grass Rule Tile","Plain Dirt","Stone Brick"],DT=[null,"Red Flower","Yellow Flower","Bush","Tall Grass","Mushroom","Signpost"];
+const NAMES={g:GT,d:DT},LN={g:"Ground",d:"Decoration"},TN={paint:"Paintbrush",box:"Box Fill",fill:"Flood Fill",erase:"Eraser"};
+const mk=()=>new Array(N).fill(0),ix=(c,r)=>r*C+c;
+const S={g:mk(),d:mk(),al:"g",sel:{g:1,d:1},tool:"paint",vis:{g:true,d:true},front:true,col:"none",grid:true,undo:[],anchor:null,test:false};
+function example(){
+  S.g=mk();S.d=mk();
+  for(let c=0;c<C;c++){S.g[ix(c,9)]=1;S.g[ix(c,10)]=1}
+  for(let c=12;c<=15;c++)S.g[ix(c,6)]=1;
+  [[2,8,3],[5,8,1],[8,8,4],[10,8,6],[13,5,2],[15,5,3]].forEach(a=>S.d[ix(a[0],a[1])]=a[2]);
+}
+function saveT(){store("Tiles",JSON.stringify({g:S.g.join(""),d:S.d.join("")}))}
+function loadT(){try{const o=JSON.parse(load("Tiles")||"null");
+  if(o&&/^\d{220}$/.test(o.g)&&/^\d{220}$/.test(o.d)){S.g=[...o.g].map(v=>+v<GT.length?+v:0);S.d=[...o.d].map(v=>+v<DT.length?+v:0)}}catch(e){}}
+example();loadT();
+
+const px=(cx,x,y,w,h,c)=>{cx.fillStyle=c;cx.fillRect(x,y,w,h)};
+function gArt(cx,id,c,r,nb){
+  const x=c*T,y=r*T;
+  if(id===1){
+    px(cx,x,y,T,T,"#7a4a22");
+    if((c*7+r*13)%5===0)px(cx,x+6,y+9,2,2,"#5d3a18");
+    if(!nb.l)px(cx,x,y,2,T,"#5d3a18");
+    if(!nb.r)px(cx,x+T-2,y,2,T,"#5d3a18");
+    if(!nb.d)px(cx,x,y+T-2,T,2,"#5d3a18");
+    if(!nb.u){px(cx,x,y,T,4,"#4caf50");px(cx,x,y,T,1,"#8be36b");
+      if(!nb.l)px(cx,x,y,2,6,"#4caf50");if(!nb.r)px(cx,x+T-2,y,2,6,"#4caf50")}
+  }else if(id===2){
+    px(cx,x,y,T,T,"#8a5a2b");px(cx,x,y,T,1,"#6b4420");px(cx,x,y,1,T,"#6b4420");
+    if((c*5+r*3)%4===0)px(cx,x+9,y+8,2,2,"#6b4420");
+  }else{
+    const k="#5b6475";px(cx,x,y,T,T,"#9aa4bf");px(cx,x,y,T,1,"#c3cbe0");
+    px(cx,x,y+5,T,1,k);px(cx,x,y+11,T,1,k);px(cx,x,y+T-1,T,1,k);
+    px(cx,x+7,y,1,5,k);px(cx,x+3,y+6,1,5,k);px(cx,x+11,y+6,1,5,k);px(cx,x+7,y+12,1,4,k);
+  }
+}
+function dArt(cx,id,c,r){
+  const x=c*T,y=r*T;
+  if(id===1||id===2){
+    px(cx,x+7,y+8,2,8,"#3e9b3e");px(cx,x+4,y+11,3,2,"#3e9b3e");px(cx,x+9,y+12,3,2,"#3e9b3e");
+    px(cx,x+6,y+3,4,6,id===1?"#e0344f":"#ffd23d");px(cx,x+4,y+5,8,2,id===1?"#e0344f":"#ffd23d");px(cx,x+7,y+5,2,2,id===1?"#ffc83d":"#7a4a22");
+  }else if(id===3){
+    px(cx,x+1,y+8,14,8,"#2e8b3e");px(cx,x+3,y+5,10,3,"#2e8b3e");px(cx,x+5,y+3,6,2,"#2e8b3e");
+    px(cx,x+4,y+6,3,2,"#4caf50");px(cx,x+9,y+9,3,2,"#4caf50");
+  }else if(id===4){
+    [[3,8,8],[6,5,11],[9,7,9],[12,9,7],[4,10,6]].forEach(b=>px(cx,x+b[0],y+b[1],1,b[2],"#4caf50"));
+    [[5,9,6],[10,10,6]].forEach(b=>px(cx,x+b[0],y+b[1],1,b[2],"#2e8b3e"));
+  }else if(id===5){
+    px(cx,x+6,y+10,4,6,"#f3e6d0");px(cx,x+3,y+6,10,5,"#e0344f");px(cx,x+5,y+5,6,1,"#e0344f");
+    px(cx,x+5,y+7,2,2,"#fff");px(cx,x+9,y+8,2,2,"#fff");
+  }else{
+    px(cx,x+7,y+8,2,8,"#7a4a22");px(cx,x+2,y+3,12,7,"#c68642");px(cx,x+2,y+3,12,1,"#6b4420");px(cx,x+2,y+9,12,1,"#6b4420");
+    px(cx,x+4,y+6,6,1,"#6b4420");px(cx,x+9,y+5,1,3,"#6b4420");
+  }
+}
+const same=(c,r)=>c<0||c>=C||r>=R?true:r<0?false:S.g[ix(c,r)]===1;
+const nbOf=(c,r)=>({l:same(c-1,r),r:same(c+1,r),u:same(c,r-1),d:same(c,r+1)});
+const solid=(c,r)=>c>=0&&c<C&&r>=0&&r<R&&S.g[ix(c,r)]>0;
+function hit(x,y){const c0=Math.floor(x/T),c1=Math.floor((x+PW-.01)/T),r0=Math.floor(y/T),r1=Math.floor((y+PH-.01)/T);
+  for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++)if(solid(c,r))return{c,r};return null}
+function line(a,b,f){let x0=a.c,y0=a.r;const x1=b.c,y1=b.r,dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1;let e=dx+dy;
+  for(;;){f(x0,y0);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx}if(e2<=dx){e+=dx;y0+=sy}}}
+const tname=(k,c,r)=>{const id=S[k][ix(c,r)];return id?NAMES[k][id]:"empty"};
+
+WIDGETS.tiles=function(m){
+  m.innerHTML=`<h3>Try it: paint two Tilemap layers</h3>
+<p class="hint">A <b>Tilemap</b> is a grid of cells and each cell holds one tile. This level uses two Tilemaps inside one <b>Grid</b>: <b>Ground</b> (solid, has a collider) and <b>Decoration</b> (just for looks). Pick a layer, pick a tile from the palette, then click or drag on the grid. Keyboard: arrow keys move the cursor, Space paints, Delete erases.</p>
+<div class="hier" role="group" aria-label="Layers, like the Unity Hierarchy">
+  <div class="hl">Grid</div>
+  <div class="lay"><button type="button" class="alt" data-x="lg" aria-pressed="true">Ground</button><span class="cmp">Tilemap, Tilemap Renderer (Order 0), Tilemap Collider 2D</span><label class="chk"><input type="checkbox" data-x="vg" checked> Renderer on</label></div>
+  <div class="lay"><button type="button" class="alt" data-x="ld" aria-pressed="false">Decoration</button><span class="cmp">Tilemap, Tilemap Renderer, no collider</span><label class="chk"><input type="checkbox" data-x="vd" checked> Renderer on</label><label class="chk">Order in Layer <select data-x="ord"><option value="1">1 (in front of Ground)</option><option value="-1">-1 (behind Ground)</option></select></label></div>
+</div>
+<div class="wbar" role="group" aria-label="Tile tools">
+  <span class="lbl">Tools</span>
+  <button type="button" class="alt" data-ed data-tl="paint" aria-pressed="true" title="Paintbrush (B)">${ic("paintbrush","✎")} Brush</button>
+  <button type="button" class="alt" data-ed data-tl="box" aria-pressed="false" title="Box Fill (U)">${ic("vector-square","▭")} Box fill</button>
+  <button type="button" class="alt" data-ed data-tl="fill" aria-pressed="false" title="Flood Fill (G)">${ic("fill-drip","▼")} Flood fill</button>
+  <button type="button" class="alt" data-ed data-tl="erase" aria-pressed="false" title="Eraser (D)">${ic("eraser","⌫")} Eraser</button>
+  <button type="button" class="alt" data-ed data-x="un" disabled>Undo</button>
+  <button type="button" class="alt" data-ed data-x="cl">Clear layer</button>
+  <button type="button" class="alt" data-ed data-x="rs">Reset example</button>
+</div>
+<div class="lbl" data-x="pln"></div>
+<div class="pal" data-x="pal" role="group" aria-label="Tile palette"></div>
+<canvas class="tmcv" data-x="cv" tabindex="0" role="application" aria-label="Tilemap painting grid, 20 by 11 cells. Arrow keys move the cursor, Space paints with the current tool, Delete erases. In play test, arrow keys move the player and Space jumps."></canvas>
+<div class="wbar">
+  <label class="chk"><span class="lbl">Show colliders</span> <select data-x="col" aria-label="Show colliders"><option value="none">Off</option><option value="tile">Tilemap Collider 2D (one box per tile)</option><option value="comp">+ Composite Collider 2D (one merged outline)</option></select></label>
+  <label class="chk"><input type="checkbox" data-x="grid" checked> Show grid</label>
+  <button type="button" class="alt" data-x="tg" aria-pressed="false">${ic("play","▶")} <span>Play test</span></button>
+</div>
+<div class="wbar" data-x="tch" role="group" aria-label="Play test controls" hidden>
+  <button type="button" class="alt" data-tk="left">&#9664; Left</button><button type="button" class="alt" data-tk="right">Right &#9654;</button><button type="button" class="alt" data-tk="jump">Jump</button><button type="button" class="alt" data-tk="run" aria-pressed="false">Run</button>
+</div>
+<div class="stat" data-x="st"><div data-x="s1"></div><div data-x="s2"></div><div data-x="s3"></div></div>
+<p class="hint"><b>Try this:</b> 1) Paint ground with the Grass Rule Tile and watch the grass appear on top by itself. 2) Switch to Decoration and add flowers and a bush. 3) Untick Ground's renderer: the decoration stays, because it is a separate Tilemap. 4) Show colliders, then compare the two collider modes. 5) Play test: you stand on Ground but walk straight through the bushes.</p>`;
+
+  const h=n=>m.querySelector('[data-x="'+n+'"]');
+  const cv=h("cv"),cx=cv.getContext("2d");cv.width=W;cv.height=H;
+  const ub=h("un"),pal=h("pal"),tchB=h("tch");
+  let cur=null,down=false,last=null,dirty=true,fr=0;
+  const key={left:0,right:0,run:0,jq:false};
+  let PL=null;
+  S.test=false;S.anchor=null;
+
+  function spawn(){PL={x:8,y:-24,vx:0,vy:0,on:false,j:0,f:1,pose:"idle"}}
+  function pstep(){
+    const p=PL;fr++;const dir=key.right-key.left;
+    p.vx=dir*(key.run?2.1:1.3);if(dir)p.f=dir;
+    if(key.jq){key.jq=false;if(p.on){p.vy=-6.2;p.j=1}else if(p.j===1){p.vy=-6.2;p.j=2}}
+    p.x=Math.max(0,Math.min(W-PW,p.x+p.vx));
+    let q=hit(p.x,p.y);if(q&&p.vx)p.x=p.vx>0?q.c*T-PW:(q.c+1)*T;
+    p.vy=Math.min(p.vy+.35,8);p.y+=p.vy;p.on=false;
+    q=hit(p.x,p.y);
+    if(q){if(p.vy>0){p.y=q.r*T-PH;p.on=true;p.j=0}else p.y=(q.r+1)*T;p.vy=0}
+    if(p.y>H+30)spawn();
+    p.pose=!p.on?"jump":Math.abs(p.vx)>.1?"run":"idle";
+  }
+
+  function draw(){
+    cx.fillStyle="#5ec8f2";cx.fillRect(0,0,W,H);
+    cx.fillStyle="#fff";[[30,14],[150,26],[250,10]].forEach(c=>{cx.fillRect(c[0],c[1],28,6);cx.fillRect(c[0]+6,c[1]-4,16,4)});
+    (S.front?["g","d"]:["d","g"]).forEach(k=>{
+      if(!S.vis[k])return;
+      for(let r=0;r<R;r++)for(let c=0;c<C;c++){const id=S[k][ix(c,r)];if(!id)continue;k==="g"?gArt(cx,id,c,r,nbOf(c,r)):dArt(cx,id,c,r)}
+    });
+    if(S.grid){cx.fillStyle="rgba(11,15,26,.22)";for(let c=1;c<C;c++)cx.fillRect(c*T,0,1,H);for(let r=1;r<R;r++)cx.fillRect(0,r*T,W,1)}
+    if(S.col!=="none"){
+      cx.strokeStyle="#b6ff3b";
+      if(S.col==="tile"){cx.lineWidth=1;for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(S.g[ix(c,r)])cx.strokeRect(c*T+.5,r*T+.5,T-1,T-1)}
+      else{cx.lineWidth=2;cx.beginPath();
+        for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(S.g[ix(c,r)]){const x=c*T,y=r*T;
+          if(!solid(c,r-1)){cx.moveTo(x,y+1);cx.lineTo(x+T,y+1)}
+          if(!solid(c,r+1)){cx.moveTo(x,y+T-1);cx.lineTo(x+T,y+T-1)}
+          if(!solid(c-1,r)){cx.moveTo(x+1,y);cx.lineTo(x+1,y+T)}
+          if(!solid(c+1,r)){cx.moveTo(x+T-1,y);cx.lineTo(x+T-1,y+T)}}
+        cx.stroke()}
+    }
+    if(S.test){hero(cx,PL.x,PL.y,PL.f,PL.pose,fr)}
+    else if(cur){
+      const x=cur.c*T,y=cur.r*T;
+      if(S.anchor){const a=Math.min(S.anchor.c,cur.c),b=Math.max(S.anchor.c,cur.c),c2=Math.min(S.anchor.r,cur.r),d=Math.max(S.anchor.r,cur.r);
+        cx.fillStyle="rgba(255,200,61,.3)";cx.fillRect(a*T,c2*T,(b-a+1)*T,(d-c2+1)*T);cx.strokeStyle="#ffc83d";cx.lineWidth=2;cx.strokeRect(a*T+1,c2*T+1,(b-a+1)*T-2,(d-c2+1)*T-2)}
+      else{
+        if(S.tool==="erase"){cx.strokeStyle="#ff2e88";cx.lineWidth=2;cx.strokeRect(x+1,y+1,T-2,T-2)}
+        else{cx.globalAlpha=.55;const id=S.sel[S.al];S.al==="g"?gArt(cx,id,cur.c,cur.r,nbOf(cur.c,cur.r)):dArt(cx,id,cur.c,cur.r);cx.globalAlpha=1;
+          cx.strokeStyle="#ffc83d";cx.lineWidth=1;cx.strokeRect(x+.5,y+.5,T-1,T-1)}
+      }
+    }
+  }
+
+  function info(){
+    const gN=S.g.filter(Boolean).length,dN=S.d.filter(Boolean).length;
+    if(S.test){
+      h("s1").textContent="Play test: arrows or A/D move, Space or W jumps, Shift runs. Click the grid first.";
+      h("s2").textContent="You collide with Ground only. Decoration has no collider, so you pass through bushes and flowers.";
+      h("s3").textContent="Try unticking Ground's renderer: it is invisible but you still stand on it, because the collider is separate.";return}
+    h("s1").textContent="Active Tilemap: "+LN[S.al]+"   Tool: "+TN[S.tool]+"   Tile: "+(S.tool==="erase"?"none":NAMES[S.al][S.sel[S.al]]);
+    h("s2").textContent=cur?"Cell ("+cur.c+", "+(R-1-cur.r)+", 0)   Ground: "+tname("g",cur.c,cur.r)+"   Decoration: "+tname("d",cur.c,cur.r):"Cell (x, y, 0): move over the grid to see it. Unity uses whole-number Vector3Int cells.";
+    h("s3").textContent="Ground tiles: "+gN+(S.col==="comp"?" (merged into one outline)":S.col==="tile"?" (one collider box each)":"")+"   Decoration tiles: "+dN+" (no collider)";
+  }
+  const changed=()=>{saveT();dirty=true;info()};
+  function snap(){S.undo.push(S.g.join("")+"|"+S.d.join(""));if(S.undo.length>40)S.undo.shift();ub.disabled=S.test}
+  function undo(){const s=S.undo.pop();if(!s)return say("Nothing to undo.");const p=s.split("|");S.g=[...p[0]].map(Number);S.d=[...p[1]].map(Number);changed();say("Undone")}
+  const put=(k,c,r,id)=>{if(c>=0&&c<C&&r>=0&&r<R)S[k][ix(c,r)]=id};
+  const paintAt=(c,r)=>put(S.al,c,r,S.tool==="erase"?0:S.sel[S.al]);
+  function boxFill(a,b){const id=S.sel[S.al];for(let r=Math.min(a.r,b.r);r<=Math.max(a.r,b.r);r++)for(let c=Math.min(a.c,b.c);c<=Math.max(a.c,b.c);c++)put(S.al,c,r,id)}
+  function flood(c,r){const arr=S[S.al],id=S.sel[S.al],t0=arr[ix(c,r)];if(t0===id)return;const q=[[c,r]];
+    while(q.length){const p=q.pop(),x=p[0],y=p[1];if(x<0||x>=C||y<0||y>=R||arr[ix(x,y)]!==t0)continue;arr[ix(x,y)]=id;q.push([x+1,y],[x-1,y],[x,y+1],[x,y-1])}}
+  const cellAt=e=>{const b=cv.getBoundingClientRect(),c=Math.floor((e.clientX-b.left)/b.width*C),r=Math.floor((e.clientY-b.top)/b.height*R);return c<0||c>=C||r<0||r>=R?null:{c,r}};
+
+  function drawPal(){
+    h("pln").textContent="Tile Palette: "+LN[S.al]+" Tilemap";
+    pal.innerHTML="";
+    NAMES[S.al].forEach((n,id)=>{
+      if(!id)return;
+      const b=document.createElement("button");b.type="button";b.className="alt";b.dataset.ed="";b.disabled=S.test;
+      b.setAttribute("aria-pressed",S.sel[S.al]===id&&S.tool!=="erase");b.title=n;
+      const t=document.createElement("canvas");t.width=T;t.height=T;t.setAttribute("aria-hidden","true");
+      const tx=t.getContext("2d");tx.fillStyle="#5ec8f2";tx.fillRect(0,0,T,T);
+      S.al==="g"?gArt(tx,id,0,0,{l:true,r:true,u:false,d:true}):dArt(tx,id,0,0);
+      const s=document.createElement("span");s.textContent=n;
+      b.append(t,s);b.onclick=()=>{S.sel[S.al]=id;if(S.tool==="erase")setTool("paint");drawPal();info();dirty=true;say(n+" selected")};
+      pal.append(b);
+    });
+  }
+  function setTool(t){S.tool=t;S.anchor=null;m.querySelectorAll("[data-tl]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tl===t));drawPal();info();dirty=true}
+  function setLayer(k){S.al=k;h("lg").setAttribute("aria-pressed",k==="g");h("ld").setAttribute("aria-pressed",k==="d");drawPal();info();dirty=true;say(LN[k]+" Tilemap is now active")}
+  function setTest(v){
+    S.test=v;S.anchor=null;const b=h("tg");b.setAttribute("aria-pressed",v);b.querySelector("span").textContent=v?"Stop test":"Play test";
+    m.querySelectorAll("[data-ed]").forEach(x=>{x.disabled=v||(x===ub&&!S.undo.length)});tchB.hidden=!v;
+    if(v){spawn();key.left=key.right=key.run=0;key.jq=false;cv.focus();say("Play test started. Use arrow keys and Space.")}else say("Back to painting.");
+    info();dirty=true;
+  }
+  const cellSay=()=>"Cell "+cur.c+", "+(R-1-cur.r)+". Ground: "+tname("g",cur.c,cur.r)+". Decoration: "+tname("d",cur.c,cur.r)+".";
+  function act(){
+    if(!cur)return;const c=cur.c,r=cur.r;
+    if(S.tool==="paint"||S.tool==="erase"){snap();paintAt(c,r);changed();say((S.tool==="erase"?"Erased":"Painted "+NAMES[S.al][S.sel[S.al]])+" at cell "+c+", "+(R-1-r))}
+    else if(S.tool==="fill"){snap();flood(c,r);changed();say("Flood filled from cell "+c+", "+(R-1-r))}
+    else if(!S.anchor){S.anchor={c,r};dirty=true;say("Box corner set. Move the cursor and press Space again.")}
+    else{snap();boxFill(S.anchor,cur);S.anchor=null;changed();say("Box filled")}
+  }
+
+  m.querySelectorAll("[data-tl]").forEach(b=>b.onclick=()=>{setTool(b.dataset.tl);say(TN[b.dataset.tl]+" tool")});
+  h("lg").onclick=()=>setLayer("g");h("ld").onclick=()=>setLayer("d");
+  h("vg").onchange=function(){S.vis.g=this.checked;dirty=true;say("Ground renderer "+(this.checked?"on":"off")+". Its collider still works.")};
+  h("vd").onchange=function(){S.vis.d=this.checked;dirty=true;say("Decoration renderer "+(this.checked?"on":"off"))};
+  h("ord").value=S.front?"1":"-1";h("ord").onchange=function(){S.front=this.value==="1";dirty=true;say("Decoration order in layer "+this.value)};
+  h("col").value=S.col;h("col").onchange=function(){S.col=this.value;info();dirty=true};
+  h("grid").checked=S.grid;h("grid").onchange=function(){S.grid=this.checked;dirty=true};
+  ub.disabled=!S.undo.length;ub.onclick=undo;
+  h("cl").onclick=()=>{snap();S[S.al]=mk();changed();say(LN[S.al]+" layer cleared. Undo brings it back.")};
+  h("rs").onclick=()=>{snap();example();changed();say("Example level restored")};
+  h("tg").onclick=()=>setTest(!S.test);
+
+  cv.onpointerdown=e=>{
+    cv.focus();if(S.test)return;const q=cellAt(e);if(!q)return;e.preventDefault();cur=q;
+    try{cv.setPointerCapture(e.pointerId)}catch(x){}
+    if(S.tool==="paint"||S.tool==="erase"){snap();down=true;last=q;paintAt(q.c,q.r);changed()}
+    else if(S.tool==="fill"){snap();flood(q.c,q.r);changed()}
+    else{S.anchor=q;down=true;dirty=true}
+  };
+  cv.onpointermove=e=>{
+    if(S.test)return;const q=cellAt(e);if(!q)return;
+    if(!cur||q.c!==cur.c||q.r!==cur.r){
+      cur=q;
+      if(down&&(S.tool==="paint"||S.tool==="erase")){line(last,q,(c,r)=>paintAt(c,r));last=q;changed()}else{info();dirty=true}
+    }
+  };
+  const up=()=>{if(down&&S.tool==="box"&&S.anchor&&cur){snap();boxFill(S.anchor,cur);S.anchor=null;changed()}down=false;last=null};
+  cv.onpointerup=up;cv.onpointercancel=()=>{down=false;S.anchor=null;dirty=true};
+  cv.onpointerleave=()=>{if(!down&&document.activeElement!==cv){cur=null;info();dirty=true}};
+  cv.onfocus=()=>{if(!S.test&&!cur){cur={c:10,r:5};info()}dirty=true};
+  cv.onblur=()=>{key.left=key.right=key.run=0;dirty=true};
+  cv.onkeydown=e=>{
+    const k=e.key;
+    if(S.test){
+      const mv={ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right",Shift:"run"};
+      if(mv[k]){key[mv[k]]=1;e.preventDefault()}else if([" ","ArrowUp","w","W"].includes(k)){if(!e.repeat)key.jq=true;e.preventDefault()}
+      return;
+    }
+    if(e.ctrlKey||e.metaKey){if(k==="z"||k==="Z"){e.preventDefault();undo()}return}
+    const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[k];
+    if(d){e.preventDefault();cur=cur||{c:10,r:5};cur={c:Math.max(0,Math.min(C-1,cur.c+d[0])),r:Math.max(0,Math.min(R-1,cur.r+d[1]))};dirty=true;info();say(cellSay());return}
+    if(k===" "||k==="Enter"){e.preventDefault();act();return}
+    if(k==="Delete"||k==="Backspace"){e.preventDefault();if(cur){snap();put(S.al,cur.c,cur.r,0);changed();say("Erased at cell "+cur.c+", "+(R-1-cur.r))}return}
+    if(k==="Escape"){S.anchor=null;dirty=true;return}
+    const t={b:"paint",B:"paint",u:"box",U:"box",g:"fill",G:"fill",d:"erase",D:"erase"}[k];if(t){setTool(t);say(TN[t]+" tool")}
+  };
+  cv.onkeyup=e=>{const mv={ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right",Shift:"run"};if(mv[e.key])key[mv[e.key]]=0};
+  m.querySelectorAll("[data-tk]").forEach(b=>{
+    const k=b.dataset.tk;
+    if(k==="run"){b.onclick=()=>{key.run=key.run?0:1;b.setAttribute("aria-pressed",!!key.run)};return}
+    if(k==="jump"){b.onpointerdown=e=>{e.preventDefault();key.jq=true};b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();key.jq=true}};return}
+    const on=e=>{e.preventDefault();key[k]=1},off=()=>{key[k]=0};
+    b.onpointerdown=on;b.onpointerup=off;b.onpointerleave=off;b.onpointercancel=off;
+    b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();key[k]=1}};b.onkeyup=e=>{if(e.key==="Enter"||e.key===" ")key[k]=0};
+  });
+
+  drawPal();info();
+  (function loop(){if(!m.isConnected)return;if(S.test)pstep();if(S.test||dirty){draw();dirty=false}requestAnimationFrame(loop)})();
+};
+})();
+
+/* ---------- Animator state machine playground ---------- */
+WIDGETS.fsm=function(m){
+  const NS=[
+    {id:"any",t:"Any State",x:30,y:18,k:"any"},
+    {id:"jump",t:"Jump",x:240,y:18,len:.5},
+    {id:"entry",t:"Entry",x:30,y:128,k:"entry"},
+    {id:"idle",t:"Idle",x:240,y:128,len:1,def:1},
+    {id:"run",t:"Run",x:480,y:128,len:.6},
+    {id:"attack",t:"Attack",x:240,y:240,len:.6,once:1}];
+  const TR=[
+    {id:"e-i",f:"entry",to:"idle",d:"M150 150 L238 150",c:[],def:1},
+    {id:"a-j",f:"any",to:"jump",d:"M150 40 L238 40",c:[["IsGrounded","=",false]],lx:195,ly:32,la:"middle",lt:"IsGrounded = false"},
+    {id:"j-i",f:"jump",to:"idle",d:"M300 62 L300 126",c:[["IsGrounded","=",true]],lx:308,ly:98,la:"start",lt:"IsGrounded = true"},
+    {id:"i-r",f:"idle",to:"run",d:"M360 142 L478 142",c:[["Speed",">",.1]],ex:1,lx:419,ly:134,la:"middle",lt:"Speed > 0.1"},
+    {id:"r-i",f:"run",to:"idle",d:"M480 160 L362 160",c:[["Speed","<",.1]],ex:1,lx:419,ly:178,la:"middle",lt:"Speed < 0.1"},
+    {id:"i-a",f:"idle",to:"attack",d:"M283 172 L283 238",c:[["Attack","t"]],lx:275,ly:210,la:"end",lt:"Attack (trigger)"},
+    {id:"a-i",f:"attack",to:"idle",d:"M318 238 L318 172",c:[],hx:1,exit:1,lx:326,ly:210,la:"start",lt:"Has Exit Time"},
+    {id:"r-a",f:"run",to:"attack",d:"M530 172 Q 520 262 362 262",c:[["Attack","t"]],lx:468,ly:284,la:"middle",lt:"Attack (trigger)"}];
+  const nm=id=>NS.find(n=>n.id===id).t;
+  const mkr=(id,c)=>`<marker id="fm-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:${c}"/></marker>`;
+  const svg=`<svg class="fmsvg" viewBox="0 0 640 310" role="img" aria-label="Animator graph. Entry goes to Idle. Idle and Run switch on Speed. Any State goes to Jump when IsGrounded is false. Jump returns to Idle when grounded. Idle and Run go to Attack on the Attack trigger, and Attack returns to Idle after its clip finishes.">
+<defs>${mkr("an","var(--mu)")+mkr("ag","var(--li)")+mkr("as","var(--cy)")+mkr("ap","var(--pk)")+mkr("aa","var(--am)")}</defs>
+${TR.map(t=>`<path class="ed${t.def?" def":""}" data-e="${t.id}" d="${t.d}"/>`).join("")}
+${NS.map(n=>`<g class="ng ${n.k||""}${n.def?" def":""}" data-n="${n.id}"><rect class="nd" x="${n.x}" y="${n.y}" width="120" height="44" rx="8"/><text class="nt" x="${n.x+60}" y="${n.y+(n.len?20:23)}" text-anchor="middle" dominant-baseline="middle">${n.t}</text>${n.len?`<rect class="pb" data-pb="${n.id}" x="${n.x+8}" y="${n.y+34}" width="0" height="5" rx="2"/>`:""}</g>`).join("")}
+${TR.filter(t=>t.lt).map(t=>`<text class="el" data-l="${t.id}" x="${t.lx}" y="${t.ly}" text-anchor="${t.la}">${t.lt}</text>`).join("")}
+${TR.map(t=>`<path class="hit" data-t="${t.id}" d="${t.d}"/>`).join("")}
+</svg>`;
+  m.innerHTML=`<h3>Try it: an Animator state machine</h3>
+<p class="hint">This is the Animator window in miniature. Each box is a <b>state</b> (an animation). Each arrow is a <b>transition</b> that fires when its <b>conditions</b> are true. Change the parameters, watch the machine move, and click any state or arrow to inspect it.</p>
+<div class="fmrow">
+  <div class="prm" role="group" aria-label="Animator parameters">
+    <div class="prow"><span class="pt">Float</span><label for="fm-sp">Speed</label><input type="range" id="fm-sp" min="0" max="8" step="0.1" value="0"><output id="fm-spo" for="fm-sp">0.0</output></div>
+    <div class="prow"><span class="pt">Bool</span><label class="chk"><input type="checkbox" id="fm-gr" checked> IsGrounded</label><button type="button" class="alt" id="fm-jp">Simulate a jump</button></div>
+    <div class="prow"><span class="pt">Trigger</span><button type="button" class="alt" id="fm-at">Set Attack</button><span class="dot" id="fm-dot" aria-hidden="true"></span><span class="cmp" id="fm-dt">not set</span></div>
+    <label class="chk"><input type="checkbox" id="fm-ex"> Has Exit Time on Idle &#8644; Run (see the lag)</label>
+    <div class="wbar"><button type="button" class="alt" id="fm-rs">Reset machine</button></div>
+  </div>
+  <canvas class="fmcv" id="fm-cv" width="80" height="48" role="img" aria-label="Preview of the character playing the current animation"></canvas>
+</div>
+<div class="stat"><div id="fm-now"></div></div>
+<div class="fmwrap" tabindex="0" role="region" aria-label="Animator graph. Scrolls sideways on small screens.">${svg}</div>
+<div class="wbar"><label class="chk"><span class="lbl">Inspect</span> <select id="fm-in" aria-label="Inspect a state or transition"></select></label></div>
+<div class="insp" id="fm-ip"></div>
+<div class="lbl">Transition log (newest first)</div>
+<ol class="flog" id="fm-lg"></ol>
+<p class="hint"><b>Try this:</b> 1) Drag Speed up: Idle goes to Run. 2) Untick IsGrounded: Any State forces Jump. 3) Tick Has Exit Time, then drag Speed: the character slides while still showing Idle, because it waits for the clip. 4) Press Set Attack while running: the trigger is used up, Attack plays once, then leaves by itself.</p>`;
+
+  const g=id=>m.querySelector("#"+id),cv=g("fm-cv"),cx=cv.getContext("2d"),ex=g("fm-ex");
+  const P={Speed:0,IsGrounded:true,Attack:false};
+  let st="idle",tin=0,fire=null,fireT=0,sel="s:idle",gx=0,fr=0,lastTs=0,jt=null,shown="";
+  const logA=[];
+  const norm=()=>{const n=NS.find(x=>x.id===st);const u=tin/n.len;return n.once?Math.min(1,u):u%1};
+  const cOK=c=>c[0]==="Speed"?(c[1]===">"?P.Speed>c[2]:P.Speed<c[2]):c[0]==="IsGrounded"?P.IsGrounded===c[2]:P.Attack;
+  const need=t=>t.hx?t.exit:(t.ex&&ex.checked)?.9:null;
+  const ready=t=>{if(!t.c.every(cOK))return"no";const e=need(t);return(e!==null&&norm()<e)?"wait":"yes"};
+  const ctext=c=>c[0]==="Speed"?"Speed "+(c[1]===">"?"Greater ":"Less ")+c[2]:c[0]==="IsGrounded"?"IsGrounded "+(c[2]?"true":"false"):"Attack (trigger)";
+  const cands=()=>TR.filter(t=>t.f==="any"&&t.to!==st).concat(TR.filter(t=>t.f===st));
+  function go(t){
+    if(t.c.some(c=>c[0]==="Attack"))P.Attack=false;
+    st=t.to;tin=0;fire=t.id;fireT=.45;
+    logA.unshift(nm(t.f)+" \u2192 "+nm(t.to)+(t.c.length?"  ("+t.c.map(ctext).join(", ")+")":"  (exit time)"));if(logA.length>6)logA.pop();
+    g("fm-lg").innerHTML=logA.map(x=>"<li>"+esc(x)+"</li>").join("");
+    say("Animator entered "+nm(t.to));
+  }
+  function inspHTML(v){
+    const id=v.slice(2);
+    if(v[0]==="s"){
+      const n=NS.find(x=>x.id===id);
+      if(id==="entry")return"<b>Entry</b><p>Every Animator Controller starts here. The orange arrow points at the <b>Default State</b>, which is Idle. Right-click a state in Unity and choose <i>Set as Layer Default State</i> to change it.</p>";
+      if(id==="any")return"<b>Any State</b><p>A special node. A transition drawn from it can fire from whatever state you are in. Here it sends the character to Jump the moment IsGrounded is false, even in the middle of an attack.</p>";
+      const out=TR.filter(t=>t.f===id).map(t=>nm(t.f)+" \u2192 "+nm(t.to)).join(", ")||"none";
+      return"<b>"+n.t+"</b><ul><li>Motion: the "+n.t+" animation clip ("+n.len.toFixed(1)+" s, "+(n.once?"plays once":"loops")+")</li><li>"+(n.def?"This is the Default State.":"Reached from: "+TR.filter(t=>t.to===id).map(t=>nm(t.f)).join(", "))+"</li><li>Transitions out: "+esc(out)+"</li></ul>";
+    }
+    const t=TR.find(x=>x.id===id);
+    if(t.def)return"<b>Entry \u2192 Idle</b><p>The default transition. It has no conditions: the machine simply starts in Idle.</p>";
+    const e=need(t),anyT=t.f==="any";
+    let note="";
+    if(id==="i-r"||id==="r-i")note=ex.checked?"Has Exit Time is ticked, so even once the condition is true the machine waits until the clip is 90% played. The character slides along while still showing the old animation. This is why the lesson says to untick it.":"Has Exit Time is unticked, so the change happens the moment the condition becomes true.";
+    else if(anyT)note="Any State transitions can fire from every state, so Jump can interrupt Run, Idle or Attack. Untick Can Transition To Self, otherwise Jump would restart every frame while you are in the air.";
+    else if(id==="j-i")note="Landing: once IsGrounded is true again the machine returns to Idle, and Idle \u2192 Run can then take over if you are moving.";
+    else if(id==="a-i")note="No conditions at all. With Has Exit Time ticked at 1.0 the state plays its whole clip, then leaves. Use this for one-shot animations like attacks.";
+    else note="A Trigger is a bool that switches itself off once a transition has used it. If you set it while the machine is in a state with no Attack arrow (such as Jump), it waits until one can use it.";
+    return"<b>"+nm(t.f)+" \u2192 "+nm(t.to)+"</b><ul><li>Conditions: "+(t.c.length?esc(t.c.map(ctext).join(" and ")):"none")+"</li><li>Has Exit Time: "+(e!==null?"ticked, Exit Time "+e.toFixed(2):"unticked")+"</li><li>Transition Duration: 0 s</li>"+(anyT?"<li>Can Transition To Self: unticked</li>":"")+"</ul><p>"+note+"</p>";
+  }
+  function setSel(v){sel=v;g("fm-in").value=v;g("fm-ip").innerHTML=inspHTML(v);
+    m.querySelectorAll(".ng").forEach(n=>n.classList.toggle("nsel",v==="s:"+n.dataset.n));}
+  g("fm-in").innerHTML="<optgroup label=\"States\">"+NS.map(n=>`<option value="s:${n.id}">${n.t}</option>`).join("")+"</optgroup><optgroup label=\"Transitions\">"+TR.map(t=>`<option value="t:${t.id}">${nm(t.f)} \u2192 ${nm(t.to)}</option>`).join("")+"</optgroup>";
+  g("fm-in").onchange=function(){setSel(this.value)};
+  m.querySelectorAll(".ng").forEach(n=>n.onclick=()=>setSel("s:"+n.dataset.n));
+  m.querySelectorAll(".hit").forEach(p=>p.onclick=()=>setSel("t:"+p.dataset.t));
+
+  g("fm-sp").oninput=function(){P.Speed=+this.value;g("fm-spo").textContent=P.Speed.toFixed(1)};
+  g("fm-gr").onchange=function(){P.IsGrounded=this.checked;if(this.checked&&jt){clearTimeout(jt);jt=null}};
+  g("fm-jp").onclick=()=>{if(!P.IsGrounded)return;P.IsGrounded=false;g("fm-gr").checked=false;
+    jt=setTimeout(()=>{jt=null;if(!m.isConnected)return;P.IsGrounded=true;g("fm-gr").checked=true},900)};
+  g("fm-at").onclick=()=>{P.Attack=true;say("Attack trigger set")};
+  ex.onchange=()=>{setSel(sel);say("Has Exit Time "+(ex.checked?"ticked":"unticked")+" on Idle and Run transitions")};
+  g("fm-rs").onclick=()=>{st="idle";tin=0;fire=null;fireT=0;P.Speed=0;P.IsGrounded=true;P.Attack=false;if(jt){clearTimeout(jt);jt=null}
+    g("fm-sp").value=0;g("fm-spo").textContent="0.0";g("fm-gr").checked=true;ex.checked=false;logA.length=0;g("fm-lg").innerHTML="";setSel(sel);say("Machine reset to Idle")};
+
+  function paint(dt){
+    const nrm=norm(),cs=cands(),stateEdge=new Set(cs.filter(t=>ready(t)==="wait").map(t=>t.id));
+    m.querySelectorAll(".ng").forEach(n=>n.classList.toggle("on",n.dataset.n===st));
+    m.querySelectorAll("[data-pb]").forEach(b=>b.setAttribute("width",b.dataset.pb===st?(104*nrm).toFixed(1):0));
+    m.querySelectorAll(".ed").forEach(e=>{const id=e.dataset.e;e.classList.toggle("fire",fireT>0&&fire===id);e.classList.toggle("wait",stateEdge.has(id));e.classList.toggle("sel",sel==="t:"+id)});
+    m.querySelectorAll(".el").forEach(l=>{if(l.dataset.l==="i-r"||l.dataset.l==="r-i"){const b=TR.find(t=>t.id===l.dataset.l).lt+(ex.checked?" +exit":"");if(l.textContent!==b)l.textContent=b}});
+    g("fm-dot").classList.toggle("on",P.Attack);g("fm-dt").textContent=P.Attack?"set (waiting for a transition to use it)":"not set";
+    const s="Current state: "+nm(st)+"    Speed: "+P.Speed.toFixed(1)+"    IsGrounded: "+P.IsGrounded+"    Attack: "+(P.Attack?"set":"off");
+    if(s!==shown){shown=s;g("fm-now").textContent=s}
+    // preview
+    gx=(gx+P.Speed*dt*14)%16;
+    cx.fillStyle="#5ec8f2";cx.fillRect(0,0,80,48);
+    cx.fillStyle="#fff";cx.fillRect(10,8,16,4);cx.fillRect(14,5,8,3);cx.fillRect(52,14,16,4);cx.fillRect(56,11,8,3);
+    cx.fillStyle="#7a4a22";cx.fillRect(0,38,80,10);cx.fillStyle="#4caf50";cx.fillRect(0,38,80,3);
+    cx.fillStyle="#5d3a18";for(let x=-16;x<96;x+=16)cx.fillRect(Math.round(x-gx)+8,43,3,2);
+    hero(cx,34,st==="jump"?14:24,1,st,fr,nrm);
+  }
+  function tick(ts){
+    if(!m.isConnected)return;
+    const dt=lastTs?Math.min(.05,(ts-lastTs)/1000):.016;lastTs=ts;fr++;tin+=dt;if(fireT>0)fireT-=dt;
+    const c=cands();for(let i=0;i<c.length;i++){if(ready(c[i])==="yes"){go(c[i]);break}}
+    paint(dt);requestAnimationFrame(tick);
+  }
+  setSel("s:idle");requestAnimationFrame(tick);
+};
+
 /* ===== 10. BOOT ===== */
 function boot(){
   try{const s=JSON.parse(load("Data")||"null");if(s&&s.data&&s.v<=CFG.version)Object.keys(s.data).forEach(k=>{if(okKey(k)&&typeof s.data[k]==="string")data[k]=s.data[k]})}catch(e){}
@@ -762,15 +1338,17 @@ const NEW=[
 "Moving platform added over a new pit. Untick the parent option, stand on the platform, and see what changes.",
 "Lives added: three hearts top-right. Falling in the pit or running out of health costs a life.",
 "Animator added: the player now has Idle, Run and Jump animations. The Animator state shows below.",
+"Enemy AI added: the enemy walks between numbered waypoints and waits at each one. Use the sliders to change the wait time and speed.",
 "Scene management added: Start, Win and Lose screens. Collect coins and reach the flag on the right to win."];
 class HealthSystem{constructor(m){this.max=m;this.cur=m}takeDamage(a){this.cur=Math.max(0,this.cur-a)}heal(a){this.cur=Math.min(this.max,this.cur+a)}isDead(){return this.cur<=0}pct(){return this.cur/this.max}}
 let L=0,F={},G,keys={left:0,right:0,run:0},jq=false,paused=false,t=0,show=false,parent=true,lastRO="";
+let WP=[150,205,260],WAIT=1,SPD=.8;
 const tile=(c,r)=>(c<0||c>=20||r<0||r>10)?false:(r===10&&!F.pit)?true:MAP[r][c]==="#";
 function hit(x,y){const c0=Math.floor(x/T),c1=Math.floor((x+PW-.01)/T),r0=Math.floor(y/T),r1=Math.floor((y+PH-.01)/T);for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++)if(tile(c,r))return{c,r};return null}
 const ov=(ax,ay,aw,ah,bx,by,bw,bh)=>ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;
 function reset(){G={scene:F.scenes?"start":"play",x:16,y:146,vx:0,vy:0,pb:160,dir:0,onG:true,jumps:0,face:1,coins:0,lives:3,hp:new HealthSystem(100),inv:0,riding:false,st:"Idle",
  cs:[[72,112],[96,112],[168,80],[184,80],[224,112],[240,112],[130,146]].map(c=>({x:c[0],y:c[1],on:true})),
- en:{x:200,y:148,d:-1,alive:true,hp:new HealthSystem(30)},pl:{x:40,d:1}}}
+ en:{x:200,y:148,d:-1,alive:true,hp:new HealthSystem(30),wi:1,wd:1,wait:0},pl:{x:40,d:1}}}
 function respawn(){G.x=16;G.y=146;G.vx=0;G.vy=0;G.hp=new HealthSystem(100);G.inv=60}
 function die(){
   if(F.lives){G.lives--;if(G.lives<=0){if(F.scenes){G.scene="lose";return}G.lives=3}}
@@ -797,7 +1375,11 @@ function step(){
   G.st=!G.onG?"Jump":Math.abs(G.vx)>.1?"Run":"Idle";
   if(F.coin)G.cs.forEach(c=>{if(c.on&&ov(G.x,G.y,PW,PH,c.x-4,c.y-4,8,8)){c.on=false;G.coins++}});
   if(F.enemy&&G.en.alive){
-    const e=G.en;e.x+=.5*e.d;if(e.x<150)e.d=1;if(e.x>260)e.d=-1;
+    const e=G.en;
+    if(F.ai){if(e.wait>0)e.wait--;else{const tx=WP[e.wi],dx=tx-e.x;
+      if(Math.abs(dx)<=SPD){e.x=tx;e.wait=Math.round(WAIT*60);if(e.wi+e.wd<0||e.wi+e.wd>=WP.length)e.wd=-e.wd;e.wi+=e.wd}
+      else{e.d=Math.sign(dx);e.x+=e.d*SPD}}}
+    else{e.x+=.5*e.d;if(e.x<150)e.d=1;if(e.x>260)e.d=-1}
     if(ov(G.x,G.y,PW,PH,e.x,e.y,12,12)){
       if(G.vy>0&&G.pb<=e.y+4){e.hp.takeDamage(30);if(e.hp.isDead())e.alive=false;G.vy=-4}
       else if(G.inv<=0){G.hp.takeDamage(25);G.inv=60;G.vy=-3;if(G.hp.isDead())return die()}
@@ -848,6 +1430,8 @@ function draw(){
     if(F.enemy&&G.en.alive){cx.strokeStyle="#ff2e88";cx.strokeRect(G.en.x+.5,G.en.y+.5,11,11)}
   }
   cx.font="8px monospace";cx.textBaseline="alphabetic";
+  if(F.ai){WP.forEach((x,i)=>{cx.fillStyle=i===G.en.wi?"#ffc83d":"#ff2e88";cx.fillRect(x+3,156,6,4);txt(String(i+1),x+4,153,"#fff")});
+    if(G.en.alive&&G.en.wait>0)txt("...",G.en.x+1,G.en.y-2,"#ffc83d")}
   txt("Coins: "+G.coins,4,10);
   if(F.enemy){cx.fillStyle="#000";cx.fillRect(3,14,42,6);cx.fillStyle="#333";cx.fillRect(4,15,40,4);cx.fillStyle=G.hp.pct()>.4?"#b6ff3b":"#ff2e88";cx.fillRect(4,15,Math.round(40*G.hp.pct()),4)}
   if(F.lives){const P=["0110110","1111111","1111111","0111110","0011100","0001000"];for(let i=0;i<3;i++){cx.fillStyle=i<G.lives?"#ff2e88":"#3a2a3a";const ox=W-34+i*10;P.forEach((row,ry)=>{for(let rx=0;rx<7;rx++)if(row[rx]==="1")cx.fillRect(ox+rx,4+ry,1,1)})}}
@@ -866,14 +1450,15 @@ function ro(){
   if(L>=5)s+="  parent="+(G.riding&&parent?"MovingPlatform":"none");
   if(L>=6)s+="  lives="+G.lives;
   if(L>=7)s+="  Animator: "+G.st;
-  if(L>=8)s+="  scene="+G.scene;
+  if(L>=8)s+="  enemy="+(G.en.wait>0?"Waiting "+(G.en.wait/60).toFixed(1)+"s":"Moving to waypoint "+(G.en.wi+1));
+  if(L>=9)s+="  scene="+G.scene;
   if(s!==lastRO){lastRO=s;$("dv").textContent=s}
 }
 function setL(i){
-  L=i>=9?8:i;
-  F={move:L>=1,coin:L>=2,tiles:L>=3,enemy:L>=4,plat:L>=5,pit:L>=5,lives:L>=6,anim:L>=7,scenes:L>=8};
+  L=i>=10?9:i;
+  F={move:L>=1,coin:L>=2,tiles:L>=3,enemy:L>=4,plat:L>=5,pit:L>=5,lives:L>=6,anim:L>=7,ai:L>=8,scenes:L>=9};
   $("dn").textContent="New in this step: "+NEW[L]+" (The preview restarts on each step.)";
-  $("dpw").hidden=!F.plat;$("dcw").hidden=L<1;
+  $("dpw").hidden=!F.plat;$("daw").hidden=L<8;$("dcw").hidden=L<1;
   reset();lastRO="";
 }
 window.demoSet=setL;
@@ -899,6 +1484,8 @@ $("drs").onclick=()=>{reset();if(F.scenes)G.scene="play";lastRO=""};
 $("dps").onclick=function(){paused=!paused;this.setAttribute("aria-pressed",paused);this.querySelector("span").textContent=paused?"Resume":"Pause"};
 $("dc").onchange=function(){show=this.checked};
 $("dp").onchange=function(){parent=this.checked};
+$("dww").oninput=function(){WAIT=+this.value;$("dwo").textContent=WAIT+"s"};
+$("dws").oninput=function(){SPD=+this.value;$("dso").textContent=SPD};
 let last=0,acc=0;
 function loop(ts){
   if(!last)last=ts;acc+=Math.min(ts-last,100);last=ts;

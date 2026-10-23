@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- PIXELAGENT WEB APP TEMPLATE v1.1 (condensed comments). Unity 2D Platformer lesson.
+     Edit CFG, APP_TABS and CODE only. Keep every [MUST] feature: a11y toolbar, Reflect tab, voice, exports, modal. -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unity 2D Platformer · C# Lesson</title>
+<style>
+/* Contrast vs --card: NIGHT tx 13.3 mu 6.9 cy 11.1 li 14.1 am 11.1 pk 4.9 (dark text) | DAY tx 17.9 mu 7.6 cy 5.4 li 5.0 am 5.0 pk 6.0 | CONTRAST tx 21 */
+:root{--bg:#0B0F1A;--card:#151B2E;--bd:#2c3552;--cy:#00E5FF;--pk:#FF2E88;--onpk:#0B0F1A;--li:#B6FF3B;--am:#FFC83D;--mu:#9AA4BF;--tx:#DDE3F2;--hd:#fff;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);font-size:100%}
+:root[data-theme=day]{--bg:#f8fafc;--card:#fff;--bd:#94a3b8;--cy:#0e7490;--pk:#be185d;--onpk:#fff;--li:#4d7c0f;--am:#b45309;--mu:#475569;--tx:#0f172a;--hd:#0f172a;color-scheme:light}
+:root[data-theme=contrast]{--bg:#000;--card:#000;--bd:#ff0;--cy:#ff0;--pk:#f6c;--onpk:#000;--li:#0f6;--am:#ff0;--mu:#ff0;--tx:#fff;--hd:#fff;color-scheme:dark}
+:root[data-theme=contrast] .panel,:root[data-theme=contrast] textarea,:root[data-theme=contrast] input[type=text],:root[data-theme=contrast] select,:root[data-theme=contrast] .dlg,:root[data-theme=contrast] .rc,:root[data-theme=contrast] pre,:root[data-theme=contrast] .task{border-width:2px}
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 4rem)}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--tx);font:1rem/1.45 Calibri,Arial,sans-serif;transition:background-color .2s,color .2s}
+p,span,h1,h2,h3,div,label,button,small,li{overflow-wrap:anywhere}
+body.dys,body.dys *{font-family:"OpenDyslexic","Open Dyslexic","Comic Sans MS","Comic Neue",Verdana,sans-serif!important}
+body.dys{letter-spacing:.03em;word-spacing:.08em;line-height:1.7}
+:focus-visible{outline:3px solid var(--am)!important;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:var(--cy);color:var(--bg);padding:10px 16px;z-index:100;font-weight:700}
+.skip:focus{left:8px;top:8px}
+.a11y{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:2px solid var(--bd);padding:8px 14px}
+.a11y-in{max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.a11y-l{font-size:.75rem;letter-spacing:2px;font-weight:700;color:var(--mu);text-transform:uppercase}
+.grp{display:flex;align-items:center;gap:4px;background:var(--bg);border:1.5px solid var(--bd);border-radius:8px;padding:3px}
+.a11y button{background:transparent;color:var(--tx);border:1.5px solid transparent;padding:2px 10px;min-height:2rem;font-size:.8125rem}
+.a11y button.on{background:var(--cy);color:var(--bg);border-color:var(--cy)}
+.a11y .solo{background:var(--bg);border:1.5px solid var(--bd)}
+#fsd{min-width:3.2em;text-align:center;font-size:.75rem;font-weight:700;color:var(--mu)}
+header,main{max-width:1000px;margin:0 auto;padding:0 20px}header{padding-top:22px}main{padding-bottom:40px}main:focus{outline:none}
+.tag{display:inline-block;background:var(--li);color:var(--bg);font-weight:700;letter-spacing:2px;font-size:.75rem;padding:4px 12px}
+h1{font:700 1.875rem "Trebuchet MS",Arial,sans-serif;color:var(--hd);margin:10px 0 2px}.sub{color:var(--mu);font-style:italic;margin:0 0 10px}
+button{font:700 .9375rem "Trebuchet MS",Arial,sans-serif;border:0;border-radius:6px;padding:9px 16px;min-height:2.75rem;cursor:pointer;background:var(--cy);color:var(--bg)}
+button.alt{background:transparent;color:var(--cy);border:1.5px solid var(--cy)}button:hover:not(:disabled){filter:brightness(1.12)}
+button:disabled{opacity:.5;cursor:not-allowed}
+select{background:var(--card);color:var(--hd);border:1.5px solid var(--bd);border-radius:6px;padding:7px 9px;min-height:2.75rem;font:inherit;max-width:100%}
+.tts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 6px;padding:8px 10px;background:var(--card);border:1.5px solid var(--bd);border-radius:8px}
+.tts button{background:transparent;color:var(--cy);border:1.5px solid var(--cy)}.tts label{color:var(--mu);font-size:.875rem;font-weight:700}
+[role=tablist]{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+[role=tab]{background:var(--card);color:var(--mu);border:1.5px solid var(--bd);display:flex;gap:8px;align-items:center;font-size:.8125rem}
+[role=tab][aria-selected=true]{background:var(--cy);color:var(--bg);border-color:var(--cy)}
+.panel{background:var(--card);border:1.5px solid var(--bd);border-left:6px solid var(--li);border-radius:10px;padding:16px 18px}.panel:focus{outline:none}
+.panel h2{font:700 1.375rem "Trebuchet MS",Arial,sans-serif;color:var(--hd);margin:0 0 4px}
+.panel h3{font:700 1rem "Trebuchet MS",Arial,sans-serif;color:var(--cy);margin:14px 0 4px}
+label.f{display:block;font-weight:700;margin:12px 0 2px;color:var(--hd)}.hint{display:block;color:var(--mu);font-size:.875rem;margin-bottom:3px;font-weight:400}
+textarea,input[type=text]{width:100%;background:var(--bg);color:var(--hd);border:1.5px solid var(--bd);border-radius:6px;padding:9px 11px;min-height:2.75rem;font:inherit}
+textarea{min-height:4.5em;resize:vertical}
+pre{background:var(--bg);color:var(--tx);border:1.5px solid var(--bd);border-radius:8px;padding:12px;margin:6px 0;overflow-x:auto;font:.8125rem/1.45 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+body.dys pre,body.dys pre *{font-family:ui-monospace,Menlo,Consolas,monospace!important;letter-spacing:0;word-spacing:0}
+.cts{display:flex;gap:6px;flex-wrap:wrap}.cts button{min-height:2.5rem;padding:6px 12px;font-size:.8125rem}.cts button[aria-pressed=true]{background:var(--cy);color:var(--bg)}
+.task{border:1.5px dashed var(--am);border-radius:8px;padding:8px 14px 10px;margin:14px 0 4px}.task b{color:var(--am)}
+.task label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;min-height:2.75rem;cursor:pointer}.task input{width:1.4rem;height:1.4rem;flex:0 0 auto;margin-top:.1rem}
+.panel code{background:var(--bg);border:1px solid var(--bd);border-radius:4px;padding:0 4px;font-size:.9em}
+.ig{display:flex;align-items:flex-start;gap:10px}
+.ig>textarea,.ig>input{flex:1 1 auto;width:auto;min-width:0}.ig>textarea{max-height:12rem}
+.ig>.mic{margin:0;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 12px;font-size:.8125rem;min-height:2.75rem;max-height:3.5rem;border-radius:6px}
+.ref{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:10px}
+.rc{--c:var(--cy);background:var(--bg);border:1.5px solid var(--c);border-radius:8px;padding:2px 14px 14px}.rc.sw{--c:var(--pk)}.rc.nw{--c:var(--li)}
+.rc label.f{color:var(--c);font:700 1.125rem "Trebuchet MS",Arial,sans-serif;margin-top:12px}.rc .hint{font:400 .875rem Calibri,Arial,sans-serif;color:var(--mu)}
+.cite{margin:12px 0 0;font-size:.8125rem}
+.sel{margin:2px 0 8px}.sel label{display:block;font-size:.875rem;font-weight:700;color:var(--mu);margin-bottom:2px}.sel select{width:100%}
+.rc select{border-color:var(--c)}
+.mic[aria-pressed=true]{background:var(--pk);color:var(--onpk);border-color:var(--pk)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pnav{justify-content:space-between;margin-top:18px}.pnav button{flex:1 1 10rem}
+#live{min-height:1.5em;color:var(--li);font-weight:700;margin-top:10px}
+i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.svg-inline--fa,i[data-fb]{margin-right:.3em}
+@media (max-width:600px){.a11y{padding:8px}.a11y-in{flex-wrap:nowrap;gap:4px;overflow-x:auto}.a11y-l,.a11y-text{display:none}.a11y .grp,.a11y .solo{flex-shrink:0}.a11y .grp{gap:2px;padding:2px}.a11y button{min-width:2rem;padding:2px 6px}.a11y .svg-inline--fa,.a11y i[data-fb]{margin-right:0}#fsd{min-width:3em}}
+.footer-menu{flex-wrap:nowrap}.footer-menu button{min-width:2.75rem;padding:9px 12px}.footer-menu .svg-inline--fa,.footer-menu i[data-fb]{margin-right:0}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}.ov[hidden]{display:none}
+.dlg{background:var(--card);color:var(--tx);border:2px solid var(--bd);border-top:6px solid var(--li);border-radius:12px;width:100%;max-width:480px;max-height:100%;overflow:auto;padding:18px}
+.dlg h2{font:700 1.375rem "Trebuchet MS",Arial,sans-serif;color:var(--hd);margin:0 0 4px}.dlg h3{font:700 1rem "Trebuchet MS",Arial,sans-serif;color:var(--cy);margin:14px 0 6px}.dlg .hint{margin:0 0 12px}
+.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:0 0 8px;padding:10px 14px}.opt small{display:block;font-weight:400;color:var(--mu);font-size:.8125rem}.dlg .close{margin-top:6px;width:100%}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media print{.a11y,.skip,.tts,#tabs,.row,.mic,#dh,#live,button,.pnav,.sel{display:none!important}body{background:#fff;color:#000}.panel{border-color:#000}textarea,input,pre{border-color:#000;color:#000;background:#fff}}
+.panel>.ref{grid-template-columns:1fr}
+#demo{margin-bottom:12px;border-left-color:var(--cy)}
+#demo h2{margin-bottom:2px}
+#gc{display:block;width:100%;max-width:640px;height:auto;aspect-ratio:20/11;image-rendering:pixelated;background:#000;border:2px solid var(--bd);border-radius:6px;margin:8px 0 4px}
+.drow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.drow button{padding:6px 14px}.drow button[aria-pressed=true]{background:var(--cy);color:var(--bg)}
+.drow label{display:flex;align-items:center;gap:8px;min-height:2.75rem;font-weight:700;cursor:pointer}.drow input{width:1.4rem;height:1.4rem}
+#dv{font-size:.8125rem;color:var(--tx)}
+[hidden]{display:none!important}
+.an-w{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.an-g{flex:1 1 280px;max-width:420px;border:1.5px solid var(--bd);border-radius:8px;background:var(--bg)}
+.an-n{fill:var(--card);stroke:var(--bd);stroke-width:1.5}.an-n.on{fill:var(--cy);stroke:var(--cy)}.an-n.any{stroke-dasharray:3 2}
+.an-t{fill:var(--tx);font:700 9px Calibri,Arial,sans-serif}.an-n.on+.an-t{fill:var(--bg)}
+.an-l{stroke:var(--mu);stroke-width:1.5}.an-m{fill:var(--mu)}
+.an-x{fill:var(--tx);font:8px Calibri,Arial,sans-serif;paint-order:stroke;stroke:var(--card);stroke-width:3px}
+#al-sp{width:96px;height:96px;image-rendering:pixelated;border:2px solid var(--bd);border-radius:6px;background:#5ec8f2}
+#al ul{padding-left:20px}#al li{margin:4px 0}
+@media print{#demo{display:none!important}}
+
+</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" crossorigin="anonymous"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="a11y" id="a11y" role="toolbar" aria-label="Accessibility options"><div class="a11y-in">
+  <span class="a11y-l">Accessibility</span>
+  <div class="grp" role="group" aria-label="Colour theme">
+    <button type="button" id="th-day" aria-label="Day theme" title="Day theme" aria-pressed="false"><i class="fa-solid fa-sun" data-fb="☀" aria-hidden="true"></i><span class="a11y-text"> Day</span></button>
+    <button type="button" id="th-night" aria-label="Night theme" title="Night theme" aria-pressed="false"><i class="fa-solid fa-moon" data-fb="☾" aria-hidden="true"></i><span class="a11y-text"> Night</span></button>
+    <button type="button" id="th-contrast" aria-label="Contrast theme" title="Contrast theme" aria-pressed="false"><i class="fa-solid fa-circle-half-stroke" data-fb="◐" aria-hidden="true"></i><span class="a11y-text"> Contrast</span></button>
+  </div>
+  <div class="grp" role="group" aria-label="Text size">
+    <button type="button" id="fm" aria-label="Decrease text size">A-</button><span id="fsd" aria-live="polite">100%</span><button type="button" id="fp" aria-label="Increase text size">A+</button>
+  </div>
+  <button type="button" class="solo" id="dys" aria-label="Dyslexic font" title="Dyslexic font" aria-pressed="false"><i class="fa-solid fa-font" data-fb="Aa" aria-hidden="true"></i><span class="a11y-text"> Dyslexic font</span></button>
+</div></div>
+<header><span class="tag" id="kick"></span><h1 id="ttl"></h1><p class="sub" id="sub"></p></header>
+<main id="main" tabindex="-1">
+  <div class="tts" role="group" aria-label="Read aloud">
+    <button type="button" id="rd"><i class="fa-solid fa-volume-high" data-fb="🔊" aria-hidden="true"></i> Read this card</button>
+    <button type="button" id="ps"><i class="fa-solid fa-pause" data-fb="⏸" aria-hidden="true"></i> <span id="pst">Pause</span></button>
+    <button type="button" id="st"><i class="fa-solid fa-stop" data-fb="⏹" aria-hidden="true"></i> Stop</button>
+    <label for="sp">Speed</label>
+    <select id="sp"><option value="0.8">0.8x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option></select>
+  </div>
+  <p class="hint" id="dh"></p>
+  <div id="tabs" role="tablist" aria-label="Steps"></div>
+  <section id="demo" class="panel" aria-labelledby="demo-h">
+    <h2 id="demo-h">Game preview</h2>
+    <p class="hint" id="dn"></p>
+    <canvas id="gc" tabindex="0" role="img" aria-label="Playable pixel platformer preview. Click it, then use arrow keys or A and D to move, Space or W to jump, Shift to run. The variables line below the game shows the same state as text."></canvas>
+    <p class="hint">Click the game, then arrows or A/D to move, Space or W to jump (jump again in the air), hold Shift to run. On a touch screen use the buttons.</p>
+    <div class="drow" role="group" aria-label="Game controls">
+      <button type="button" class="alt" data-gk="left"><span aria-hidden="true">&#9664;</span> Left</button>
+      <button type="button" class="alt" data-gk="right">Right <span aria-hidden="true">&#9654;</span></button>
+      <button type="button" class="alt" data-gk="jump">Jump</button>
+      <button type="button" class="alt" data-gk="run" aria-pressed="false">Run</button>
+      <button type="button" class="alt" id="drs">Restart</button>
+      <button type="button" class="alt" id="dps" aria-pressed="false"><span>Pause</span></button>
+    </div>
+    <div class="drow">
+      <label id="dcw" hidden><input type="checkbox" id="dc"> Show colliders</label>
+      <label id="dpw" hidden><input type="checkbox" id="dp" checked> Parent player to platform (SetParent)</label>
+    </div>
+    <div class="drow" id="dtw" hidden>
+      <label><input type="checkbox" id="dpm"> Paint tiles</label>
+      <label>Layer <select id="dl"><option value="g">Ground (has collider)</option><option value="d">Decoration (no collider)</option></select></label>
+      <label>Tile <select id="dt"></select></label>
+      <label><input type="checkbox" id="dsg" checked> Show Ground</label>
+      <label><input type="checkbox" id="dsd" checked> Show Decoration</label>
+      <button type="button" class="alt" id="dmr">Reset map</button>
+    </div>
+    <div class="drow" id="daw" hidden>
+      <label>Wait at each waypoint <input type="range" id="dww" min="0" max="3" step="0.5" value="1"> <output id="dwo">1s</output></label>
+      <label>Enemy speed <input type="range" id="dws" min="0.4" max="2" step="0.1" value="0.8"> <output id="dso">0.8</output></label>
+    </div>
+    <p class="hint">Variables in your scripts right now:</p><code id="dv"></code>
+  </section>
+  <section id="panel" class="panel" role="tabpanel" tabindex="-1"></section>
+  <div class="row footer-menu" role="group" aria-label="Work actions">
+    <button type="button" class="alt" id="xopen" aria-label="Export…" title="Export…" aria-haspopup="dialog"><i class="fa-solid fa-file-export" data-fb="⇪" aria-hidden="true"></i></button>
+    <button type="button" class="alt" id="xcp" aria-label="Copy text" title="Copy text"><i class="fa-solid fa-copy" data-fb="⎘" aria-hidden="true"></i></button>
+    <button type="button" class="alt" id="xpr" aria-label="Print" title="Print"><i class="fa-solid fa-print" data-fb="🖶" aria-hidden="true"></i></button>
+    <button type="button" class="alt" id="clr" aria-label="Clear everything" title="Clear everything"><i class="fa-solid fa-eraser" data-fb="✖" aria-hidden="true"></i></button>
+  </div>
+  <div id="live" role="status" aria-live="polite"></div>
+</main>
+<div id="mdl" class="ov" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="mt" aria-describedby="mc">
+  <h2 id="mt">Export</h2><p class="hint" id="mc"></p>
+  <div id="mo"></div>
+  <h3>Move to another device</h3>
+  <button type="button" class="alt opt" id="bks"><i class="fa-solid fa-download" data-fb="⬇" aria-hidden="true"></i><span>Save backup (.json)<small>Everything on this device</small></span></button>
+  <button type="button" class="alt opt" id="bki"><i class="fa-solid fa-upload" data-fb="⬆" aria-hidden="true"></i><span>Import a backup…<small>Replaces what is here</small></span></button>
+  <button type="button" class="alt close" id="xcl">Close</button>
+</div></div>
+<input type="file" id="bkf" accept=".json,application/json" hidden>
+
+<script>
+/* ===== 1. CONFIG + CONTENT ===== */
+const CFG={pfx:"unityplat",file:"unity-platformer-lesson",title:"Unity 2D Platformer: C# Coding",kicker:"CODING · UNITY · 2D PLATFORMER",sub:"Build player movement, health, lives, animation and scenes. Tick the tasks, then write your notes.",version:1};
+
+/* Code snippets (shown in <pre>, escaped by esc()). tabs => switchable listings. */
+const CODE={
+patrol:`using UnityEngine;
+using System.Collections;
+
+public class EnemyPatrol : MonoBehaviour
+{
+    public Transform[] waypoints;   // drag empty objects in, in order
+    public float speed = 2f;
+    public float waitTime = 1f;     // pause at each waypoint
+
+    int index = 0;
+    int direction = 1;              // 1 = forward, -1 = back
+    bool waiting;
+    SpriteRenderer sr;
+
+    void Awake() { sr = GetComponent<SpriteRenderer>(); }
+
+    void Update()
+    {
+        if (waiting) return;
+
+        Vector2 target = new Vector2(waypoints[index].position.x, transform.position.y);
+        sr.flipX = target.x < transform.position.x;   // face the way we walk
+        transform.position = Vector2.MoveTowards(
+            transform.position, target, speed * Time.deltaTime);
+
+        if (Mathf.Abs(transform.position.x - target.x) < 0.05f)
+            StartCoroutine(WaitThenNext());
+    }
+
+    IEnumerator WaitThenNext()
+    {
+        waiting = true;
+        yield return new WaitForSeconds(waitTime);
+
+        if (index + direction < 0 || index + direction >= waypoints.Length)
+            direction = -direction;   // turn around at either end
+        index += direction;
+        waiting = false;
+    }
+}`,
+pat2:`// Timer version: no coroutine needed
+float waitTimer;
+
+void Update()
+{
+    if (waitTimer > 0)            // still pausing
+    {
+        waitTimer -= Time.deltaTime;
+        return;
+    }
+
+    // ...move towards waypoints[index] as before...
+
+    if (arrived)
+    {
+        waitTimer = waitTime;     // start the pause
+        NextWaypoint();           // same ping-pong code as above
+    }
+}`,
+gm:`using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager Instance;   // singleton
+    public int coins;
+    public int lives = 3;
+    public TMP_Text coinText;
+    public Transform spawnPoint;
+
+    void Awake() { Instance = this; }
+    void Start() { coinText.text = "Coins: " + coins; }
+
+    public void AddCoin(int amount = 1)
+    {
+        coins += amount;
+        coinText.text = "Coins: " + coins;
+    }
+}`,
+old:`using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float walkSpeed = 5f, runSpeed = 8f, jumpForce = 10f;
+    public Rigidbody2D rb;
+    public SpriteRenderer sr;
+    public Transform groundCheck;
+    public float checkRadius = 0.2f;
+    public LayerMask groundLayer;
+
+    float h;
+    bool grounded, canDoubleJump;
+
+    void Update()
+    {
+        h = Input.GetAxisRaw("Horizontal");
+        if (h != 0) sr.flipX = h < 0;
+        grounded = Physics2D.OverlapCircle(
+            groundCheck.position, checkRadius, groundLayer);
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (grounded) { Jump(); canDoubleJump = true; }
+            else if (canDoubleJump) { Jump(); canDoubleJump = false; }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        float speed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
+        rb.velocity = new Vector2(h * speed, rb.velocity.y);
+    }
+
+    void Jump() { rb.velocity = new Vector2(rb.velocity.x, jumpForce); }
+}`,
+neu:`using UnityEngine;
+using UnityEngine.InputSystem;   // Input System package
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float walkSpeed = 5f, runSpeed = 8f, jumpForce = 10f;
+    public Rigidbody2D rb;
+    public SpriteRenderer sr;
+    public Transform groundCheck;
+    public float checkRadius = 0.2f;
+    public LayerMask groundLayer;
+    // Drag actions in from your Input Actions asset
+    public InputActionReference moveAction, jumpAction, runAction;
+
+    float h;
+    bool grounded, canDoubleJump;
+
+    void OnEnable()
+    {
+        moveAction.action.Enable();
+        runAction.action.Enable();
+        jumpAction.action.Enable();
+        jumpAction.action.performed += OnJump;
+    }
+    void OnDisable() { jumpAction.action.performed -= OnJump; }
+
+    void Update()
+    {
+        h = moveAction.action.ReadValue<Vector2>().x;
+        if (h != 0) sr.flipX = h < 0;
+        grounded = Physics2D.OverlapCircle(
+            groundCheck.position, checkRadius, groundLayer);
+    }
+
+    void OnJump(InputAction.CallbackContext ctx)
+    {
+        if (grounded) { Jump(); canDoubleJump = true; }
+        else if (canDoubleJump) { Jump(); canDoubleJump = false; }
+    }
+
+    void FixedUpdate()
+    {
+        float speed = runAction.action.IsPressed() ? runSpeed : walkSpeed;
+        rb.velocity = new Vector2(h * speed, rb.velocity.y);
+    }
+
+    void Jump() { rb.velocity = new Vector2(rb.velocity.x, jumpForce); }
+}`,
+coin:`using UnityEngine;
+
+public class Coin : MonoBehaviour
+{
+    public int value = 1;
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            GameManager.Instance.AddCoin(value);
+            Destroy(gameObject);
+        }
+    }
+}`,
+hs:`public class HealthSystem
+{
+    int maxHealth;
+    int currentHealth;
+
+    public HealthSystem(int max)          // constructor
+    {
+        maxHealth = max;
+        currentHealth = max;
+    }
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth < 0) currentHealth = 0;
+    }
+
+    public void Heal(int amount)
+    {
+        currentHealth += amount;
+        if (currentHealth > maxHealth) currentHealth = maxHealth;
+    }
+
+    public int GetHealth() { return currentHealth; }
+    public bool IsDead() { return currentHealth <= 0; }
+    public float GetHealthPercent() { return (float)currentHealth / maxHealth; }
+}`,
+en:`using UnityEngine;
+
+public class Enemy : MonoBehaviour
+{
+    public int maxHealth = 30;
+    HealthSystem health;
+
+    void Awake() { health = new HealthSystem(maxHealth); }
+
+    public void TakeHit(int dmg)
+    {
+        health.TakeDamage(dmg);
+        if (health.IsDead()) Destroy(gameObject);
+    }
+}
+
+// In PlayerMovement.cs
+public int maxHealth = 100;
+HealthSystem health;
+void Awake() { health = new HealthSystem(maxHealth); }
+
+void OnCollisionEnter2D(Collision2D col)
+{
+    if (col.gameObject.CompareTag("Enemy"))
+    {
+        health.TakeDamage(25);
+        if (health.IsDead())
+        {
+            health = new HealthSystem(maxHealth);
+            GameManager.Instance.LoseLife();
+        }
+    }
+}`,
+plat:`using UnityEngine;
+
+public class MovingPlatform : MonoBehaviour
+{
+    public Transform pointA, pointB;   // NOT children of the platform
+    public float speed = 2f;
+    Vector3 target;
+
+    void Start() { target = pointB.position; }
+
+    void Update()
+    {
+        transform.position = Vector3.MoveTowards(
+            transform.position, target, speed * Time.deltaTime);
+        if (Vector3.Distance(transform.position, target) < 0.05f)
+            target = (target == pointA.position) ? pointB.position : pointA.position;
+    }
+
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+            col.transform.SetParent(transform);   // ride along
+    }
+
+    void OnCollisionExit2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+            col.transform.SetParent(null);        // let go
+    }
+}`,
+lives:`// Add to GameManager.cs
+public GameObject[] hearts;   // drag the 3 heart images in
+
+public void LoseLife()
+{
+    lives--;
+    UpdateLivesUI();
+    if (lives <= 0)
+        SceneManager.LoadScene("LoseScreen");
+    else
+        FindObjectOfType<PlayerMovement>().transform.position =
+            spawnPoint.position;   // respawn
+}
+
+void UpdateLivesUI()
+{
+    for (int i = 0; i < hearts.Length; i++)
+        hearts[i].SetActive(i < lives);
+}`,
+anim:`// Add to PlayerMovement.cs
+public Animator anim;
+
+void Update()
+{
+    // ...existing input code...
+    anim.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+    anim.SetBool("IsGrounded", grounded);
+}`,
+sl:`using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class SceneLoader : MonoBehaviour
+{
+    public void LoadByName(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+    public void Quit() { Application.Quit(); }
+}`,
+win:`// On the Finish flag (trigger collider)
+void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.CompareTag("Player"))
+        SceneManager.LoadScene("WinScreen");
+}`};
+
+/* Each tab: title, icon, fb, intro (plain text, read aloud), body (trusted HTML), code [{h, c|tabs}], task [], fields [] */
+const APP_TABS=[
+{title:"Setup",icon:"gears",fb:"⚙",intro:"Create the project and a GameManager that holds the score, lives and scene flow.",
+ body:`<ul><li>New <b>2D</b> project. Make a <code>Player</code> (Rigidbody2D + CapsuleCollider2D, tag <b>Player</b>) and a <b>Ground</b> layer.</li><li>Add an empty object called <code>GameManager</code>. It uses a <b>singleton</b> (<code>static Instance</code>) so any script can call <code>GameManager.Instance</code>.</li><li><code>public</code> fields show in the Inspector. Everything else stays private.</li></ul>`,
+ code:[{h:"GameManager.cs",c:"gm"}],
+ task:["Create the GameManager object and script","Add a TextMeshPro coin counter to a Canvas","Drag the text into Coin Text in the Inspector"],
+ fields:[{k:"name",label:"Your name",hint:"Used as the title of your exported work."},{k:"s0",label:"Why use a GameManager?",hint:"In your own words. What does a singleton let other scripts do?",rows:3}]},
+{title:"Movement",icon:"person-running",fb:"🏃",intro:"Walk, run with Shift, jump and double jump. Learn both Unity input systems.",
+ body:`<p>Read input in <code>Update</code>, apply physics in <code>FixedUpdate</code>. A small circle under the feet (<code>groundCheck</code>) tells us if we are grounded.</p><ul><li><b>Old Input Manager:</b> <code>Input.GetAxisRaw</code>, <code>GetButtonDown</code>. Quick to learn.</li><li><b>New Input System:</b> actions and bindings, so keyboard, gamepad and touch share one setup. Create an Input Actions asset with Move (WASD and arrows), Jump (Space) and Run (Left Shift).</li><li>Switch under <b>Project Settings → Player → Active Input Handling</b>.</li><li>Unity 6 renamed <code>rb.velocity</code> to <code>rb.linearVelocity</code>.</li></ul>`,
+ code:[{h:"PlayerMovement.cs: choose an input system",tabs:[["Old Input Manager","old"],["New Input System","neu"]]}],
+ task:["Add a groundCheck child under the feet","Set the Ground layer on your platforms","Walk, run and jump using the old system","Rebuild it with the new Input System","Test the double jump: it must reset on landing"],
+ fields:[{k:"s1",label:"Old versus new input",hint:"Name one thing each system does well. Which would you choose for a game with a gamepad?",rows:4}]},
+{title:"Collecting",icon:"coins",fb:"🪙",intro:"Make coins that the player collects. Triggers detect overlap without blocking movement.",
+ body:`<p>Give the coin a <b>CircleCollider2D</b> and tick <b>Is Trigger</b>. The coin tells the GameManager, then removes itself.</p>`,
+ code:[{h:"Coin.cs",c:"coin"}],
+ task:["Create a coin prefab with a trigger collider","Place 10 coins around the level","Watch the counter go up"],
+ fields:[{k:"s2",label:"Trigger or collision?",hint:"When do you use OnTriggerEnter2D, and when OnCollisionEnter2D?",rows:3}]},
+{title:"Colliders & Tilemaps",icon:"border-all",fb:"▦",intro:"Learn the 2D collider types, then build a level with Tilemaps and a Rule Tile.",
+ body:`<h3>2D colliders</h3><ul><li><b>BoxCollider2D</b>: platforms, crates. <b>CircleCollider2D</b>: coins, balls. <b>CapsuleCollider2D</b>: characters, smooth over tile edges.</li><li><b>PolygonCollider2D</b> traces a sprite. <b>EdgeCollider2D</b> is a line, good for slopes.</li><li><b>Solid</b> colliders use <code>OnCollisionEnter2D</code>. <b>Triggers</b> use <code>OnTriggerEnter2D</code>. At least one object needs a <b>Rigidbody2D</b>.</li></ul><h3>Tilemaps</h3><ul><li><b>GameObject → 2D Object → Tilemap → Rectangular</b> makes a Grid with a Tilemap child.</li><li>Open <b>Window → 2D → Tile Palette</b> and drag sprites in to make tiles.</li><li>Add <b>Tilemap Collider 2D</b>, then <b>Composite Collider 2D</b> (tick <i>Used By Composite</i>, Rigidbody2D Static) to merge tiles into one shape.</li><li><b>Rule Tiles</b> pick the right sprite (corner, edge, centre) from neighbour rules.</li></ul><h3>Layers</h3><p>Use one Tilemap per job. <b>Ground</b> has a Tilemap Collider 2D. <b>Decoration</b> (flowers, bushes, signs) has none, so the player walks straight through it. <b>Order in Layer</b> decides which Tilemap draws on top.</p>`,
+ code:[],taskTitle:"Mini task: paint a level",
+ task:["Make a Tile Palette and paint a ground layer","Put platforms on their own Tilemap with a collider","Create a Rule Tile: centre, top edge, left and right corners","Paint with the Rule Tile and check the corners join up","Walk your player across it with no snagging on joins","In the game preview tick Paint tiles and paint a new platform on the Ground layer","Add flowers and bushes on the Decoration layer, then Show colliders: which layer has colliders?"],
+ fields:[{k:"s3",label:"What does a Rule Tile do?",hint:"Explain it to someone who has only painted tiles by hand.",rows:3}]},
+{title:"Health",icon:"heart-pulse",fb:"❤",intro:"Write health logic once in a HealthSystem class and reuse it for the player and enemies.",
+ body:`<p>Concepts: fields, a <b>constructor</b>, methods, and <b>encapsulation</b> (health is private and changed only through methods). Fix a bug here once and every user of the class benefits.</p>`,
+ code:[{h:"HealthSystem.cs",c:"hs"},{h:"Enemy.cs and Player damage",c:"en"}],
+ task:["Write HealthSystem and explain the constructor","Explain TakeDamage, Heal, GetHealth and IsDead","Give the Player and Enemy different max health","Challenge: add a health bar using GetHealthPercent()"],
+ fields:[{k:"s4",label:"Explain the HealthSystem methods",hint:"Constructor, TakeDamage, Heal, GetHealth, IsDead: one line each.",rows:6}]},
+{title:"Platforms",icon:"truck",fb:"🚚",intro:"Stop the player sliding off a moving platform by changing the player's parent.",
+ body:`<p>A moving platform carries its children. When the player lands, make them a child with <code>SetParent</code>. When they leave, set the parent back to null. Keep PointA and PointB <i>outside</i> the platform, and flip the sprite with <code>sr.flipX</code>, not scale, so a parent never distorts the player.</p>`,
+ code:[{h:"MovingPlatform.cs",c:"plat"}],
+ task:["Build a platform with a Box Collider and two empty point objects","Stand on it: you should ride along, not slide","Jump off and check the Hierarchy: no parent"],
+ fields:[{k:"s5",label:"Why does changing the parent work?",hint:"What does a child inherit from its parent?",rows:3}]},
+{title:"Lives & UI",icon:"heart",fb:"♥",intro:"Design the lives display in the Canvas first, then script it.",
+ body:`<p>Create a <b>Canvas</b> (Scale With Screen Size). Add a <b>Panel</b> anchored top-left with a <b>Horizontal Layout Group</b> and three heart <b>Images</b>. Each lost life hides one heart.</p>`,
+ code:[{h:"Lives code",c:"lives"}],
+ task:["Create the heart panel with anchors set to top-left","Fill the hearts array in the Inspector","Lose all lives: do the hearts vanish one at a time?","Extension: a fall zone trigger that calls LoseLife()"],
+ fields:[{k:"s6",label:"Describe your lives UI",hint:"Where is it, why, and how does the code update it?",rows:4}]},
+{title:"Animation",icon:"film",fb:"🎞",intro:"Use the Animator Controller to switch between Idle, Run and Jump.",
+ body:`<ol><li>Create clips: <b>Idle, Run, Jump</b>.</li><li>In the Animator add parameters <code>Speed</code> (float) and <code>IsGrounded</code> (bool).</li><li>Idle → Run when <code>Speed &gt; 0.1</code>. Run → Idle when <code>Speed &lt; 0.1</code>. Any State → Jump when <code>IsGrounded</code> is false.</li><li>Untick <b>Has Exit Time</b> so transitions react instantly.</li></ol><div id="al"></div>`,
+ code:[{h:"Drive the Animator from code",c:"anim"}],
+ task:["In the playground, add a Float Speed and a Bool IsGrounded parameter","Connect the states and pass Check my controller","Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check Has Exit Time is unticked on each","Add the code and watch the parameters at runtime"],
+ fields:[{k:"s7",label:"How does code control an animation?",hint:"What are parameters, and what are transitions?",rows:4}]},
+{title:"Enemy AI",icon:"route",fb:"➜",intro:"Teach the enemy to patrol between waypoints and pause at each one.",
+ body:`<p>Instead of bouncing between two fixed numbers, give the enemy a list of <b>waypoints</b> (empty GameObjects). It walks to waypoint 1, pauses, walks to the next, and turns around at the ends (ping-pong).</p><ul><li>Create empty objects <code>WP1</code>, <code>WP2</code>, <code>WP3</code> along a platform. Keep them <b>outside</b> the enemy so they do not move with it.</li><li><code>Vector2.MoveTowards</code> takes a fixed step each frame. <code>Time.deltaTime</code> keeps the speed the same on every computer.</li><li>A <b>coroutine</b> with <code>WaitForSeconds</code> pauses the enemy without freezing the game. A <code>waitTimer</code> counting down in <code>Update</code> does the same job.</li></ul><p>Try it in the preview: use the sliders to change the wait time and speed, and watch <code>enemy</code> in the variables line.</p>`,
+ code:[{h:"EnemyPatrol.cs",c:"patrol"},{h:"Alternative: a timer instead of a coroutine",c:"pat2"}],
+ task:["Create three waypoint objects along a platform","Add EnemyPatrol and drag the waypoints into the array in order","Set Wait Time to 2 and check the enemy pauses at every waypoint","Make the enemy turn around at both ends (ping-pong)","Challenge: add a 4th waypoint, then make the enemy chase the player when close"],
+ fields:[{k:"s9",label:"How does the pause work?",hint:"Explain what WaitForSeconds does, or how your timer counts down.",rows:3}]},
+{title:"Scenes",icon:"layer-group",fb:"▤",intro:"Add start, win and lose screens and move between them with SceneManager.",
+ body:`<p>Make scenes <b>Game</b>, <b>WinScreen</b>, <b>LoseScreen</b> and an optional <b>Start</b> menu. Add them all in <b>Build Settings</b>, otherwise <code>LoadScene</code> cannot find them. On each UI button set <b>OnClick()</b>, drag in the SceneLoader and pick <code>LoadByName</code>.</p>`,
+ code:[{h:"SceneLoader.cs",c:"sl"},{h:"Win trigger",c:"win"}],
+ task:["Create Start, Win and Lose scenes with a title and a button","Add every scene to Build Settings","Wire the Play Again and Quit buttons","Play through: start to win, then start to lose"],
+ fields:[{k:"s8",label:"Why add scenes to Build Settings?",hint:"What happens if you forget?",rows:3}]}
+];
+const REFLECT={title:"Reflect",icon:"comments",fb:"💬",reflect:true,
+  intro:"What? So What? Now What? Three questions, one next step. Write one to three sentences for each.",
+  cite:"Based on Borton, T. (1970) Reach, Touch and Teach; developed by Rolfe, Freshwater and Jasper (2001).",
+  fields:[
+    {k:"ref_what",cls:"",label:"WHAT? Describe it",hint:"What happened? Facts only: what did you do, see, hear or make? Start with: I noticed...",rows:4,starters:["I noticed that...","First I...","The part I spent most time on was...","Someone told me...","What I made or wrote was..."]},
+    {k:"ref_sowhat",cls:"sw",label:"SO WHAT? Make sense of it",hint:"Why does it matter? What did you learn, find hard or find surprising? Start with: This matters because...",rows:4,starters:["This matters because...","I found it hard to...","I was surprised that...","This shows me that...","The evidence for this is..."]},
+    {k:"ref_nowwhat",cls:"nw",label:"NOW WHAT? Act on it",hint:"What will you do next? One clear action. Start with: Next I will...",rows:4,starters:["Next I will...","To fix this I will...","My first step is...","I will ask for feedback on...","By the next lesson I will have..."]}]};
+const TABS=APP_TABS.concat(REFLECT);
+
+/* ===== 2. CORE HELPERS ===== */
+const $=id=>document.getElementById(id),qa=(r,s)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store=(k,v)=>{try{localStorage.setItem(CFG.pfx+k,v)}catch(e){}};
+const load=k=>{try{return localStorage.getItem(CFG.pfx+k)}catch(e){return null}};
+const say=m=>{const l=$("live");l.textContent="";setTimeout(()=>l.textContent=m,30)};
+const ic=(f,b)=>`<i class="fa-solid fa-${f}" data-fb="${b}" aria-hidden="true"></i>`;
+const THEMES=["day","night","contrast"],FONTS=[90,100,110,120,130];
+const FIELDS=TABS.flatMap(t=>t.fields);
+let theme=load("Theme"),fp=+load("Font")||100,dys=load("Dys")==="true";
+let data={},cur=0,spd=1,dl=null;
+if(!THEMES.includes(theme))theme=null;if(!FONTS.includes(fp))fp=100;
+const g=k=>String(data[k]||"").trim();
+const started=()=>FIELDS.some(f=>g(f.k));
+const persist=()=>store("Data",JSON.stringify({v:CFG.version,data}));
+
+/* ===== 3. ACCESSIBILITY ===== */
+function setTheme(t){theme=t;document.documentElement.setAttribute("data-theme",t);THEMES.forEach(x=>{$("th-"+x).classList.toggle("on",x===t);$("th-"+x).setAttribute("aria-pressed",x===t)});store("Theme",t)}
+function applyFont(){document.documentElement.style.fontSize=fp+"%";$("fsd").textContent=fp+"%"}
+function setFont(d){const i=FONTS.indexOf(fp)+d;if(i<0||i>=FONTS.length)return;fp=FONTS[i];applyFont();store("Font",fp);say("Text size "+fp+" percent")}
+function setDys(v){dys=v;document.body.classList.toggle("dys",v);$("dys").classList.toggle("on",v);$("dys").setAttribute("aria-pressed",v);store("Dys",v)}
+
+/* ===== 4. TABS + PANEL ===== */
+function drawTabs(){
+  $("tabs").innerHTML=TABS.map((t,i)=>`<button type="button" role="tab" id="t${i}" aria-controls="panel" aria-selected="${i===cur}" tabindex="${i===cur?0:-1}">${ic(t.icon,t.fb)}${esc(t.title)}</button>`).join("");
+  TABS.forEach((t,i)=>{const b=$("t"+i);b.onclick=()=>openTab(i);
+    b.onkeydown=e=>{const n=e.key==="ArrowRight"?i+1:e.key==="ArrowLeft"?i-1:e.key==="Home"?0:e.key==="End"?TABS.length-1:null;if(n===null)return;e.preventDefault();openTab((n+TABS.length)%TABS.length,true)}});
+}
+function openTab(i,focus){if(window.demoSet)demoSet(i);stopMic();stopTTS();cur=i;drawTabs();drawPanel();if(focus)$("t"+i).focus()}
+function field(f){
+  const id="f-"+f.k,d=`id="${id}" data-k="${f.k}" aria-describedby="h-${f.k}"`;
+  const chips=f.starters?`<div class="sel"><label for="s-${f.k}">Add a starter (keyboard: arrows to browse, Enter to add)</label><select id="s-${f.k}" data-s="${f.k}"><option value="">Choose a starter…</option>${f.starters.map((t,i)=>`<option value="${i}">${esc(t)}</option>`).join("")}</select></div>`:"";
+  return `<label class="f" for="${id}">${esc(f.label)}<span class="hint" id="h-${f.k}">${esc(f.hint||"")}</span></label>`+chips+
+    (f.rows?`<textarea ${d} rows="${f.rows}">${esc(data[f.k])}</textarea>`:`<input type="text" ${d} value="${esc(data[f.k])}">`);
+}
+/* Lesson content block: body HTML, code listings (with tab switch), tick-off task list */
+function lesson(t,ti){
+  let h=t.body||"";
+  (t.code||[]).forEach((b,bi)=>{
+    h+=`<h3>${esc(b.h)}</h3>`;
+    if(b.tabs){
+      h+=`<div class="cts" role="group" aria-label="Choose an input system">${b.tabs.map((x,j)=>`<button type="button" class="alt" data-ct="${bi}-${j}" aria-pressed="${j===0}">${esc(x[0])}</button>`).join("")}</div>`+
+         b.tabs.map((x,j)=>`<pre tabindex="0" data-cp="${bi}-${j}"${j?" hidden":""}><code>${esc(CODE[x[1]])}</code></pre>`).join("");
+    }else h+=`<pre tabindex="0"><code>${esc(CODE[b.c])}</code></pre>`;
+  });
+  if(t.task)h+=`<div class="task" role="group" aria-label="Task checklist"><b>${esc(t.taskTitle||"Task checklist")}</b>`+t.task.map((x,j)=>{const k="c"+ti+"_"+j;return `<label><input type="checkbox" data-c="${k}"${data[k]?" checked":""}><span>${esc(x)}</span></label>`}).join("")+`</div>`;
+  return h;
+}
+function drawPanel(){
+  const t=TABS[cur];
+  $("panel").setAttribute("aria-labelledby","t"+cur);
+  $("panel").innerHTML=`<h2>${esc(t.title)}</h2><p>${esc(t.intro)}</p>`+(t.reflect
+    ?`<div class="ref">${t.fields.map(f=>`<div class="rc ${f.cls}">${field(f)}</div>`).join("")}</div><p class="hint cite">${esc(t.cite)}</p>`
+    :lesson(t,cur)+t.fields.map(field).join(""));
+  qa($("panel"),"[data-k]").forEach(el=>{el.oninput=()=>{data[el.dataset.k]=el.value;persist()}});
+  qa($("panel"),"input[data-c]").forEach(el=>{el.onchange=()=>{if(el.checked)data[el.dataset.c]="1";else delete data[el.dataset.c];persist()}});
+  qa($("panel"),"button[data-ct]").forEach(b=>b.onclick=()=>{const [bi]=b.dataset.ct.split("-");
+    qa($("panel"),`button[data-ct^="${bi}-"]`).forEach(x=>x.setAttribute("aria-pressed",x===b));
+    qa($("panel"),`pre[data-cp^="${bi}-"]`).forEach(p=>p.hidden=p.dataset.cp!==b.dataset.ct);say(b.textContent+" shown")});
+  qa($("panel"),"select[data-s]").forEach(sel=>{
+    const add=()=>{if(sel.value==="")return;insertStarter($("f-"+sel.dataset.s),FIELDS.find(x=>x.k===sel.dataset.s).starters[+sel.value]);sel.value="";sel._nav=false};
+    sel.onpointerdown=()=>{sel._nav=false};
+    sel.onkeydown=e=>{if(["ArrowUp","ArrowDown","Home","End","PageUp","PageDown"].includes(e.key))sel._nav=true;else if(e.key==="Enter"){e.preventDefault();add()}};
+    sel.onchange=()=>{if(!sel._nav)add()};
+    sel.onblur=()=>{sel._nav=false;sel.value=""};
+  });
+  if(cur===7&&window.animLab)animLab();addMics();drawNav();
+}
+function drawNav(){
+  const p=cur>0?TABS[cur-1]:null,n=cur<TABS.length-1?TABS[cur+1]:null;
+  $("panel").insertAdjacentHTML("beforeend",`<div class="row pnav" id="pnav">`+
+    (p?`<button type="button" class="alt" data-nav="-1"><span aria-hidden="true">\u2190</span> Back: ${esc(p.title)}</button>`:"<span></span>")+
+    (n?`<button type="button" data-nav="1">Next: ${esc(n.title)} <span aria-hidden="true">\u2192</span></button>`:`<button type="button" data-nav="x">Done: export your work\u2026</button>`)+`</div>`);
+  qa($("pnav"),"button").forEach(b=>b.onclick=()=>{if(b.dataset.nav==="x")return $("xopen").click();stepTab(+b.dataset.nav)});
+}
+function stepTab(d){openTab(cur+d);$("panel").focus({preventScroll:true});$("tabs").scrollIntoView({block:"start"})}
+function insertStarter(el,t){const v=el.value,sep=v&&!/\s$/.test(v)?" ":"";el.value=v+sep+t+" ";el.focus();el.setSelectionRange(el.value.length,el.value.length);el.dispatchEvent(new Event("input"));say("Added: "+t.replace(/\.+$/,""))}
+
+/* ===== 5. READ ALOUD ===== */
+const hasTTS="speechSynthesis" in window&&"SpeechSynthesisUtterance" in window;
+function readText(){const t=TABS[cur];return [t.title,t.intro].concat((t.task?["Tasks: "+t.task.join(". ")]:[]),t.fields.map(f=>f.label+". "+(g(f.k)||"empty"))).map(x=>/[.?!]$/.test(x)?x:x+".").join(" ")}
+function speak(txt){if(!hasTTS)return say("Read aloud is not available in this browser.");speechSynthesis.cancel();$("pst").textContent="Pause";const u=new SpeechSynthesisUtterance(txt);u.rate=spd;u.lang=document.documentElement.lang||"en-GB";speechSynthesis.speak(u)}
+function stopTTS(){if(hasTTS)speechSynthesis.cancel();$("pst").textContent="Pause"}
+
+/* ===== 6. DICTATION ===== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,recBtn=null;
+const micIdle=b=>{b.setAttribute("aria-pressed","false");b.querySelector("span").textContent="Dictate"};
+function stopMic(){if(rec){const r=rec;rec=null;try{r.stop()}catch(e){}}if(recBtn){micIdle(recBtn);recBtn=null}}
+const labelOf=el=>{const l=document.querySelector(`label[for="${el.id}"]`);return l?l.childNodes[0].textContent:"this field"};
+function toggleMic(el,b){
+  if(recBtn===b){stopMic();return say("Stopped listening")}
+  stopMic();
+  const r=new SR(),base=el.value,sep=base&&!/\s$/.test(base)?" ":"";
+  r.lang=navigator.language||"en-GB";r.interimResults=true;r.continuous=false;
+  r.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;el.value=base+sep+t;el.dispatchEvent(new Event("input"))};
+  r.onerror=e=>say(e.error==="not-allowed"||e.error==="service-not-allowed"?"The microphone is blocked here. Allow it in your browser settings, or use the microphone key on your keyboard.":e.error==="no-speech"?"I did not hear anything. Tap Dictate and try again.":"Dictation stopped ("+e.error+").");
+  r.onend=()=>{if(rec===r){rec=null;recBtn=null}micIdle(b)};
+  try{r.start()}catch(e){return say("Dictation could not start.")}
+  rec=r;recBtn=b;b.setAttribute("aria-pressed","true");b.querySelector("span").textContent="Stop";
+  say("Listening. Speak now, then tap Dictate again for more.");
+}
+function addMics(){
+  if(!SR)return;
+  qa($("panel"),"textarea,input[type=text]").forEach(el=>{
+    if(el.dataset.nomic)return;
+    const b=document.createElement("button");b.type="button";b.className="alt mic";b.setAttribute("aria-pressed","false");
+    b.setAttribute("aria-label","Dictate into "+labelOf(el));b.innerHTML=ic("microphone","🎤")+"<span>Dictate</span>";
+    const w=document.createElement("div");w.className="ig";el.parentNode.insertBefore(w,el);w.append(el,b);b.onclick=()=>toggleMic(el,b);
+  });
+}
+
+/* ===== 7. EXPORT MODEL: tasks completed are included as a line per section ===== */
+function model(){
+  return {title:g("name")?g("name")+": "+CFG.title:CFG.title,
+    sections:TABS.map((t,ti)=>{const rows=t.fields.map(f=>[f.label,g(f.k)||"(empty)"]);
+      if(t.task){const d=t.task.filter((x,j)=>data["c"+ti+"_"+j]).length;rows.unshift(["Tasks completed",d+" of "+t.task.length])}
+      return {h:t.title,rows}})};
+}
+const stamp=()=>new Date().toISOString().slice(0,10);
+const fileName=ext=>`${CFG.file}-${stamp()}.${ext}`;
+function md(){const m=model();return "# "+m.title+"\n\n"+m.sections.map(s=>"## "+s.h+"\n\n"+s.rows.map(r=>"**"+r[0]+"**\n\n"+r[1]).join("\n\n")).join("\n\n")+"\n"}
+const cell=v=>{v=String(v);if(/^[=+\-@\t\r]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'};
+function csv(){const m=model(),o=[["Section","Field","Value"].map(cell).join(",")];m.sections.forEach(s=>s.rows.forEach(r=>o.push([s.h,r[0],r[1]].map(cell).join(","))));return "\uFEFF"+o.join("\r\n")+"\r\n"}
+const CRC=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+function zipBlob(files,mime){
+  const enc=new TextEncoder(),parts=[],cd=[];let off=0;
+  files.forEach(f=>{
+    const name=enc.encode(f[0]),d=enc.encode(f[1]),crc=crc32(d);
+    const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);
+    h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,name.length,true);
+    parts.push(h.buffer,name,d);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(14,0x21,true);
+    c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    cd.push(c.buffer,name);off+=30+name.length+d.length;
+  });
+  let len=0;cd.forEach(b=>len+=b.byteLength);
+  const e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,len,true);e.setUint32(16,off,true);
+  return new Blob(parts.concat(cd,[e.buffer]),{type:mime});
+}
+const xe=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"");
+const wp=(t,o={})=>String(t).split(/\r?\n/).map(l=>`<w:p><w:r><w:rPr>${o.b?"<w:b/>":""}${o.c?`<w:color w:val="${o.c}"/>`:""}<w:sz w:val="${o.sz||22}"/></w:rPr><w:t xml:space="preserve">${xe(l)}</w:t></w:r></w:p>`).join("");
+const wt=rows=>`<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/><w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(b=>`<w:${b} w:val="single" w:sz="4" w:color="94A3B8"/>`).join("")}</w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="2400"/><w:gridCol w:w="6600"/></w:tblGrid>${rows.map(r=>`<w:tr>${r.map((c,i)=>`<w:tc><w:tcPr><w:tcW w:w="${i?6600:2400}" w:type="dxa"/></w:tcPr>${wp(c,{b:!i})}</w:tc>`).join("")}</w:tr>`).join("")}</w:tbl>`;
+function docx(){
+  const m=model(),X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const body=wp(m.title,{b:1,sz:44})+m.sections.map(s=>wp(s.h,{b:1,sz:30,c:"0E7490"})+wt(s.rows)+wp("")).join("");
+  return zipBlob([
+    ["[Content_Types].xml",X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'],
+    ["_rels/.rels",X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+    ["word/document.xml",X+'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+'</w:body></w:document>']
+  ],"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+}
+function pptx(){
+  const m=model(),p=new PptxGenJS();p.layout="LAYOUT_WIDE";
+  const H=t=>({text:t,options:{bold:true,color:"FFFFFF",fill:{color:"0E7490"}}});
+  const t=p.addSlide();t.background={color:"0B0F1A"};
+  t.addText(m.title,{x:.6,y:2.4,w:12,h:1,fontSize:36,bold:true,color:"FFFFFF",fontFace:"Calibri"});
+  t.addText(CFG.title,{x:.6,y:3.5,w:12,h:.8,fontSize:20,color:"00E5FF",fontFace:"Calibri"});
+  m.sections.forEach(s=>{
+    const a=p.addSlide();
+    a.addText(s.h,{x:.5,y:.25,w:12.3,h:.7,fontSize:26,bold:true,color:"0F172A",fontFace:"Calibri"});
+    a.addTable([[H("Field"),H("Response")]].concat(s.rows.map(r=>[{text:r[0],options:{bold:true}},{text:r[1]}])),
+      {x:.5,y:1.1,w:12.3,colW:[2.8,9.5],fontSize:12,fontFace:"Calibri",color:"0F172A",border:{type:"solid",color:"94A3B8",pt:1},valign:"top",autoPage:true});
+  });
+  return p.write({outputType:"blob"});
+}
+function pdf(){
+  const m=model(),d=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),L=15,W=180;let y=20;
+  const room=h=>{if(y+h>282){d.addPage();y=20}};
+  d.setFont("helvetica","bold");d.setFontSize(20);d.setTextColor(14,116,144);
+  d.splitTextToSize(m.title,W).forEach(l=>{room(9);d.text(l,L,y);y+=9});y+=4;
+  m.sections.forEach(s=>{
+    room(14);d.setFont("helvetica","bold");d.setFontSize(14);d.setTextColor(14,116,144);d.text(s.h,L,y);y+=8;
+    s.rows.forEach(r=>{
+      d.setFontSize(11);d.setTextColor(30);d.setFont("helvetica","bold");room(6);d.text(r[0],L,y);y+=5.5;
+      d.setFont("helvetica","normal");d.splitTextToSize(r[1],W).forEach(l=>{room(5.5);d.text(l,L,y);y+=5.5});y+=2;
+    });y+=4;
+  });
+  return d.output("blob");
+}
+
+/* ===== 8. EXPORT PIPELINE ===== */
+const EXPORTS=[
+  {id:"pptx",label:"PowerPoint (.pptx)",desc:"Title slide and one slide per section",ic:"file-powerpoint",fb:"▦",lib:()=>window.PptxGenJS,build:pptx},
+  {id:"docx",label:"Word (.docx)",desc:"Report with a table per section",ic:"file-word",fb:"📝",build:docx},
+  {id:"pdf",label:"PDF (.pdf)",desc:"Ready to print or share",ic:"file-pdf",fb:"📕",lib:()=>window.jspdf,build:pdf},
+  {id:"csv",label:"CSV (.csv)",desc:"Opens in Excel or Google Sheets",ic:"file-csv",fb:"▤",build:()=>new Blob([csv()],{type:"text/csv;charset=utf-8"})},
+  {id:"md",label:"Markdown (.md)",desc:"Plain text with headings",ic:"file-lines",fb:"📄",build:()=>new Blob([md()],{type:"text/markdown;charset=utf-8"})}
+];
+function save(name,body){
+  if(dl)return dl.save({filename:name,data:body}).then(()=>say("Saved "+name),e=>say(e&&e.code==="declined"?"Save cancelled.":"This view could not save the file."));
+  try{const b=body instanceof Blob?body:new Blob([body],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
+    a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);say("Saved "+name);
+  }catch(e){say("This view could not save the file.")}
+}
+function runExport(x){
+  if(!started())return say("Fill in part of the form first.");
+  if(x.lib&&!x.lib())return say(x.label+" is still loading or was blocked. Try again, or choose another format.");
+  Promise.resolve().then(x.build).then(b=>save(fileName(x.id),b)).catch(e=>{console.warn(e);say("Could not build the "+x.id.toUpperCase()+" file.")});
+}
+function copyText(){
+  if(!started())return say("Fill in part of the form first.");
+  if(navigator.clipboard)navigator.clipboard.writeText(md()).then(()=>say("Copied to clipboard"),()=>say("Could not copy"));
+  else say("Copy is not available in this browser.");
+}
+function backup(){
+  if(!started())return say("Nothing to back up yet.");
+  save(`${CFG.file}-backup-${stamp()}.json`,new Blob([JSON.stringify({app:CFG.pfx,version:CFG.version,saved:new Date().toISOString(),data,prefs:{theme,font:fp,dys}},null,2)],{type:"application/json;charset=utf-8"}));
+}
+const okKey=k=>FIELDS.some(f=>f.k===k)||/^c\d+_\d+$/.test(k);
+function importBackup(f){
+  if(!f)return;
+  if(f.size>2e6)return say("That file is too large to be a backup.");
+  const r=new FileReader();r.onerror=()=>say("That file could not be read.");
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||d.app!==CFG.pfx||typeof d.data!=="object")throw 0;
+      if(d.version>CFG.version)return say("That backup is from a newer version of this app.");
+      if(started()&&!confirm("Replace what is on this device with the backup?"))return say("Import cancelled. Nothing changed.");
+      data={};Object.keys(d.data).forEach(k=>{if(okKey(k)&&typeof d.data[k]==="string")data[k]=d.data[k].slice(0,5000)});
+      persist();drawPanel();say("Backup imported.");
+    }catch(e){say("That does not look like a backup from this app.")}
+  };
+  r.readAsText(f);
+}
+
+/* ===== 9. MODAL ===== */
+let opener=null;const BG=["#a11y","header","main"];
+const mEls=()=>qa($("mdl"),"button").filter(b=>!b.disabled);
+function openM(){
+  const n=started();opener=document.activeElement;
+  $("mc").textContent=n?"Your work is ready to export. Choose a format:":"Fill in part of the form first, then come back to export.";
+  qa($("mo"),"button").forEach(b=>b.disabled=!n);$("bks").disabled=!n;
+  $("mdl").hidden=false;BG.forEach(q=>document.querySelector(q).inert=true);
+  (mEls()[0]||$("xcl")).focus();
+}
+function closeM(){$("mdl").hidden=true;BG.forEach(q=>document.querySelector(q).inert=false);if(opener&&opener.focus)opener.focus()}
+
+/* ===== 10. BOOT ===== */
+function boot(){
+  try{const s=JSON.parse(load("Data")||"null");if(s&&s.data&&s.v<=CFG.version)Object.keys(s.data).forEach(k=>{if(okKey(k)&&typeof s.data[k]==="string")data[k]=s.data[k]})}catch(e){}
+  document.title=CFG.title;$("kick").textContent=CFG.kicker;$("ttl").textContent=CFG.title;$("sub").textContent=CFG.sub;
+  THEMES.forEach(t=>$("th-"+t).onclick=()=>setTheme(t));
+  $("fm").onclick=()=>setFont(-1);$("fp").onclick=()=>setFont(1);$("dys").onclick=()=>setDys(!dys);
+  $("rd").onclick=()=>speak(readText());
+  $("ps").onclick=()=>{if(!hasTTS)return;if(speechSynthesis.paused){speechSynthesis.resume();$("pst").textContent="Pause"}else if(speechSynthesis.speaking){speechSynthesis.pause();$("pst").textContent="Resume"}};
+  $("st").onclick=stopTTS;$("sp").onchange=()=>{spd=+$("sp").value};
+  addEventListener("pagehide",()=>{stopTTS();stopMic()});
+  $("dh").textContent=SR?"Tip: tap Dictate under any box and speak. Your browser's speech service may send the audio away, so do not say personal details.":"Dictation is not supported in this browser. On a phone, use the microphone key on your keyboard.";
+  $("mo").innerHTML=EXPORTS.map(x=>`<button type="button" class="alt opt" id="x-${x.id}">${ic(x.ic,x.fb)}<span>${esc(x.label)}<small>${esc(x.desc)}</small></span></button>`).join("");
+  EXPORTS.forEach(x=>$("x-"+x.id).onclick=()=>{closeM();runExport(x)});
+  $("xopen").onclick=openM;$("xcl").onclick=closeM;$("xcp").onclick=copyText;$("xpr").onclick=()=>window.print();
+  $("bks").onclick=()=>{closeM();backup()};$("bki").onclick=()=>$("bkf").click();
+  $("bkf").onchange=function(){closeM();importBackup(this.files[0]);this.value=""};
+  $("mdl").onclick=e=>{if(e.target===$("mdl"))closeM()};
+  $("mdl").onkeydown=e=>{
+    if(e.key==="Escape"){e.preventDefault();closeM();return}
+    if(e.key!=="Tab")return;
+    const f=mEls();if(!f.length)return;const i=f.indexOf(document.activeElement);
+    if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}
+  };
+  $("clr").onclick=()=>{if(!confirm("Clear everything you have written? This cannot be undone."))return;data={};persist();openTab(0);say("Everything cleared")};
+  setTheme(theme||(matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"day":"night"));
+  applyFont();setDys(dys);drawTabs();drawPanel();
+  if(window.claude&&claude.use)claude.use("downloads").then(d=>{if(d)dl=d},()=>{});
+}
+boot();
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const cv=$("gc"),cx=cv.getContext("2d"),W=320,H=176,T=16,PW=10,PH=14;
+cv.width=W;cv.height=H;
+const MAP=["....................","....................","....................","....................","....................","....................","..........###.......","....................","....###......###....","....................","###....#############"];
+const NEW=[
+"Scene set up. The GameManager holds the coin count (top-left). Nothing moves yet because there is no movement script.",
+"PlayerMovement added: walk, hold Shift to run, jump, then jump again in mid-air for the double jump. Watch canDoubleJump below.",
+"Coin script added: coins are triggers. Turn on Show colliders to see them (yellow). Collect coins and watch coins go up.",
+"Tilemap and Rule Tile added: tick Paint tiles, then paint ground on the Ground layer and flowers or bushes on the Decoration layer. Show colliders: only Ground has them.",
+"HealthSystem added: stomp the red enemy (30 health) or touch it and lose 25 of your 100 health.",
+"Moving platform added over a new pit. Untick the parent option, stand on the platform, and see what changes.",
+"Lives added: three hearts top-right. Falling in the pit or running out of health costs a life.",
+"Animator added: the player now has Idle, Run and Jump animations. The Animator state shows below.",
+"Enemy AI added: the enemy walks between numbered waypoints and waits at each one. Use the sliders to change the wait time and speed.",
+"Scene management added: Start, Win and Lose screens. Collect coins and reach the flag on the right to win."];
+class HealthSystem{constructor(m){this.max=m;this.cur=m}takeDamage(a){this.cur=Math.max(0,this.cur-a)}heal(a){this.cur=Math.min(this.max,this.cur+a)}isDead(){return this.cur<=0}pct(){return this.cur/this.max}}
+let L=0,F={},G,keys={left:0,right:0,run:0},jq=false,paused=false,t=0,show=false,parent=true,lastRO="";
+const GR=MAP.map(r=>[...r].map(ch=>ch==="#"?1:0)),DR=MAP.map(r=>[...r].map(()=>0));
+let pm=false,sg=true,sd=true,lay="g",tt=1,cur_={c:1,r:9},WP=[150,205,260],WAIT=1,SPD=.8;
+const tile=(c,r)=>(c<0||c>=20||r<0||r>10)?false:(r===10&&c>=3&&c<=6&&!F.pit)?true:GR[r][c]>0;
+function hit(x,y){const c0=Math.floor(x/T),c1=Math.floor((x+PW-.01)/T),r0=Math.floor(y/T),r1=Math.floor((y+PH-.01)/T);for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++)if(tile(c,r))return{c,r};return null}
+const ov=(ax,ay,aw,ah,bx,by,bw,bh)=>ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;
+function reset(){G={scene:F.scenes?"start":"play",x:16,y:146,vx:0,vy:0,pb:160,dir:0,onG:true,jumps:0,face:1,coins:0,lives:3,hp:new HealthSystem(100),inv:0,riding:false,st:"Idle",
+ cs:[[72,112],[96,112],[168,80],[184,80],[224,112],[240,112],[130,146]].map(c=>({x:c[0],y:c[1],on:true})),
+ en:{x:200,y:148,d:-1,alive:true,hp:new HealthSystem(30),wi:1,wd:1,wait:0},pl:{x:40,d:1}}}
+function respawn(){G.x=16;G.y=146;G.vx=0;G.vy=0;G.hp=new HealthSystem(100);G.inv=60}
+function die(){
+  if(F.lives){G.lives--;if(G.lives<=0){if(F.scenes){G.scene="lose";return}G.lives=3}}
+  respawn();
+}
+function step(){
+  t++;if(G.inv>0)G.inv--;
+  if(G.scene!=="play")return;
+  G.dir=keys.right-keys.left;
+  let pdx=0;
+  if(F.plat){const p=G.pl;pdx=.6*p.d;p.x+=pdx;if(p.x>=96)p.d=-1;if(p.x<=40)p.d=1}
+  const carry=(F.plat&&G.riding&&parent)?pdx:0;
+  G.vx=F.move?G.dir*(keys.run?2.1:1.3):0;
+  if(F.move&&G.dir)G.face=G.dir;
+  if(jq){jq=false;if(F.move){if(G.onG){G.vy=-6.2;G.jumps=1}else if(G.jumps===1){G.vy=-6.2;G.jumps=2}}}
+  G.x=Math.max(0,Math.min(W-PW,G.x+G.vx+carry));
+  let h=hit(G.x,G.y);
+  if(h){G.x=(G.vx+carry>0)?h.c*T-PW:(h.c+1)*T}
+  G.pb=G.y+PH;G.vy=Math.min(G.vy+.35,8);G.y+=G.vy;G.onG=false;G.riding=false;
+  h=hit(G.x,G.y);
+  if(h){if(G.vy>0){G.y=h.r*T-PH;G.onG=true;G.jumps=0}else G.y=(h.r+1)*T;G.vy=0}
+  if(F.plat&&G.vy>=0){const top=144,p=G.pl;if(G.x+PW>p.x&&G.x<p.x+32&&G.pb<=top+.5&&G.y+PH>=top){G.y=top-PH;G.vy=0;G.onG=true;G.riding=true;G.jumps=0}}
+  if(G.y>H+10)return die();
+  G.st=!G.onG?"Jump":Math.abs(G.vx)>.1?"Run":"Idle";
+  if(F.coin)G.cs.forEach(c=>{if(c.on&&ov(G.x,G.y,PW,PH,c.x-4,c.y-4,8,8)){c.on=false;G.coins++}});
+  if(F.enemy&&G.en.alive){
+    const e=G.en;
+    if(F.ai){if(e.wait>0)e.wait--;else{const tx=WP[e.wi],dx=tx-e.x;
+      if(Math.abs(dx)<=SPD){e.x=tx;e.wait=Math.round(WAIT*60);if(e.wi+e.wd<0||e.wi+e.wd>=WP.length)e.wd=-e.wd;e.wi+=e.wd}
+      else{e.d=Math.sign(dx);e.x+=e.d*SPD}}}
+    else{e.x+=.5*e.d;if(e.x<150)e.d=1;if(e.x>260)e.d=-1}
+    if(ov(G.x,G.y,PW,PH,e.x,e.y,12,12)){
+      if(G.vy>0&&G.pb<=e.y+4){e.hp.takeDamage(30);if(e.hp.isDead())e.alive=false;G.vy=-4}
+      else if(G.inv<=0){G.hp.takeDamage(25);G.inv=60;G.vy=-3;if(G.hp.isDead())return die()}
+    }
+  }
+  if(F.scenes&&ov(G.x,G.y,PW,PH,288,136,16,24))G.scene="win";
+}
+function txt(s,x,y,c){cx.fillStyle="#000";cx.fillText(s,x+1,y+1);cx.fillStyle=c||"#fff";cx.fillText(s,x,y)}
+function drawTile(c,r){
+  const x=c*T,y=r*T;
+  if(!F.tiles||GR[r][c]===2){cx.fillStyle="#8a5a2b";cx.fillRect(x,y,T,T);cx.fillStyle="#6b4420";cx.fillRect(x,y,T,1);cx.fillRect(x,y,1,T);return}
+  cx.fillStyle="#7a4a22";cx.fillRect(x,y,T,T);
+  if((c*7+r*13)%5===0){cx.fillStyle="#5d3a18";cx.fillRect(x+6,y+9,2,2)}
+  if(!tile(c-1,r)){cx.fillStyle="#5d3a18";cx.fillRect(x,y,2,T)}
+  if(!tile(c+1,r)){cx.fillStyle="#5d3a18";cx.fillRect(x+T-2,y,2,T)}
+  if(!tile(c,r-1)){cx.fillStyle="#4caf50";cx.fillRect(x,y,T,4);cx.fillStyle="#8be36b";cx.fillRect(x,y,T,1);
+    if(!tile(c-1,r)){cx.fillStyle="#4caf50";cx.fillRect(x,y,2,6)}if(!tile(c+1,r)){cx.fillStyle="#4caf50";cx.fillRect(x+T-2,y,2,6)}}
+}
+function drawPlayer(){
+  if(G.inv>0&&(t>>2)&1)return;
+  const x=Math.round(G.x),f=G.face;let y=Math.round(G.y),leg=0;
+  if(F.anim){if(G.st==="Run")leg=((t/6)|0)%2?1:2;else if(G.st==="Jump")leg=3;else if(((t/30)|0)%2)y+=1}
+  cx.fillStyle="#f2c9a0";cx.fillRect(x+1,y+1,8,6);
+  cx.fillStyle="#c0392b";cx.fillRect(x,y,10,3);cx.fillRect(f>0?x+7:x-1,y+2,4,2);
+  cx.fillStyle="#111";cx.fillRect(f>0?x+6:x+3,y+4,1,2);
+  cx.fillStyle="#2f6fe0";cx.fillRect(x+1,y+7,8,4);
+  cx.fillStyle="#222";
+  if(leg===0){cx.fillRect(x+1,y+11,3,3);cx.fillRect(x+6,y+11,3,3)}
+  else if(leg===1){cx.fillRect(x,y+11,3,3);cx.fillRect(x+6,y+12,3,2)}
+  else if(leg===2){cx.fillRect(x+1,y+12,3,2);cx.fillRect(x+7,y+11,3,3)}
+  else cx.fillRect(x+2,y+11,6,2);
+}
+function draw(){
+  cx.fillStyle="#5ec8f2";cx.fillRect(0,0,W,H);
+  cx.fillStyle="#fff";[[30,20],[150,34],[250,16]].forEach(c=>{cx.fillRect(c[0],c[1],28,6);cx.fillRect(c[0]+6,c[1]-4,16,4)});
+  if(sg)for(let r=0;r<11;r++)for(let c=0;c<20;c++)if(tile(c,r))drawTile(c,r);
+  if(sd)for(let r=0;r<11;r++)for(let c=0;c<20;c++)if(DR[r][c])deco(DR[r][c],c*T,r*T);
+  if(F.plat){const p=G.pl;cx.fillStyle="#9aa4bf";cx.fillRect(p.x,144,32,6);cx.fillStyle="#5b6475";cx.fillRect(p.x+3,146,2,2);cx.fillRect(p.x+27,146,2,2)}
+  if(F.scenes){cx.fillStyle="#ddd";cx.fillRect(292,136,2,24);cx.fillStyle="#ff2e88";cx.fillRect(294,136,10,7)}
+  if(F.coin)G.cs.forEach(c=>{if(!c.on)return;cx.fillStyle="#ffc83d";cx.fillRect(c.x-3,c.y-4,6,8);cx.fillRect(c.x-4,c.y-3,8,6);cx.fillStyle="#fff3b0";cx.fillRect(c.x-2,c.y-3,2,3)});
+  if(F.enemy&&G.en.alive){const e=G.en,b=((t/10)|0)%2;cx.fillStyle="#e0344f";cx.fillRect(e.x,e.y+b,12,12-b);cx.fillStyle="#fff";cx.fillRect(e.x+2,e.y+3+b,3,3);cx.fillRect(e.x+7,e.y+3+b,3,3);cx.fillStyle="#111";cx.fillRect(e.x+3+(e.d>0?1:0),e.y+4+b,1,2);cx.fillRect(e.x+8+(e.d>0?1:0),e.y+4+b,1,2)}
+  drawPlayer();
+  if(show&&L>=1){
+    cx.lineWidth=1;cx.strokeStyle="#b6ff3b";
+    for(let r=0;r<11;r++)for(let c=0;c<20;c++)if(tile(c,r))cx.strokeRect(c*T+.5,r*T+.5,T-1,T-1);
+    if(F.plat)cx.strokeRect(G.pl.x+.5,144.5,31,5);
+    cx.strokeStyle="#00e5ff";cx.strokeRect(Math.round(G.x)+.5,Math.round(G.y)+.5,PW-1,PH-1);
+    if(F.coin){cx.strokeStyle="#ffc83d";G.cs.forEach(c=>{if(c.on)cx.strokeRect(c.x-3.5,c.y-3.5,7,7)})}
+    if(F.enemy&&G.en.alive){cx.strokeStyle="#ff2e88";cx.strokeRect(G.en.x+.5,G.en.y+.5,11,11)}
+  }
+  if(pm){cx.lineWidth=1;cx.strokeStyle="#fff";cx.strokeRect(cur_.c*T+.5,cur_.r*T+.5,T-1,T-1)}
+  cx.font="8px monospace";cx.textBaseline="alphabetic";
+  if(F.ai){WP.forEach((x,i)=>{cx.fillStyle=i===G.en.wi?"#ffc83d":"#ff2e88";cx.fillRect(x+3,156,6,4);txt(String(i+1),x+4,153,"#fff")});
+    if(G.en.alive&&G.en.wait>0)txt("...",G.en.x+1,G.en.y-2,"#ffc83d")}
+  txt("Coins: "+G.coins,4,10);
+  if(F.enemy){cx.fillStyle="#000";cx.fillRect(3,14,42,6);cx.fillStyle="#333";cx.fillRect(4,15,40,4);cx.fillStyle=G.hp.pct()>.4?"#b6ff3b":"#ff2e88";cx.fillRect(4,15,Math.round(40*G.hp.pct()),4)}
+  if(F.lives){const P=["0110110","1111111","1111111","0111110","0011100","0001000"];for(let i=0;i<3;i++){cx.fillStyle=i<G.lives?"#ff2e88":"#3a2a3a";const ox=W-34+i*10;P.forEach((row,ry)=>{for(let rx=0;rx<7;rx++)if(row[rx]==="1")cx.fillRect(ox+rx,4+ry,1,1)})}}
+  if(G.scene!=="play"){
+    cx.fillStyle="rgba(11,15,26,.85)";cx.fillRect(0,0,W,H);cx.textAlign="center";
+    const a=G.scene==="start"?"PIXEL PLATFORMER":G.scene==="win"?"YOU WIN!":"GAME OVER";
+    const b=G.scene==="start"?"Collect coins and reach the flag":"Coins: "+G.coins;
+    cx.fillStyle="#fff";cx.font="bold 16px monospace";cx.fillText(a,W/2,70);cx.font="8px monospace";cx.fillText(b,W/2,92);
+    cx.fillStyle="#ffc83d";cx.fillRect(W/2-46,106,92,18);cx.fillStyle="#0b0f1a";cx.fillText(G.scene==="start"?"PLAY (Enter)":"AGAIN (Enter)",W/2,118);cx.textAlign="left";
+  }
+}
+function ro(){
+  let s="coins="+G.coins;
+  if(L>=1)s+="  h="+G.dir+"  grounded="+G.onG+"  canDoubleJump="+(G.jumps===1);
+  if(L>=4)s+="  health="+G.hp.cur+"/"+G.hp.max;
+  if(L>=5)s+="  parent="+(G.riding&&parent?"MovingPlatform":"none");
+  if(L>=6)s+="  lives="+G.lives;
+  if(L>=7)s+="  Animator: "+G.st;
+  if(L>=8)s+="  enemy="+(G.en.wait>0?"Waiting "+(G.en.wait/60).toFixed(1)+"s":"Moving to waypoint "+(G.en.wi+1));
+  if(L>=9)s+="  scene="+G.scene;
+  if(s!==lastRO){lastRO=s;$("dv").textContent=s}
+}
+function setL(i){
+  L=i>=10?9:i;
+  F={move:L>=1,coin:L>=2,tiles:L>=3,enemy:L>=4,plat:L>=5,pit:L>=5,lives:L>=6,anim:L>=7,ai:L>=8,scenes:L>=9};
+  $("dn").textContent="New in this step: "+NEW[L]+" (The preview restarts on each step.)";
+  $("dpw").hidden=!F.plat;$("daw").hidden=L<8;$("dcw").hidden=L<1;$("dtw").hidden=L<3;if(L<3){pm=false;$("dpm").checked=false;cv.style.touchAction=""}
+  reset();lastRO="";
+}
+window.demoSet=setL;
+function startPlay(){if(G.scene!=="play"){reset();G.scene="play"}}
+const K={ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right",Shift:"run"},J=[" ","ArrowUp","w","W"];
+cv.addEventListener("keydown",e=>{
+  if(pm){const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+    if(d){cur_.c=Math.max(0,Math.min(19,cur_.c+d[0]));cur_.r=Math.max(0,Math.min(10,cur_.r+d[1]));e.preventDefault()}
+    else if(e.key===" "||e.key==="Enter"){paint(cur_.c,cur_.r);e.preventDefault()}
+    return}
+  if(K[e.key]){keys[K[e.key]]=1;e.preventDefault()}
+  else if(J.includes(e.key)){if(!e.repeat)jq=true;e.preventDefault()}
+  else if(e.key==="Enter"){startPlay();e.preventDefault()}
+});
+cv.addEventListener("keyup",e=>{if(K[e.key])keys[K[e.key]]=0});
+cv.addEventListener("blur",()=>{keys.left=keys.right=keys.run=0});
+cv.addEventListener("pointerdown",e=>{cv.focus();if(pm){const q=cellAt(e);cur_={c:q[0],r:q[1]};paint(q[0],q[1]);cv.setPointerCapture(e.pointerId);return}startPlay()});
+cv.addEventListener("pointermove",e=>{if(!pm)return;const q=cellAt(e);cur_={c:q[0],r:q[1]};if(e.buttons&1)paint(q[0],q[1])});
+document.querySelectorAll("#demo [data-gk]").forEach(b=>{
+  const k=b.dataset.gk;
+  if(k==="run"){b.onclick=()=>{keys.run=keys.run?0:1;b.setAttribute("aria-pressed",!!keys.run)};return}
+  if(k==="jump"){b.onpointerdown=e=>{e.preventDefault();jq=true};b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();jq=true}};return}
+  const on=e=>{e.preventDefault();keys[k]=1},off=()=>{keys[k]=0};
+  b.onpointerdown=on;b.onpointerup=off;b.onpointerleave=off;b.onpointercancel=off;
+  b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();keys[k]=1}};b.onkeyup=e=>{if(e.key==="Enter"||e.key===" ")keys[k]=0};
+});
+$("drs").onclick=()=>{reset();if(F.scenes)G.scene="play";lastRO=""};
+$("dps").onclick=function(){paused=!paused;this.setAttribute("aria-pressed",paused);this.querySelector("span").textContent=paused?"Resume":"Pause"};
+$("dc").onchange=function(){show=this.checked};
+$("dp").onchange=function(){parent=this.checked};
+const OPT={g:[["Rule Tile",1],["Plain tile",2],["Eraser",0]],d:[["Grass tuft",1],["Flower",2],["Bush",3],["Sign",4],["Eraser",0]]};
+function fillOpt(){$("dt").innerHTML=OPT[lay].map(o=>'<option value="'+o[1]+'">'+o[0]+"</option>").join("");tt=+$("dt").value}
+function paint(c,r){
+  if(c<0||c>19||r<0||r>10)return;
+  if(lay==="g"){if(tt&&ov(G.x,G.y,PW,PH,c*T,r*T,T,T))return;GR[r][c]=tt}else DR[r][c]=tt;
+}
+function resetMap(){MAP.forEach((row,y)=>[...row].forEach((ch,x)=>{GR[y][x]=ch==="#"?1:0;DR[y][x]=0}));respawn()}
+function cellAt(e){const r=cv.getBoundingClientRect();return[Math.floor((e.clientX-r.left)*W/r.width/T),Math.floor((e.clientY-r.top)*H/r.height/T)]}
+function deco(id,x,y){const b=y+T;
+  if(id===1){cx.fillStyle="#3b9c3b";cx.fillRect(x+4,b-5,1,5);cx.fillRect(x+7,b-7,1,7);cx.fillRect(x+10,b-4,1,4)}
+  else if(id===2){cx.fillStyle="#2e8b2e";cx.fillRect(x+7,b-8,1,8);cx.fillStyle="#ff2e88";cx.fillRect(x+5,b-11,5,4);cx.fillStyle="#ffc83d";cx.fillRect(x+7,b-10,1,2)}
+  else if(id===3){cx.fillStyle="#2e8b2e";cx.fillRect(x+1,b-8,14,8);cx.fillRect(x+3,b-10,10,2);cx.fillStyle="#4caf50";cx.fillRect(x+4,b-8,3,2);cx.fillRect(x+9,b-6,3,2)}
+  else{cx.fillStyle="#6b4420";cx.fillRect(x+7,b-8,2,8);cx.fillStyle="#c98b4a";cx.fillRect(x+2,b-14,12,7);cx.fillStyle="#6b4420";cx.fillRect(x+4,b-12,8,1);cx.fillRect(x+4,b-10,6,1)}
+}
+$("dl").onchange=function(){lay=this.value;fillOpt()};
+$("dt").onchange=function(){tt=+this.value};
+$("dpm").onchange=function(){pm=this.checked;keys.left=keys.right=keys.run=0;cv.style.touchAction=pm?"none":"";say(pm?"Paint mode on. Arrow keys move the cursor, Space paints.":"Paint mode off.")};
+$("dsg").onchange=function(){sg=this.checked};
+$("dsd").onchange=function(){sd=this.checked};
+$("dmr").onclick=()=>{resetMap();say("Map reset")};
+fillOpt();
+$("dww").oninput=function(){WAIT=+this.value;$("dwo").textContent=WAIT+"s"};
+$("dws").oninput=function(){SPD=+this.value;$("dso").textContent=SPD};
+let last=0,acc=0;
+function loop(ts){
+  if(!last)last=ts;acc+=Math.min(ts-last,100);last=ts;
+  if(!paused){while(acc>=16.667){step();acc-=16.667}}else acc=0;
+  draw();if(t%6===0||paused)ro();
+  requestAnimationFrame(loop);
+}
+setL(0);requestAnimationFrame(loop);
+})();
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const A={states:["Idle","Run","Jump"],params:[],tr:[],cur:"Idle",val:{},fr:0,tm:null,st:""};
+const TY={f:"Float",b:"Bool",i:"Int",t:"Trigger"},find=n=>A.params.find(p=>p.n===n);
+const ok=x=>{const p=find(x.p);if(!p)return false;const v=A.val[p.n];return p.t==="t"?!!v:p.t==="b"?v===(x.op==="true"):x.op===">"?v>x.v:x.op==="<"?v<x.v:v===x.v};
+function evalA(){const x=A.tr.find(x=>(x.f===A.cur||x.f==="Any State")&&x.to!==A.cur&&ok(x));if(x){A.cur=x.to;const p=find(x.p);if(p&&p.t==="t")A.val[p.n]=false}}
+const lbl=x=>{const p=find(x.p);return !p?"":p.t==="t"?x.p:p.t==="b"?x.p+" is "+x.op:x.p+" "+x.op+" "+x.v};
+const opts=a=>a.map(s=>`<option>${esc(s)}</option>`).join("");
+function graph(){
+  const P={},n=A.states.length,used=A.tr.some(x=>x.f==="Any State");
+  A.states.forEach((s,i)=>{const a=-Math.PI/2+i*2*Math.PI/n;P[s]=[160+(n>1?100:0)*Math.cos(a),92+62*Math.sin(a)]});
+  P["Any State"]=[52,16];
+  const node=(s,any)=>{const[x,y]=P[s];return `<g><rect data-sn="${esc(s)}" class="an-n${any?" any":""}" x="${x-35}" y="${y-13}" width="70" height="26" rx="6"/><text class="an-t" x="${x}" y="${y+3}" text-anchor="middle">${esc(s)}</text></g>`};
+  let h=`<svg viewBox="0 0 320 190" role="img" aria-label="Animator state graph with states ${esc(A.states.join(", "))}" class="an-g"><defs><marker id="al-ar" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L6 3L0 6z" class="an-m"/></marker></defs>`;
+  A.tr.forEach(x=>{const a=P[x.f],b=P[x.to];if(!a||!b)return;
+    const dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
+    const cut=Math.min(Math.abs(ux)>.001?35/Math.abs(ux):1e9,Math.abs(uy)>.001?13/Math.abs(uy):1e9)+3,px=-uy*5,py=ux*5;
+    const x1=a[0]+ux*cut+px,y1=a[1]+uy*cut+py,x2=b[0]-ux*cut+px,y2=b[1]-uy*cut+py;
+    h+=`<line class="an-l" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#al-ar)"/><text class="an-x" x="${(x1+x2)/2+px*1.8}" y="${(y1+y2)/2+py*1.8}" text-anchor="middle">${esc(lbl(x))}</text>`});
+  A.states.forEach(s=>h+=node(s));if(used)h+=node("Any State",1);
+  return h+"</svg>";
+}
+function spr(){
+  const c=$("al-sp");if(!c)return;const g=c.getContext("2d"),f=A.fr,x=11;g.clearRect(0,0,32,32);
+  let leg=0,y=10;if(A.cur==="Run")leg=((f/6)|0)%2?1:2;else if(A.cur==="Jump"){leg=3;y=6}else if(((f/30)|0)%2)y=11;
+  g.fillStyle="#f2c9a0";g.fillRect(x+1,y+1,8,6);g.fillStyle="#c0392b";g.fillRect(x,y,10,3);g.fillRect(x+7,y+2,4,2);
+  g.fillStyle="#111";g.fillRect(x+6,y+4,1,2);g.fillStyle="#2f6fe0";g.fillRect(x+1,y+7,8,4);g.fillStyle="#222";
+  if(leg===0){g.fillRect(x+1,y+11,3,3);g.fillRect(x+6,y+11,3,3)}else if(leg===1){g.fillRect(x,y+11,3,3);g.fillRect(x+6,y+12,3,2)}
+  else if(leg===2){g.fillRect(x+1,y+12,3,2);g.fillRect(x+7,y+11,3,3)}else g.fillRect(x+2,y+11,6,2);
+}
+function refresh(){
+  const r=$("al");if(!r)return;
+  r.querySelectorAll("[data-sn]").forEach(e=>e.classList.toggle("on",e.dataset.sn===A.cur));
+  const s=$("al-st");if(s&&A.st!==A.cur){A.st=A.cur;s.textContent="State: "+A.cur}
+  spr();
+}
+function ops(){
+  const p=find($("al-p").value),o=$("al-o"),vw=$("al-vw");
+  if(!p){o.innerHTML="";vw.hidden=true;return}
+  o.innerHTML=opts(p.t==="b"?["true","false"]:p.t==="t"?["is set"]:p.t==="i"?[">","<","="]:[">","<"]);
+  vw.hidden=p.t==="b"||p.t==="t";
+}
+function check(){
+  if(!A.params.some(p=>p.n==="Speed"&&p.t==="f")||!A.params.some(p=>p.n==="IsGrounded"&&p.t==="b"))return say("Add a Float parameter called Speed and a Bool called IsGrounded first.");
+  const sv=[A.cur,{...A.val}],T=[[.5,true,"Run"],[0,true,"Idle"],[0,false,"Jump"],[0,true,"Idle"]];let bad="";A.cur="Idle";
+  for(let i=0;i<T.length&&!bad;i++){A.val.Speed=T[i][0];A.val.IsGrounded=T[i][1];for(let k=0;k<4;k++)evalA();
+    if(A.cur!==T[i][2])bad="Test "+(i+1)+" failed: with Speed "+T[i][0]+" and IsGrounded "+T[i][1]+" it should be "+T[i][2]+" but is "+A.cur+"."}
+  A.cur=sv[0];A.val=sv[1];refresh();
+  say(bad||"All 4 tests passed. Your controller works.");
+}
+function render(){
+  const r=$("al");if(!r)return;A.st="";
+  const pr=A.params.map(p=>{const v=A.val[p.n],n=esc(p.n);
+    const c=p.t==="f"?`<input type="range" min="0" max="10" step="0.1" value="${v}" data-pv="${n}"><output>${v}</output>`:p.t==="b"?`<input type="checkbox" data-pv="${n}"${v?" checked":""}>`:p.t==="i"?`<input type="number" step="1" value="${v}" data-pv="${n}" style="width:5rem">`:`<button type="button" class="alt" data-pt="${n}">Set trigger</button>`;
+    return `<div class="drow"><label>${n} (${TY[p.t]}) ${p.t==="t"?"":c}</label>${p.t==="t"?c:""}<button type="button" class="alt" data-rp="${n}" aria-label="Remove parameter ${n}">Remove</button></div>`}).join("");
+  const tl=A.tr.map((x,i)=>`<li>${esc(x.f)} \u2192 ${esc(x.to)} when ${esc(lbl(x))} <button type="button" class="alt" data-rt="${i}" aria-label="Remove transition ${i+1}">Remove</button></li>`).join("")||"<li>No transitions yet.</li>";
+  r.innerHTML=`<h3>Animator playground</h3><p>Build a controller: add parameters, connect the states, then drive it with the test controls. Names are case-sensitive, like <code>SetFloat("Speed", ...)</code>.</p>
+<div class="drow"><label>New parameter <input type="text" id="al-pn" data-nomic="1" maxlength="20" style="width:9rem"></label><label>Type <select id="al-pt"><option value="f">Float</option><option value="b">Bool</option><option value="i">Int</option><option value="t">Trigger</option></select></label><button type="button" id="al-ap">Add parameter</button></div>${pr}
+<div class="drow"><label>New state <input type="text" id="al-ns" data-nomic="1" maxlength="14" style="width:8rem"></label><button type="button" class="alt" id="al-as">Add state</button></div>
+<div class="drow"><label>From <select id="al-f">${opts(["Any State"].concat(A.states))}</select></label><label>To <select id="al-t">${opts(A.states)}</select></label><label>Parameter <select id="al-p">${opts(A.params.map(p=>p.n))}</select></label><label>Condition <select id="al-o"></select></label><label id="al-vw">Value <input type="number" id="al-v" value="0.1" step="0.1" style="width:5rem"></label><button type="button" id="al-at">Add transition</button></div>
+<ul>${tl}</ul>
+<div class="an-w">${graph()}<div><canvas id="al-sp" width="32" height="32" aria-hidden="true"></canvas><p id="al-st" aria-live="polite"></p></div></div>
+<div class="drow"><button type="button" id="al-ex">Load example</button><button type="button" class="alt" id="al-cl">Clear</button><button type="button" id="al-ck">Check my controller</button></div>
+<p class="hint">Challenge: Idle and Run switch on Speed, and any state goes to Jump when IsGrounded is false.</p>`;
+  ops();$("al-p").onchange=ops;
+  $("al-ap").onclick=()=>{const n=$("al-pn").value.trim(),t=$("al-pt").value;if(!n)return say("Type a parameter name first.");if(find(n))return say("That parameter already exists.");A.params.push({n,t});A.val[n]=t==="f"||t==="i"?0:false;render();say("Added "+TY[t]+" parameter "+n)};
+  $("al-as").onclick=()=>{const n=$("al-ns").value.trim();if(!n||A.states.includes(n)||n==="Any State")return say("Type a new, unused state name.");A.states.push(n);render();say("Added state "+n)};
+  $("al-at").onclick=()=>{const p=find($("al-p").value),f=$("al-f").value,to=$("al-t").value;if(!p)return say("Add a parameter first.");if(f===to)return say("Choose two different states.");
+    A.tr.push({f,to,p:p.n,op:p.t==="t"?"set":$("al-o").value,v:+$("al-v").value});render();say("Added transition "+f+" to "+to)};
+  r.querySelectorAll("[data-rp]").forEach(e=>e.onclick=()=>{const n=e.dataset.rp;A.params=A.params.filter(p=>p.n!==n);delete A.val[n];A.tr=A.tr.filter(x=>x.p!==n);render();say("Removed "+n)});
+  r.querySelectorAll("[data-rt]").forEach(e=>e.onclick=()=>{A.tr.splice(+e.dataset.rt,1);render();say("Transition removed")});
+  r.querySelectorAll("[data-pv]").forEach(e=>e.oninput=()=>{const p=find(e.dataset.pv);A.val[p.n]=p.t==="b"?e.checked:+e.value;const o=e.nextElementSibling;if(o&&o.tagName==="OUTPUT")o.textContent=e.value;evalA();refresh()});
+  r.querySelectorAll("[data-pt]").forEach(e=>e.onclick=()=>{A.val[e.dataset.pt]=true;evalA();refresh();say("Trigger set")});
+  $("al-ex").onclick=()=>{A.states=["Idle","Run","Jump"];A.params=[{n:"Speed",t:"f"},{n:"IsGrounded",t:"b"}];A.val={Speed:0,IsGrounded:true};A.cur="Idle";
+    A.tr=[{f:"Idle",to:"Run",p:"Speed",op:">",v:.1},{f:"Run",to:"Idle",p:"Speed",op:"<",v:.1},{f:"Any State",to:"Jump",p:"IsGrounded",op:"false",v:0},{f:"Jump",to:"Idle",p:"IsGrounded",op:"true",v:0}];render();say("Example loaded")};
+  $("al-cl").onclick=()=>{A.params=[];A.tr=[];A.val={};A.cur="Idle";render();say("Cleared")};
+  $("al-ck").onclick=check;
+  refresh();
+}
+function tick(){if(!$("al")){clearInterval(A.tm);A.tm=null;return}A.fr+=6;evalA();refresh()}
+window.animLab=()=>{render();if(!A.tm)A.tm=setInterval(tick,100)};
+})();
+</script>
+</body>
+</html>
