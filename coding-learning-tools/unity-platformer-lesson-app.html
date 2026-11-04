@@ -139,6 +139,8 @@ i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.
 .fmsvg .ed.fire{stroke:var(--li);stroke-width:4;marker-end:url(#fm-ag)}
 .fmsvg .hit{fill:none;stroke:transparent;stroke-width:18;cursor:pointer;pointer-events:stroke}
 .fmsvg .el{fill:var(--tx);font:12px Calibri,Arial,sans-serif}
+.hico{vertical-align:-7px;margin-right:12px;color:var(--cy)}
+.alth{margin:22px 0 6px;padding-top:12px;border-top:3px solid var(--cy)}
 .insp{background:var(--card);border:1.5px solid var(--bd);border-left:5px solid var(--cy);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:.9375rem}
 .insp p{margin:4px 0}.insp ul{margin:4px 0 4px 1.2rem;padding:0}
 .flog{margin:4px 0 0 1.2rem;padding:0;font-size:.875rem;color:var(--tx)}
@@ -217,7 +219,7 @@ i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.
 
 <script>
 /* ===== 1. CONFIG + CONTENT ===== */
-const CFG={pfx:"unityplat",file:"unity-platformer-lesson",title:"Unity 2D Platformer: C# Coding",kicker:"CODING · UNITY · 2D PLATFORMER",sub:"Build player movement, health, lives, animation and scenes. Tick the tasks, then write your notes.",version:1};
+const CFG={pfx:"unityplat",file:"unity-platformer-lesson",title:"Unity 2D Platformer: C# Coding",kicker:"CODING · UNITY · 2D PLATFORMER",sub:"Build player movement, health, lives, moving platforms, switches, animation and scenes. Tick the tasks, then write your notes.",version:1};
 
 /* Code snippets (shown in <pre>, escaped by esc()). tabs => switchable listings. */
 const CODE={
@@ -441,6 +443,259 @@ anim.SetTrigger("Attack");           // Trigger: on until a transition uses it, 
 // Example: attack when J is pressed (in PlayerMovement.cs, inside Update)
 if (Input.GetKeyDown(KeyCode.J))
     anim.SetTrigger("Attack");`,
+animAlt:`using UnityEngine;
+
+public class PlayerAnimation : MonoBehaviour
+{
+    private Animator animator;
+    public bool isGrounded;            // set by your ground check
+    bool isDead;                       // stops Update from overwriting Death
+
+    // playerState: 0 = Idle, 1 = Run, 2 = Jump, 3 = Death
+
+    void Start()
+    {
+        animator = GetComponent<Animator>();   // get the Animator on this object
+    }
+
+    void Update()
+    {
+        if (isDead) return;                          // once dead, leave playerState alone
+
+        if (Input.GetButton("Horizontal"))
+        {
+            animator.SetInteger("playerState", 1);   // run
+        }
+        else if (isGrounded)
+        {
+            animator.SetInteger("playerState", 0);   // idle
+        }
+
+        if (!isGrounded)
+        {
+            animator.SetInteger("playerState", 2);   // jump (checked last, so it wins)
+        }
+    }
+
+    public void Die()
+    {
+        isDead = true;
+        animator.SetInteger("playerState", 3);       // death
+    }
+}`,
+platLerp:`using UnityEngine;
+
+public class MovingPlatform : MonoBehaviour
+{
+    public Transform platform;      // the platform that moves
+    public Transform startPoint;    // empty object, NOT a child of the platform
+    public Transform endPoint;      // empty object, NOT a child of the platform
+    public float speed = 1.5f;
+    public int direction = 1;       // 1 = heading to start, -1 = heading to end
+
+    // Draws the route in the Scene view
+    void OnDrawGizmos()
+    {
+        if (platform != null && startPoint != null && endPoint != null)
+        {
+            Gizmos.DrawLine(platform.position, startPoint.position);
+            Gizmos.DrawLine(platform.position, endPoint.position);
+        }
+    }
+
+    void Update()
+    {
+        Vector2 target = CurrentTarget();
+        platform.position = Vector2.Lerp(platform.position, target, speed * Time.deltaTime);
+
+        // Lerp slows down and never quite arrives, so turn round a little early
+        float distance = (target - (Vector2)platform.position).magnitude;
+        if (distance <= 0.1f)
+            direction *= -1;        // 1 becomes -1, -1 becomes 1
+    }
+
+    Vector2 CurrentTarget()
+    {
+        return direction == 1 ? startPoint.position : endPoint.position;
+    }
+
+    // Carry the player: make them a child while they stand on the platform
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+            col.transform.SetParent(platform, true);
+    }
+
+    void OnCollisionExit2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player") && col.transform.parent == platform)
+            col.transform.SetParent(null, true);
+    }
+}`,
+platCirc:`using UnityEngine;
+
+public class CircularMovingPlatform : MonoBehaviour
+{
+    public Transform platform;       // the platform to move
+    public Transform centerPoint;    // centre of the circle
+    public Transform radiusPoint;    // its distance from the centre sets the radius
+    public float speed = 1.5f;       // radians per second
+
+    float angle;
+    float radius;
+
+    void Start()
+    {
+        radius = Vector2.Distance(centerPoint.position, radiusPoint.position);
+    }
+
+    void Update()
+    {
+        angle += speed * Time.deltaTime;
+        // Cos and Sin work in radians, so one full turn is 2 x PI (not 360)
+        if (angle >= Mathf.PI * 2f) angle -= Mathf.PI * 2f;
+
+        float x = centerPoint.position.x + Mathf.Cos(angle) * radius;
+        float y = centerPoint.position.y + Mathf.Sin(angle) * radius;
+        platform.position = new Vector2(x, y);
+    }
+
+    void OnDrawGizmos()
+    {
+        if (centerPoint != null && radiusPoint != null)
+        {
+            float r = Vector2.Distance(centerPoint.position, radiusPoint.position);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(centerPoint.position, r);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(centerPoint.position, radiusPoint.position);
+        }
+    }
+
+    // Carry the player: make them a child while they stand on the platform
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+            col.transform.SetParent(platform, true);
+    }
+
+    void OnCollisionExit2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Player") && col.transform.parent == platform)
+            col.transform.SetParent(null, true);
+    }
+}`,
+platArr:`using UnityEngine;
+
+public class MovingPlatformArray : MonoBehaviour
+{
+    public Transform platform;      // the platform to move
+    public Transform[] points;      // drag empty objects in, in order
+    public float speed = 1.5f;
+
+    int currentPointIndex = 0;      // which point we are heading to
+
+    void OnDrawGizmos()
+    {
+        if (points != null && points.Length > 1)
+        {
+            for (int i = 0; i < points.Length; i++)
+            {
+                Transform next = points[(i + 1) % points.Length];   // % wraps back to 0
+                Gizmos.DrawLine(points[i].position, next.position);
+            }
+        }
+    }
+
+    void Update()
+    {
+        if (points.Length < 2) return;   // need at least two points
+
+        Transform target = points[currentPointIndex];
+        platform.position = Vector2.MoveTowards(
+            platform.position, target.position, speed * Time.deltaTime);
+
+        if (Vector2.Distance(platform.position, target.position) < 0.1f)
+            currentPointIndex = (currentPointIndex + 1) % points.Length;   // next point
+    }
+    // Add OnCollisionEnter2D and OnCollisionExit2D from the other platform scripts
+}`,
+swTrig:`// Needs Is Trigger ticked on the Box Collider 2D
+void OnTriggerEnter2D(Collider2D col)
+{
+    if (col.CompareTag("Player"))
+    {
+        // Trigger the platform
+    }
+}`,
+swPlat:`// Add to MovingPlatform.cs (the Lerp version)
+public bool loop = true;       // keep going back and forth?
+bool isMoving = false;         // waits until a switch turns it on
+
+// public, so other scripts (the switch) can call it
+public void SetIsMoving(bool moving)
+{
+    isMoving = moving;
+}
+
+void Update()
+{
+    if (!isMoving) return;     // switched off: do nothing
+
+    Vector2 target = CurrentTarget();
+    platform.position = Vector2.Lerp(platform.position, target, speed * Time.deltaTime);
+
+    float distance = (target - (Vector2)platform.position).magnitude;
+    if (loop && distance <= 0.1f)
+        direction *= -1;       // with loop off it stops at the first point instead
+}`,
+swStep:`// Variant: the platform only moves while the player stands on it
+void OnCollisionEnter2D(Collision2D col)
+{
+    if (col.gameObject.CompareTag("Player"))
+    {
+        isMoving = true;
+        col.transform.SetParent(platform, true);
+    }
+}
+
+void OnCollisionExit2D(Collision2D col)
+{
+    if (col.gameObject.CompareTag("Player"))
+    {
+        isMoving = false;
+        if (col.transform.parent == platform)
+            col.transform.SetParent(null, true);
+    }
+}`,
+swScript:`using UnityEngine;
+
+public class PlatformSwitch : MonoBehaviour
+{
+    public MovingPlatform platform;   // drag the platform object in
+    public bool startMoving = true;   // true = turns it on, false = turns it off
+
+    public void TriggerPlatform()
+    {
+        if (platform != null)
+            platform.SetIsMoving(startMoving);
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("Player"))   // the player touched the switch
+            TriggerPlatform();
+    }
+}`,
+swToggle:`// Extension: a lever that flips on and off each time it is touched
+bool isOn;
+
+void OnTriggerEnter2D(Collider2D col)
+{
+    if (!col.CompareTag("Player")) return;
+    isOn = !isOn;                      // ! means "not": true becomes false and back
+    platform.SetIsMoving(isOn);
+}`,
 patrol:`using UnityEngine;
 using System.Collections;
 
@@ -574,6 +829,74 @@ void OnTriggerEnter2D(Collider2D other)
 {
     if (other.CompareTag("Player"))
         SceneManager.LoadScene("WinScreen");
+}`,
+dispMsg:`using UnityEngine;
+using UnityEngine.UI;
+
+public class DisplayMessage : MonoBehaviour
+{
+    public GameObject messageText;          // the Winner object (starts deactivated)
+    [SerializeField] private Text childText; // the Text (Legacy) inside Winner
+
+    // Set the message text, then show it
+    public void ShowMessage(string message)
+    {
+        childText.text = message;
+        messageText.SetActive(true);
+    }
+
+    // Hide the message again
+    public void HideMessage()
+    {
+        messageText.SetActive(false);
+    }
+}`,
+dispTest:`// Quick test: add to your player script
+public DisplayMessage displayMessage;
+
+void Start()   // you can't have more than one Start()
+{
+    displayMessage.ShowMessage("Hello, World!");
+    Invoke("ClearMessage", 3.0f);   // call ClearMessage in 3 seconds
+}
+
+void ClearMessage()
+{
+    displayMessage.HideMessage();
+}`,
+endLvl:`using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class EndLevel : MonoBehaviour
+{
+    public string nextSceneName;              // scene to load next (must be in Build Settings)
+    public DisplayMessage displayMessage;     // drag the Finish object in
+    public string showMessage;                // e.g. "Level complete!"
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.tag == "Player")   // did the player touch the signpost?
+        {
+            displayMessage.ShowMessage(showMessage);
+            Invoke("LoadNextLevel", 2f);         // wait 2 seconds, then load
+        }
+    }
+
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(nextSceneName);
+    }
+}`,
+disPlr:`// Add inside the if block of EndLevel, before Invoke
+// Reference the Player by its tag
+GameObject player = GameObject.FindWithTag("Player");
+// Get the player's movement script
+var playerMovementScript = player.GetComponent<PlayerController>();
+
+// Disable it, but only if it was found
+if (playerMovementScript != null)
+{
+    playerMovementScript.enabled = false;   // the player can no longer move
 }`};
 
 /* Each tab: title, icon, fb, intro (plain text, read aloud), body (trusted HTML), code [{h, c|tabs}], task [], fields [] */
@@ -603,32 +926,49 @@ const APP_TABS=[
  code:[{h:"HealthSystem.cs",c:"hs"},{h:"Enemy.cs and Player damage",c:"en"}],
  task:["Write HealthSystem and explain the constructor","Explain TakeDamage, Heal, GetHealth and IsDead","Give the Player and Enemy different max health","Challenge: add a health bar using GetHealthPercent()"],
  fields:[{k:"s4",label:"Explain the HealthSystem methods",hint:"Constructor, TakeDamage, Heal, GetHealth, IsDead: one line each.",rows:6}]},
-{title:"Platforms",icon:"truck",fb:"🚚",intro:"Stop the player sliding off a moving platform by changing the player's parent.",
- body:`<p>A moving platform carries its children. When the player lands, make them a child with <code>SetParent</code>. When they leave, set the parent back to null. Keep PointA and PointB <i>outside</i> the platform, and flip the sprite with <code>sr.flipX</code>, not scale, so a parent never distorts the player.</p>`,
- code:[{h:"MovingPlatform.cs",c:"plat"}],
- task:["Build a platform with a Box Collider and two empty point objects","Stand on it: you should ride along, not slide","Jump off and check the Hierarchy: no parent"],
- fields:[{k:"s5",label:"Why does changing the parent work?",hint:"What does a child inherit from its parent?",rows:3}]},
-{title:"Lives & UI",icon:"heart",fb:"♥",intro:"Design the lives display in the Canvas first, then script it.",
+{title:"Platforms",icon:"truck",fb:"🚚",intro:"Make platforms move from A to B, in a circle or round a list of points, and carry the player with them.",
+ body:`<p>A moving platform carries its children. When the player lands, make them a child with <code>SetParent</code>. When they leave, set the parent back to null. Keep the points <i>outside</i> the platform, and flip the sprite with <code>sr.flipX</code>, not scale, so a parent never distorts the player.</p><h3>Set-up</h3><ol><li>Create a new script (for example <code>MovingPlatform</code>) and attach it to the platform.</li><li>Add empty objects for the points: <code>StartPoint</code> and <code>EndPoint</code> (circle: <code>CenterPoint</code> and <code>RadiusPoint</code>).</li><li>Put the platform and its points in one empty parent called <code>moving platform</code>, then drag each into the script's slots.</li></ol><h3>Three kinds of movement</h3><ul><li><b>A to B:</b> <code>MoveTowards</code> moves at a steady speed. <code>Vector2.Lerp(current, target, speed * Time.deltaTime)</code> covers a fraction of the remaining distance each frame, so it is quick at first and eases to a stop. It never quite arrives, so we turn round when the distance is under 0.1. <code>direction *= -1</code> flips 1 and -1.</li><li><b>Circle:</b> a point on a circle is <code>centre + (cos angle, sin angle) * radius</code>. <code>Mathf.Cos</code> and <code>Sin</code> use <b>radians</b>, so one lap is 2 x PI.</li><li><b>Array of points:</b> a list of waypoints (a zigzag or rectangle). <code>% points.Length</code> wraps from the last point back to the first.</li></ul><p><code>OnDrawGizmos</code> draws the route in the Scene view, so you can check it before you press Play. More help: <a href="https://www.monkeykidgc.com/2021/03/unity-moving-platform.html" target="_blank" rel="noopener">Monkey Kid: Unity moving platform</a>.</p>`,
+ widget:"pmv",
+ code:[{h:"MovingPlatform: choose a movement",tabs:[["A to B (MoveTowards)","plat"],["A to B (Lerp)","platLerp"],["Circle","platCirc"],["Array of points","platArr"]]}],
+ taskTitle:"Task: platform movements (30 mins)",
+ task:["Build a platform with a Box Collider and two empty point objects","Stand on it: you should ride along, not slide","Jump off and check the Hierarchy: no parent","ALL: make a simple platform that goes from point A to point B","MOST: make a platform that moves in a circle","SOME: use an array of points to make a zigzag or a rectangle","Turn on Gizmos and check the route lines match your points"],
+ fields:[{k:"s5",label:"Why does changing the parent work?",hint:"What does a child inherit from its parent?",rows:3},{k:"s5b",label:"Lerp or MoveTowards?",hint:"What does each do to the speed as the platform nears its target? Which suits a lift, and which a sliding block?",rows:3}]},
+{title:"Switches",tk:11,lv:5,icon:"toggle-on",fb:"⏻",art:`<svg class="hico" viewBox="0 0 48 28" width="56" height="32" aria-hidden="true" focusable="false"><rect x="1.5" y="1.5" width="45" height="25" rx="12.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="34" cy="14" r="8" fill="currentColor"/></svg>`,intro:"Add a switch that turns a moving platform on and off, using a trigger collider.",
+ body:`<p>Sometimes you want a controller to turn the platform movement on and off. A switch is an object with a collider set to <b>Is Trigger</b>. When the player touches it, <code>OnTriggerEnter2D</code> runs and tells the platform what to do. The same idea can open doors or move blocks that close passages.</p><ol><li>Create <code>PlatformSwitch</code> and attach it to the switch sprite. Add a <b>Box Collider 2D</b> and tick <b>Is Trigger</b>.</li><li>In <code>MovingPlatform</code> add <code>isMoving</code> and a public <code>SetIsMoving(bool)</code>, so other scripts can call it. Add <code>bool loop = true;</code> to choose whether it keeps going back and forth.</li><li>Drag the platform into the switch's <b>Platform</b> slot. <b>Start Moving</b> ticked turns the platform on, unticked turns it off.</li><li>Untick <b>loop</b> and the platform only travels once to its first target. Place it at the end point so it has somewhere to go.</li></ol><p>A solid platform uses <code>OnCollisionEnter2D</code>, a switch uses <code>OnTriggerEnter2D</code>. The switch must be a trigger, or the player will stand on it instead of pressing it.</p>`,
+ widget:"swgame",
+ code:[{h:"Detect the player",c:"swTrig"},{h:"MovingPlatform: choose a version",tabs:[["Switch controls it","swPlat"],["Moves while you stand on it","swStep"]]},{h:"PlatformSwitch.cs",c:"swScript"},{h:"Extension: a lever that toggles",c:"swToggle"}],
+ taskTitle:"Task: switches (30 mins)",
+ task:["Add a Box Collider 2D to the switch and tick Is Trigger","Add isMoving, loop and SetIsMoving to MovingPlatform","Create PlatformSwitch and drag the platform into its slot","Touch the switch: the platform starts moving","Untick loop and test: it moves once and stops","Challenge: make a lever that toggles the platform on and off","Playground: walk onto the switch and watch the platform start","Playground: untick Start Moving, press the switch and explain what changes","Challenge: use a switch to open and close a door or passage"],
+ fields:[{k:"s10",label:"How does the switch talk to the platform?",hint:"Which script has the trigger, which has the public method, and why must the method be public?",rows:4},{k:"s10b",label:"Trigger or collision for a switch?",hint:"What would happen to your player if Is Trigger was unticked?",rows:3}]},
+{title:"Lives & UI",tk:6,lv:6,icon:"heart",fb:"♥",intro:"Design the lives display in the Canvas first, then script it.",
  body:`<p>Create a <b>Canvas</b> (Scale With Screen Size). Add a <b>Panel</b> anchored top-left with a <b>Horizontal Layout Group</b> and three heart <b>Images</b>. Each lost life hides one heart.</p>`,
  code:[{h:"Lives code",c:"lives"}],
  task:["Create the heart panel with anchors set to top-left","Fill the hearts array in the Inspector","Lose all lives: do the hearts vanish one at a time?","Extension: a fall zone trigger that calls LoseLife()"],
  fields:[{k:"s6",label:"Describe your lives UI",hint:"Where is it, why, and how does the code update it?",rows:4}]},
-{title:"Animation",icon:"film",fb:"🎞",intro:"Use the Animator Controller, a state machine, to switch between Idle, Run, Jump and Attack. Try one in the playground first.",
+{title:"Animation",tk:7,lv:7,icon:"film",fb:"🎞",intro:"Use the Animator Controller, a state machine, to switch between Idle, Run, Jump and Attack. Try one in the playground first, then see the sprite sheet version with a single playerState number.",
  body:`<ol><li>Create clips: <b>Idle, Run, Jump</b>.</li><li>In the Animator add parameters <code>Speed</code> (float) and <code>IsGrounded</code> (bool).</li><li>Idle → Run when <code>Speed &gt; 0.1</code>. Run → Idle when <code>Speed &lt; 0.1</code>. Any State → Jump when <code>IsGrounded</code> is false.</li><li>Untick <b>Has Exit Time</b> so transitions react instantly.</li></ol><h3>State machine vocabulary</h3><ul><li><b>State</b>: one animation that is playing (Idle, Run, Jump).</li><li><b>Transition</b>: an arrow from one state to another. It fires when its <b>conditions</b> are true.</li><li><b>Parameters</b>: values your code sets. There are four kinds: <b>Float</b>, <b>Int</b>, <b>Bool</b> and <b>Trigger</b>.</li><li><b>Entry</b> and the orange <b>Default State</b>: where the machine starts. <b>Any State</b>: a transition from here can fire from every state.</li><li><b>Has Exit Time</b>: wait until the clip has played to a chosen point before leaving.</li></ul>`,
+ body2:`<h2 class="alth">Alternative version: one int called playerState</h2><p>The version above uses a float and a bool. This one uses a single <b>int</b> called <code>playerState</code>, and adds a Death state. Your art often arrives as a <b>sprite sheet</b>, a grid of frames. An animation clip plays the frames in order, like a flipbook (<a href="https://learn.unity.com/tutorial/introduction-to-sprite-animations" target="_blank" rel="noopener">Unity Learn: Introduction to Sprite Animations</a>).</p><h3>1. Slice the sprite sheet</h3><ol><li>Select the image. In the Inspector set <b>Texture Type</b> to <i>Sprite (2D and UI)</i> and <b>Sprite Mode</b> to <i>Multiple</i>. Click <b>Apply</b>.</li><li>Click <b>Open Sprite Editor</b>, then <b>Slice</b>. Choose <i>Grid By Cell Count</i>, enter the columns and rows (for example C 4, R 2), click <b>Slice</b>, then <b>Apply</b>.</li></ol><h3>2. Make a clip for each animation</h3><ol><li>Expand the sheet and select the frames for one animation: Idle, Run or Jump.</li><li>Right-click and choose <b>Create → Animation</b>, or drag the frames into the Animation window. Name the clips <code>idle_hero</code>, <code>run_hero</code>, <code>jump_hero</code> and <code>death_hero</code>.</li><li>Double-click a clip and open the <b>Sprite</b> arrow: each frame is a keyframe.</li><li><b>Add Property greyed out?</b> Select the GameObject that has the Animator, watch it in the Scene view, pick the clip in the Animation window dropdown and press Play.</li></ol><h3>3. Connect them in the Animator</h3><ol><li>Drag the clips into the Animator window and add a transition from <b>Any State</b> to each one.</li><li>Add an <b>Int</b> parameter called <code>playerState</code>.</li><li>Give each transition a condition: <code>playerState Equals</code> 0 for Idle, 1 for Run, 2 for Jump and 3 for Death.</li><li>Untick <b>Has Exit Time</b>. If a clip keeps restarting from frame 1, open the transition's <b>Settings</b> and untick <b>Can Transition To Self</b>.</li></ol><p><b>Which one?</b> Float and bool read naturally (a speed, a yes or no). One int keeps the current state in one place, but the numbers are easy to mix up. Challenge: name them with an <code>enum</code>.</p>`,
+ widget2:"fsm2",
  widget:"fsm",
- code:[{h:"Drive the Animator from code",c:"anim"},{h:"Parameter types and a Trigger",c:"anim2"}],
- task:["Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check Has Exit Time is unticked on each","Add the code and watch the parameters at runtime","Playground: make the character go Idle, Run, then Jump using only the parameters","Playground: tick Has Exit Time on Idle and Run and describe the delay you see","Extension: add an Attack state that uses a Trigger and leaves by Exit Time"],
- fields:[{k:"s7",label:"How does code control an animation?",hint:"What are parameters, and what are transitions?",rows:4},{k:"s7b",label:"What do Has Exit Time and a Trigger do?",hint:"Use the playground. Which setting made the character slow to react? What happens to a Trigger once a transition has used it?",rows:4}]},
-{title:"Enemy AI",tk:10,icon:"route",fb:"➜",intro:"Teach the enemy to patrol between waypoints and pause at each one.",
+ code:[{h:"Drive the Animator from code: choose a version",tabs:[["Speed + IsGrounded","anim"],["playerState int","animAlt"]]},{h:"Parameter types and a Trigger",c:"anim2"}],
+ task:["Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check Has Exit Time is unticked on each","Add the code and watch the parameters at runtime","Playground: make the character go Idle, Run, then Jump using only the parameters","Playground: tick Has Exit Time on Idle and Run and describe the delay you see","Extension: add an Attack state that uses a Trigger and leaves by Exit Time","Alternative: slice a sprite sheet (Sprite 2D and UI, Multiple, Grid By Cell Count)","Alternative: make idle_hero, run_hero, jump_hero and death_hero clips","Alternative: add an Int playerState and an Any State transition for each clip (0, 1, 2, 3)","Alternative: add PlayerAnimation and watch playerState change at runtime","Alternative: call Die() when health reaches 0 and watch death_hero play","Playground 2: set playerState 0 to 3 by hand and watch Any State fire each transition","Playground 2: switch on the code controls, press Die(), and explain why isDead is needed","Playground 2: tick Can Transition To Self and describe what happens to the clip"],
+ fields:[{k:"s7",label:"How does code control an animation?",hint:"What are parameters, and what are transitions?",rows:4},{k:"s7b",label:"What do Has Exit Time and a Trigger do?",hint:"Use the playground. Which setting made the character slow to react? What happens to a Trigger once a transition has used it?",rows:4},{k:"s7c",label:"Two ways to drive the Animator",hint:"Compare Speed + IsGrounded with playerState. Which would you use in your game, and why?",rows:4}]},
+{title:"Enemy AI",tk:10,lv:8,icon:"route",fb:"➜",intro:"Teach the enemy to patrol between waypoints and pause at each one.",
  body:`<p>Instead of bouncing between two fixed numbers, give the enemy a list of <b>waypoints</b> (empty GameObjects). It walks to waypoint 1, pauses, walks to the next, and turns around at the ends (ping-pong).</p><ul><li>Create empty objects <code>WP1</code>, <code>WP2</code>, <code>WP3</code> along a platform. Keep them <b>outside</b> the enemy so they do not move with it.</li><li><code>Vector2.MoveTowards</code> takes a fixed step each frame. <code>Time.deltaTime</code> keeps the speed the same on every computer.</li><li>A <b>coroutine</b> with <code>WaitForSeconds</code> pauses the enemy without freezing the game. A <code>waitTimer</code> counting down in <code>Update</code> does the same job.</li></ul><p>Try it in the preview: use the sliders to change the wait time and speed, and watch <code>enemy</code> in the variables line.</p>`,
  code:[{h:"EnemyPatrol.cs",c:"patrol"},{h:"Alternative: a timer instead of a coroutine",c:"pat2"}],
  task:["Create three waypoint objects along a platform","Add EnemyPatrol and drag the waypoints into the array in order","Set Wait Time to 2 and check the enemy pauses at every waypoint","Make the enemy turn around at both ends (ping-pong)","Challenge: add a 4th waypoint, then make the enemy chase the player when close"],
  fields:[{k:"s9",label:"How does the pause work?",hint:"Explain what WaitForSeconds does, or how your timer counts down.",rows:3}]},
-{title:"Scenes",tk:8,icon:"layer-group",fb:"▤",intro:"Add start, win and lose screens and move between them with SceneManager.",
+{title:"Scenes",tk:8,lv:9,icon:"layer-group",fb:"▤",intro:"Add start, win and lose screens and move between them with SceneManager.",
  body:`<p>Make scenes <b>Game</b>, <b>WinScreen</b>, <b>LoseScreen</b> and an optional <b>Start</b> menu. Add them all in <b>Build Settings</b>, otherwise <code>LoadScene</code> cannot find them. On each UI button set <b>OnClick()</b>, drag in the SceneLoader and pick <code>LoadByName</code>.</p>`,
  code:[{h:"SceneLoader.cs",c:"sl"},{h:"Win trigger",c:"win"}],
  task:["Create Start, Win and Lose scenes with a title and a button","Add every scene to Build Settings","Wire the Play Again and Quit buttons","Play through: start to win, then start to lose"],
- fields:[{k:"s8",label:"Why add scenes to Build Settings?",hint:"What happens if you forget?",rows:3}]}
+ fields:[{k:"s8",label:"Why add scenes to Build Settings?",hint:"What happens if you forget?",rows:3}]},
+{title:"Levels",tk:12,lv:9,icon:"flag",fb:"🚩",art:`<svg class="hico" viewBox="0 0 40 48" width="36" height="44" aria-hidden="true" focusable="false"><path d="M8 4v40" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M10 6h24l-6 8 6 8H10z" fill="currentColor"/></svg>`,intro:"Add a finish post that shows a message, then loads the next level. Link up your levels.",
+ body:`<h3>1. The finish post</h3><ol><li>Add a signpost sprite to the end of your level, name it <code>Finish</code> and give it the <b>Finish</b> tag. It needs a <b>Box Collider 2D</b>.</li><li>In the Canvas create an empty object called <code>Winner</code>, put a <b>Text (Legacy)</b> inside it, then <b>deactivate</b> <code>Winner</code> so it starts hidden.</li></ol><h3>2. Show a message</h3><ol><li>Attach <code>DisplayMessage</code> to the <code>Finish</code> object.</li><li>Drag <code>Winner</code> into <b>Message Text</b> and the Text inside it into <b>Child Text</b>.</li></ol><p>You could test it from the player script, but that causes problems once you add more levels. Put the code in an <code>EndLevel</code> script on the signpost instead, so every level has its own.</p><h3>3. End the level</h3><ol><li>Attach <code>EndLevel</code> to <code>Finish</code>.</li><li>Set <b>Next Scene Name</b> (add every scene to <b>Build Settings</b> first), drag <code>Finish</code> into <b>Display Message</b>, and type a <b>Show Message</b>.</li></ol><p>The script is on the object that was touched, so the player is <code>other</code>. <code>Invoke</code> waits 2 seconds before loading, so the player can read the message. A public field with a class type, like <code>DisplayMessage</code>, lets one script reach another.</p><h3>S&C: disable the player</h3><p>Once a level is complete it is a good idea to stop the player moving. Find the player by its tag, get its movement script and switch it off. Think about which script this belongs in. The Rigidbody2D keeps its speed, so the player may slide on.</p>`,
+ code:[{h:"DisplayMessage.cs",c:"dispMsg"},{h:"Test it from the player",c:"dispTest"},{h:"EndLevel.cs",c:"endLvl"},{h:"S&C: disable the player",c:"disPlr"}],
+ taskTitle:"Task: levels (30 mins)",
+ task:["Add a Finish signpost with the Finish tag and a collider","Make the hidden Winner object with a Text inside","Attach DisplayMessage and drag in Message Text and Child Text","Attach EndLevel and set Next Scene Name and Show Message","PASS: link up three levels","MERIT: link up three levels, then add a win screen","DISTINCTION: add coins to be collected on each level","S&C: disable the player script, or swap to a player prefab that jumps up and down","Write up and explain the five lines of code below"],
+ fields:[{k:"s11",label:"Explain these five lines of code",hint:"1) Invoke(\"ClearMessage\", 3.0f);  2) if (other.gameObject.tag == \"Player\")  3) messageText.SetActive(true);  4) public DisplayMessage displayMessage;  5) SceneManager.LoadScene(nextSceneName);",rows:10},{k:"s11b",label:"Which script should disable the player?",hint:"Why there, and not in the player script?",rows:3}]}
 ];
 const REFLECT={title:"Reflect",icon:"comments",fb:"💬",reflect:true,
   intro:"What? So What? Now What? Three questions, one next step. Write one to three sentences for each.",
@@ -667,7 +1007,7 @@ function drawTabs(){
   TABS.forEach((t,i)=>{const b=$("t"+i);b.onclick=()=>openTab(i);
     b.onkeydown=e=>{const n=e.key==="ArrowRight"?i+1:e.key==="ArrowLeft"?i-1:e.key==="Home"?0:e.key==="End"?TABS.length-1:null;if(n===null)return;e.preventDefault();openTab((n+TABS.length)%TABS.length,true)}});
 }
-function openTab(i,focus){if(window.demoSet)demoSet(i);stopMic();stopTTS();cur=i;drawTabs();drawPanel();if(focus)$("t"+i).focus()}
+function openTab(i,focus){if(window.demoSet)demoSet(TABS[i].lv!==undefined?TABS[i].lv:i);stopMic();stopTTS();cur=i;drawTabs();drawPanel();if(focus)$("t"+i).focus()}
 function field(f){
   const id="f-"+f.k,d=`id="${id}" data-k="${f.k}" aria-describedby="h-${f.k}"`;
   const chips=f.starters?`<div class="sel"><label for="s-${f.k}">Add a starter (keyboard: arrows to browse, Enter to add)</label><select id="s-${f.k}" data-s="${f.k}"><option value="">Choose a starter…</option>${f.starters.map((t,i)=>`<option value="${i}">${esc(t)}</option>`).join("")}</select></div>`:"";
@@ -678,10 +1018,12 @@ function field(f){
 function lesson(t,ti){
   let h=t.body||"";
   if(t.widget)h+=`<div class="wg" data-w="${t.widget}"></div>`;
+  if(t.body2)h+=t.body2;
+  if(t.widget2)h+=`<div class="wg" data-w="${t.widget2}"></div>`;
   (t.code||[]).forEach((b,bi)=>{
     h+=`<h3>${esc(b.h)}</h3>`;
     if(b.tabs){
-      h+=`<div class="cts" role="group" aria-label="Choose an input system">${b.tabs.map((x,j)=>`<button type="button" class="alt" data-ct="${bi}-${j}" aria-pressed="${j===0}">${esc(x[0])}</button>`).join("")}</div>`+
+      h+=`<div class="cts" role="group" aria-label="Choose a version">${b.tabs.map((x,j)=>`<button type="button" class="alt" data-ct="${bi}-${j}" aria-pressed="${j===0}">${esc(x[0])}</button>`).join("")}</div>`+
          b.tabs.map((x,j)=>`<pre tabindex="0" data-cp="${bi}-${j}"${j?" hidden":""}><code>${esc(CODE[x[1]])}</code></pre>`).join("");
     }else h+=`<pre tabindex="0"><code>${esc(CODE[b.c])}</code></pre>`;
   });
@@ -691,7 +1033,7 @@ function lesson(t,ti){
 function drawPanel(){
   const t=TABS[cur];
   $("panel").setAttribute("aria-labelledby","t"+cur);
-  $("panel").innerHTML=`<h2>${esc(t.title)}</h2><p>${esc(t.intro)}</p>`+(t.reflect
+  $("panel").innerHTML=`<h2>${t.art||""}${esc(t.title)}</h2><p>${esc(t.intro)}</p>`+(t.reflect
     ?`<div class="ref">${t.fields.map(f=>`<div class="rc ${f.cls}">${field(f)}</div>`).join("")}</div><p class="hint cite">${esc(t.cite)}</p>`
     :lesson(t,cur)+t.fields.map(field).join(""));
   qa($("panel"),"[data-k]").forEach(el=>{el.oninput=()=>{data[el.dataset.k]=el.value;persist()}});
@@ -1289,6 +1631,239 @@ ${TR.map(t=>`<path class="hit" data-t="${t.id}" d="${t.d}"/>`).join("")}
     const dt=lastTs?Math.min(.05,(ts-lastTs)/1000):.016;lastTs=ts;fr++;tin+=dt;if(fireT>0)fireT-=dt;
     const c=cands();for(let i=0;i<c.length;i++){if(ready(c[i])==="yes"){go(c[i]);break}}
     paint(dt);requestAnimationFrame(tick);
+  }
+  setSel("s:idle");requestAnimationFrame(tick);
+};
+
+/* ---------- Switch playground: the player triggers the platform ---------- */
+WIDGETS.swgame=function(m){
+  m.innerHTML=`<h3>Try it: step on the switch</h3>
+<p class="hint">Click the game, then walk with the arrow keys or A and D and jump with Space (or use the buttons). The platform stays still until you touch the switch. The switch is a trigger, so <code>OnTriggerEnter2D</code> runs and calls <code>SetIsMoving</code>.</p>
+<div class="wbar"><label class="chk"><input type="checkbox" id="sg-sm" checked> Start Moving</label><label class="chk"><input type="checkbox" id="sg-lp" checked> loop</label><label class="chk"><input type="checkbox" id="sg-pr" checked> Parent player to platform</label></div>
+<canvas class="tmcv" id="sg-cv" tabindex="0" width="320" height="176" style="cursor:default" role="img" aria-label="Playable mini game. A pit separates two areas. The player starts on the left next to a switch. The platform in the pit only moves once the player touches the switch. Use arrow keys or A and D to move and Space to jump."></canvas>
+<div class="wbar" role="group" aria-label="Game controls"><button type="button" class="alt" id="sg-l">&#9664; Left</button><button type="button" class="alt" id="sg-j">Jump</button><button type="button" class="alt" id="sg-r">Right &#9654;</button><button type="button" class="alt" id="sg-rs">Reset</button></div>
+<div class="stat"><div id="sg-st"></div></div>
+<p class="hint"><b>Try this:</b> 1) Walk to the pit before touching the switch: the platform just sits there. 2) Touch the switch, then jump on and ride across. 3) Untick <i>loop</i> and press Reset: the platform crosses once and stops. 4) Untick <i>Start Moving</i>, then touch the switch: it turns the platform off instead. 5) Untick <i>Parent player</i> and see what happens on the ride.</p>`;
+  const g=id=>m.querySelector("#"+id),cv=g("sg-cv"),cx=cv.getContext("2d");
+  const T=144,EP=130,SP=190,E=1.6;       // ground height; endPoint (left) and startPoint (right)
+  let px,py,vy,face,gr,riding,was,fired,jq,last=0,fr=0,shown="";
+  const k={l:0,r:0},PL={x:EP,dir:1,on:false};
+  function reset(){px=20;py=T-14;vy=0;face=1;gr=true;riding=false;was=false;fired=false;jq=false;PL.x=EP;PL.dir=1;PL.on=false}
+  reset();
+  const KM={ArrowLeft:"l",a:"l",A:"l",ArrowRight:"r",d:"r",D:"r"};
+  cv.addEventListener("keydown",e=>{if(KM[e.key]){k[KM[e.key]]=1;e.preventDefault()}else if([" ","ArrowUp","w","W"].includes(e.key)){jq=true;e.preventDefault()}});
+  cv.addEventListener("keyup",e=>{if(KM[e.key])k[KM[e.key]]=0});
+  cv.addEventListener("blur",()=>{k.l=k.r=0});
+  cv.addEventListener("pointerdown",()=>cv.focus());
+  const hold=(id,fn)=>{const b=g(id);
+    b.onpointerdown=e=>{e.preventDefault();fn(1)};
+    ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,()=>fn(0)));
+    b.onclick=e=>{if(e.detail===0){fn(1);setTimeout(()=>fn(0),300)}}};
+  hold("sg-l",v=>k.l=v);hold("sg-r",v=>k.r=v);hold("sg-j",v=>{if(v)jq=true});
+  g("sg-rs").onclick=()=>{reset();say("Reset: the switch is off again")};
+  function step(dt){
+    let dx=0;
+    if(PL.on){const t=PL.dir===1?SP:EP,nx=PL.x+(t-PL.x)*Math.min(1,1.5*dt);dx=nx-PL.x;PL.x=nx;if(g("sg-lp").checked&&Math.abs(t-PL.x)<=E)PL.dir*=-1}
+    const d=k.r-k.l;px+=d*70*dt;if(d)face=d;
+    if(riding&&g("sg-pr").checked)px+=dx;
+    px=Math.max(0,Math.min(310,px));
+    if(jq&&gr){vy=-210;gr=false}jq=false;
+    vy+=600*dt;const pf=py+14;py+=vy*dt;const ft=py+14;
+    const gL=px<110,gR=px+10>210,gP=px+10>PL.x-20&&px<PL.x+20;
+    gr=false;riding=false;
+    if(vy>=0&&pf<=T+1&&ft>=T&&(gL||gR||gP)){py=T-14;vy=0;gr=true;riding=gP&&!(gL||gR)}
+    if(py>180){px=20;py=T-14;vy=0;say("You fell. Back to the start.")}
+    const ov=px+10>50&&px<68&&py+14>=T-16;       // inside the switch's trigger collider
+    if(ov&&!was){PL.on=g("sg-sm").checked;fired=true;say("Switch touched: platform "+(PL.on?"on":"off"))}
+    was=ov;
+  }
+  const txt=(t,x,y)=>{cx.fillStyle="#fff";cx.font="bold 8px sans-serif";cx.fillText(t,x,y)};
+  function draw(){
+    cx.fillStyle="#5ec8f2";cx.fillRect(0,0,320,176);
+    cx.fillStyle="#1d1b3a";cx.fillRect(110,T,100,32);
+    [[0,110],[210,110]].forEach(a=>{cx.fillStyle="#7a4a22";cx.fillRect(a[0],T,a[1],32);cx.fillStyle="#4caf50";cx.fillRect(a[0],T,a[1],4)});
+    cx.fillStyle="#1d1b3a";[EP,SP].forEach(x=>{cx.beginPath();cx.arc(x,T+14,2.5,0,7);cx.fill()});
+    cx.strokeStyle="rgba(29,27,58,.5)";cx.lineWidth=1.5;cx.beginPath();cx.moveTo(EP,T+14);cx.lineTo(SP,T+14);cx.stroke();
+    txt("endPoint",EP-18,T+28);txt("startPoint",SP-20,T+28);
+    cx.fillStyle="#4caf50";cx.fillRect(Math.round(PL.x-20),T,40,3);cx.fillStyle=PL.on?"#2f6fe0":"#555";cx.fillRect(Math.round(PL.x-20),T+3,40,4);
+    const on=PL.on;
+    cx.fillStyle="#555";cx.fillRect(52,T-5,16,5);
+    cx.strokeStyle=on?"#2ecc71":"#c0392b";cx.lineWidth=3;cx.beginPath();cx.moveTo(60,T-5);cx.lineTo(on?68:52,T-20);cx.stroke();
+    cx.fillStyle=on?"#2ecc71":"#c0392b";cx.beginPath();cx.arc(on?68:52,T-20,4,0,7);cx.fill();
+    txt("SWITCH",44,T-28);
+    hero(cx,px,py,face,!gr?"jump":(k.l||k.r)?"run":"idle",fr,0);
+  }
+  function tick(ts){
+    if(!m.isConnected)return;
+    const dt=last?Math.min(.05,(ts-last)/1000):.016;last=ts;fr++;
+    step(dt);draw();
+    const s="Switch: "+(PL.on?"ON":"OFF")+"    OnTriggerEnter2D fired: "+(fired?"yes":"not yet")+"    platform: "+(!PL.on?"waiting":(!g("sg-lp").checked&&Math.abs((PL.dir===1?SP:EP)-PL.x)<=E)?"stopped":"moving")+"    riding: "+(riding?"yes":"no");
+    if(s!==shown){shown=s;g("sg-st").textContent=s}
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+};
+
+/* ---------- Platform movements playground: every example at once ---------- */
+WIDGETS.pmv=function(m){
+  m.innerHTML=`<h3>Try it: every platform movement</h3>
+<p class="hint">Five platforms, one for each example in this lesson. Compare how they move, then try the switch platform at the bottom right.</p>
+<div class="wbar"><label class="chk"><span class="lbl">Speed</span> <input type="range" id="pm-sp" min="0.5" max="4" step="0.1" value="1.5"><output id="pm-so" for="pm-sp">1.5</output></label><button type="button" class="alt" id="pm-ps" aria-pressed="false">Pause</button></div>
+<div class="wbar"><button type="button" class="alt" id="pm-sw" aria-pressed="false">Switch: OFF (press to turn on)</button><label class="chk"><input type="checkbox" id="pm-lp" checked> loop</label><button type="button" class="alt" id="pm-rs">Reset switch platform</button></div>
+<canvas class="tmcv" id="pm-cv" width="320" height="176" style="cursor:default" role="img" aria-label="Five moving platforms. Top left: an A to B platform using Lerp, and one using MoveTowards. Top right: a circular platform. Bottom left: a platform following an array of four points in a rectangle. Bottom right: a platform that only moves when the switch is on."></canvas>
+<div class="stat"><div id="pm-st"></div></div>
+<p class="hint"><b>Try this:</b> 1) Watch the two top-left platforms: Lerp slows as it nears each end, MoveTowards keeps a steady speed. 2) The rectangle platform visits four points in order, then wraps back to the first. 3) Press the switch, then untick loop and press Reset: the platform moves once to its first point and stops.</p>`;
+  const g=id=>m.querySelector("#"+id),cv=g("pm-cv"),cx=cv.getContext("2d");
+  const U=16,E=1.6;                       // 16 pixels = 1 unit; 0.1 unit = 1.6 px
+  const mk=(a,b)=>({a,b,p:a.slice(),dir:1});
+  const L=mk([22,22],[130,22]),M=mk([22,52],[130,52]),W=mk([190,160],[300,160]);
+  W.p=W.b.slice();
+  const C={c:[250,44],r:30,ang:0,p:[280,44]};
+  const R={pts:[[22,100],[130,100],[130,150],[22,150]],i:0,p:[22,100]};
+  let on=false,paused=false,last=0,shown="";
+  const sp=()=>+g("pm-sp").value,dist=(p,q)=>Math.hypot(q[0]-p[0],q[1]-p[1]);
+  const lerp=(o,t,k)=>{o.p[0]+=(t[0]-o.p[0])*k;o.p[1]+=(t[1]-o.p[1])*k};
+  const toward=(o,t,d)=>{const n=dist(o.p,t);if(n<=d){o.p[0]=t[0];o.p[1]=t[1]}else{o.p[0]+=(t[0]-o.p[0])/n*d;o.p[1]+=(t[1]-o.p[1])/n*d}};
+  g("pm-sp").oninput=function(){g("pm-so").textContent=(+this.value).toFixed(1)};
+  g("pm-ps").onclick=function(){paused=!paused;this.setAttribute("aria-pressed",paused);this.textContent=paused?"Play":"Pause";say(paused?"Paused":"Playing")};
+  g("pm-sw").onclick=function(){on=!on;this.setAttribute("aria-pressed",on);this.textContent=on?"Switch: ON (press to turn off)":"Switch: OFF (press to turn on)";say("Switch "+(on?"on":"off"))};
+  g("pm-rs").onclick=()=>{W.p=W.b.slice();W.dir=1;say("Switch platform reset")};
+  function step(dt){
+    const s=sp();
+    lerp(L,L.dir===1?L.a:L.b,Math.min(1,s*dt));if(dist(L.p,L.dir===1?L.a:L.b)<=E)L.dir*=-1;
+    toward(M,M.dir===1?M.a:M.b,s*U*.8*dt);if(dist(M.p,M.dir===1?M.a:M.b)<E)M.dir*=-1;
+    C.ang+=s*dt;if(C.ang>=Math.PI*2)C.ang-=Math.PI*2;
+    C.p=[C.c[0]+Math.cos(C.ang)*C.r,C.c[1]+Math.sin(C.ang)*C.r];
+    toward(R,R.pts[R.i],s*U*.8*dt);if(dist(R.p,R.pts[R.i])<E)R.i=(R.i+1)%R.pts.length;
+    if(on){const t=W.dir===1?W.a:W.b;lerp(W,t,Math.min(1,s*dt));if(g("pm-lp").checked&&dist(W.p,t)<=E)W.dir*=-1}
+  }
+  const dot=(p,c)=>{cx.fillStyle=c||"#1d1b3a";cx.beginPath();cx.arc(p[0],p[1],2.5,0,7);cx.fill()};
+  const line=(a,b)=>{cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()};
+  const plat=(p,c)=>{cx.fillStyle="#4caf50";cx.fillRect(Math.round(p[0]-14),Math.round(p[1]-3),28,3);cx.fillStyle=c||"#7a4a22";cx.fillRect(Math.round(p[0]-14),Math.round(p[1]),28,4)};
+  const txt=(t,x,y)=>{cx.fillStyle="#fff";cx.font="bold 8px sans-serif";cx.fillText(t,x,y)};
+  function draw(){
+    cx.fillStyle="#5ec8f2";cx.fillRect(0,0,320,176);
+    cx.strokeStyle="rgba(29,27,58,.55)";cx.lineWidth=1.5;
+    line(L.a,L.b);line(M.a,M.b);line(W.a,W.b);
+    cx.beginPath();cx.arc(C.c[0],C.c[1],C.r,0,7);cx.stroke();
+    cx.beginPath();R.pts.forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.closePath();cx.stroke();
+    [L.a,L.b,M.a,M.b,W.a,W.b,C.c].concat(R.pts).forEach(q=>dot(q));
+    plat(L.p);plat(M.p);plat(C.p);plat(R.p);plat(W.p,on?"#2f6fe0":"#555");
+    // the switch: a lever that flips
+    cx.fillStyle="#555";cx.fillRect(238,128,24,6);
+    cx.strokeStyle=on?"#2ecc71":"#c0392b";cx.lineWidth=3;cx.beginPath();cx.moveTo(250,128);cx.lineTo(on?262:238,on?112:112);cx.stroke();
+    cx.fillStyle=on?"#2ecc71":"#c0392b";cx.beginPath();cx.arc(on?262:238,112,4,0,7);cx.fill();
+    txt("A to B: Lerp",22,12);txt("A to B: MoveTowards",22,42);txt("Circle",232,10);txt("Array of points",22,92);txt("Switch platform",190,148);txt("Switch",232,146);
+  }
+  function tick(ts){
+    if(!m.isConnected)return;
+    const dt=last?Math.min(.05,(ts-last)/1000):.016;last=ts;
+    if(!paused)step(dt);
+    draw();
+    const s="Switch: "+(on?"ON":"OFF")+"    loop: "+g("pm-lp").checked+"    switch platform: "+(!on?"waiting":(!g("pm-lp").checked&&dist(W.p,W.dir===1?W.a:W.b)<=E)?"stopped at its first point":"moving")+"    array point: "+(R.i+1)+" of 4";
+    if(s!==shown){shown=s;g("pm-st").textContent=s}
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+};
+
+/* ---------- Animator playground 2: one int, playerState ---------- */
+/* Uses the arrow markers (fm-an etc.) defined in the first playground's SVG */
+WIDGETS.fsm2=function(m){
+  const NS=[
+    {id:"entry",t:"Entry",x:20,y:12,k:"entry"},
+    {id:"any",t:"Any State",x:20,y:118,k:"any"},
+    {id:"idle",t:"idle_hero",n:0,x:250,y:12,len:1,def:1},
+    {id:"run",t:"run_hero",n:1,x:250,y:82,len:.6},
+    {id:"jump",t:"jump_hero",n:2,x:250,y:152,len:.5},
+    {id:"death",t:"death_hero",n:3,x:250,y:222,len:.9,once:1}];
+  const TR=[{id:"e-i",f:"entry",to:"idle",d:"M140 34 L248 34",def:1}].concat(NS.filter(n=>n.len).map(n=>({id:"a-"+n.id,f:"any",to:n.id,n:n.n,d:"M140 140 L248 "+(n.y+22),lx:380,ly:n.y+27})));
+  const nm=id=>NS.find(n=>n.id===id).t;
+  const svg=`<svg class="fmsvg" viewBox="0 0 560 280" role="img" aria-label="Animator graph. Entry goes to idle_hero. Any State has a transition to each of idle_hero, run_hero, jump_hero and death_hero, set by playerState equals 0, 1, 2 and 3.">
+${TR.map(t=>`<path class="ed${t.def?" def":""}" data-e="${t.id}" d="${t.d}"/>`).join("")}
+${NS.map(n=>`<g class="ng ${n.k||""}${n.def?" def":""}" data-n="${n.id}"><rect class="nd" x="${n.x}" y="${n.y}" width="120" height="44" rx="8"/><text class="nt" x="${n.x+60}" y="${n.y+(n.len?20:23)}" text-anchor="middle" dominant-baseline="middle">${n.t}</text>${n.len?`<rect class="pb" data-pb="${n.id}" x="${n.x+8}" y="${n.y+34}" width="0" height="4" rx="2"/>`:""}</g>`).join("")}
+${TR.filter(t=>t.lx).map(t=>`<text class="el" x="${t.lx}" y="${t.ly}">playerState Equals ${t.n}</text>`).join("")}
+${TR.map(t=>`<path class="hit" data-t="${t.id}" d="${t.d}"/>`).join("")}
+</svg>`;
+  m.innerHTML=`<h3>Try it: one int, playerState</h3>
+<p class="hint">Every clip hangs off <b>Any State</b>, and the only parameter is the int <code>playerState</code>. Set it and the matching transition fires. Click a state or an arrow to inspect it.</p>
+<div class="fmrow">
+  <div class="prm" role="group" aria-label="playerState controls">
+    <div class="prow"><span class="pt">Int</span><label>playerState</label><output id="f2-v">0</output></div>
+    <div class="wbar" role="group" aria-label="Set playerState by hand">${NS.filter(n=>n.len).map(n=>`<button type="button" class="alt" data-ps="${n.n}">${n.n} ${n.t}</button>`).join("")}</div>
+    <label class="chk"><input type="checkbox" id="f2-au"> Let PlayerAnimation.cs set playerState</label>
+    <div class="prow"><label class="chk"><input type="checkbox" id="f2-h" disabled> Horizontal held</label><label class="chk"><input type="checkbox" id="f2-g" checked disabled> isGrounded</label><button type="button" class="alt" id="f2-d" disabled>Call Die()</button></div>
+    <label class="chk"><input type="checkbox" id="f2-sf"> Can Transition To Self ticked (see the restart)</label>
+    <div class="wbar"><button type="button" class="alt" id="f2-rs">Reset machine</button></div>
+  </div>
+  <canvas class="fmcv" id="f2-cv" width="80" height="48" role="img" aria-label="Preview of the character playing the current animation"></canvas>
+</div>
+<div class="stat"><div id="f2-now"></div></div>
+<div class="fmwrap" tabindex="0" role="region" aria-label="Animator graph. Scrolls sideways on small screens.">${svg}</div>
+<div class="insp" id="f2-ip"></div>
+<div class="lbl">Transition log (newest first)</div>
+<ol class="flog" id="f2-lg"></ol>
+<p class="hint"><b>Try this:</b> 1) Press the 0 to 3 buttons: each one fires its own arrow from Any State. 2) Tick <i>Let PlayerAnimation.cs set playerState</i>, hold Horizontal, then untick isGrounded: jump wins because the code checks it last. 3) Press Call Die(): Death plays once and stays. 4) Tick Can Transition To Self and watch the restart count climb: the clip never gets past its first frame.</p>`;
+
+  const g=id=>m.querySelector("#"+id),cv=g("f2-cv"),cx=cv.getContext("2d");
+  const P={ps:0,hor:false,gr:true,dead:false};
+  let st="idle",tin=0,fire=null,fireT=0,sel="s:idle",gx=0,fr=0,lastTs=0,rst=0,shown="";
+  const logA=[];
+  const norm=()=>{const n=NS.find(x=>x.id===st);const u=tin/n.len;return n.once?Math.min(1,u):u%1};
+  function go(t){
+    st=t.to;tin=0;fire=t.id;fireT=.45;
+    logA.unshift("Any State \u2192 "+nm(t.to)+"  (playerState Equals "+t.n+")");if(logA.length>5)logA.pop();
+    g("f2-lg").innerHTML=logA.map(x=>"<li>"+esc(x)+"</li>").join("");
+    say("Animator entered "+nm(t.to));
+  }
+  function insp(v){
+    const id=v.slice(2);
+    if(v[0]==="s"){
+      if(id==="entry")return"<b>Entry</b><p>The Animator starts here and follows the orange arrow to the Default State, idle_hero.</p>";
+      if(id==="any")return"<b>Any State</b><p>A transition from here can fire whatever state you are in. That is why one int can jump straight from run_hero to death_hero with no arrows between the clips.</p>";
+      const n=NS.find(x=>x.id===id);
+      return"<b>"+n.t+"</b><ul><li>Motion: the "+n.t+" clip ("+n.len.toFixed(1)+" s, "+(n.once?"plays once":"loops")+")</li><li>"+(n.def?"This is the Default State.":"Entered when playerState Equals "+n.n)+"</li></ul>";
+    }
+    const t=TR.find(x=>x.id===id);
+    if(t.def)return"<b>Entry \u2192 idle_hero</b><p>The default transition. No conditions: the machine starts in Idle.</p>";
+    return"<b>Any State \u2192 "+nm(t.to)+"</b><ul><li>Conditions: playerState Equals "+t.n+"</li><li>Has Exit Time: unticked, so it reacts instantly</li><li>Transition Duration: 0 s</li><li>Can Transition To Self: "+(g("f2-sf").checked?"ticked":"unticked")+"</li></ul><p>"+(g("f2-sf").checked?"While playerState stays "+t.n+", Any State keeps firing back into "+nm(t.to)+", so the clip restarts every frame.":"With it unticked, the transition ignores a state that is already playing, so the clip runs normally.")+"</p>";
+  }
+  function setSel(v){sel=v;g("f2-ip").innerHTML=insp(v);m.querySelectorAll(".ng").forEach(n=>n.classList.toggle("nsel",v==="s:"+n.dataset.n))}
+  m.querySelectorAll(".ng").forEach(n=>n.onclick=()=>setSel("s:"+n.dataset.n));
+  m.querySelectorAll(".hit").forEach(p=>p.onclick=()=>setSel("t:"+p.dataset.t));
+  const setPS=n=>{P.ps=n;g("f2-v").textContent=n};
+  m.querySelectorAll("[data-ps]").forEach(b=>b.onclick=()=>{if(!g("f2-au").checked)setPS(+b.dataset.ps)});
+  g("f2-au").onchange=function(){const on=this.checked;["f2-h","f2-g","f2-d"].forEach(i=>g(i).disabled=!on);m.querySelectorAll("[data-ps]").forEach(b=>b.disabled=on);say(on?"The script now sets playerState":"Set playerState by hand")};
+  g("f2-h").onchange=function(){P.hor=this.checked};
+  g("f2-g").onchange=function(){P.gr=this.checked};
+  g("f2-d").onclick=()=>{P.dead=true;setPS(3);say("Die called")};
+  g("f2-sf").onchange=()=>setSel(sel);
+  g("f2-rs").onclick=()=>{st="idle";tin=0;fire=null;fireT=0;rst=0;P.hor=false;P.gr=true;P.dead=false;setPS(0);g("f2-h").checked=false;g("f2-g").checked=true;g("f2-sf").checked=false;logA.length=0;g("f2-lg").innerHTML="";setSel(sel);say("Machine reset to idle_hero")};
+
+  function paint(){
+    const nrm=norm();
+    m.querySelectorAll(".ng").forEach(n=>n.classList.toggle("on",n.dataset.n===st));
+    m.querySelectorAll("[data-pb]").forEach(b=>b.setAttribute("width",b.dataset.pb===st?(104*nrm).toFixed(1):0));
+    m.querySelectorAll(".ed").forEach(e=>{e.classList.toggle("fire",fireT>0&&fire===e.dataset.e);e.classList.toggle("sel",sel==="t:"+e.dataset.e)});
+    const s="Current state: "+nm(st)+"    playerState: "+P.ps+"    Restarts: "+rst;
+    if(s!==shown){shown=s;g("f2-now").textContent=s}
+    cx.fillStyle="#5ec8f2";cx.fillRect(0,0,80,48);
+    cx.fillStyle="#7a4a22";cx.fillRect(0,38,80,10);cx.fillStyle="#4caf50";cx.fillRect(0,38,80,3);
+    if(st==="death"){const r=(a,b,w,h,c)=>{cx.fillStyle=c;cx.fillRect(a,b,w,h)};r(26,34,8,4,"#2f6fe0");r(34,34,7,4,"#f2c9a0");r(34,33,4,2,"#c0392b");r(21,35,5,3,"#222")}
+    else hero(cx,34,st==="jump"?14:24,1,st,fr,nrm);
+  }
+  function tick(ts){
+    if(!m.isConnected)return;
+    const dt=lastTs?Math.min(.05,(ts-lastTs)/1000):.016;lastTs=ts;fr++;tin+=dt;if(fireT>0)fireT-=dt;
+    if(g("f2-au").checked&&!P.dead){            // the PlayerAnimation.cs Update() logic
+      let v=P.ps;
+      if(P.hor)v=1;else if(P.gr)v=0;
+      if(!P.gr)v=2;
+      if(v!==P.ps)setPS(v);
+    }
+    const t=TR.find(x=>x.f==="any"&&x.n===P.ps);
+    if(t){if(t.to!==st)go(t);else if(g("f2-sf").checked){tin=0;rst++}}
+    paint();requestAnimationFrame(tick);
   }
   setSel("s:idle");requestAnimationFrame(tick);
 };
