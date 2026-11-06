@@ -53,7 +53,16 @@ body.dys pre,body.dys pre *{font-family:ui-monospace,Menlo,Consolas,monospace!im
 .cts{display:flex;gap:6px;flex-wrap:wrap}.cts button{min-height:2.5rem;padding:6px 12px;font-size:.8125rem}.cts button[aria-pressed=true]{background:var(--cy);color:var(--bg)}
 .task{border:1.5px dashed var(--am);border-radius:8px;padding:8px 14px 10px;margin:14px 0 4px}.task b{color:var(--am)}
 .task label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;min-height:2.75rem;cursor:pointer}.task input{width:1.4rem;height:1.4rem;flex:0 0 auto;margin-top:.1rem}
-.panel code{background:var(--bg);border:1px solid var(--bd);border-radius:4px;padding:0 4px;font-size:.9em}
+.panel :not(pre)>code{background:var(--bg);border:1px solid var(--bd);border-radius:4px;padding:0 4px;font-size:.9em}
+/* Prism token colours follow the lesson's accessibility themes. */
+.panel pre>code{font:inherit}
+.panel pre .token:is(.comment,.prolog,.doctype){color:var(--mu)}
+.panel pre .token:is(.keyword,.directive,.operator){color:var(--cy)}
+.panel pre .token:is(.string,.char){color:var(--li)}
+.panel pre .token:is(.number,.boolean,.constant,.class-name,.function){color:var(--am)}
+:root[data-theme=contrast] .panel pre .token{font-weight:700}
+@media print{.panel pre .token{color:#000!important}}
+
 .ig{display:flex;align-items:flex-start;gap:10px}
 .ig>textarea,.ig>input{flex:1 1 auto;width:auto;min-width:0}.ig>textarea{max-height:12rem}
 .ig>.mic{margin:0;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 12px;font-size:.8125rem;min-height:2.75rem;max-height:3.5rem;border-radius:6px}
@@ -149,6 +158,9 @@ i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" crossorigin="anonymous"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+<!-- Prism core, C-like dependency (in prism.min.js), then C#. -->
+<script defer data-manual src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/prism.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.30.0/components/prism-csharp.min.js"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -1228,18 +1240,24 @@ function lesson(t,ti){
     h+=`<h3>${esc(b.h)}</h3>`;
     if(b.tabs){
       h+=`<div class="cts" role="group" aria-label="Choose a version">${b.tabs.map((x,j)=>`<button type="button" class="alt" data-ct="${bi}-${j}" aria-pressed="${j===0}">${esc(x[0])}</button>`).join("")}</div>`+
-         b.tabs.map((x,j)=>`<pre tabindex="0" data-cp="${bi}-${j}"${j?" hidden":""}><code>${esc(CODE[x[1]])}</code></pre>`).join("");
-    }else h+=`<pre tabindex="0"><code>${esc(CODE[b.c])}</code></pre>`;
+         b.tabs.map((x,j)=>`<pre tabindex="0" data-cp="${bi}-${j}"${j?" hidden":""}><code class="language-csharp">${esc(CODE[x[1]])}</code></pre>`).join("");
+    }else h+=`<pre tabindex="0"><code class="language-csharp">${esc(CODE[b.c])}</code></pre>`;
   });
   if(t.task)h+=`<div class="task" role="group" aria-label="Task checklist"><b>${esc(t.taskTitle||"Task checklist")}</b>`+t.task.map((x,j)=>{const k="c"+(t.tk===undefined?ti:t.tk)+"_"+j;return `<label><input type="checkbox" data-c="${k}"${data[k]?" checked":""}><span>${esc(x)}</span></label>`}).join("")+`</div>`;
   return h;
 }
+function highlightExamples(){
+  if(window.Prism?.languages.csharp) window.Prism.highlightAllUnder($("panel"));
+}
+// The first card may render before the deferred Prism scripts have loaded.
+document.addEventListener("DOMContentLoaded", highlightExamples, {once:true});
 function drawPanel(){
   const t=TABS[cur];
   $("panel").setAttribute("aria-labelledby","t"+cur);
   $("panel").innerHTML=`<h2>${t.art||""}${esc(t.title)}</h2><p>${esc(t.intro)}</p>`+(t.reflect
     ?`<div class="ref">${t.fields.map(f=>`<div class="rc ${f.cls}">${field(f)}</div>`).join("")}</div><p class="hint cite">${esc(t.cite)}</p>`
     :lesson(t,cur)+t.fields.map(field).join(""));
+  highlightExamples();
   qa($("panel"),"[data-k]").forEach(el=>{el.oninput=()=>{data[el.dataset.k]=el.value;persist()}});
   qa($("panel"),"input[data-c]").forEach(el=>{el.onchange=()=>{if(el.checked)data[el.dataset.c]="1";else delete data[el.dataset.c];persist()}});
   qa($("panel"),"button[data-ct]").forEach(b=>b.onclick=()=>{const [bi]=b.dataset.ct.split("-");
