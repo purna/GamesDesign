@@ -219,7 +219,7 @@ i[data-fb]::before{content:attr(data-fb);font-style:normal;font-family:inherit}.
 
 <script>
 /* ===== 1. CONFIG + CONTENT ===== */
-const CFG={pfx:"unityplat",file:"unity-platformer-lesson",title:"Unity 2D Platformer: C# Coding",kicker:"CODING · UNITY · 2D PLATFORMER",sub:"Build player movement, health, lives, moving platforms, switches, animation and scenes. Tick the tasks, then write your notes.",version:1};
+const CFG={pfx:"unityplat",file:"unity-platformer-lesson",title:"Unity 2D Platformer: C# Coding",kicker:"CODING · UNITY · 2D PLATFORMER",sub:"Build player movement, health, lives, moving platforms, switches, animation, hazards, enemy AI and scenes. Tick the tasks, then write your notes.",version:1};
 
 /* Code snippets (shown in <pre>, escaped by esc()). tabs => switchable listings. */
 const CODE={
@@ -696,6 +696,213 @@ void OnTriggerEnter2D(Collider2D col)
     isOn = !isOn;                      // ! means "not": true becomes false and back
     platform.SetIsMoving(isOn);
 }`,
+trapWheel:`using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody2D))]
+public class TrapWheel : MonoBehaviour
+{
+    [SerializeField] float turnsPerSecond = 2f;
+    Rigidbody2D rb;
+
+    void Awake() { rb = GetComponent<Rigidbody2D>(); }
+
+    void FixedUpdate()
+    {
+        rb.MoveRotation(rb.rotation + 360f * turnsPerSecond * Time.fixedDeltaTime);
+    }
+}`,
+hazardLife:`using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+[RequireComponent(typeof(Rigidbody2D))]
+public class PlayerLife : MonoBehaviour
+{
+    [SerializeField, Min(1)] int lives = 3;
+    [SerializeField] Transform spawnPoint;
+    [SerializeField] TMP_Text livesText;
+    [SerializeField] Behaviour movementScript;
+    [SerializeField] AudioSource hitSound;
+    [SerializeField] string loseScene = "LoseScreen";
+
+    Rigidbody2D rb;
+    bool gameOver;
+    float safeUntil;
+
+    void Awake() { rb = GetComponent<Rigidbody2D>(); }
+    void Start() { UpdateLivesText(); }
+
+    void OnCollisionEnter2D(Collision2D hit)
+    {
+        if (gameOver || Time.time < safeUntil) return;
+        if (hit.gameObject.CompareTag("Trap"))
+        {
+            lives--;
+            UpdateLivesText();
+            if (lives == 0) EndGame();
+            else
+            {
+                if (hitSound != null) hitSound.Play();
+                safeUntil = Time.time + 0.5f;
+                StopMotion();
+                rb.position = spawnPoint.position;
+            }
+        }
+        else if (hit.gameObject.CompareTag("Enemy"))
+        {
+            lives = 0; // This lesson's rule: enemy contact ends the run.
+            UpdateLivesText();
+            EndGame();
+        }
+    }
+
+    public void AddLife()
+    {
+        if (gameOver) return;
+        lives++;
+        UpdateLivesText();
+    }
+
+    void StopMotion()
+    {
+#if UNITY_6000_0_OR_NEWER
+        rb.linearVelocity = Vector2.zero;
+#else
+        rb.velocity = Vector2.zero;
+#endif
+        rb.angularVelocity = 0f;
+    }
+
+    void UpdateLivesText()
+    {
+        if (livesText != null) livesText.text = "Lives: " + lives;
+    }
+
+    void EndGame()
+    {
+        gameOver = true;
+        if (movementScript != null) movementScript.enabled = false;
+        StopMotion();
+        rb.simulated = false;
+        if (hitSound != null) hitSound.Play();
+        Invoke(nameof(LoadLoseScene), 2f);
+    }
+
+    void LoadLoseScene() { SceneManager.LoadScene(loseScene); }
+}`,
+cherryBonus:`using UnityEngine;
+using TMPro;
+
+[RequireComponent(typeof(PlayerLife))]
+public class CherryCollector : MonoBehaviour
+{
+    [SerializeField] TMP_Text cherriesText;
+    [SerializeField] AudioSource pickupSound;
+    PlayerLife life;
+    int cherries;
+
+    void Awake() { life = GetComponent<PlayerLife>(); }
+    void Start() { UpdateCherryText(); }
+
+    void OnTriggerEnter2D(Collider2D pickup)
+    {
+        if (!pickup.CompareTag("Cherry") || !pickup.enabled) return;
+        pickup.enabled = false; // Consume now; Destroy runs later.
+        Destroy(pickup.gameObject);
+        if (pickupSound != null) pickupSound.Play();
+
+        cherries++;
+        if (cherries == 3)
+        {
+            life.AddLife();
+            cherries = 0;
+        }
+        UpdateCherryText();
+    }
+
+    void UpdateCherryText()
+    {
+        if (cherriesText != null) cherriesText.text = "Cherries: " + cherries + "/3";
+    }
+}`,
+hazardAI:`using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+public class EnemyAI : MonoBehaviour
+{
+    [SerializeField] Transform player;
+    [SerializeField] SpriteRenderer sprite;
+    [SerializeField] LayerMask ground, wall;
+    [SerializeField, Min(0f)] float moveSpeed = 2f;
+    [SerializeField, Min(0f)] float detectionRange = 4f;
+    [SerializeField, Min(0.1f)] float followDuration = 3f;
+
+    Rigidbody2D rb;
+    BoxCollider2D box;
+    int patrolDirection = 1;
+    bool canStartChase = true;
+    float chaseTime;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        box = GetComponent<BoxCollider2D>();
+    }
+
+    void FixedUpdate()
+    {
+        bool inRange = player != null &&
+            Vector2.Distance(rb.position, (Vector2)player.position) <= detectionRange;
+
+        if (!inRange) canStartChase = true;
+        if (inRange && canStartChase && chaseTime <= 0f)
+        {
+            chaseTime = followDuration;
+            canStartChase = false;
+        }
+
+        bool chasing = chaseTime > 0f && player != null;
+        int direction = patrolDirection;
+        if (chasing)
+        {
+            float offset = player.position.x - rb.position.x;
+            direction = Mathf.Abs(offset) < 0.1f ? 0 : (offset < 0f ? -1 : 1);
+        }
+        chaseTime = Mathf.Max(0f, chaseTime - Time.fixedDeltaTime);
+
+        if (direction != 0 && !CanWalk(direction))
+        {
+            if (!chasing)
+            {
+                patrolDirection = -direction;
+                direction = CanWalk(patrolDirection) ? patrolDirection : 0;
+            }
+            else direction = 0; // Wait at the wall or ledge during a chase.
+        }
+
+        if (sprite != null && direction != 0) sprite.flipX = direction < 0;
+#if UNITY_6000_0_OR_NEWER
+        rb.linearVelocity = new Vector2(moveSpeed * direction, rb.linearVelocity.y);
+#else
+        rb.velocity = new Vector2(moveSpeed * direction, rb.velocity.y);
+#endif
+    }
+
+    bool CanWalk(int direction)
+    {
+        Bounds b = box.bounds;
+        // Look just beyond the leading edge of the box.
+        float lookAhead = Mathf.Max(0.05f, moveSpeed * Time.fixedDeltaTime);
+        float edgeX = b.center.x + direction * b.extents.x;
+        Vector2 edge = new Vector2(edgeX, b.center.y);
+        Vector2 foot = new Vector2(edgeX + direction * lookAhead, b.min.y + 0.05f);
+        bool wallAhead = Physics2D.Raycast(edge, Vector2.right * direction,
+            lookAhead, wall).collider != null;
+        bool groundAhead = Physics2D.Raycast(foot, Vector2.down,
+            0.2f, ground).collider != null;
+        return !wallAhead && groundAhead;
+    }
+}`,
 patrol:`using UnityEngine;
 using System.Collections;
 
@@ -714,10 +921,11 @@ public class EnemyPatrol : MonoBehaviour
 
     void Update()
     {
-        if (waiting) return;
+        if (waiting || waypoints == null || waypoints.Length < 2 ||
+            waypoints[index] == null) return;
 
         Vector2 target = new Vector2(waypoints[index].position.x, transform.position.y);
-        sr.flipX = target.x < transform.position.x;   // face the way we walk
+        if (sr != null) sr.flipX = target.x < transform.position.x;   // face the way we walk
         transform.position = Vector2.MoveTowards(
             transform.position, target, speed * Time.deltaTime);
 
@@ -734,25 +942,6 @@ public class EnemyPatrol : MonoBehaviour
             direction = -direction;   // turn around at either end
         index += direction;
         waiting = false;
-    }
-}`,
-pat2:`// Timer version: no coroutine needed
-float waitTimer;
-
-void Update()
-{
-    if (waitTimer > 0)            // still pausing
-    {
-        waitTimer -= Time.deltaTime;
-        return;
-    }
-
-    // ...move towards waypoints[index] as before...
-
-    if (arrived)
-    {
-        waitTimer = waitTime;     // start the pause
-        NextWaypoint();           // same ping-pong code as above
     }
 }`,
 plat:`using UnityEngine;
@@ -953,11 +1142,26 @@ const APP_TABS=[
  code:[{h:"Drive the Animator from code: choose a version",tabs:[["Speed + IsGrounded","anim"],["playerState int","animAlt"]]},{h:"Parameter types and a Trigger",c:"anim2"}],
  task:["Make Idle, Run and Jump clips","Build the Animator Controller with the three transitions","Check Has Exit Time is unticked on each","Add the code and watch the parameters at runtime","Playground: make the character go Idle, Run, then Jump using only the parameters","Playground: tick Has Exit Time on Idle and Run and describe the delay you see","Extension: add an Attack state that uses a Trigger and leaves by Exit Time","Alternative: slice a sprite sheet (Sprite 2D and UI, Multiple, Grid By Cell Count)","Alternative: make idle_hero, run_hero, jump_hero and death_hero clips","Alternative: add an Int playerState and an Any State transition for each clip (0, 1, 2, 3)","Alternative: add PlayerAnimation and watch playerState change at runtime","Alternative: call Die() when health reaches 0 and watch death_hero play","Playground 2: set playerState 0 to 3 by hand and watch Any State fire each transition","Playground 2: switch on the code controls, press Die(), and explain why isDead is needed","Playground 2: tick Can Transition To Self and describe what happens to the clip"],
  fields:[{k:"s7",label:"How does code control an animation?",hint:"What are parameters, and what are transitions?",rows:4},{k:"s7b",label:"What do Has Exit Time and a Trigger do?",hint:"Use the playground. Which setting made the character slow to react? What happens to a Trigger once a transition has used it?",rows:4},{k:"s7c",label:"Two ways to drive the Animator",hint:"Compare Speed + IsGrounded with playerState. Which would you use in your game, and why?",rows:4}]},
-{title:"Enemy AI",tk:10,lv:8,icon:"route",fb:"➜",intro:"Teach the enemy to patrol between waypoints and pause at each one.",
- body:`<p>Instead of bouncing between two fixed numbers, give the enemy a list of <b>waypoints</b> (empty GameObjects). It walks to waypoint 1, pauses, walks to the next, and turns around at the ends (ping-pong).</p><ul><li>Create empty objects <code>WP1</code>, <code>WP2</code>, <code>WP3</code> along a platform. Keep them <b>outside</b> the enemy so they do not move with it.</li><li><code>Vector2.MoveTowards</code> takes a fixed step each frame. <code>Time.deltaTime</code> keeps the speed the same on every computer.</li><li>A <b>coroutine</b> with <code>WaitForSeconds</code> pauses the enemy without freezing the game. A <code>waitTimer</code> counting down in <code>Update</code> does the same job.</li></ul><p>Try it in the preview: use the sliders to change the wait time and speed, and watch <code>enemy</code> in the variables line.</p>`,
- code:[{h:"EnemyPatrol.cs",c:"patrol"},{h:"Alternative: a timer instead of a coroutine",c:"pat2"}],
- task:["Create three waypoint objects along a platform","Add EnemyPatrol and drag the waypoints into the array in order","Set Wait Time to 2 and check the enemy pauses at every waypoint","Make the enemy turn around at both ends (ping-pong)","Challenge: add a 4th waypoint, then make the enemy chase the player when close"],
- fields:[{k:"s9",label:"How does the pause work?",hint:"Explain what WaitForSeconds does, or how your timer counts down.",rows:3}]},
+{title:"Enemies & Spikes",tk:10,lv:8,icon:"route",fb:"➜",intro:"Build spikes and a rotating trap, then give an enemy a patrol and a short chase. Test how each hazard affects the player.",
+ body:`<h3>Warm-up: absolute value and square root (5 min each)</h3>
+ <p>Write a C# method that takes a number and returns its absolute value. Try <code>15, -2, -34, 12, 102, -12</code> → <code>15, 2, 34, 12, 102, 12</code>. Then try a square-root method: <code>64, 25, 9, 196, 16</code> → <code>8, 5, 3, 14, 4</code>. Use <code>MathF.Abs</code> and <code>MathF.Sqrt</code> in a modern C# console project, or <code>Mathf.Abs</code> and <code>Mathf.Sqrt</code> in Unity. Why is absolute value useful when measuring horizontal distance?</p>
+ <h3>1. Spikes and rotating wheels</h3>
+ <ol><li>Create <b>Trap</b> and <b>Enemy</b> tags. Give the spikes a solid Collider 2D fitted to the sprite, with <b>Is Trigger</b> off, and tag the collider object <b>Trap</b>.</li>
+ <li>Make a wheel with a centred pivot, a solid Collider 2D and a <b>Kinematic Rigidbody2D</b>. Tag it <b>Trap</b> and attach <code>TrapWheel</code>. A circle collider stays the same shape as it spins; fit a Polygon Collider 2D if you want the teeth to matter.</li>
+ <li>Attach <code>PlayerLife</code> to the player with its Dynamic Rigidbody2D. Assign a safe <b>Spawn Point</b> outside the player hierarchy and clear of hazards, your <b>Movement Script</b>, a TextMeshPro <b>Lives Text</b> and, optionally, a <b>Hit Sound</b>. Add the scene named in <b>Lose Scene</b> to the Unity 6 Build Profiles scene list (Build Settings in older versions).</li></ol>
+ <p>For this exercise, <code>PlayerLife</code> owns lives, respawn and game over. Remove the Health lesson's enemy damage callback from <code>PlayerMovement</code> if you added it; keep movement and the coin counter. Do not call the Lives &amp; UI lesson's <code>GameManager.LoseLife()</code> for these hazards or display a second lives counter. A trap costs one life; an enemy ends the run. There is no stomp attack in this version.</p>
+ <h3>2. Enemy patrol and chase</h3>
+ <ol><li>On a flat platform, give the enemy a solid Box Collider 2D, a Dynamic Rigidbody2D with Z rotation frozen, and the <b>Enemy</b> tag. Add <code>EnemyAI</code> and assign the player and sprite in the Inspector. This example assumes the sprite faces right before flipping.</li>
+ <li>Put walkable surfaces on <b>Ground</b> and blockers on <b>Wall</b>, then select those layers in the matching enemy masks. The masks select layers, not tags. Keep the enemy off both layers so the rays cannot hit its own collider. If you add invisible enemy-only walls, put the enemy on an <b>AI</b> layer and use the Physics 2D collision matrix to let the player's layer pass through those walls.</li>
+ <li>The enemy patrols until the player comes into range. It chases horizontally for a set time, stopping at a wall or ledge, then resumes patrol. The player must leave range before another chase can start. Move in <code>FixedUpdate</code>, keep the vertical velocity for gravity, and use <code>flipX</code> for facing.</li></ol>
+ <h3>3. Optional: earn an extra life</h3>
+ <p>Attach <code>CherryCollector</code> to the <b>player</b>, with optional TextMeshPro text and pickup sound. Give each cherry a single trigger Collider 2D and the <b>Cherry</b> tag on that same object. Three cherries give one life and reset the cherry count. This can coexist with the existing coin counter. Use the <b>Levels</b> lesson if you also need a finish post.</p>
+ <h3>Alternative: waypoint patrol</h3>
+ <p>Use <code>EnemyPatrol</code> instead of <code>EnemyAI</code> if you want a fixed route with pauses. For this transform-based example use a Kinematic Rigidbody2D, place at least two waypoints outside the enemy hierarchy on the same height, and assign them in order. The browser preview demonstrates this waypoint version; it still uses the earlier health and stomp rules. Test spikes, respawns and chasing in Unity.</p>`,
+ code:[{h:"TrapWheel.cs",c:"trapWheel"},{h:"PlayerLife.cs",c:"hazardLife"},{h:"EnemyAI.cs",c:"hazardAI"},{h:"CherryCollector.cs (optional)",c:"cherryBonus"},{h:"EnemyPatrol.cs (alternative)",c:"patrol"}],
+ taskTitle:"Build and test: spikes (30 min) and enemies (30 min)",
+ task:["Waypoint option: create three waypoint objects along a platform","Waypoint option: assign the waypoints to EnemyPatrol in order","Waypoint option: set Wait Time to 2 and verify each pause","Waypoint option: verify the enemy turns at both ends","Challenge: compare the waypoint route with a second enemy using different chase settings","Test both spikes and the rotating wheel: contact costs one life and respawns you without the previous movement speed","Lose the last life to a trap, then in a separate run touch an enemy: both should load LoseScreen once","Test patrol at each wall or ledge, then enter range and check that the chase ends and does not repeat until you leave range","Optional: collect three cherries and confirm the counter resets to 0/3 as lives increases by one"],
+ fields:[{k:"s9",label:"How does the pause work?",hint:"For waypoint patrol, explain what WaitForSeconds does, or how a timer would count down.",rows:3},{k:"s9hazard",label:"What did you test?",hint:"Compare a trap hit and an enemy hit. How did you check respawning, the lives display and the chase timer?",rows:4}]},
 {title:"Scenes",tk:8,lv:9,icon:"layer-group",fb:"▤",intro:"Add start, win and lose screens and move between them with SceneManager.",
  body:`<p>Make scenes <b>Game</b>, <b>WinScreen</b>, <b>LoseScreen</b> and an optional <b>Start</b> menu. Add them all in <b>Build Settings</b>, otherwise <code>LoadScene</code> cannot find them. On each UI button set <b>OnClick()</b>, drag in the SceneLoader and pick <code>LoadByName</code>.</p>`,
  code:[{h:"SceneLoader.cs",c:"sl"},{h:"Win trigger",c:"win"}],
@@ -1913,7 +2117,7 @@ const NEW=[
 "Moving platform added over a new pit. Untick the parent option, stand on the platform, and see what changes.",
 "Lives added: three hearts top-right. Falling in the pit or running out of health costs a life.",
 "Animator added: the player now has Idle, Run and Jump animations. The Animator state shows below.",
-"Enemy AI added: the enemy walks between numbered waypoints and waits at each one. Use the sliders to change the wait time and speed.",
+"Waypoint patrol preview: the enemy walks between numbered waypoints and waits at each one. Use the sliders to change the wait time and speed.",
 "Scene management added: Start, Win and Lose screens. Collect coins and reach the flag on the right to win."];
 class HealthSystem{constructor(m){this.max=m;this.cur=m}takeDamage(a){this.cur=Math.max(0,this.cur-a)}heal(a){this.cur=Math.min(this.max,this.cur+a)}isDead(){return this.cur<=0}pct(){return this.cur/this.max}}
 let L=0,F={},G,keys={left:0,right:0,run:0},jq=false,paused=false,t=0,show=false,parent=true,lastRO="";
